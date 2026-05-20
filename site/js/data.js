@@ -9,7 +9,7 @@ window.LIMA = {
     email: 'hola@limaflores.pe',
     instagram: 'lima_flores',
     facebook: 'limafloresperu',
-    address: 'Av. Pardo y Aliaga 670, San Isidro · Lima'
+    address: 'Calle Francia 823, Miraflores · Lima'
   },
   categories: [
     { id: 'arreglos', label: 'Arreglos', subtitle: 'Composiciones en caja o base', palette: ['#B6855E', '#ECE4D2'] },

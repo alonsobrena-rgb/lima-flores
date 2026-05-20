@@ -3,3 +3,6 @@ npm-debug.log*
 .DS_Store
 .env
 .railway/
+
+# Presupuestos / documentos privados — no publicar en el repo público
+presupuesto-*.html
