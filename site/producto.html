@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Producto — Lima Flores</title>
+<meta name="theme-color" content="#F4EFE5" />
+<link rel="icon" type="image/png" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css" />
+</head>
+<body>
+
+<header class="header" data-scrolled="false">
+  <div class="container header__inner">
+    <a href="index.html" class="header__logo" aria-label="Lima Flores">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
+    </a>
+    <nav class="header__nav" aria-label="primary">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="suscripcion.html">Suscripción</a>
+      <a href="index.html#atelier">Atelier</a>
+      <a href="index.html#contacto">Contacto</a>
+    </nav>
+    <div class="header__actions">
+      <button class="header__cart" data-cart-open aria-label="Carrito">
+        Carrito <span class="cart-count" data-cart-count hidden>0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="pd">
+  <div class="container">
+    <nav class="pd__breadcrumb" data-reveal>
+      <a href="index.html">Inicio</a>
+      <span>/</span>
+      <a href="catalogo.html">Catálogo</a>
+      <span>/</span>
+      <span id="bc-cat" style="color:var(--ink)"></span>
+    </nav>
+    <div class="pd__grid">
+      <div class="pd__media" id="pd-media" data-reveal="left"></div>
+      <div class="pd__copy" data-reveal style="--reveal-delay:120ms">
+        <div class="pd__cat" id="pd-cat"></div>
+        <h1 class="pd__title" id="pd-title"></h1>
+        <div class="pd__price" id="pd-price"></div>
+        <p class="pd__desc" id="pd-desc"></p>
+        <dl class="pd__details" id="pd-details"></dl>
+        <div class="pd__qty">
+          <span class="t-label">Cantidad</span>
+          <div class="pd__qty-ctrl">
+            <button id="qty-minus" aria-label="Restar">−</button>
+            <span id="qty-value">1</span>
+            <button id="qty-plus" aria-label="Sumar">+</button>
+          </div>
+        </div>
+        <div class="pd__actions">
+          <button class="btn btn--primary" id="add-to-cart">Agregar al carrito <span class="arrow">→</span></button>
+          <a href="checkout.html" class="btn btn--ghost" id="buy-now">Comprar ahora</a>
+        </div>
+        <div class="pd__note">
+          <strong style="font-weight:500; color:var(--ink)">Entrega el mismo día</strong> · Pedidos antes
+          de las 2 pm llegan esa tarde. Después coordinamos
+          al día siguiente sin costo extra.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── More from atelier ──────────────────────── -->
+<section style="background:var(--paper); padding-block: clamp(80px, 10vw, 160px);">
+  <div class="container">
+    <div class="section-head section-head--row">
+      <div data-reveal>
+        <span class="index-mark" style="margin-bottom:20px">Más del atelier</span>
+        <h2 style="font-size:clamp(2rem,3.5vw,3rem); font-weight:300; line-height:1;">Otras piezas<br/>que <em>podrían</em> gustarte.</h2>
+      </div>
+      <a href="catalogo.html" class="btn btn--text" data-reveal style="--reveal-delay:120ms">Ver el catálogo completo <span class="arrow">→</span></a>
+    </div>
+    <div class="grid-products" id="more-grid" data-reveal-stagger></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <div class="footer__brand">Lima<br/><em>Flores</em>.</div>
+        <p class="footer__brand-tag">Atelier botánico de Lima. Haciendo arte con flores desde 2017.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Catálogo</h4>
+        <ul>
+          <li><a href="catalogo.html?cat=arreglos">Arreglos</a></li>
+          <li><a href="catalogo.html?cat=ramos">Ramos</a></li>
+          <li><a href="catalogo.html?cat=floreros">Floreros</a></li>
+          <li><a href="catalogo.html?cat=plantas">Plantas</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="https://wa.me/51999479855" target="_blank" rel="noopener">WhatsApp · 999 479 855</a></li>
+          <li><a href="mailto:hola@limaflores.pe">hola@limaflores.pe</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Síguenos</h4>
+        <ul>
+          <li><a href="https://instagram.com/lima_flores" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="https://facebook.com/limafloresperu" target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span data-year>2026</span> Lima Flores · Todos los derechos reservados</span>
+      <a href="index.html">Volver al inicio</a>
+    </div>
+  </div>
+</footer>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="drawer" id="cart-drawer" aria-label="Carrito">
+  <div class="drawer__head">
+    <h3>Tu carrito</h3>
+    <button data-cart-close aria-label="Cerrar" style="font-size:1.5rem; color:var(--ink); padding:4px">✕</button>
+  </div>
+  <div class="drawer__body" id="cart-body"></div>
+  <div class="drawer__foot" id="cart-foot"></div>
+</aside>
+
+<script src="js/data.js"></script>
+<script src="js/lima.js"></script>
+<script src="js/product.js"></script>
+</body>
+</html>

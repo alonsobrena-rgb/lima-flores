@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pedido confirmado — Lima Flores</title>
+<meta name="theme-color" content="#F4EFE5" />
+<link rel="icon" type="image/png" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css" />
+</head>
+<body>
+
+<header class="header" data-scrolled="true">
+  <div class="container header__inner">
+    <a href="index.html" class="header__logo" aria-label="Lima Flores">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
+    </a>
+    <nav class="header__nav" aria-label="primary">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="suscripcion.html">Suscripción</a>
+      <a href="index.html#atelier">Atelier</a>
+      <a href="index.html#contacto">Contacto</a>
+    </nav>
+    <div class="header__actions">
+      <a href="catalogo.html" class="t-mono" style="color:var(--ink-soft)">Seguir explorando →</a>
+    </div>
+  </div>
+</header>
+
+<section class="container confirm" data-reveal>
+  <div class="confirm__mark">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 10 17 19 8"/></svg>
+  </div>
+  <span class="t-eyebrow" style="margin-bottom:24px; display:block">Pedido confirmado</span>
+  <h1>Gracias, <em id="conf-name">amig@</em>.<br/>Tu pedido está<br/>en <em>nuestras manos</em>.</h1>
+  <p>Te contactamos por WhatsApp en menos de 30 minutos para confirmar el pago y los detalles de entrega. Mientras tanto, alguien ya empezó a pensar qué tallos van a entrar en tu pedido.</p>
+  <div class="confirm__id" id="conf-id">— sin id —</div>
+  <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+    <a href="catalogo.html" class="btn btn--ink">Volver al catálogo <span class="arrow">→</span></a>
+    <a href="https://wa.me/51999479855" target="_blank" rel="noopener" class="btn btn--ghost">Abrir WhatsApp</a>
+  </div>
+</section>
+
+<!-- Pequeña sección de "qué pasa ahora" -->
+<section style="background:var(--paper); padding-block: clamp(80px, 10vw, 160px); border-top:1px solid var(--line);">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="index-mark">Qué pasa ahora</span>
+      <h2 style="font-size:clamp(2rem,3.5vw,3rem); font-weight:300; line-height:1; max-width:18ch;">Cuatro pasos<br/>hasta tu <em>puerta</em>.</h2>
+    </div>
+    <div class="promise__grid" data-reveal-stagger>
+      <div class="promise__item">
+        <div class="promise__num">i.</div>
+        <h3>Te escribimos.</h3>
+        <p>Antes de 30 min, alguien del atelier te confirma el pago, la fecha y la franja horaria por WhatsApp.</p>
+      </div>
+      <div class="promise__item">
+        <div class="promise__num">ii.</div>
+        <h3>Armamos a mano.</h3>
+        <p>El día de la entrega, una florista se sienta y arma tu pieza con las flores más frescas que tengamos.</p>
+      </div>
+      <div class="promise__item">
+        <div class="promise__num">iii.</div>
+        <h3>Entregamos.</h3>
+        <p>Dentro de la franja que elegiste. Te avisamos cuando salimos del atelier para que estés pendiente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <div class="footer__brand">Lima<br/><em>Flores</em>.</div>
+        <p class="footer__brand-tag">Atelier botánico de Lima. Haciendo arte con flores desde 2017.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="https://wa.me/51999479855" target="_blank" rel="noopener">WhatsApp · 999 479 855</a></li>
+          <li><a href="mailto:hola@limaflores.pe">hola@limaflores.pe</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Síguenos</h4>
+        <ul>
+          <li><a href="https://instagram.com/lima_flores" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="https://facebook.com/limafloresperu" target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Atelier</h4>
+        <ul>
+          <li style="color:rgba(244,239,229,0.65)">Lun — Vie · 9:00 – 19:00</li>
+          <li style="color:rgba(244,239,229,0.65)">Sábado · 9:00 – 17:00</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span data-year>2026</span> Lima Flores</span>
+      <a href="index.html">Volver al inicio</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/lima.js"></script>
+<script>
+  (function() {
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const saved = JSON.parse(sessionStorage.getItem('lima-last-order') || 'null');
+    if (id) document.getElementById('conf-id').textContent = 'N° ' + id;
+    if (saved && saved.recipient) {
+      const first = saved.recipient.split(' ')[0];
+      document.getElementById('conf-name').textContent = first;
+    }
+  })();
+</script>
+</body>
+</html>

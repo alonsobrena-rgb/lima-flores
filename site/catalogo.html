@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catálogo — Lima Flores</title>
+<meta name="description" content="Catálogo completo del atelier: arreglos, ramos, floreros y plantas hechos a mano en Lima." />
+<meta name="theme-color" content="#F4EFE5" />
+<link rel="icon" type="image/png" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css" />
+</head>
+<body>
+
+<header class="header" data-scrolled="false">
+  <div class="container header__inner">
+    <a href="index.html" class="header__logo" aria-label="Lima Flores">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
+    </a>
+    <nav class="header__nav" aria-label="primary">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html" class="is-active">Catálogo</a>
+      <a href="suscripcion.html">Suscripción</a>
+      <a href="index.html#atelier">Atelier</a>
+      <a href="index.html#contacto">Contacto</a>
+    </nav>
+    <div class="header__actions">
+      <button class="header__cart" data-cart-open aria-label="Carrito">
+        Carrito <span class="cart-count" data-cart-count hidden>0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ─── Page hero ──────────────────────────────── -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero__eyebrow" data-reveal>
+      <span class="index-mark">No. 03 · El catálogo</span>
+    </div>
+    <div class="page-hero--inline">
+      <h1 data-comment-anchor="catalog-title">
+        <span class="reveal-line"><span>Cada arreglo,</span></span>
+        <span class="reveal-line" style="--line-delay:140ms"><span>hecho a <em>mano</em>.</span></span>
+      </h1>
+      <p class="page-hero__sub" data-reveal style="--reveal-delay:200ms">
+        Recibimos flores frescas tres veces por semana. Lo que ves disponible es lo que tenemos hoy — si algo se acaba, te avisamos en menos de una hora.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Toolbar sticky ─────────────────────────── -->
+<div class="cat-toolbar">
+  <div class="container cat-toolbar__inner">
+    <div class="chips" id="chips">
+      <button class="chip is-active" data-cat="all">Todo</button>
+      <button class="chip" data-cat="arreglos">Arreglos</button>
+      <button class="chip" data-cat="ramos">Ramos</button>
+      <button class="chip" data-cat="floreros">Floreros</button>
+      <button class="chip" data-cat="plantas">Plantas</button>
+    </div>
+    <div class="cat-count" id="cat-count">12 piezas</div>
+  </div>
+</div>
+
+<!-- ─── Grid ───────────────────────────────────── -->
+<section style="background:var(--bone)">
+  <div class="container">
+    <div class="grid-products" id="catalog-grid" data-reveal-stagger></div>
+  </div>
+</section>
+
+<!-- ─── Closing CTA strip ──────────────────────── -->
+<section class="section--ink" style="padding-block: clamp(80px, 10vw, 160px); background:var(--ink); color:var(--bone)">
+  <div class="container">
+    <div style="display:grid; grid-template-columns: 1fr auto; gap:32px; align-items:end; flex-wrap:wrap;">
+      <div data-reveal>
+        <span class="index-mark" style="color:rgba(244,239,229,0.65); margin-bottom:24px">¿No encuentras lo que buscas?</span>
+        <h2 style="font-size:clamp(2.25rem,4vw,3.5rem); color:var(--bone); font-weight:300; line-height:1; max-width:18ch;">Te armamos uno <em>a medida</em>, conversando.</h2>
+      </div>
+      <a href="https://wa.me/51999479855" target="_blank" rel="noopener" class="btn btn--ghost-light" data-reveal style="--reveal-delay:160ms">Escríbenos por WhatsApp <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ─────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <div class="footer__brand">Lima<br/><em>Flores</em>.</div>
+        <p class="footer__brand-tag">Atelier botánico de Lima. Haciendo arte con flores desde 2017.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Catálogo</h4>
+        <ul>
+          <li><a href="catalogo.html?cat=arreglos">Arreglos</a></li>
+          <li><a href="catalogo.html?cat=ramos">Ramos</a></li>
+          <li><a href="catalogo.html?cat=floreros">Floreros</a></li>
+          <li><a href="catalogo.html?cat=plantas">Plantas</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="https://wa.me/51999479855" target="_blank" rel="noopener">WhatsApp · 999 479 855</a></li>
+          <li><a href="mailto:hola@limaflores.pe">hola@limaflores.pe</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Síguenos</h4>
+        <ul>
+          <li><a href="https://instagram.com/lima_flores" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="https://facebook.com/limafloresperu" target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span data-year>2026</span> Lima Flores · Todos los derechos reservados</span>
+      <a href="index.html">Volver al inicio</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="drawer" id="cart-drawer" aria-label="Carrito">
+  <div class="drawer__head">
+    <h3>Tu carrito</h3>
+    <button data-cart-close aria-label="Cerrar" style="font-size:1.5rem; color:var(--ink); padding:4px">✕</button>
+  </div>
+  <div class="drawer__body" id="cart-body"></div>
+  <div class="drawer__foot" id="cart-foot"></div>
+</aside>
+
+<script src="js/data.js"></script>
+<script src="js/lima.js"></script>
+<script src="js/catalog.js"></script>
+</body>
+</html>

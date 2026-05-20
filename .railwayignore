@@ -1,0 +1,6 @@
+node_modules
+.git
+.railway
+npm-debug.log*
+.DS_Store
+.env

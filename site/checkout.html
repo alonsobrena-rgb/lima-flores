@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout — Lima Flores</title>
+<meta name="theme-color" content="#F4EFE5" />
+<link rel="icon" type="image/png" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css" />
+</head>
+<body>
+
+<header class="header" data-scrolled="false">
+  <div class="container header__inner">
+    <a href="index.html" class="header__logo" aria-label="Lima Flores">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
+    </a>
+    <nav class="header__nav" aria-label="primary">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+    </nav>
+    <div class="header__actions">
+      <span class="t-mono" style="color:var(--ink-soft)">Paso 02 / 02</span>
+    </div>
+  </div>
+</header>
+
+<section class="checkout-section">
+  <div class="container">
+    <div class="checkout">
+      <form id="checkout-form" novalidate>
+        <div data-reveal>
+          <span class="checkout__step">Confirmando tu pedido</span>
+          <h1 class="checkout__title">
+            Tu pedido,<br/>
+            casi <em>listo</em>.
+          </h1>
+        </div>
+
+        <h2>Dirección de entrega</h2>
+        <div class="stack-4">
+          <div class="field">
+            <input type="text" id="address-street" placeholder=" " required autocomplete="street-address" />
+            <label for="address-street">Calle y número</label>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <input type="text" id="address-district" placeholder=" " required />
+              <label for="address-district">Distrito</label>
+            </div>
+            <div class="field">
+              <input type="text" id="address-ref" placeholder=" " />
+              <label for="address-ref">Referencia (opcional)</label>
+            </div>
+          </div>
+          <div class="field-row-inline" style="padding-top: 8px;">
+            <span>¿Hay recepción que pueda recibir el paquete por la persona?</span>
+            <div class="segmented" role="radiogroup" aria-label="Recepción disponible">
+              <input type="radio" id="rec-yes" name="reception" value="yes" />
+              <label for="rec-yes">Sí</label>
+              <input type="radio" id="rec-no" name="reception" value="no" checked />
+              <label for="rec-no">No</label>
+            </div>
+          </div>
+          <div class="field" id="apt-field-wrap">
+            <input type="text" id="apt-number" placeholder=" " />
+            <label for="apt-number">Número de departamento / piso</label>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <input type="date" id="delivery-date" required />
+              <label for="delivery-date" class="has-value">Fecha de entrega</label>
+            </div>
+            <div class="field">
+              <select id="delivery-window">
+                <option value="" selected>—</option>
+                <option value="09-12">9:00 — 12:00</option>
+                <option value="12-15">12:00 — 15:00</option>
+                <option value="15-18">15:00 — 18:00</option>
+                <option value="18-21">18:00 — 21:00</option>
+              </select>
+              <label for="delivery-window" class="has-value">Franja horaria</label>
+            </div>
+          </div>
+        </div>
+
+        <h2>Para quién es</h2>
+        <div class="stack-4">
+          <div class="field-grid">
+            <div class="field">
+              <input type="text" id="recipient-name" placeholder=" " required />
+              <label for="recipient-name">Nombre de quien recibe</label>
+            </div>
+            <div class="field">
+              <input type="tel" id="recipient-phone" placeholder=" " required pattern="[0-9 +\-]{7,}" />
+              <label for="recipient-phone">Teléfono de quien recibe</label>
+            </div>
+          </div>
+          <div class="field-note">
+            <strong>Importante · este teléfono es de quien recibe las flores</strong>
+            Necesitamos el número de la persona que recibirá el pedido, no el tuyo. Solo lo usamos al momento de la entrega — si por algún motivo no podemos dejar el paquete en la puerta, llamamos a este número para coordinar. No es para confirmaciones previas ni para spam.
+          </div>
+          <div class="field">
+            <textarea id="note" placeholder=" " maxlength="280"></textarea>
+            <label for="note">Mensaje en la tarjeta</label>
+          </div>
+        </div>
+
+        <h2>Comprobante</h2>
+        <div class="stack-4">
+          <div class="pay-options">
+            <label class="pay-opt">
+              <input type="radio" name="invoice" value="boleta" checked />
+              <span>Boleta de venta · para personas naturales</span>
+            </label>
+            <label class="pay-opt">
+              <input type="radio" name="invoice" value="factura" />
+              <span>Factura · para empresas (necesitamos RUC)</span>
+            </label>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <input type="text" id="invoice-doc" placeholder=" " required pattern="[0-9]{7,11}" maxlength="11" />
+              <label for="invoice-doc"><span id="doc-label">DNI</span></label>
+            </div>
+            <div class="field">
+              <input type="text" id="invoice-name" placeholder=" " />
+              <label for="invoice-name"><span id="invoice-name-label">Nombre completo (opcional)</span></label>
+            </div>
+          </div>
+        </div>
+
+        <h2>Tus datos</h2>
+        <div class="stack-4">
+          <div class="field-grid">
+            <div class="field">
+              <input type="text" id="buyer-name" placeholder=" " required />
+              <label for="buyer-name">Tu nombre</label>
+            </div>
+            <div class="field">
+              <input type="email" id="buyer-email" placeholder=" " required />
+              <label for="buyer-email">Tu email</label>
+            </div>
+          </div>
+          <div class="field">
+            <input type="tel" id="buyer-phone" placeholder=" " required />
+            <label for="buyer-phone">Tu teléfono / WhatsApp</label>
+          </div>
+        </div>
+
+        <h2>Método de pago</h2>
+        <div class="pay-options">
+          <label class="pay-opt">
+            <input type="radio" name="payment" value="yape" checked />
+            <span>Yape o Plin — te enviamos el número al confirmar</span>
+          </label>
+          <label class="pay-opt">
+            <input type="radio" name="payment" value="transfer" />
+            <span>Transferencia bancaria · BCP / Interbank</span>
+          </label>
+          <label class="pay-opt">
+            <input type="radio" name="payment" value="cash" />
+            <span>Efectivo contra entrega</span>
+          </label>
+        </div>
+
+        <div style="margin-top: 56px">
+          <button type="submit" class="btn btn--primary btn--block" id="submit-btn">Confirmar pedido <span class="arrow">→</span></button>
+          <p class="t-small" style="text-align:center;margin-top:16px;">Al confirmar, te contactamos por WhatsApp en menos de 30 min para coordinar.</p>
+        </div>
+      </form>
+
+      <aside class="summary">
+        <h3>Resumen del pedido</h3>
+        <div class="summary__items" id="summary-items"></div>
+        <div class="summary__row"><span>Subtotal</span><span id="summary-subtotal">S/ 0.00</span></div>
+        <div class="summary__row"><span>Envío estimado</span><span id="summary-shipping">— por calcular</span></div>
+        <div class="summary__total"><span>Total</span><span id="summary-total">S/ 0.00</span></div>
+        <p class="t-small" style="margin-top:20px; padding-top:16px; border-top:1px dashed var(--line);">
+          Envío gratis en pedidos sobre <strong style="color:var(--ink); font-weight:500">S/ 200</strong>
+          dentro de Lima Metropolitana.
+        </p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top" style="grid-template-columns: 1fr auto;">
+      <div>
+        <div class="footer__brand" style="font-size:clamp(2rem,3vw,2.5rem)">Lima<em>Flores</em>.</div>
+      </div>
+      <a href="https://wa.me/51999479855" target="_blank" rel="noopener" style="color:var(--bone); font-size:0.875rem; letter-spacing:0.06em; text-transform:uppercase;">¿Necesitas ayuda? · WhatsApp</a>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span data-year>2026</span> Lima Flores</span>
+      <a href="index.html#contacto">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="drawer" id="cart-drawer" aria-label="Carrito">
+  <div class="drawer__head">
+    <h3>Tu carrito</h3>
+    <button data-cart-close aria-label="Cerrar" style="font-size:1.5rem; color:var(--ink); padding:4px">✕</button>
+  </div>
+  <div class="drawer__body" id="cart-body"></div>
+  <div class="drawer__foot" id="cart-foot"></div>
+</aside>
+
+<script src="js/data.js"></script>
+<script src="js/lima.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>
