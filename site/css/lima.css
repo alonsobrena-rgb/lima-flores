@@ -373,6 +373,17 @@ p { color: var(--ink); }
   .header[data-menu="open"] .header__logo-img {
     filter: drop-shadow(0 2px 10px rgba(0,0,0,0.45));
   }
+
+  /* Con scroll el header activa backdrop-filter, lo que lo convierte en el
+     "contenedor" de los hijos position:fixed y recorta el menú. Al abrir el
+     menú quitamos filtro y fondo para que el overlay cubra siempre toda la
+     pantalla, por encima de todo. */
+  .header[data-menu="open"] {
+    background: transparent !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border-bottom-color: transparent !important;
+  }
 }
 
 /* ─── Buttons ───────────────────────────────────── */
