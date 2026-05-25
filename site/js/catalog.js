@@ -5,6 +5,15 @@
   const countEl = document.getElementById('cat-count');
   if (!grid) return;
 
+  const toolbar = document.querySelector('.cat-toolbar');
+  const toggle = document.getElementById('filter-toggle');
+  const currentLabel = document.getElementById('filter-current');
+  const closeFilters = () => {
+    if (!toolbar) return;
+    toolbar.classList.remove('is-open');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  };
+
   // Read ?cat=
   const params = new URLSearchParams(location.search);
   const initialCat = params.get('cat') || 'all';
@@ -48,12 +57,28 @@
       chips.forEach(x => x.classList.remove('is-active'));
       c.classList.add('is-active');
       render(c.dataset.cat);
+      if (currentLabel) currentLabel.textContent = c.textContent.trim();
+      closeFilters();
       const url = new URL(location.href);
       if (c.dataset.cat === 'all') url.searchParams.delete('cat');
       else url.searchParams.set('cat', c.dataset.cat);
       history.replaceState({}, '', url);
     });
   });
+
+  // Dropdown de filtros (móvil)
+  if (toggle && toolbar) {
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = toolbar.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cat-toolbar__inner')) closeFilters();
+    });
+  }
+  const activeChip = [...chips].find((c) => c.dataset.cat === initialCat) || chips[0];
+  if (currentLabel && activeChip) currentLabel.textContent = activeChip.textContent.trim();
 
   render(initialCat);
 })();
