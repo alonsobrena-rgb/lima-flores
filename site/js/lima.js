@@ -13,6 +13,20 @@
   setHeaderState();
   window.addEventListener('scroll', setHeaderState, { passive: true });
 
+  // ─── Mobile menu toggle ──────────────────────────
+  const menuBtn = document.querySelector('.header__menu');
+  if (header && menuBtn) {
+    const setMenu = (open) => {
+      header.dataset.menu = open ? 'open' : 'closed';
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    menuBtn.addEventListener('click', () => setMenu(header.dataset.menu !== 'open'));
+    header.querySelectorAll('.header__nav a').forEach((a) =>
+      a.addEventListener('click', () => setMenu(false)));
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 900) setMenu(false); });
+  }
+
   // ─── Reveal on scroll (IntersectionObserver) ─────
   if (!prefersReduced && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {

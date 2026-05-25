@@ -5,4 +5,4 @@ npm-debug.log*
 .railway/
 
 # Presupuestos / documentos privados — no publicar en el repo público
-presupuesto-*.html
+presupuesto-*
