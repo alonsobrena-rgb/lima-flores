@@ -51,21 +51,22 @@ async function quoteCabify(lat, lng) {
   const shippingTypeId = chosen.id || chosen.shipping_type_id;
   if (!shippingTypeId) throw new Error('Cabify: el shipping_type elegido no tiene id');
 
-  // 3. Cotiza con dimensiones "arreglo grande" — fuerza a Cabify a asignar AUTO.
-  // (Confirmado empíricamente: 30x40x30/3kg → moped, 60x50x50/8kg → car.)
-  // Sobrescribibles con env vars LF_PARCEL_* si necesitas ajustar el default.
+  // 3. Cotiza con el mínimo que aún resulta en asset_kind='car'.
+  // Sonda confirmó: ≤45×45×40/5kg → moped; ≥50×50×45/6kg → car.
+  // 50×50×45/6kg es el umbral mínimo de "auto" y cuesta lo mismo que 8kg.
+  // Override con env vars LF_PARCEL_* si necesitas ajustar.
   const est = await cabifyEstimate({
     shippingTypeId,
     pickup: { lat: PICKUP_LAT, lon: PICKUP_LON },
     dropoff: { lat: Number(lat), lon: Number(lng) },
     dimensions: {
-      height: Number(process.env.LF_PARCEL_HEIGHT_CM || 60),
+      height: Number(process.env.LF_PARCEL_HEIGHT_CM || 50),
       length: Number(process.env.LF_PARCEL_LENGTH_CM || 50),
-      width:  Number(process.env.LF_PARCEL_WIDTH_CM  || 50),
+      width:  Number(process.env.LF_PARCEL_WIDTH_CM  || 45),
       unit: 'cm',
     },
     weight: {
-      value: Number(process.env.LF_PARCEL_WEIGHT_G || 8000),
+      value: Number(process.env.LF_PARCEL_WEIGHT_G || 6000),
       unit: 'g',
     },
   });

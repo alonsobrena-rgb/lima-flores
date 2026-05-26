@@ -12,7 +12,6 @@ const { URL } = require('url');
 require('./integrations/urbaner/load-env')();
 
 const quoteHandler = require('./api/quote');
-const diagSizesHandler = require('./api/diag-sizes');
 
 const SITE_DIR = path.join(__dirname, 'site');
 const PORT = Number(process.env.PORT) || 3000;
@@ -51,12 +50,6 @@ const server = http.createServer(async (req, res) => {
     // El handler usa req.query y req.url, ya viene preparado.
     req.query = Object.fromEntries(parsed.searchParams.entries());
     return quoteHandler(req, res);
-  }
-
-  // ─── /api/diag-sizes (temporal) ───
-  if (parsed.pathname === '/api/diag-sizes') {
-    req.query = Object.fromEntries(parsed.searchParams.entries());
-    return diagSizesHandler(req, res);
   }
 
   // ─── /api/config — keys públicas del front (Maps JS, etc.) ───
