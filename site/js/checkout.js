@@ -86,13 +86,10 @@
     populateSlots();
   }
 
-  // ─── Envío: cotización real con Urbaner vía /api/quote ──
-  // Dos rutas para obtener las coordenadas del destino:
-  //   1. Precisa: cliente eligió una sugerencia de Google Places en el
-  //      input #address-street → tenemos lat/lng exactos de esa dirección.
-  //   2. Aproximada (fallback): cliente solo eligió un distrito en el
-  //      <select> → usamos el centroide del distrito (precio orientativo,
-  //      puede variar ±S/2-3 según dónde quede la dirección real).
+  // ─── Envío: cotización real con Cabify (Urbaner fallback) vía /api/quote ──
+  // El cliente busca su dirección con Google Places. Al elegir una sugerencia
+  // tenemos lat/lng exactos. La cotización va contra esas coords. Si Google
+  // Maps no carga, mostramos "Coordinamos por WhatsApp".
   // Si subtotal ≥ S/200 → envío gratis (lo absorbe Lima Flores).
   const shipLabel = document.getElementById('summary-shipping');
   const shipNote = document.getElementById('summary-shipping-note');
@@ -168,77 +165,7 @@
     }
   }
 
-  // Ruta 2 — fallback por distrito (centroide).
-  async function quoteByDistrict(latlon) {
-    if (!latlon) { setShipManual('— por calcular'); return; }
-    if (latlon === 'other') { setShipManual('Coordinamos por WhatsApp'); return; }
-    if (precisePlace) return; // ya tenemos coords precisas del autocomplete → no degradar
-    const [lat, lng] = latlon.split(',');
-    return quoteByCoords(lat, lng, { precise: false, cacheKey: latlon });
-  }
-
-  const districtSel = document.getElementById('address-district');
   const streetInput = document.getElementById('address-street');
-  districtSel.addEventListener('change', (e) => quoteByDistrict(e.target.value));
-
-  // Auto-seleccionar el distrito del <select> a partir de los candidatos de Google.
-  // Acepta string o array de candidatos. Hace normalización (lowercase, sin tildes,
-  // sin paréntesis) y tiene un mapeo para sinónimos comunes que Google usa.
-  const DISTRICT_SYNONYMS = {
-    'lima': 'cercado de lima',
-    'cercado': 'cercado de lima',
-    'santiago de surco': 'surco',
-    'magdalena vieja': 'pueblo libre',
-    'callao cercado': 'callao',
-    'provincia constitucional del callao': 'callao',
-    'distrito de miraflores': 'miraflores',
-  };
-
-  const normDistrict = (s) => (s || '')
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/distrito de /g, '')
-    .replace(/\s*\([^)]*\)\s*/g, ' ')   // quita "(Santiago de Surco)" etc.
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  function selectDistrictByName(nameOrList) {
-    const list = Array.isArray(nameOrList) ? nameOrList : [nameOrList];
-    if (!list.length) return false;
-
-    // 1ª pasada: match exacto / startsWith / sinónimo
-    for (const raw of list) {
-      if (!raw) continue;
-      let target = normDistrict(raw);
-      if (DISTRICT_SYNONYMS[target]) target = DISTRICT_SYNONYMS[target];
-
-      for (const opt of districtSel.options) {
-        if (!opt.value || opt.value === 'other') continue;
-        const txt = normDistrict(opt.text);
-        if (txt === target || txt.startsWith(target) || target.startsWith(txt)) {
-          districtSel.value = opt.value;
-          return true;
-        }
-      }
-    }
-
-    // 2ª pasada: contains bidireccional sobre tokens (más permisivo)
-    for (const raw of list) {
-      if (!raw) continue;
-      const target = normDistrict(raw);
-      for (const opt of districtSel.options) {
-        if (!opt.value || opt.value === 'other') continue;
-        const txt = normDistrict(opt.text);
-        const txtTokens = txt.split(' ').filter((t) => t.length > 3);
-        if (txtTokens.some((t) => target.includes(t))) {
-          districtSel.value = opt.value;
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
 
   // Móvil — al enfocar la calle, scrollear el input al tope de la pantalla
   // para que el teclado virtual no tape el dropdown de Google Places.
@@ -257,33 +184,36 @@
     if (precisePlace && streetInput.value !== precisePlace.formatted) {
       precisePlace = null;
       hideMap();
-      setHint('Cambiaste la dirección — elige una sugerencia para recalcular.', null);
-      quoteByDistrict(districtSel.value);
+      setHint('Elige otra sugerencia de Google Maps para recalcular el envío.', null);
+      setShipManual('— por calcular');
     }
   });
 
   // ─── Mapa con pin (usa el SDK ya cargado por geocoder.js) ──
   // showMap(lat, lng) muestra/centra el mapa en esas coords con un marker
-  // draggable. Al soltar el pin, re-cotizamos con las coords nuevas para
-  // que el cliente pueda ajustarlo si Google lo puso 2 puertas más allá.
+  // draggable. Al soltar el pin, re-cotizamos con las coords nuevas.
   let _map = null;
   let _marker = null;
   const mapWrap = document.getElementById('address-map');
   const mapCanvas = document.getElementById('address-map-canvas');
+  const mapToggleBtn = document.getElementById('address-map-toggle');
+  const pinNote = document.getElementById('pin-note');
 
   function showMap(lat, lng, formatted) {
     if (!mapCanvas || !window.google || !window.google.maps) return;
     const pos = { lat: Number(lat), lng: Number(lng) };
     mapWrap.hidden = false;
+    if (pinNote) pinNote.hidden = false;
 
     if (!_map) {
       _map = new google.maps.Map(mapCanvas, {
         center: pos,
         zoom: 17,
+        mapTypeId: 'roadmap',
         disableDefaultUI: true,
         zoomControl: true,
         clickableIcons: false,
-        gestureHandling: 'cooperative', // ctrl+scroll → zoom; evita zoom accidental al hacer scroll de la página
+        gestureHandling: 'cooperative',
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
@@ -305,6 +235,17 @@
         setHint(`📍 Pin ajustado · ${formatted || ''}`.trim(), 'ok');
         quoteByCoords(newLat, newLng, { precise: true, cacheKey: `${newLat.toFixed(6)},${newLng.toFixed(6)}` });
       });
+
+      // Toggle satélite ↔ mapa
+      if (mapToggleBtn) {
+        mapToggleBtn.addEventListener('click', () => {
+          const now = _map.getMapTypeId();
+          const next = now === 'satellite' || now === 'hybrid' ? 'roadmap' : 'hybrid';
+          _map.setMapTypeId(next);
+          mapToggleBtn.textContent = next === 'roadmap' ? '🛰️ Satélite' : '🗺️ Mapa';
+          mapToggleBtn.setAttribute('aria-label', next === 'roadmap' ? 'Cambiar a vista satélite' : 'Cambiar a vista mapa');
+        });
+      }
     } else {
       _map.setCenter(pos);
       _marker.setPosition(pos);
@@ -314,25 +255,21 @@
 
   function hideMap() {
     if (mapWrap) mapWrap.hidden = true;
+    if (pinNote) pinNote.hidden = true;
   }
 
-  // Ruta 1 — coords precisas desde Google Places Autocomplete.
+  // Coords precisas desde Google Places Autocomplete.
   if (window.LimaGeo) {
     LimaGeo.attach(streetInput, (place) => {
       precisePlace = place;
       streetInput.value = place.formatted;
-      const matched = selectDistrictByName(place.districtCandidates || place.district);
-      setHint(
-        matched
-          ? `📍 ${place.formatted}`
-          : `📍 ${place.formatted} · distrito no listado, cotizamos igual con la ubicación exacta`,
-        'ok'
-      );
+      setHint(`📍 ${place.formatted}`, 'ok');
       quoteByCoords(place.lat, place.lng, { precise: true, cacheKey: place.placeId || `${place.lat},${place.lng}` });
       showMap(place.lat, place.lng, place.formatted);
     }).then((ac) => {
       if (!ac && LimaGeo.disabledReason) {
-        setHint('Calculamos por distrito (sin autocompletado de dirección).', null);
+        setHint('Google Maps no se cargó. Coordinamos el envío por WhatsApp.', 'error');
+        setShipManual('Coordinamos por WhatsApp');
       }
     });
   }
@@ -374,7 +311,7 @@
       alert('Tu carrito está vacío. Agrega algo desde el catálogo.');
       return;
     }
-    const required = ['address-street','address-district','delivery-date','delivery-time','recipient-name','recipient-phone','invoice-doc','buyer-name','buyer-email','buyer-phone'];
+    const required = ['address-street','delivery-date','delivery-time','recipient-name','recipient-phone','invoice-doc','buyer-name','buyer-email','buyer-phone'];
     for (const id of required) {
       const el = document.getElementById(id);
       if (!el.value.trim()) { el.focus(); el.style.borderColor = 'var(--error)'; return; }

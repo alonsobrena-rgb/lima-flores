@@ -1979,9 +1979,9 @@ p { color: var(--ink); }
 .address-map {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 260px;
   margin-top: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(244, 239, 229, 0.22);
   border-radius: 4px;
   overflow: hidden;
   background: var(--bone-deep);
@@ -1989,6 +1989,26 @@ p { color: var(--ink); }
 }
 .address-map[hidden] { display: none; }
 .address-map__canvas { position: absolute; inset: 0; }
+.address-map__toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(252, 247, 237, 0.96);
+  border: 1px solid var(--line);
+  padding: 7px 12px 7px 10px;
+  border-radius: 3px;
+  font-family: var(--f-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+  transition: background 120ms, transform 120ms;
+}
+.address-map__toggle:hover { background: white; }
+.address-map__toggle:active { transform: translateY(1px); }
 .address-map__hint {
   position: absolute;
   bottom: 10px;
@@ -2007,6 +2027,223 @@ p { color: var(--ink); }
 @keyframes address-map-in {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: none; }
+}
+
+/* ─── Tarjeta verde oscuro: datos de quien recibe ─── */
+.recipient-card {
+  background: var(--moss-deep);
+  color: var(--bone);
+  padding: 40px 36px;
+  border-radius: 6px;
+  margin: 28px 0 36px;
+  position: relative;
+  box-shadow: 0 16px 40px rgba(47, 57, 37, 0.20);
+  overflow: hidden;
+}
+.recipient-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle at top right, rgba(244,239,229,0.08), transparent 65%);
+  pointer-events: none;
+}
+.recipient-card::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 4px; height: 60px;
+  background: var(--bone);
+  transform: translateY(-50%);
+  opacity: 0.4;
+}
+
+.recipient-card__header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(244, 239, 229, 0.18);
+  position: relative;
+}
+.recipient-card__badge {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  background: rgba(244, 239, 229, 0.12);
+  border: 1px solid rgba(244, 239, 229, 0.34);
+  padding: 8px 16px;
+  border-radius: 2px;
+  color: var(--bone);
+  flex-shrink: 0;
+  margin-top: 6px;
+  white-space: nowrap;
+}
+.recipient-card__heading-wrap { flex: 1; min-width: 0; }
+.recipient-card__title {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 2rem;
+  color: var(--bone);
+  margin: 0 0 8px;
+  line-height: 1.1;
+  font-weight: 400;
+}
+.recipient-card__subtitle {
+  font-size: 0.9375rem;
+  color: rgba(244, 239, 229, 0.82);
+  margin: 0;
+  line-height: 1.55;
+}
+
+.recipient-card__section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px dashed rgba(244, 239, 229, 0.16);
+}
+.recipient-card__section:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.recipient-card__heading {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: rgba(244, 239, 229, 0.92);
+  margin: 0 0 22px;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+
+.recipient-card__pin-note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(244, 239, 229, 0.09);
+  border-left: 2px solid var(--bone);
+  padding: 14px 16px;
+  margin: 12px 0 6px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgba(244, 239, 229, 0.92);
+  border-radius: 0 3px 3px 0;
+}
+.recipient-card__pin-note[hidden] { display: none; }
+.recipient-card__pin-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-top: 1px;
+}
+.recipient-card__pin-note strong {
+  display: block;
+  color: var(--bone);
+  font-weight: 500;
+  margin-bottom: 3px;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 0.9375rem;
+}
+
+/* Inputs sobre fondo oscuro */
+.recipient-card .field input,
+.recipient-card .field textarea,
+.recipient-card .field select {
+  background: rgba(244, 239, 229, 0.07);
+  color: var(--bone);
+  border-bottom: 1px solid rgba(244, 239, 229, 0.34);
+  padding: 16px 14px 12px;
+  transition: background 160ms, border-color 160ms;
+}
+.recipient-card .field input:focus,
+.recipient-card .field textarea:focus,
+.recipient-card .field select:focus {
+  border-bottom-color: var(--bone);
+  background: rgba(244, 239, 229, 0.13);
+  outline: 0;
+}
+.recipient-card .field label {
+  color: rgba(244, 239, 229, 0.62);
+}
+.recipient-card .field input:focus + label,
+.recipient-card .field input:not(:placeholder-shown) + label,
+.recipient-card .field textarea:focus + label,
+.recipient-card .field textarea:not(:placeholder-shown) + label,
+.recipient-card .field select:focus + label,
+.recipient-card .field label.has-value {
+  color: var(--bone);
+}
+.recipient-card .field-hint {
+  color: rgba(244, 239, 229, 0.66);
+}
+.recipient-card .field-hint.is-ok { color: rgba(213, 230, 200, 0.95); }
+.recipient-card .field-hint.is-error { color: #ffb4b4; }
+
+/* Notas sobre fondo verde */
+.recipient-card .field-note {
+  background: rgba(244, 239, 229, 0.08);
+  border-left: 2px solid var(--bone);
+  color: rgba(244, 239, 229, 0.86);
+}
+.recipient-card .field-note strong { color: var(--bone); }
+
+/* Recepción sí/no sobre verde */
+.recipient-card .field-row-inline {
+  color: rgba(244, 239, 229, 0.88);
+  border-top: 1px dashed rgba(244, 239, 229, 0.16);
+  padding-top: 14px;
+}
+.recipient-card .segmented {
+  background: rgba(244, 239, 229, 0.08);
+  border: 1px solid rgba(244, 239, 229, 0.22);
+}
+.recipient-card .segmented label {
+  color: rgba(244, 239, 229, 0.78);
+}
+.recipient-card .segmented input:checked + label {
+  background: var(--bone);
+  color: var(--moss-deep);
+}
+
+/* Input date / select sobre verde — flecha y picker visible */
+.recipient-card .field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.7);
+  cursor: pointer;
+}
+.recipient-card .field select {
+  background-image: linear-gradient(45deg, transparent 50%, rgba(244, 239, 229, 0.7) 50%),
+                    linear-gradient(135deg, rgba(244, 239, 229, 0.7) 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% + 2px), calc(100% - 13px) calc(50% + 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
+
+/* Móvil — la tarjeta se acerca a los bordes para aprovechar pantalla */
+@media (max-width: 768px) {
+  .recipient-card {
+    padding: 26px 20px;
+    margin: 22px -6px 28px;
+    border-radius: 4px;
+  }
+  .recipient-card::before { width: 120px; height: 120px; }
+  .recipient-card__header {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+  }
+  .recipient-card__title { font-size: 1.55rem; }
+  .recipient-card__badge { margin-top: 0; }
+  .recipient-card__section { margin-top: 26px; padding-top: 20px; }
+  .address-map { height: 220px; }
+  .address-map__toggle {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }
 
 /* Segmented yes/no */

@@ -43,109 +43,102 @@
           </h1>
         </div>
 
-        <h2>Dirección de entrega</h2>
-        <div class="stack-4">
-          <div class="field">
-            <input type="text" id="address-street" placeholder=" " required autocomplete="off" />
-            <label for="address-street">Calle y número</label>
-            <p class="field-hint" id="address-hint">Escribe y elige una sugerencia para calcular el envío exacto.</p>
-          </div>
-          <div class="field-grid">
-            <div class="field">
-              <select id="address-district" required>
-                <option value="" selected>—</option>
-                <option value="-12.121900,-77.029700">Miraflores</option>
-                <option value="-12.097200,-77.036300">San Isidro</option>
-                <option value="-12.148800,-77.022000">Barranco</option>
-                <option value="-12.139100,-76.993000">Surco (Santiago de Surco)</option>
-                <option value="-12.108600,-76.998600">San Borja</option>
-                <option value="-12.078600,-76.942000">La Molina</option>
-                <option value="-12.171600,-76.998500">Chorrillos</option>
-                <option value="-12.090500,-77.070000">Magdalena del Mar</option>
-                <option value="-12.076400,-77.094400">San Miguel</option>
-                <option value="-12.074600,-77.063300">Pueblo Libre</option>
-                <option value="-12.074300,-77.049400">Jesús María</option>
-                <option value="-12.084800,-77.033900">Lince</option>
-                <option value="-12.115800,-77.018100">Surquillo</option>
-                <option value="-12.046400,-77.042800">Cercado de Lima</option>
-                <option value="-12.058800,-77.050000">Breña</option>
-                <option value="-12.070000,-77.014400">La Victoria</option>
-                <option value="-12.076400,-76.999400">San Luis</option>
-                <option value="-12.062500,-77.118600">Callao</option>
-                <option value="-12.063300,-77.120800">Bellavista</option>
-                <option value="-12.070000,-77.116700">La Perla</option>
-                <option value="-11.992500,-77.011400">San Juan de Lurigancho</option>
-                <option value="-12.157200,-76.969400">San Juan de Miraflores</option>
-                <option value="-12.160600,-76.932200">Villa María del Triunfo</option>
-                <option value="-12.212800,-76.932200">Villa El Salvador</option>
-                <option value="-11.995600,-77.070800">Los Olivos</option>
-                <option value="-12.029700,-77.058100">San Martín de Porres</option>
-                <option value="-12.026300,-76.911900">Ate</option>
-                <option value="other">Otro distrito (consultaremos por WhatsApp)</option>
-              </select>
-              <label for="address-district" class="has-value">Distrito</label>
+        <section class="recipient-card">
+          <header class="recipient-card__header">
+            <div class="recipient-card__badge">Para</div>
+            <div class="recipient-card__heading-wrap">
+              <h2 class="recipient-card__title">Quien recibe las flores</h2>
+              <p class="recipient-card__subtitle">Estos son los datos de la persona que abrirá la puerta — su ubicación exacta en el mapa, su nombre y su teléfono.</p>
             </div>
+          </header>
+
+          <div class="recipient-card__section">
+            <h3 class="recipient-card__heading">Dónde se entrega</h3>
+
+            <div class="field">
+              <input type="text" id="address-street" placeholder=" " required autocomplete="off" />
+              <label for="address-street">Buscar dirección</label>
+              <p class="field-hint" id="address-hint">Escribe la dirección y elige una sugerencia de Google Maps.</p>
+            </div>
+
+            <div class="address-map" id="address-map" hidden>
+              <div class="address-map__canvas" id="address-map-canvas"></div>
+              <button class="address-map__toggle" id="address-map-toggle" type="button" aria-label="Cambiar vista del mapa">🛰️ Satélite</button>
+              <div class="address-map__hint">Arrastra el pin si la ubicación no es exacta.</div>
+            </div>
+
+            <p class="recipient-card__pin-note" id="pin-note" hidden>
+              <span class="recipient-card__pin-icon">📍</span>
+              <span>
+                <strong>Las flores se entregan exactamente donde está el pin.</strong>
+                Si el pin no coincide con la puerta del edificio o casa, arrástralo a la ubicación correcta. La dirección escrita es solo referencia — lo que cuenta es la posición del mapa.
+              </span>
+            </p>
+
             <div class="field">
               <input type="text" id="address-ref" placeholder=" " />
-              <label for="address-ref">Referencia (opcional)</label>
+              <label for="address-ref">Referencia (color de fachada, piso, etc. — opcional)</label>
             </div>
-          </div>
-          <div class="address-map" id="address-map" hidden>
-            <div class="address-map__canvas" id="address-map-canvas"></div>
-            <div class="address-map__hint">Arrastra el pin si necesitas ajustar la ubicación exacta.</div>
-          </div>
-          <div class="field-row-inline" style="padding-top: 8px;">
-            <span>¿Hay recepción que pueda recibir el paquete por la persona?</span>
-            <div class="segmented" role="radiogroup" aria-label="Recepción disponible">
-              <input type="radio" id="rec-yes" name="reception" value="yes" />
-              <label for="rec-yes">Sí</label>
-              <input type="radio" id="rec-no" name="reception" value="no" checked />
-              <label for="rec-no">No</label>
-            </div>
-          </div>
-          <div class="field" id="apt-field-wrap">
-            <input type="text" id="apt-number" placeholder=" " />
-            <label for="apt-number">Número de departamento / piso</label>
-          </div>
-          <div class="field-grid">
-            <div class="field">
-              <input type="date" id="delivery-date" required />
-              <label for="delivery-date" class="has-value">Fecha de entrega</label>
-            </div>
-            <div class="field">
-              <select id="delivery-time" required>
-                <option value="" selected>—</option>
-              </select>
-              <label for="delivery-time" class="has-value">Hora objetivo (±30 min)</label>
-            </div>
-          </div>
-          <div class="field-note" id="delivery-window-preview" style="display:none">
-            <strong>Llega entre <span id="window-from">—</span> y <span id="window-to">—</span></strong>
-            Necesitamos al menos 24 h de anticipación para preparar tu arreglo a mano. La hora exacta puede variar ±30 min según el tráfico y la disponibilidad del repartidor.
-          </div>
-        </div>
 
-        <h2>Para quién es</h2>
-        <div class="stack-4">
-          <div class="field-grid">
-            <div class="field">
-              <input type="text" id="recipient-name" placeholder=" " required />
-              <label for="recipient-name">Nombre de quien recibe</label>
+            <div class="field-row-inline" style="padding-top: 8px;">
+              <span>¿Hay recepción que pueda recibir el paquete por la persona?</span>
+              <div class="segmented" role="radiogroup" aria-label="Recepción disponible">
+                <input type="radio" id="rec-yes" name="reception" value="yes" />
+                <label for="rec-yes">Sí</label>
+                <input type="radio" id="rec-no" name="reception" value="no" checked />
+                <label for="rec-no">No</label>
+              </div>
             </div>
-            <div class="field">
-              <input type="tel" id="recipient-phone" placeholder=" " required pattern="[0-9 +\-]{7,}" />
-              <label for="recipient-phone">Teléfono de quien recibe</label>
+
+            <div class="field" id="apt-field-wrap">
+              <input type="text" id="apt-number" placeholder=" " />
+              <label for="apt-number">Número de departamento / piso</label>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <input type="date" id="delivery-date" required />
+                <label for="delivery-date" class="has-value">Fecha de entrega</label>
+              </div>
+              <div class="field">
+                <select id="delivery-time" required>
+                  <option value="" selected>—</option>
+                </select>
+                <label for="delivery-time" class="has-value">Hora objetivo (±30 min)</label>
+              </div>
+            </div>
+
+            <div class="field-note" id="delivery-window-preview" style="display:none">
+              <strong>Llega entre <span id="window-from">—</span> y <span id="window-to">—</span></strong>
+              Necesitamos al menos 24 h de anticipación para preparar tu arreglo a mano. La hora exacta puede variar ±30 min según el tráfico y la disponibilidad del repartidor.
             </div>
           </div>
-          <div class="field-note">
-            <strong>Importante · este teléfono es de quien recibe las flores</strong>
-            Necesitamos el número de la persona que recibirá el pedido, no el tuyo. Solo lo usamos al momento de la entrega — si por algún motivo no podemos dejar el paquete en la puerta, llamamos a este número para coordinar. No es para confirmaciones previas ni para spam.
+
+          <div class="recipient-card__section">
+            <h3 class="recipient-card__heading">A quién se entrega</h3>
+
+            <div class="field-grid">
+              <div class="field">
+                <input type="text" id="recipient-name" placeholder=" " required />
+                <label for="recipient-name">Nombre de quien recibe</label>
+              </div>
+              <div class="field">
+                <input type="tel" id="recipient-phone" placeholder=" " required pattern="[0-9 +\-]{7,}" />
+                <label for="recipient-phone">Teléfono de quien recibe</label>
+              </div>
+            </div>
+
+            <div class="field-note">
+              <strong>Importante · este teléfono es de quien recibe las flores</strong>
+              Necesitamos el número de la persona que recibirá el pedido, no el tuyo. Solo lo usamos al momento de la entrega — si por algún motivo no podemos dejar el paquete en la puerta, llamamos a este número para coordinar. No es para confirmaciones previas ni para spam.
+            </div>
+
+            <div class="field">
+              <textarea id="note" placeholder=" " maxlength="280"></textarea>
+              <label for="note">Mensaje en la tarjeta</label>
+            </div>
           </div>
-          <div class="field">
-            <textarea id="note" placeholder=" " maxlength="280"></textarea>
-            <label for="note">Mensaje en la tarjeta</label>
-          </div>
-        </div>
+        </section>
 
         <h2>Comprobante</h2>
         <div class="stack-4">
