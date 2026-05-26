@@ -240,6 +240,17 @@
     return false;
   }
 
+  // Móvil — al enfocar la calle, scrollear el input al tope de la pantalla
+  // para que el teclado virtual no tape el dropdown de Google Places.
+  // Espera 300ms a que el teclado abra antes de scrollear.
+  streetInput.addEventListener('focus', () => {
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        streetInput.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }, 300);
+    }
+  });
+
   // Si el cliente edita el campo a mano DESPUÉS de elegir una sugerencia,
   // invalidamos las coords precisas para no engañarlo con un precio que ya no corresponde.
   streetInput.addEventListener('input', () => {
