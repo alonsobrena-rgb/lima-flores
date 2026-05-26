@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "site",
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "functions": {
+    "api/*.js": { "memory": 256, "maxDuration": 10 }
+  }
+}

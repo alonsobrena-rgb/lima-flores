@@ -86,22 +86,60 @@
     populateSlots();
   }
 
-  // Shipping estimate logic — based on subtotal (placeholder)
-  const calcShip = () => {
-    if (subtotal === 0) return { fee: 0, free: false };
-    if (subtotal >= 200) return { fee: 0, free: true };
-    return { fee: 18, free: false };
-  };
-  const ship = calcShip();
-  document.getElementById('summary-shipping').textContent = ship.free ? 'Gratis · estimado' : formatSoles(ship.fee);
-  document.getElementById('summary-total').textContent = formatSoles(subtotal + ship.fee);
+  // ─── Envío: cotización real con Urbaner vía /api/quote ──
+  // Si subtotal ≥ S/200, envío gratis (lo absorbe Lima Flores).
+  // Si no, llamamos a /api/quote?lat=…&lng=… (función serverless en Vercel
+  // que internamente consulta a Urbaner). Cacheamos por distrito para no
+  // re-cotizar cada vez que el cliente vuelva a abrir el select.
+  const shipLabel = document.getElementById('summary-shipping');
+  const totalLabel = document.getElementById('summary-total');
+  const FREE_THRESHOLD = 200;
+  const quoteCache = Object.create(null);
+  let currentShip = { fee: 0, label: '— por calcular' };
 
-  // Re-evaluate when district filled
-  document.getElementById('address-district').addEventListener('blur', (e) => {
-    if (e.target.value.trim().length > 2 && subtotal > 0 && subtotal < 200) {
-      document.getElementById('summary-shipping').textContent = formatSoles(ship.fee);
+  const renderTotals = () => {
+    shipLabel.textContent = currentShip.label;
+    totalLabel.textContent = formatSoles(subtotal + currentShip.fee);
+  };
+
+  const setShipFromQuote = ({ price, order_type }) => {
+    currentShip = {
+      fee: Number(price),
+      label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}`,
+    };
+    renderTotals();
+  };
+
+  const setShipManual = (label) => {
+    currentShip = { fee: 0, label };
+    renderTotals();
+  };
+
+  async function quoteDistrict(latlon) {
+    if (subtotal === 0) { setShipManual('— agrega un arreglo'); return; }
+    if (subtotal >= FREE_THRESHOLD) { setShipManual('Gratis · supera S/ 200'); return; }
+    if (!latlon) { setShipManual('— por calcular'); return; }
+    if (latlon === 'other') { setShipManual('Coordinamos por WhatsApp'); return; }
+    if (quoteCache[latlon]) { setShipFromQuote(quoteCache[latlon]); return; }
+
+    setShipManual('Calculando…');
+    const [lat, lng] = latlon.split(',');
+    try {
+      const r = await fetch(`/api/quote?lat=${lat}&lng=${lng}`, { headers: { Accept: 'application/json' } });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      if (!data || data.error || data.price == null) throw new Error(data?.error || 'sin precio');
+      quoteCache[latlon] = data;
+      setShipFromQuote(data);
+    } catch (_) {
+      // En GitHub Pages (sin /api) o sin cobertura → fallback gracioso.
+      setShipManual('Coordinamos por WhatsApp');
     }
-  });
+  }
+
+  const districtSel = document.getElementById('address-district');
+  districtSel.addEventListener('change', (e) => quoteDistrict(e.target.value));
+  renderTotals(); // estado inicial
 
   // ─── Reception toggle controls apartment field visibility ──
   const aptWrap = document.getElementById('apt-field-wrap');
@@ -147,7 +185,7 @@
     const orderId = 'LF-' + Date.now().toString(36).toUpperCase();
     sessionStorage.setItem('lima-last-order', JSON.stringify({
       id: orderId,
-      total: subtotal + ship.fee,
+      total: subtotal + currentShip.fee,
       recipient: document.getElementById('recipient-name').value,
       items
     }));
