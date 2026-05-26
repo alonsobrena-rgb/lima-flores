@@ -1,70 +1,142 @@
-// /api/quote — endpoint serverless que cotiza envío con Urbaner.
+// /api/quote — cotización con Cabify como principal y Urbaner como fallback.
 // Portable: corre en Vercel (Node serverless) y en Node http nativo (Railway).
 //
 // Llamada: GET /api/quote?lat=-12.0972&lng=-77.0363
-// Respuesta: { price, currency, distance_m, duration_s, order_type }
+// Respuesta: { price, currency, distance_m, duration_s, order_type, provider }
 //
-// Credenciales: URBANER_EMAIL / URBANER_PASSWORD inyectadas por el host
-// (Vercel Project Settings → Environment Variables, o Railway → Variables).
-// Nunca llegan al navegador.
+// Estrategia:
+//   1. Intenta Cabify (principal).
+//   2. Si Cabify falla por cualquier razón → cae a Urbaner.
+//   3. Si Urbaner también falla → 500 al front, que muestra "Coordinamos por WhatsApp".
 'use strict';
 
-const { price } = require('../integrations/urbaner/client');
+const { price: urbanerPrice } = require('../integrations/urbaner/client');
+const { shippingTypes: cabifyShippingTypes, estimate: cabifyEstimate } = require('../integrations/cabify/client');
 
-// Atelier Lima Flores · Calle Francia 823, Miraflores
-// Centroide de Calle Francia (Nominatim). Precisión ~50-100 m de la altura 823 real.
-// Para mayor precisión, setea URBANER_PICKUP_LATLON en Railway con el pin exacto
-// de Google Maps (right-click sobre el local → copiar coords).
+// Atelier Lima Flores · Calle Francia 823, Miraflores (centroide ~50-100m).
 const ATELIER_LATLON = process.env.URBANER_PICKUP_LATLON || '-12.122272,-77.035838';
+const [PICKUP_LAT_STR, PICKUP_LON_STR] = ATELIER_LATLON.split(',');
+const PICKUP_LAT = Number(PICKUP_LAT_STR);
+const PICKUP_LON = Number(PICKUP_LON_STR);
 
+// ─── Cabify (principal) ─────────────────────────────────
+async function quoteCabify(lat, lng) {
+  // 1. Lista tipos de envío disponibles en la ubicación del cliente.
+  const types = await cabifyShippingTypes(Number(lat), Number(lng));
+  const list = Array.isArray(types) ? types : (types?.shipping_types || types?.data || []);
+
+  // 2. Elige el de tipo "auto/car/sedan". La doc menciona asset_kind para distinguir vehículo.
+  const isAuto = (t) => {
+    const ak = (t.asset_kind || t.assetKind || '').toString().toLowerCase();
+    if (['car', 'auto', 'sedan'].includes(ak)) return true;
+    const nm = (t.name || t.label || t.id || '').toString().toLowerCase();
+    return /car|auto|sedan/.test(nm);
+  };
+  const chosen = list.find(isAuto) || list[0];
+  if (!chosen) throw new Error('Cabify: no hay shipping_types disponibles en esa ubicación');
+  const shippingTypeId = chosen.id || chosen.shipping_type_id;
+  if (!shippingTypeId) throw new Error('Cabify: el shipping_type elegido no tiene id');
+
+  // 3. Cotiza.
+  const est = await cabifyEstimate({
+    shippingTypeId,
+    pickup: { latitude: PICKUP_LAT, longitude: PICKUP_LON },
+    dropoff: { latitude: Number(lat), longitude: Number(lng) },
+    dimensions: { height: 30, length: 40, width: 30 }, // cm — paquete de flor promedio
+    weight: { value: 3000 },                           // gramos — ramo mediano
+  });
+
+  // 4. Parseo defensivo: la doc no fija un solo shape, probamos varios paths.
+  const parcels = Array.isArray(est?.parcels) ? est.parcels : [];
+  const p0 = parcels[0] || est?.parcel || est;
+
+  let priceNum = null, currency = 'PEN';
+  const priceCandidates = [
+    p0?.estimated_price, p0?.price, p0?.fare, p0?.cost, p0?.amount,
+    est?.estimated_price, est?.price, est?.fare,
+  ];
+  for (const c of priceCandidates) {
+    if (c == null) continue;
+    if (typeof c === 'number') { priceNum = c; break; }
+    if (typeof c === 'object') {
+      if (typeof c.value === 'number') { priceNum = c.value; currency = c.currency || currency; break; }
+      if (typeof c.amount === 'number') { priceNum = c.amount; currency = c.currency || currency; break; }
+      if (typeof c.total === 'number') { priceNum = c.total; currency = c.currency || currency; break; }
+    }
+  }
+  if (priceNum == null) throw new Error(`Cabify: no encontré precio en la respuesta — keys: ${Object.keys(est || {}).join(',')}`);
+
+  // Algunas APIs devuelven en céntimos (1850 = S/18.50). Heurística: si > 200 y la
+  // moneda es PEN, probablemente está en céntimos. Esto se puede afinar al testear.
+  if (priceNum > 200 && (currency === 'PEN' || currency === 'PE')) priceNum = priceNum / 100;
+
+  const distance = p0?.distance ?? p0?.distance_m ?? est?.distance ?? null;
+  const duration = p0?.duration ?? p0?.duration_s ?? est?.duration ?? null;
+
+  return {
+    price: priceNum,
+    currency,
+    order_type: chosen.name || 'AUTO',
+    distance_m: typeof distance === 'number' ? distance : null,
+    duration_s: typeof duration === 'number' ? duration : null,
+    provider: 'cabify',
+  };
+}
+
+// ─── Urbaner (fallback) ─────────────────────────────────
+async function quoteUrbaner(lat, lng) {
+  const dropoff = `${lat},${lng}`;
+  const out = await urbanerPrice({
+    destinations: [{ latlon: ATELIER_LATLON }, { latlon: dropoff }],
+    vehicleTypeId: Number(process.env.URBANER_VEHICLE_ID || 1),
+    isReturn: false,
+  });
+  const prices = Array.isArray(out?.prices) ? out.prices : [];
+  const chosen = prices.find((p) => p.order_type === 'NEXTDAY') || prices[0] || null;
+  if (!chosen) throw new Error('Urbaner: sin cobertura para ese destino');
+  return {
+    price: chosen.price,
+    currency: 'PEN',
+    order_type: chosen.order_type,
+    distance_m: out.distance,
+    duration_s: out.duration,
+    provider: 'urbaner',
+  };
+}
+
+// ─── Handler ────────────────────────────────────────────
 module.exports = async (req, res) => {
-  // Helper portable (Vercel res.status() no existe en http nativo).
   const send = (code, payload) => {
     res.statusCode = code;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 min
+    res.setHeader('Cache-Control', 'public, max-age=300');
     res.end(typeof payload === 'string' ? payload : JSON.stringify(payload));
   };
 
   try {
-    // req.query lo prepara el host (Vercel o nuestro server.js); fallback por si no.
     const q = req.query || (() => {
       const u = new URL(req.url, `http://${req.headers?.host || 'localhost'}`);
       return Object.fromEntries(u.searchParams.entries());
     })();
-
     const lat = q.lat, lng = q.lng;
     if (!lat || !lng) return send(400, { error: 'Faltan lat / lng en la query string.' });
 
-    const dropoff = `${lat},${lng}`;
-    // vehicle_type_id en Urbaner (confirmado empíricamente):
-    //   1 = AUTO  — solo NEXTDAY (programado), precio ~2x moto. Encaja con
-    //               nuestro modelo de +24h de antelación. Default correcto
-    //               para flores: no caben en mochila de moto sin dañarse.
-    //   2 = MOTO  — EXPRESS + NEXTDAY, precio bajo. Solo conviene para
-    //               envíos pequeños/planos (sobres, ramos diminutos).
-    //   3 = CAMIONETA — precio ~igual a auto, para cargas voluminosas.
-    // Sobrescribir con URBANER_VEHICLE_ID en Railway si necesitas otro.
-    const out = await price({
-      destinations: [{ latlon: ATELIER_LATLON }, { latlon: dropoff }],
-      vehicleTypeId: Number(process.env.URBANER_VEHICLE_ID || 1),
-      isReturn: false,
-    });
+    // 1. Intento Cabify.
+    try {
+      const r = await quoteCabify(lat, lng);
+      return send(200, r);
+    } catch (cabifyErr) {
+      console.warn('[quote] Cabify falló, fallback a Urbaner:', cabifyErr.message);
 
-    // Preferimos NEXTDAY (encaja con el flujo de +24 h del checkout).
-    // Si Urbaner no ofrece NEXTDAY para ese destino, caemos a EXPRESS.
-    const prices = Array.isArray(out?.prices) ? out.prices : [];
-    const chosen = prices.find((p) => p.order_type === 'NEXTDAY') || prices[0] || null;
-
-    if (!chosen) return send(404, { error: 'Sin cobertura Urbaner para ese destino.' });
-
-    return send(200, {
-      price: chosen.price,
-      currency: 'PEN',
-      order_type: chosen.order_type,
-      distance_m: out.distance,
-      duration_s: out.duration,
-    });
+      // 2. Fallback a Urbaner.
+      try {
+        const r = await quoteUrbaner(lat, lng);
+        return send(200, r);
+      } catch (urbanerErr) {
+        console.error('[quote] Ambos couriers fallaron. Cabify:', cabifyErr.message, '| Urbaner:', urbanerErr.message);
+        return send(502, { error: 'No pudimos cotizar el envío. Te contactamos por WhatsApp.' });
+      }
+    }
   } catch (e) {
     return send(500, { error: e.message });
   }
