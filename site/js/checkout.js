@@ -229,10 +229,65 @@
   streetInput.addEventListener('input', () => {
     if (precisePlace && streetInput.value !== precisePlace.formatted) {
       precisePlace = null;
+      hideMap();
       setHint('Cambiaste la dirección — elige una sugerencia para recalcular.', null);
       quoteByDistrict(districtSel.value);
     }
   });
+
+  // ─── Mapa con pin (usa el SDK ya cargado por geocoder.js) ──
+  // showMap(lat, lng) muestra/centra el mapa en esas coords con un marker
+  // draggable. Al soltar el pin, re-cotizamos con las coords nuevas para
+  // que el cliente pueda ajustarlo si Google lo puso 2 puertas más allá.
+  let _map = null;
+  let _marker = null;
+  const mapWrap = document.getElementById('address-map');
+  const mapCanvas = document.getElementById('address-map-canvas');
+
+  function showMap(lat, lng, formatted) {
+    if (!mapCanvas || !window.google || !window.google.maps) return;
+    const pos = { lat: Number(lat), lng: Number(lng) };
+    mapWrap.hidden = false;
+
+    if (!_map) {
+      _map = new google.maps.Map(mapCanvas, {
+        center: pos,
+        zoom: 17,
+        disableDefaultUI: true,
+        zoomControl: true,
+        clickableIcons: false,
+        gestureHandling: 'cooperative', // ctrl+scroll → zoom; evita zoom accidental al hacer scroll de la página
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+      _marker = new google.maps.Marker({
+        map: _map,
+        position: pos,
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        title: formatted || 'Dirección de entrega',
+      });
+      _marker.addListener('dragend', () => {
+        const p = _marker.getPosition();
+        const newLat = p.lat();
+        const newLng = p.lng();
+        if (precisePlace) {
+          precisePlace = { ...precisePlace, lat: newLat, lng: newLng };
+        }
+        setHint(`📍 Pin ajustado · ${formatted || ''}`.trim(), 'ok');
+        quoteByCoords(newLat, newLng, { precise: true, cacheKey: `${newLat.toFixed(6)},${newLng.toFixed(6)}` });
+      });
+    } else {
+      _map.setCenter(pos);
+      _marker.setPosition(pos);
+      _marker.setTitle(formatted || 'Dirección de entrega');
+    }
+  }
+
+  function hideMap() {
+    if (mapWrap) mapWrap.hidden = true;
+  }
 
   // Ruta 1 — coords precisas desde Google Places Autocomplete.
   if (window.LimaGeo) {
@@ -247,6 +302,7 @@
         'ok'
       );
       quoteByCoords(place.lat, place.lng, { precise: true, cacheKey: place.placeId || `${place.lat},${place.lng}` });
+      showMap(place.lat, place.lng, place.formatted);
     }).then((ac) => {
       if (!ac && LimaGeo.disabledReason) {
         setHint('Calculamos por distrito (sin autocompletado de dirección).', null);
