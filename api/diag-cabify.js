@@ -55,8 +55,12 @@ module.exports = async (req, res) => {
   // Paso 3: estimate con el primer shipping type encontrado
   try {
     const types = out.steps.shipping_types?.raw;
-    const list = Array.isArray(types) ? types : (types?.shipping_types || types?.data || []);
-    const chosen = list[0];
+    const list = Array.isArray(types)
+      ? types
+      : (types?.available_shipping_types || types?.shipping_types || types?.data || []);
+    // Elegir Express por nombre (excluir Comida)
+    const chosen = list.find((t) => /express/i.test(t.name || '') && !/comida|food/i.test(t.name || ''))
+                || list[0];
     if (!chosen) {
       out.steps.estimate = { ok: false, error: 'No hay shipping_types disponibles para elegir' };
     } else {

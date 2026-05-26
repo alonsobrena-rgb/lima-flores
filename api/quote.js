@@ -23,16 +23,30 @@ const PICKUP_LON = Number(PICKUP_LON_STR);
 async function quoteCabify(lat, lng) {
   // 1. Lista tipos de envío disponibles en la ubicación del cliente.
   const types = await cabifyShippingTypes(Number(lat), Number(lng));
-  const list = Array.isArray(types) ? types : (types?.shipping_types || types?.data || []);
+  const list = Array.isArray(types)
+    ? types
+    : (types?.available_shipping_types || types?.shipping_types || types?.data || []);
 
-  // 2. Elige el de tipo "auto/car/sedan". La doc menciona asset_kind para distinguir vehículo.
-  const isAuto = (t) => {
-    const ak = (t.asset_kind || t.assetKind || '').toString().toLowerCase();
-    if (['car', 'auto', 'sedan'].includes(ak)) return true;
-    const nm = (t.name || t.label || t.id || '').toString().toLowerCase();
-    return /car|auto|sedan/.test(nm);
-  };
-  const chosen = list.find(isAuto) || list[0];
+  // 2. Elegir el shipping_type. Cabify Logistics PE no expone vehículo explícito —
+  // su flota de drivers (heredada de ride-hailing) es predominantemente auto en Lima.
+  // Estrategia:
+  //   a) Si hay CABIFY_SHIPPING_TYPE_ID en env → usar ese (control fino).
+  //   b) Si no → preferir nombres con "express|standard|envío" y descartar los de
+  //      "comida|food" (que son para repartos de restaurante, otro caso de uso).
+  //   c) Si nada matchea → primer item de la lista.
+  let chosen = null;
+  const forcedId = process.env.CABIFY_SHIPPING_TYPE_ID;
+  if (forcedId) {
+    chosen = list.find((t) => (t.id || t.shipping_type_id) === forcedId);
+  }
+  if (!chosen) {
+    chosen = list.find((t) => {
+      const nm = (t.name || t.label || '').toString().toLowerCase();
+      if (/comida|food/.test(nm)) return false;
+      return /express|standard|standar|env[íi]o/.test(nm);
+    });
+  }
+  if (!chosen) chosen = list[0];
   if (!chosen) throw new Error('Cabify: no hay shipping_types disponibles en esa ubicación');
   const shippingTypeId = chosen.id || chosen.shipping_type_id;
   if (!shippingTypeId) throw new Error('Cabify: el shipping_type elegido no tiene id');
