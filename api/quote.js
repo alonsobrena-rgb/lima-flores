@@ -12,7 +12,10 @@
 const { price } = require('../integrations/urbaner/client');
 
 // Atelier Lima Flores · Calle Francia 823, Miraflores
-const ATELIER_LATLON = process.env.URBANER_PICKUP_LATLON || '-12.122550,-77.029700';
+// Centroide de Calle Francia (Nominatim). Precisión ~50-100 m de la altura 823 real.
+// Para mayor precisión, setea URBANER_PICKUP_LATLON en Railway con el pin exacto
+// de Google Maps (right-click sobre el local → copiar coords).
+const ATELIER_LATLON = process.env.URBANER_PICKUP_LATLON || '-12.122272,-77.035838';
 
 module.exports = async (req, res) => {
   // Helper portable (Vercel res.status() no existe en http nativo).
