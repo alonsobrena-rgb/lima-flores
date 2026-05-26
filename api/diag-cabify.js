@@ -66,8 +66,8 @@ module.exports = async (req, res) => {
     } else {
       const est = await estimate({
         shippingTypeId: chosen.id || chosen.shipping_type_id,
-        pickup: { latitude: PLAT, longitude: PLON },
-        dropoff: { latitude: lat, longitude: lng },
+        pickup: { lat: PLAT, lon: PLON },
+        dropoff: { lat, lon: lng },
         dimensions: { height: 30, length: 40, width: 30 },
         weight: { value: 3000 },
       });

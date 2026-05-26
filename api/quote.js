@@ -54,8 +54,8 @@ async function quoteCabify(lat, lng) {
   // 3. Cotiza.
   const est = await cabifyEstimate({
     shippingTypeId,
-    pickup: { latitude: PICKUP_LAT, longitude: PICKUP_LON },
-    dropoff: { latitude: Number(lat), longitude: Number(lng) },
+    pickup: { lat: PICKUP_LAT, lon: PICKUP_LON },
+    dropoff: { lat: Number(lat), lon: Number(lng) },
     dimensions: { height: 30, length: 40, width: 30 }, // cm — paquete de flor promedio
     weight: { value: 3000 },                           // gramos — ramo mediano
   });
