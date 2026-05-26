@@ -1,9 +1,12 @@
-// /api/quote — endpoint serverless (Vercel) que cotiza envío con Urbaner.
-// El front llama: GET /api/quote?lat=-12.0972&lng=-77.0363
-// Devuelve:      { price, currency, distance_m, duration_s, order_type }
+// /api/quote — endpoint serverless que cotiza envío con Urbaner.
+// Portable: corre en Vercel (Node serverless) y en Node http nativo (Railway).
 //
-// Credenciales: URBANER_EMAIL / URBANER_PASSWORD configurados en Vercel
-// (Project Settings → Environment Variables). Nunca se exponen al navegador.
+// Llamada: GET /api/quote?lat=-12.0972&lng=-77.0363
+// Respuesta: { price, currency, distance_m, duration_s, order_type }
+//
+// Credenciales: URBANER_EMAIL / URBANER_PASSWORD inyectadas por el host
+// (Vercel Project Settings → Environment Variables, o Railway → Variables).
+// Nunca llegan al navegador.
 'use strict';
 
 const { price } = require('../integrations/urbaner/client');
@@ -12,16 +15,23 @@ const { price } = require('../integrations/urbaner/client');
 const ATELIER_LATLON = process.env.URBANER_PICKUP_LATLON || '-12.122550,-77.029700';
 
 module.exports = async (req, res) => {
-  // CORS por si en algún momento se llama desde otro dominio (mismo origen no lo necesita).
-  res.setHeader('Cache-Control', 'public, max-age=300'); // 5 min — la tarifa cambia poco
-  res.setHeader('Content-Type', 'application/json');
+  // Helper portable (Vercel res.status() no existe en http nativo).
+  const send = (code, payload) => {
+    res.statusCode = code;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 min
+    res.end(typeof payload === 'string' ? payload : JSON.stringify(payload));
+  };
 
   try {
-    const lat = req.query?.lat ?? new URL(req.url, 'http://x').searchParams.get('lat');
-    const lng = req.query?.lng ?? new URL(req.url, 'http://x').searchParams.get('lng');
-    if (!lat || !lng) {
-      return res.status(400).end(JSON.stringify({ error: 'Faltan lat / lng en la query string.' }));
-    }
+    // req.query lo prepara el host (Vercel o nuestro server.js); fallback por si no.
+    const q = req.query || (() => {
+      const u = new URL(req.url, `http://${req.headers?.host || 'localhost'}`);
+      return Object.fromEntries(u.searchParams.entries());
+    })();
+
+    const lat = q.lat, lng = q.lng;
+    if (!lat || !lng) return send(400, { error: 'Faltan lat / lng en la query string.' });
 
     const dropoff = `${lat},${lng}`;
     const out = await price({
@@ -35,18 +45,16 @@ module.exports = async (req, res) => {
     const prices = Array.isArray(out?.prices) ? out.prices : [];
     const chosen = prices.find((p) => p.order_type === 'NEXTDAY') || prices[0] || null;
 
-    if (!chosen) {
-      return res.status(404).end(JSON.stringify({ error: 'Sin cobertura Urbaner para ese destino.' }));
-    }
+    if (!chosen) return send(404, { error: 'Sin cobertura Urbaner para ese destino.' });
 
-    return res.status(200).end(JSON.stringify({
+    return send(200, {
       price: chosen.price,
       currency: 'PEN',
       order_type: chosen.order_type,
       distance_m: out.distance,
       duration_s: out.duration,
-    }));
+    });
   } catch (e) {
-    return res.status(500).end(JSON.stringify({ error: e.message }));
+    return send(500, { error: e.message });
   }
 };

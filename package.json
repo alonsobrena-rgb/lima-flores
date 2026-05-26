@@ -2,12 +2,12 @@
   "name": "lima-flores",
   "version": "1.0.0",
   "private": true,
-  "description": "Lima Flores · atelier botánico (sitio estático)",
-  "scripts": {
-    "start": "serve site",
-    "dev": "serve site -l 3000"
+  "description": "Lima Flores · atelier botánico (sitio estático + cotización Urbaner)",
+  "engines": {
+    "node": ">=18"
   },
-  "dependencies": {
-    "serve": "^14.2.4"
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
   }
 }
