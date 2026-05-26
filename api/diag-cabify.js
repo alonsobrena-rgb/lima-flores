@@ -64,14 +64,30 @@ module.exports = async (req, res) => {
     if (!chosen) {
       out.steps.estimate = { ok: false, error: 'No hay shipping_types disponibles para elegir' };
     } else {
-      const est = await estimate({
+      // Test 1: paquete chico con units
+      const est1 = await estimate({
         shippingTypeId: chosen.id || chosen.shipping_type_id,
         pickup: { lat: PLAT, lon: PLON },
         dropoff: { lat, lon: lng },
-        dimensions: { height: 30, length: 40, width: 30 },
-        weight: { value: 3000 },
+        dimensions: { height: 30, length: 40, width: 30, unit: 'cm' },
+        weight: { value: 3000, unit: 'g' },
       });
-      out.steps.estimate = { ok: true, chosen_shipping_type: chosen, raw: est };
+      // Test 2: paquete grande (arreglo floral XL: 60cm alto, 50x50 base, 8kg)
+      const est2 = await estimate({
+        shippingTypeId: chosen.id || chosen.shipping_type_id,
+        pickup: { lat: PLAT, lon: PLON },
+        dropoff: { lat, lon: lng },
+        dimensions: { height: 60, length: 50, width: 50, unit: 'cm' },
+        weight: { value: 8000, unit: 'g' },
+      });
+      const extractKind = (r) => r?.deliveries?.[0]?.estimation?.asset_kind || 'unknown';
+      const extractPrice = (r) => r?.deliveries?.[0]?.estimation?.price?.amount;
+      out.steps.estimate = {
+        ok: true,
+        chosen_shipping_type: chosen.name,
+        test1_small: { asset_kind: extractKind(est1), price_cents: extractPrice(est1), raw: est1 },
+        test2_large: { asset_kind: extractKind(est2), price_cents: extractPrice(est2), raw: est2 },
+      };
     }
   } catch (e) {
     out.steps.estimate = { ok: false, error: e.message };
