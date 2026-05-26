@@ -12,7 +12,6 @@ const { URL } = require('url');
 require('./integrations/urbaner/load-env')();
 
 const quoteHandler = require('./api/quote');
-const diagCabifyHandler = require('./api/diag-cabify');
 
 const SITE_DIR = path.join(__dirname, 'site');
 const PORT = Number(process.env.PORT) || 3000;
@@ -51,12 +50,6 @@ const server = http.createServer(async (req, res) => {
     // El handler usa req.query y req.url, ya viene preparado.
     req.query = Object.fromEntries(parsed.searchParams.entries());
     return quoteHandler(req, res);
-  }
-
-  // ─── /api/diag-cabify (temporal, debug de respuesta cruda de Cabify) ───
-  if (parsed.pathname === '/api/diag-cabify') {
-    req.query = Object.fromEntries(parsed.searchParams.entries());
-    return diagCabifyHandler(req, res);
   }
 
   // ─── /api/config — keys públicas del front (Maps JS, etc.) ───
