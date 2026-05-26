@@ -81,9 +81,29 @@
       previewBox.style.display = '';
     };
 
-    dateInput.addEventListener('change', () => { populateSlots(); updatePreview(); });
-    timeSelect.addEventListener('change', updatePreview);
+    dateInput.addEventListener('change', () => { populateSlots(); updatePreview(); requoteIfPlace(); });
+    timeSelect.addEventListener('change', () => { updatePreview(); requoteIfPlace(); });
     populateSlots();
+  }
+
+  // Construye RFC3339 (UTC) a partir de fecha+hora del form. Si falta alguna → null.
+  function buildPickupTime() {
+    if (!dateInput || !timeSelect) return null;
+    if (!dateInput.value || !timeSelect.value) return null;
+    const [hh, mm] = timeSelect.value.split(':').map(Number);
+    const d = new Date(`${dateInput.value}T${PAD(hh)}:${PAD(mm)}:00`);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString();
+  }
+
+  // Re-cotiza si ya tenemos coords precisas (autocomplete o pin arrastrado).
+  // Se llama al cambiar fecha/hora para que el precio refleje ese momento.
+  function requoteIfPlace() {
+    if (!precisePlace) return;
+    quoteByCoords(precisePlace.lat, precisePlace.lng, {
+      precise: true,
+      cacheKey: precisePlace.placeId || `${precisePlace.lat},${precisePlace.lng}`,
+    });
   }
 
   // ─── Envío: cotización real con Cabify (Urbaner fallback) vía /api/quote ──
@@ -103,7 +123,7 @@
     totalLabel.textContent = formatSoles(subtotal + currentShip.fee);
   };
 
-  const setShipFromQuote = ({ price, order_type, distance_m, duration_s, provider, asset_kind }, precise) => {
+  const setShipFromQuote = ({ price, order_type, distance_m, duration_s, provider, asset_kind }, precise, scheduled) => {
     const km  = distance_m != null ? `${(distance_m / 1000).toFixed(1)} km` : null;
     const min = duration_s != null ? `${Math.round(duration_s / 60)} min` : null;
     const detail = [km, min].filter(Boolean).join(' · ');
@@ -112,9 +132,10 @@
     const courierLabel = provider === 'cabify'
       ? `Cabify · ${order_type || 'AUTO'}`
       : `Urbaner ${order_type || 'NEXTDAY'}`;
+    const timeTag = scheduled ? ' · para tu hora' : (precise ? ' · estimado para ahora' : ' · aprox.');
     currentShip = {
       fee: Number(price),
-      label: `${formatSoles(price)} · ${courierLabel}${detail ? ' · ' + detail : ''}${precise ? '' : ' · aprox.'}`,
+      label: `${formatSoles(price)} · ${courierLabel}${detail ? ' · ' + detail : ''}${timeTag}`,
     };
     renderTotals();
 
@@ -146,17 +167,20 @@
 
   async function quoteByCoords(lat, lng, { precise = false, cacheKey = null } = {}) {
     if (subtotal === 0) { setShipManual('— agrega un arreglo'); return; }
-    const key = cacheKey || `${lat},${lng}`;
-    if (quoteCache[key]) { setShipFromQuote(quoteCache[key], precise); return; }
+    const pickupTime = buildPickupTime();
+    const baseKey = cacheKey || `${lat},${lng}`;
+    const key = `${baseKey}|${pickupTime || 'now'}`;
+    if (quoteCache[key]) { setShipFromQuote(quoteCache[key], precise, !!pickupTime); return; }
 
     setShipManual('Calculando…');
     try {
-      const r = await fetch(`/api/quote?lat=${lat}&lng=${lng}`, { headers: { Accept: 'application/json' } });
+      const url = `/api/quote?lat=${lat}&lng=${lng}` + (pickupTime ? `&at=${encodeURIComponent(pickupTime)}` : '');
+      const r = await fetch(url, { headers: { Accept: 'application/json' } });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       if (!data || data.error || data.price == null) throw new Error(data?.error || 'sin precio');
       quoteCache[key] = data;
-      setShipFromQuote(data, precise);
+      setShipFromQuote(data, precise, !!pickupTime);
     } catch (_) {
       setShipManual('Coordinamos por WhatsApp');
     }

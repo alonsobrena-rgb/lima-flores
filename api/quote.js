@@ -20,7 +20,7 @@ const PICKUP_LAT = Number(PICKUP_LAT_STR);
 const PICKUP_LON = Number(PICKUP_LON_STR);
 
 // ─── Cabify (principal) ─────────────────────────────────
-async function quoteCabify(lat, lng) {
+async function quoteCabify(lat, lng, pickupTime) {
   // 1. Lista tipos de envío disponibles en la ubicación del cliente.
   const types = await cabifyShippingTypes(Number(lat), Number(lng));
   const list = Array.isArray(types)
@@ -69,6 +69,7 @@ async function quoteCabify(lat, lng) {
       value: Number(process.env.LF_PARCEL_WEIGHT_G || 6000),
       unit: 'g',
     },
+    pickupTime, // RFC3339 opcional — si viene, Cabify cotiza para esa hora; si no, "ahora"
   });
 
   // 4. Parsear la respuesta. Shape real (confirmada empíricamente):
@@ -153,9 +154,16 @@ module.exports = async (req, res) => {
     const lat = q.lat, lng = q.lng;
     if (!lat || !lng) return send(400, { error: 'Faltan lat / lng en la query string.' });
 
+    // pickup_time opcional (ISO 8601). Si no es válido o ya pasó, lo ignoramos.
+    let pickupTime = null;
+    if (q.at) {
+      const t = new Date(q.at);
+      if (!isNaN(t.getTime()) && t.getTime() > Date.now()) pickupTime = t.toISOString();
+    }
+
     // 1. Intento Cabify.
     try {
-      const r = await quoteCabify(lat, lng);
+      const r = await quoteCabify(lat, lng, pickupTime);
       return send(200, r);
     } catch (cabifyErr) {
       console.warn('[quote] Cabify falló, fallback a Urbaner:', cabifyErr.message);
