@@ -46,8 +46,9 @@
         <h2>Dirección de entrega</h2>
         <div class="stack-4">
           <div class="field">
-            <input type="text" id="address-street" placeholder=" " required autocomplete="street-address" />
+            <input type="text" id="address-street" placeholder=" " required autocomplete="off" />
             <label for="address-street">Calle y número</label>
+            <p class="field-hint" id="address-hint">Escribe y elige una sugerencia para calcular el envío exacto.</p>
           </div>
           <div class="field-grid">
             <div class="field">
@@ -248,6 +249,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/lima.js"></script>
+<script src="js/geocoder.js"></script>
 <script src="js/checkout.js"></script>
 </body>
 </html>

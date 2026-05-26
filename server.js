@@ -52,6 +52,19 @@ const server = http.createServer(async (req, res) => {
     return quoteHandler(req, res);
   }
 
+  // ─── /api/config — keys públicas del front (Maps JS, etc.) ───
+  // La key de Google Maps JS es client-side por diseño; la seguridad se hace
+  // restringiendo HTTP referrer en Google Cloud Console, no ocultándola.
+  if (parsed.pathname === '/api/config') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+    });
+    return res.end(JSON.stringify({
+      googleMapsKey: process.env.GOOGLE_MAPS_API_KEY || '',
+    }));
+  }
+
   // ─── Estáticos desde site/ ───
   let pathname = decodeURIComponent(parsed.pathname);
   if (pathname.endsWith('/')) pathname += 'index.html';

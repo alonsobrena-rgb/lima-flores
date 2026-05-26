@@ -87,25 +87,30 @@
   }
 
   // ─── Envío: cotización real con Urbaner vía /api/quote ──
-  // Si subtotal ≥ S/200, envío gratis (lo absorbe Lima Flores).
-  // Si no, llamamos a /api/quote?lat=…&lng=… (función serverless en Vercel
-  // que internamente consulta a Urbaner). Cacheamos por distrito para no
-  // re-cotizar cada vez que el cliente vuelva a abrir el select.
+  // Dos rutas para obtener las coordenadas del destino:
+  //   1. Precisa: cliente eligió una sugerencia de Google Places en el
+  //      input #address-street → tenemos lat/lng exactos de esa dirección.
+  //   2. Aproximada (fallback): cliente solo eligió un distrito en el
+  //      <select> → usamos el centroide del distrito (precio orientativo,
+  //      puede variar ±S/2-3 según dónde quede la dirección real).
+  // Si subtotal ≥ S/200 → envío gratis (lo absorbe Lima Flores).
   const shipLabel = document.getElementById('summary-shipping');
   const totalLabel = document.getElementById('summary-total');
+  const addressHint = document.getElementById('address-hint');
   const FREE_THRESHOLD = 200;
   const quoteCache = Object.create(null);
   let currentShip = { fee: 0, label: '— por calcular' };
+  let precisePlace = null; // { lat, lng, district, formatted } cuando hay autocomplete
 
   const renderTotals = () => {
     shipLabel.textContent = currentShip.label;
     totalLabel.textContent = formatSoles(subtotal + currentShip.fee);
   };
 
-  const setShipFromQuote = ({ price, order_type }) => {
+  const setShipFromQuote = ({ price, order_type }, precise) => {
     currentShip = {
       fee: Number(price),
-      label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}`,
+      label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}${precise ? '' : ' · aprox.'}`,
     };
     renderTotals();
   };
@@ -115,30 +120,91 @@
     renderTotals();
   };
 
-  async function quoteDistrict(latlon) {
+  const setHint = (text, kind) => {
+    if (!addressHint) return;
+    addressHint.textContent = text;
+    addressHint.classList.remove('is-error', 'is-ok');
+    if (kind) addressHint.classList.add(`is-${kind}`);
+  };
+
+  async function quoteByCoords(lat, lng, { precise = false, cacheKey = null } = {}) {
     if (subtotal === 0) { setShipManual('— agrega un arreglo'); return; }
     if (subtotal >= FREE_THRESHOLD) { setShipManual('Gratis · supera S/ 200'); return; }
-    if (!latlon) { setShipManual('— por calcular'); return; }
-    if (latlon === 'other') { setShipManual('Coordinamos por WhatsApp'); return; }
-    if (quoteCache[latlon]) { setShipFromQuote(quoteCache[latlon]); return; }
+    const key = cacheKey || `${lat},${lng}`;
+    if (quoteCache[key]) { setShipFromQuote(quoteCache[key], precise); return; }
 
     setShipManual('Calculando…');
-    const [lat, lng] = latlon.split(',');
     try {
       const r = await fetch(`/api/quote?lat=${lat}&lng=${lng}`, { headers: { Accept: 'application/json' } });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       if (!data || data.error || data.price == null) throw new Error(data?.error || 'sin precio');
-      quoteCache[latlon] = data;
-      setShipFromQuote(data);
+      quoteCache[key] = data;
+      setShipFromQuote(data, precise);
     } catch (_) {
-      // En GitHub Pages (sin /api) o sin cobertura → fallback gracioso.
       setShipManual('Coordinamos por WhatsApp');
     }
   }
 
+  // Ruta 2 — fallback por distrito (centroide).
+  async function quoteByDistrict(latlon) {
+    if (!latlon) { setShipManual('— por calcular'); return; }
+    if (latlon === 'other') { setShipManual('Coordinamos por WhatsApp'); return; }
+    if (precisePlace) return; // ya tenemos coords precisas del autocomplete → no degradar
+    const [lat, lng] = latlon.split(',');
+    return quoteByCoords(lat, lng, { precise: false, cacheKey: latlon });
+  }
+
   const districtSel = document.getElementById('address-district');
-  districtSel.addEventListener('change', (e) => quoteDistrict(e.target.value));
+  const streetInput = document.getElementById('address-street');
+  districtSel.addEventListener('change', (e) => quoteByDistrict(e.target.value));
+
+  // Auto-seleccionar el distrito del <select> a partir del nombre de Google.
+  function selectDistrictByName(name) {
+    if (!name) return false;
+    const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+    const target = norm(name);
+    for (const opt of districtSel.options) {
+      if (!opt.value || opt.value === 'other') continue;
+      const txt = norm(opt.text);
+      if (txt === target || txt.startsWith(target) || target.includes(txt.split(' ')[0])) {
+        districtSel.value = opt.value;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Si el cliente edita el campo a mano DESPUÉS de elegir una sugerencia,
+  // invalidamos las coords precisas para no engañarlo con un precio que ya no corresponde.
+  streetInput.addEventListener('input', () => {
+    if (precisePlace && streetInput.value !== precisePlace.formatted) {
+      precisePlace = null;
+      setHint('Cambiaste la dirección — elige una sugerencia para recalcular.', null);
+      quoteByDistrict(districtSel.value);
+    }
+  });
+
+  // Ruta 1 — coords precisas desde Google Places Autocomplete.
+  if (window.LimaGeo) {
+    LimaGeo.attach(streetInput, (place) => {
+      precisePlace = place;
+      streetInput.value = place.formatted;
+      const matched = selectDistrictByName(place.district);
+      setHint(
+        matched
+          ? `📍 ${place.formatted}`
+          : `📍 ${place.formatted} · distrito no listado, cotizamos igual con la ubicación exacta`,
+        'ok'
+      );
+      quoteByCoords(place.lat, place.lng, { precise: true, cacheKey: place.placeId || `${place.lat},${place.lng}` });
+    }).then((ac) => {
+      if (!ac && LimaGeo.disabledReason) {
+        setHint('Calculamos por distrito (sin autocompletado de dirección).', null);
+      }
+    });
+  }
+
   renderTotals(); // estado inicial
 
   // ─── Reception toggle controls apartment field visibility ──

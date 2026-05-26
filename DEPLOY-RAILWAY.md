@@ -86,6 +86,53 @@ Cuando te aprueben las credenciales:
 1. Agrega `NINETYNINE_CLIENT_ID` y `NINETYNINE_CLIENT_SECRET` a Railway Variables.
 2. Yo modifico `/api/quote.js` para cotizar con ambos y devolver el más barato.
 
+---
+
+## Google Places Autocomplete — cotización por dirección exacta
+
+Sin esta clave, el checkout cotiza usando el **centroide del distrito** (precio aproximado, el mismo en toda San Isidro por ejemplo). Con la clave, el cliente escribe su dirección, elige una sugerencia real, y Urbaner cotiza desde Calle Francia 823 hasta esa dirección puntual.
+
+**Costo real para Lima Flores:** Google da $200 USD de crédito mensual recurrente. Con ~30 pedidos/mes son ~30 sesiones de autocomplete + 30 cargas del SDK ≈ **$0**. El crédito alcanza para ~17.000 sesiones/mes — recién cobraría si crece 500x.
+
+### Paso A — Crear la API key (10 min)
+
+1. Entra a https://console.cloud.google.com/ (login con cualquier cuenta Google).
+2. Arriba a la izquierda, **Select a project → New Project**:
+   - Nombre: `lima-flores`
+   - Sin organización
+   - Click **Create**.
+3. Esperas a que se cree (~30 s), lo seleccionas.
+4. Menú lateral ☰ → **APIs & Services → Library**. Busca y **Enable** cada uno:
+   - **Maps JavaScript API**
+   - **Places API (New)**  (si solo aparece "Places API" legacy, habilítala también — el SDK usa cualquiera)
+5. ⚠️ Si te pide habilitar facturación → **Billing → Link a billing account → Create billing account**. Te pide tarjeta pero **no cobra** hasta superar los $200/mes. Google promete "no auto-charge sin permiso" — incluso si te pasaras, te avisan antes.
+6. Menú lateral ☰ → **APIs & Services → Credentials → + Create Credentials → API Key**. Te muestra la clave (algo como `AIzaSy…`). Cópiala.
+
+### Paso B — Restringir la key (CRÍTICO, hazlo ya mismo)
+
+Sin restricciones, alguien puede copiar tu key del HTML y usarla a tu costa. Esto evita ese abuso:
+
+1. En la misma pantalla, click sobre tu key recién creada → **Edit API key**.
+2. **Application restrictions → Websites**. Agrega estas URLs:
+   ```
+   https://lima-flores-production.up.railway.app/*
+   http://localhost:*/*
+   ```
+   (La segunda es para probar local. Cuando tengas dominio propio, agrégalo también.)
+3. **API restrictions → Restrict key → Select APIs**, marca solo:
+   - Maps JavaScript API
+   - Places API (New) y/o Places API
+4. **Save**.
+
+### Paso C — Pegarla en Railway
+
+1. Railway → tu servicio → **Variables → + New Variable** (uno por uno, no Raw Editor — para evitar el bug del `#`).
+2. Name: `GOOGLE_MAPS_API_KEY` · Value: `AIzaSy…` (tu key).
+3. Save → Railway redeploy automático (~30 s).
+4. Verifica: abre `https://lima-flores-production.up.railway.app/api/config` → debe responder `{"googleMapsKey":"AIzaSy…"}` (la key real).
+5. Abre `https://lima-flores-production.up.railway.app/checkout.html` → en "Calle y número" empieza a escribir "Av. Larco" — deben aparecer sugerencias bajo el campo.
+6. Elige una → el campo "Envío estimado" debe pasar de aprox. a precio exacto sin la palabra "aprox."
+
 ## Troubleshooting
 
 - **Build falla con "no engines specified":** revisa que `package.json` tenga `"engines": { "node": ">=18" }`.
