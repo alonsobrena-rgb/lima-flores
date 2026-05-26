@@ -12,6 +12,9 @@ const { URL } = require('url');
 require('./integrations/urbaner/load-env')();
 
 const quoteHandler = require('./api/quote');
+const orderHandler = require('./api/order');
+const adminHandler = require('./api/admin');
+const { checkBasicAuth } = require('./lib/basic-auth');
 
 const SITE_DIR = path.join(__dirname, 'site');
 const PORT = Number(process.env.PORT) || 3000;
@@ -50,6 +53,26 @@ const server = http.createServer(async (req, res) => {
     // El handler usa req.query y req.url, ya viene preparado.
     req.query = Object.fromEntries(parsed.searchParams.entries());
     return quoteHandler(req, res);
+  }
+
+  // ─── POST /api/order — crea pedido en BD (status: pending) ───
+  if (parsed.pathname === '/api/order') {
+    return orderHandler(req, res);
+  }
+
+  // ─── /api/admin/* — listar/despachar/cancelar (Basic Auth) ───
+  if (parsed.pathname.startsWith('/api/admin/')) {
+    return adminHandler(req, res, parsed);
+  }
+
+  // ─── /admin · /admin.html — panel del atelier (Basic Auth) ───
+  // Protegemos el HTML para que el browser popee el diálogo de credenciales
+  // y las reuse en los XHR a /api/admin/*.
+  if (parsed.pathname === '/admin' || parsed.pathname === '/admin.html') {
+    if (!checkBasicAuth(req, res)) return;
+    const adminFile = path.join(SITE_DIR, 'admin.html');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+    return fs.createReadStream(adminFile).pipe(res);
   }
 
   // ─── /api/config — keys públicas del front (Maps JS, etc.) ───

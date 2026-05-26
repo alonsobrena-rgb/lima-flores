@@ -325,8 +325,9 @@
   document.querySelectorAll('input[name="invoice"]').forEach(el => el.addEventListener('change', updateInvoice));
   updateInvoice();
 
-  // Submit
-  document.getElementById('checkout-form').addEventListener('submit', (e) => {
+  // Submit — POST a /api/order, persiste en BD como 'pending'.
+  // El despacho a Cabify lo dispara el atelier desde /admin (no automático).
+  document.getElementById('checkout-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (items.length === 0) {
       alert('Tu carrito está vacío. Agrega algo desde el catálogo.');
@@ -337,16 +338,77 @@
       const el = document.getElementById(id);
       if (!el.value.trim()) { el.focus(); el.style.borderColor = 'var(--error)'; return; }
     }
-    // Save order id
-    const orderId = 'LF-' + Date.now().toString(36).toUpperCase();
-    sessionStorage.setItem('lima-last-order', JSON.stringify({
-      id: orderId,
-      total: subtotal + currentShip.fee,
-      recipient: document.getElementById('recipient-name').value,
-      items
-    }));
-    LimaCart.items = [];
-    LimaCart.save();
-    location.href = 'confirmacion.html?id=' + orderId;
+    if (!precisePlace || precisePlace.lat == null) {
+      alert('Elige tu dirección de la lista de Google Maps para fijar el pin antes de confirmar.');
+      document.getElementById('address-street').focus();
+      return;
+    }
+
+    // Enriquecer items con precio/nombre (server confía pero queda registrado).
+    const fullItems = items.map((it) => {
+      const p = LIMA.products.find((x) => x.id === it.id);
+      return { id: it.id, qty: it.qty, name: p?.name || it.id, price: p?.price || 0 };
+    });
+
+    const payload = {
+      buyer_name:  document.getElementById('buyer-name').value.trim(),
+      buyer_email: document.getElementById('buyer-email').value.trim(),
+      buyer_phone: document.getElementById('buyer-phone').value.trim(),
+
+      recipient_name:        document.getElementById('recipient-name').value.trim(),
+      recipient_phone:       document.getElementById('recipient-phone').value.trim(),
+      recipient_address:     precisePlace.formatted || document.getElementById('address-street').value.trim(),
+      recipient_address_ref: document.getElementById('address-ref').value.trim() || null,
+      recipient_lat:         Number(precisePlace.lat),
+      recipient_lng:         Number(precisePlace.lng),
+      recipient_apt:         document.getElementById('apt-number').value.trim() || null,
+      recipient_has_reception: document.getElementById('rec-yes').checked,
+
+      delivery_date: document.getElementById('delivery-date').value,
+      delivery_time: document.getElementById('delivery-time').value,
+
+      invoice_type: document.querySelector('input[name="invoice"]:checked')?.value || 'boleta',
+      invoice_doc:  document.getElementById('invoice-doc').value.trim(),
+      invoice_name: document.getElementById('invoice-name').value.trim() || null,
+
+      payment_method: document.querySelector('input[name="payment"]:checked')?.value || 'yape',
+      card_note:      document.getElementById('note').value.trim() || null,
+
+      items: fullItems,
+      subtotal,
+      shipping_fee: Number(currentShip.fee) || 0,
+      shipping_provider: currentShip.label || null,
+      shipping_label:    currentShip.label || null,
+      total: subtotal + (Number(currentShip.fee) || 0),
+    };
+
+    const submitBtn = document.getElementById('submit-btn');
+    const origText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Enviando…';
+
+    try {
+      const r = await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+
+      sessionStorage.setItem('lima-last-order', JSON.stringify({
+        id: data.id,
+        total: payload.total,
+        recipient: payload.recipient_name,
+        items,
+      }));
+      LimaCart.items = [];
+      LimaCart.save();
+      location.href = 'confirmacion.html?id=' + encodeURIComponent(data.id);
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = origText;
+      alert('No pudimos guardar tu pedido: ' + err.message + '\n\nSi el problema persiste, escríbenos por WhatsApp.');
+    }
   });
 })();

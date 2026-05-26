@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es-PE">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Lima Flores</title>
+<meta name="theme-color" content="#F4EFE5" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/png" href="assets/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css?v=20260526-9" />
+<style>
+  body { background: #F4EFE5; color: #1a1a1a; font-family: var(--f-body); }
+  .admin-wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+  .admin-head { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom: 28px; gap: 20px; flex-wrap: wrap; }
+  .admin-title { font-family: var(--f-display); font-style: italic; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 400; line-height: 1.05; margin: 0; }
+  .admin-title em { color: var(--terra); font-style: italic; }
+  .admin-meta { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+  .admin-tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .admin-tab { padding: 12px 18px; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; border: none; background: transparent; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+  .admin-tab.is-active { color: var(--ink); border-bottom-color: var(--terra); }
+  .admin-tab:hover { color: var(--ink); }
+  .admin-empty { padding: 64px 0; text-align: center; color: var(--ink-soft); font-style: italic; font-family: var(--f-display); font-size: 1.4rem; }
+  .order-card { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 24px; margin-bottom: 16px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .order-card.is-loading { opacity: 0.55; pointer-events: none; }
+  .order-card__id { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; margin-bottom: 6px; }
+  .order-card__recipient { font-family: var(--f-display); font-style: italic; font-size: 1.6rem; color: var(--ink); margin: 0 0 14px; line-height: 1.1; }
+  .order-card__row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 4px 0; font-size: 0.92rem; line-height: 1.45; }
+  .order-card__row dt { color: var(--ink-soft); font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; padding-top: 3px; }
+  .order-card__row dd { margin: 0; color: var(--ink); }
+  .order-card__items { margin: 12px 0 0; padding: 12px 0 0; border-top: 1px dashed var(--line); }
+  .order-card__item { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem; }
+  .order-card__total { font-weight: 600; font-size: 1.05rem; padding-top: 8px; margin-top: 6px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; }
+  .order-card__side { display: flex; flex-direction: column; gap: 10px; min-width: 180px; }
+  .badge { display: inline-block; padding: 4px 10px; font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 3px; }
+  .badge-pending    { background: #fef3c7; color: #92400e; }
+  .badge-dispatched { background: #d1fae5; color: #065f46; }
+  .badge-cancelled  { background: #fee2e2; color: #991b1b; }
+  .btn-dispatch { padding: 12px 18px; background: var(--ink); color: var(--bone); border: none; border-radius: 4px; font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+  .btn-dispatch:hover { background: var(--terra); }
+  .btn-dispatch:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-cancel { padding: 10px 14px; background: transparent; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 4px; font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+  .btn-cancel:hover { color: #991b1b; border-color: #991b1b; }
+  .btn-map { padding: 8px 12px; background: transparent; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 4px; font-size: 0.78rem; cursor: pointer; text-decoration: none; text-align: center; }
+  .btn-map:hover { color: var(--ink); border-color: var(--ink); }
+  .error-bar { padding: 8px 12px; background: #fee2e2; color: #991b1b; border-radius: 4px; font-size: 0.85rem; margin-top: 8px; }
+  .status-info { padding: 10px 12px; background: #f3f4f6; color: var(--ink-soft); border-radius: 4px; font-size: 0.85rem; margin-top: 8px; line-height: 1.4; }
+  .dispatched-link { font-size: 0.85rem; color: var(--terra); text-decoration: underline; }
+  @media (max-width: 720px) {
+    .order-card { grid-template-columns: 1fr; }
+    .order-card__side { flex-direction: row; flex-wrap: wrap; }
+    .order-card__row { grid-template-columns: 100px 1fr; font-size: 0.86rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="admin-wrap">
+  <div class="admin-head">
+    <div>
+      <h1 class="admin-title">Pedidos · <em>Lima Flores</em></h1>
+      <div class="admin-meta" id="admin-meta">cargando…</div>
+    </div>
+    <a class="admin-meta" href="https://logistics.cabify.com/parcels?group=all&history=actives" target="_blank" rel="noopener">Dashboard Cabify →</a>
+  </div>
+
+  <div class="admin-tabs" role="tablist">
+    <button class="admin-tab is-active" data-status="pending"    role="tab">Pendientes</button>
+    <button class="admin-tab"            data-status="dispatched" role="tab">Despachados</button>
+    <button class="admin-tab"            data-status="cancelled"  role="tab">Cancelados</button>
+    <button class="admin-tab"            data-status="all"        role="tab">Todos</button>
+  </div>
+
+  <div id="orders-list"></div>
+</div>
+
+<script>
+(function() {
+  const listEl = document.getElementById('orders-list');
+  const metaEl = document.getElementById('admin-meta');
+  const tabs = document.querySelectorAll('.admin-tab');
+  let currentStatus = 'pending';
+
+  const formatSoles = (n) => 'S/ ' + (Number(n) || 0).toFixed(2);
+  const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const formatDate = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
+  };
+
+  async function load(status) {
+    currentStatus = status;
+    metaEl.textContent = 'cargando…';
+    listEl.innerHTML = '';
+    try {
+      const r = await fetch('/api/admin/orders?status=' + encodeURIComponent(status), { credentials: 'include' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      const orders = data.orders || [];
+      metaEl.textContent = `${orders.length} pedido${orders.length === 1 ? '' : 's'} · ${status}`;
+      if (orders.length === 0) {
+        listEl.innerHTML = `<div class="admin-empty">No hay pedidos ${status === 'all' ? 'todavía' : 'en este estado'}.</div>`;
+        return;
+      }
+      listEl.innerHTML = orders.map(renderOrder).join('');
+      bindActions();
+    } catch (e) {
+      listEl.innerHTML = `<div class="admin-empty">Error: ${escape(e.message)}</div>`;
+      metaEl.textContent = 'error';
+    }
+  }
+
+  function renderOrder(o) {
+    const items = Array.isArray(o.items) ? o.items : [];
+    const itemsHtml = items.map((it) => `
+      <div class="order-card__item">
+        <span>${escape(it.name || it.id)} × ${it.qty}</span>
+        <span>${formatSoles((Number(it.price) || 0) * (Number(it.qty) || 0))}</span>
+      </div>
+    `).join('');
+
+    const badgeClass = `badge-${o.status}`;
+    const mapsUrl = (o.recipient_lat && o.recipient_lng)
+      ? `https://www.google.com/maps?q=${o.recipient_lat},${o.recipient_lng}`
+      : '#';
+
+    const dispatchedInfo = o.status === 'dispatched' && o.cabify_order_id
+      ? `<div class="status-info">
+           <strong>Cabify ID:</strong> ${escape(o.cabify_order_id)}<br>
+           <strong>Despachado:</strong> ${formatDate(o.dispatched_at)}<br>
+           <a class="dispatched-link" href="https://logistics.cabify.com/parcels?group=all&history=actives" target="_blank" rel="noopener">Ver en Cabify →</a>
+         </div>`
+      : '';
+
+    const errorBar = o.dispatch_error
+      ? `<div class="error-bar">⚠️ Último intento: ${escape(o.dispatch_error)}</div>`
+      : '';
+
+    let actions = '';
+    if (o.status === 'pending') {
+      actions = `
+        <button class="btn-dispatch" data-action="dispatch" data-id="${escape(o.id)}">Despachar a Cabify</button>
+        <a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener">📍 Ver en mapa</a>
+        <button class="btn-cancel" data-action="cancel" data-id="${escape(o.id)}">Cancelar pedido</button>
+      `;
+    } else if (o.status === 'dispatched') {
+      actions = `<a class="btn-map" href="${mapsUrl}" target="_blank" rel="noopener">📍 Ver en mapa</a>`;
+    }
+
+    return `
+      <div class="order-card" data-order-id="${escape(o.id)}">
+        <div>
+          <div class="order-card__id">${escape(o.id)} · <span class="badge ${badgeClass}">${o.status}</span> · ${formatDate(o.created_at)}</div>
+          <h3 class="order-card__recipient">Para ${escape(o.recipient_name)}</h3>
+          <dl style="margin:0;display:grid;gap:0;">
+            <div class="order-card__row"><dt>Entrega</dt><dd>${escape(o.delivery_date)} · ${escape(o.delivery_time)} (±30 min)</dd></div>
+            <div class="order-card__row"><dt>Dirección</dt><dd>${escape(o.recipient_address)}${o.recipient_apt ? ' · Dpto ' + escape(o.recipient_apt) : ''}${o.recipient_address_ref ? ' · ' + escape(o.recipient_address_ref) : ''}</dd></div>
+            <div class="order-card__row"><dt>Recepción</dt><dd>${o.recipient_has_reception ? 'Sí hay' : 'No hay'}</dd></div>
+            <div class="order-card__row"><dt>Tel. recibe</dt><dd>${escape(o.recipient_phone)}</dd></div>
+            ${o.card_note ? `<div class="order-card__row"><dt>Tarjeta</dt><dd>"${escape(o.card_note)}"</dd></div>` : ''}
+            <div class="order-card__row"><dt>Comprador</dt><dd>${escape(o.buyer_name)} · ${escape(o.buyer_email)} · ${escape(o.buyer_phone)}</dd></div>
+            <div class="order-card__row"><dt>Comprobante</dt><dd>${escape(o.invoice_type)} · ${escape(o.invoice_doc)}${o.invoice_name ? ' · ' + escape(o.invoice_name) : ''}</dd></div>
+            <div class="order-card__row"><dt>Pago</dt><dd>${escape(o.payment_method)}</dd></div>
+          </dl>
+          <div class="order-card__items">
+            ${itemsHtml}
+            <div class="order-card__item"><span>Subtotal</span><span>${formatSoles(o.subtotal)}</span></div>
+            <div class="order-card__item"><span>Envío estimado</span><span>${formatSoles(o.shipping_fee)}</span></div>
+            <div class="order-card__total"><span>Total</span><span>${formatSoles(o.total)}</span></div>
+          </div>
+          ${errorBar}
+          ${dispatchedInfo}
+        </div>
+        <div class="order-card__side">${actions}</div>
+      </div>
+    `;
+  }
+
+  function bindActions() {
+    listEl.querySelectorAll('[data-action="dispatch"]').forEach((btn) => {
+      btn.addEventListener('click', () => dispatchOrder(btn.dataset.id, btn));
+    });
+    listEl.querySelectorAll('[data-action="cancel"]').forEach((btn) => {
+      btn.addEventListener('click', () => cancelOrder(btn.dataset.id, btn));
+    });
+  }
+
+  async function dispatchOrder(id, btn) {
+    if (!confirm(`¿Despachar pedido ${id} a Cabify?\n\nEsto creará la orden REAL en Cabify y se asignará un driver.`)) return;
+    const card = btn.closest('.order-card');
+    card.classList.add('is-loading');
+    btn.textContent = 'Despachando…';
+    try {
+      const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}/dispatch`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+      alert(`Despachado.\n\nCabify ID: ${data.cabify_order_id || '(sin id)'}\n\nMonitorea en el dashboard de Cabify.`);
+      load(currentStatus);
+    } catch (e) {
+      alert('Error al despachar: ' + e.message);
+      card.classList.remove('is-loading');
+      btn.textContent = 'Despachar a Cabify';
+    }
+  }
+
+  async function cancelOrder(id, btn) {
+    if (!confirm(`¿Cancelar pedido ${id}? Esta acción no se puede deshacer.`)) return;
+    try {
+      const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}/cancel`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+      load(currentStatus);
+    } catch (e) {
+      alert('Error al cancelar: ' + e.message);
+    }
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      load(tab.dataset.status);
+    });
+  });
+
+  load('pending');
+  // Auto-refresh cada 30s mientras la pestaña esté visible.
+  setInterval(() => { if (!document.hidden) load(currentStatus); }, 30000);
+})();
+</script>
+</body>
+</html>

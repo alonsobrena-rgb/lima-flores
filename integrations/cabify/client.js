@@ -90,4 +90,38 @@ function estimate({ shippingTypeId, pickup, dropoff, dimensions, weight, pickupT
   return api('/v3/parcels/estimate', { method: 'POST', body });
 }
 
-module.exports = { ENV, base, getToken, shippingTypes, estimate, api };
+// POST /v3/parcels — crea el envío real (asigna driver, factura).
+// Diferencia con estimate: trae contact info de pickup/dropoff y external_id real.
+// Devuelve el parcel creado con su id en Cabify y tracking_url.
+function createParcel({
+  shippingTypeId,
+  externalId,
+  pickup,            // { location:{lat,lon}, contact:{name,phone}, address?, instructions? }
+  dropoff,           // idem
+  dimensions,        // { height, length, width, unit:'cm' }
+  weight,            // { value, unit:'g' }
+  pickupTime,        // RFC3339 opcional
+  description,       // texto libre que ve el driver
+}) {
+  const parcel = {
+    external_id: externalId,
+    pickup_location: pickup.location,
+    dropoff_location: dropoff.location,
+  };
+  if (pickup.contact)      parcel.pickup_contact = pickup.contact;
+  if (dropoff.contact)     parcel.dropoff_contact = dropoff.contact;
+  if (pickup.address)      parcel.pickup_address = pickup.address;
+  if (dropoff.address)     parcel.dropoff_address = dropoff.address;
+  if (pickup.instructions) parcel.pickup_instructions = pickup.instructions;
+  if (dropoff.instructions) parcel.dropoff_instructions = dropoff.instructions;
+  if (dimensions)          parcel.dimensions = dimensions;
+  if (weight)              parcel.weight = weight;
+  if (description)         parcel.description = description;
+
+  const body = { shipping_type_id: shippingTypeId, parcels: [parcel] };
+  if (pickupTime) body.pickup_time = pickupTime;
+
+  return api('/v3/parcels', { method: 'POST', body });
+}
+
+module.exports = { ENV, base, getToken, shippingTypes, estimate, createParcel, api };
