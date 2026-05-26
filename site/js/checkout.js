@@ -95,6 +95,7 @@
   //      puede variar ±S/2-3 según dónde quede la dirección real).
   // Si subtotal ≥ S/200 → envío gratis (lo absorbe Lima Flores).
   const shipLabel = document.getElementById('summary-shipping');
+  const shipNote = document.getElementById('summary-shipping-note');
   const totalLabel = document.getElementById('summary-total');
   const addressHint = document.getElementById('address-hint');
   const FREE_THRESHOLD = 200;
@@ -119,11 +120,27 @@
       label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}${detail ? ' · ' + detail : ''}${precise ? '' : ' · aprox.'}`,
     };
     renderTotals();
+
+    // Nota explicativa: cuando Urbaner cobra la tarifa mínima de auto para
+    // entregas cortas (típicamente intra-distrito o adyacentes), el precio
+    // sale más alto que para destinos más lejanos. Es una rareza de cómo
+    // Urbaner monetiza su servicio auto, no un error nuestro. Se la
+    // explicamos al cliente para que no piense que es un bug.
+    if (shipNote) {
+      const isMinFareSmallTrip = Number(price) >= 15 && distance_m != null && distance_m < 3500;
+      if (isMinFareSmallTrip) {
+        shipNote.textContent = 'Tarifa mínima del courier para entregas cercanas en auto. En distritos más lejanos el costo puede ser menor por la ruta amortizada.';
+        shipNote.hidden = false;
+      } else {
+        shipNote.hidden = true;
+      }
+    }
   };
 
   const setShipManual = (label) => {
     currentShip = { fee: 0, label };
     renderTotals();
+    if (shipNote) shipNote.hidden = true;
   };
 
   const setHint = (text, kind) => {
