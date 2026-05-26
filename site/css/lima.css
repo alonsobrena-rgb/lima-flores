@@ -2030,32 +2030,35 @@ p { color: var(--ink); }
 }
 
 /* ─── Tarjeta verde oscuro: datos de quien recibe ─── */
+/* IMPORTANTE: sin overflow:hidden — clipea el dropdown de Google Places */
 .recipient-card {
   background: var(--moss-deep);
   color: var(--bone);
-  padding: 40px 36px;
-  border-radius: 6px;
-  margin: 28px 0 36px;
+  padding: 44px 38px 40px;
+  border-radius: 8px;
+  margin: 36px 0 40px;
   position: relative;
-  box-shadow: 0 16px 40px rgba(47, 57, 37, 0.20);
-  overflow: hidden;
+  box-shadow: 0 24px 56px -16px rgba(47, 57, 37, 0.45),
+              0 2px 6px rgba(47, 57, 37, 0.18);
+  border: 1px solid rgba(244, 239, 229, 0.08);
 }
 .recipient-card::before {
   content: '';
   position: absolute;
-  top: 0; right: 0;
-  width: 220px; height: 220px;
-  background: radial-gradient(circle at top right, rgba(244,239,229,0.08), transparent 65%);
+  top: 0; left: 0; right: 0; height: 5px;
+  background: linear-gradient(90deg, var(--terra) 0%, var(--moss-soft) 100%);
+  border-radius: 8px 8px 0 0;
   pointer-events: none;
 }
 .recipient-card::after {
   content: '';
   position: absolute;
-  left: 0; top: 50%;
-  width: 4px; height: 60px;
-  background: var(--bone);
-  transform: translateY(-50%);
-  opacity: 0.4;
+  top: 22px; right: 28px;
+  width: 14px; height: 14px;
+  background: var(--terra);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(182, 133, 94, 0.18);
+  pointer-events: none;
 }
 
 .recipient-card__header {
