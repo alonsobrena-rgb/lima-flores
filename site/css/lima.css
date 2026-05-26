@@ -2065,111 +2065,141 @@ p { color: var(--ink); }
   display: flex;
   gap: 18px;
   align-items: flex-start;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid rgba(244, 239, 229, 0.18);
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(244, 239, 229, 0.22);
   position: relative;
 }
 .recipient-card__badge {
   font-family: var(--f-display);
   font-style: italic;
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  background: rgba(244, 239, 229, 0.12);
-  border: 1px solid rgba(244, 239, 229, 0.34);
-  padding: 8px 16px;
+  background: rgba(244, 239, 229, 0.16);
+  border: 1px solid rgba(244, 239, 229, 0.42);
+  padding: 9px 16px;
   border-radius: 2px;
   color: var(--bone);
   flex-shrink: 0;
-  margin-top: 6px;
+  margin-top: 8px;
   white-space: nowrap;
+  font-weight: 500;
 }
 .recipient-card__heading-wrap { flex: 1; min-width: 0; }
 .recipient-card__title {
   font-family: var(--f-display);
   font-style: italic;
-  font-size: 2rem;
+  font-size: 2.1rem;
   color: var(--bone);
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   line-height: 1.1;
   font-weight: 400;
 }
 .recipient-card__subtitle {
   font-size: 0.9375rem;
-  color: rgba(244, 239, 229, 0.82);
+  color: rgba(244, 239, 229, 0.92);
   margin: 0;
-  line-height: 1.55;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
+/* Cada sub-sección (Dónde / A quién) en flex column con gap consistente */
 .recipient-card__section {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px dashed rgba(244, 239, 229, 0.16);
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px dashed rgba(244, 239, 229, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 .recipient-card__section:first-of-type {
   margin-top: 0;
   padding-top: 0;
   border-top: 0;
 }
+/* Sub-heading con acento naranja a la izquierda */
 .recipient-card__heading {
   font-family: var(--f-display);
   font-style: italic;
-  font-size: 1.15rem;
-  color: rgba(244, 239, 229, 0.92);
-  margin: 0 0 22px;
+  font-size: 1.25rem;
+  color: var(--bone);
+  margin: 0 0 4px;
   letter-spacing: 0.01em;
-  font-weight: 400;
+  font-weight: 500;
+  position: relative;
+  padding-left: 16px;
+}
+.recipient-card__heading::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 16px;
+  background: var(--terra);
+  border-radius: 2px;
 }
 
 .recipient-card__pin-note {
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  background: rgba(244, 239, 229, 0.09);
-  border-left: 2px solid var(--bone);
-  padding: 14px 16px;
-  margin: 12px 0 6px;
+  background: rgba(244, 239, 229, 0.10);
+  border-left: 3px solid var(--terra);
+  padding: 16px 18px;
+  margin: 0;
   font-size: 0.8125rem;
-  line-height: 1.55;
-  color: rgba(244, 239, 229, 0.92);
+  line-height: 1.6;
+  color: var(--bone);
   border-radius: 0 3px 3px 0;
 }
 .recipient-card__pin-note[hidden] { display: none; }
 .recipient-card__pin-icon {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   line-height: 1;
   margin-top: 1px;
+  flex-shrink: 0;
 }
 .recipient-card__pin-note strong {
   display: block;
   color: var(--bone);
   font-weight: 500;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   font-family: var(--f-display);
   font-style: italic;
-  font-size: 0.9375rem;
+  font-size: 1rem;
 }
 
-/* Inputs sobre fondo oscuro */
+/* ─── INPUTS sobre fondo verde — bordes visibles y bien contrastados ─── */
+.recipient-card .field {
+  margin: 0;
+}
 .recipient-card .field input,
 .recipient-card .field textarea,
 .recipient-card .field select {
-  background: rgba(244, 239, 229, 0.07);
+  background: rgba(244, 239, 229, 0.12);
   color: var(--bone);
-  border-bottom: 1px solid rgba(244, 239, 229, 0.34);
-  padding: 16px 14px 12px;
+  border: 1px solid rgba(244, 239, 229, 0.32);
+  border-bottom: 1px solid rgba(244, 239, 229, 0.32);
+  border-radius: 4px;
+  padding: 20px 16px 12px;
+  font-size: 15px;
+  font-weight: 400;
   transition: background 160ms, border-color 160ms;
 }
 .recipient-card .field input:focus,
 .recipient-card .field textarea:focus,
 .recipient-card .field select:focus {
-  border-bottom-color: var(--bone);
-  background: rgba(244, 239, 229, 0.13);
+  border-color: var(--bone);
+  background: rgba(244, 239, 229, 0.20);
   outline: 0;
 }
 .recipient-card .field label {
-  color: rgba(244, 239, 229, 0.62);
+  color: rgba(244, 239, 229, 0.78);
+  left: 16px;
+  font-size: 14px;
 }
 .recipient-card .field input:focus + label,
 .recipient-card .field input:not(:placeholder-shown) + label,
@@ -2178,70 +2208,111 @@ p { color: var(--ink); }
 .recipient-card .field select:focus + label,
 .recipient-card .field label.has-value {
   color: var(--bone);
+  font-size: 11px;
+  top: 6px;
 }
 .recipient-card .field-hint {
-  color: rgba(244, 239, 229, 0.66);
+  color: rgba(244, 239, 229, 0.82);
+  font-size: 0.8125rem;
+  margin: 8px 4px 0;
+  line-height: 1.5;
 }
-.recipient-card .field-hint.is-ok { color: rgba(213, 230, 200, 0.95); }
+.recipient-card .field-hint.is-ok { color: #c7e4b6; }
 .recipient-card .field-hint.is-error { color: #ffb4b4; }
 
-/* Notas sobre fondo verde */
+/* Notas (importante) sobre verde */
 .recipient-card .field-note {
-  background: rgba(244, 239, 229, 0.08);
-  border-left: 2px solid var(--bone);
-  color: rgba(244, 239, 229, 0.86);
+  background: rgba(244, 239, 229, 0.10);
+  border-left: 3px solid var(--bone);
+  color: var(--bone);
+  padding: 16px 18px;
+  font-size: 0.8125rem;
+  line-height: 1.6;
 }
-.recipient-card .field-note strong { color: var(--bone); }
+.recipient-card .field-note strong {
+  color: var(--bone);
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  display: block;
+}
 
 /* Recepción sí/no sobre verde */
 .recipient-card .field-row-inline {
-  color: rgba(244, 239, 229, 0.88);
-  border-top: 1px dashed rgba(244, 239, 229, 0.16);
-  padding-top: 14px;
+  color: var(--bone);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px dashed rgba(244, 239, 229, 0.22);
+  padding-top: 18px;
+  margin-top: 0;
+  font-size: 0.9375rem;
 }
 .recipient-card .segmented {
-  background: rgba(244, 239, 229, 0.08);
-  border: 1px solid rgba(244, 239, 229, 0.22);
+  background: rgba(244, 239, 229, 0.10);
+  border: 1px solid rgba(244, 239, 229, 0.28);
+  border-radius: 999px;
+  padding: 3px;
 }
 .recipient-card .segmented label {
-  color: rgba(244, 239, 229, 0.78);
+  color: rgba(244, 239, 229, 0.86);
+  padding: 6px 18px;
 }
 .recipient-card .segmented input:checked + label {
   background: var(--bone);
   color: var(--moss-deep);
+  font-weight: 500;
 }
 
-/* Input date / select sobre verde — flecha y picker visible */
+/* Input date / select sobre verde — picker / chevron visible en bone */
 .recipient-card .field input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1) opacity(0.7);
+  filter: invert(1) opacity(0.85);
   cursor: pointer;
 }
 .recipient-card .field select {
-  background-image: linear-gradient(45deg, transparent 50%, rgba(244, 239, 229, 0.7) 50%),
-                    linear-gradient(135deg, rgba(244, 239, 229, 0.7) 50%, transparent 50%);
+  background-image: linear-gradient(45deg, transparent 50%, rgba(244, 239, 229, 0.85) 50%),
+                    linear-gradient(135deg, rgba(244, 239, 229, 0.85) 50%, transparent 50%);
   background-position: calc(100% - 18px) calc(50% + 2px), calc(100% - 13px) calc(50% + 2px);
-  background-size: 5px 5px, 5px 5px;
+  background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
-  padding-right: 32px;
+  padding-right: 36px;
 }
 
-/* Móvil — la tarjeta se acerca a los bordes para aprovechar pantalla */
+/* Field-grid: gap consistente con el resto */
+.recipient-card .field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* Apartment field (visible solo cuando hay recepción) */
+.recipient-card #apt-field-wrap[style*="display: none"] { display: none !important; }
+
+/* Móvil */
 @media (max-width: 768px) {
   .recipient-card {
-    padding: 26px 20px;
-    margin: 22px -6px 28px;
-    border-radius: 4px;
+    padding: 30px 22px 28px;
+    margin: 24px -8px 30px;
+    border-radius: 6px;
   }
-  .recipient-card::before { width: 120px; height: 120px; }
+  .recipient-card::after { top: 14px; right: 18px; }
   .recipient-card__header {
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 18px;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 22px;
   }
-  .recipient-card__title { font-size: 1.55rem; }
-  .recipient-card__badge { margin-top: 0; }
-  .recipient-card__section { margin-top: 26px; padding-top: 20px; }
+  .recipient-card__title { font-size: 1.6rem; }
+  .recipient-card__subtitle { font-size: 0.9rem; }
+  .recipient-card__badge { margin-top: 0; align-self: flex-start; }
+  .recipient-card__section { margin-top: 28px; padding-top: 22px; gap: 18px; }
+  .recipient-card__heading { font-size: 1.1rem; }
+  .recipient-card .field-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
   .address-map { height: 220px; }
   .address-map__toggle {
     padding: 8px 12px;
