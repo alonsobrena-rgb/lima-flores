@@ -27,8 +27,8 @@
   document.getElementById('summary-subtotal').textContent = formatSoles(subtotal);
 
   // ─── Fecha + hora objetivo (mín. +24 h, slots cada 30 min, ventana ±30) ──
-  const ATELIER_OPEN = 9;     // 9:00
-  const ATELIER_CLOSE = 19;   // 19:00 (último slot 18:30)
+  const ATELIER_OPEN = 8;     // 8:00
+  const ATELIER_CLOSE = 21;   // 21:00 (último slot 20:30)
   const SLOT_MIN = 30;
   const LEAD_MS = 24 * 60 * 60 * 1000;
   const PAD = (n) => String(n).padStart(2, '0');
