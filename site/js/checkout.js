@@ -90,12 +90,10 @@
   // El cliente busca su dirección con Google Places. Al elegir una sugerencia
   // tenemos lat/lng exactos. La cotización va contra esas coords. Si Google
   // Maps no carga, mostramos "Coordinamos por WhatsApp".
-  // Si subtotal ≥ S/200 → envío gratis (lo absorbe Lima Flores).
   const shipLabel = document.getElementById('summary-shipping');
   const shipNote = document.getElementById('summary-shipping-note');
   const totalLabel = document.getElementById('summary-total');
   const addressHint = document.getElementById('address-hint');
-  const FREE_THRESHOLD = 200;
   const quoteCache = Object.create(null);
   let currentShip = { fee: 0, label: '— por calcular' };
   let precisePlace = null; // { lat, lng, district, formatted } cuando hay autocomplete
@@ -148,7 +146,6 @@
 
   async function quoteByCoords(lat, lng, { precise = false, cacheKey = null } = {}) {
     if (subtotal === 0) { setShipManual('— agrega un arreglo'); return; }
-    if (subtotal >= FREE_THRESHOLD) { setShipManual('Gratis · supera S/ 200'); return; }
     const key = cacheKey || `${lat},${lng}`;
     if (quoteCache[key]) { setShipFromQuote(quoteCache[key], precise); return; }
 
