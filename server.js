@@ -52,20 +52,6 @@ const server = http.createServer(async (req, res) => {
     return quoteHandler(req, res);
   }
 
-  // ─── /api/diag (temporal, debug de env vars) ───
-  // No expone credenciales — solo confirma si llegaron al runtime.
-  if (parsed.pathname === '/api/diag') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({
-      URBANER_ENV: process.env.URBANER_ENV || '(no seteada → default sandbox)',
-      has_URBANER_EMAIL: !!process.env.URBANER_EMAIL,
-      email_prefix: (process.env.URBANER_EMAIL || '').slice(0, 5) + '…',
-      has_URBANER_PASSWORD: !!process.env.URBANER_PASSWORD,
-      password_length: (process.env.URBANER_PASSWORD || '').length,
-      node_version: process.version,
-    }, null, 2));
-  }
-
   // ─── Estáticos desde site/ ───
   let pathname = decodeURIComponent(parsed.pathname);
   if (pathname.endsWith('/')) pathname += 'index.html';
