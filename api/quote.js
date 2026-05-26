@@ -51,49 +51,66 @@ async function quoteCabify(lat, lng) {
   const shippingTypeId = chosen.id || chosen.shipping_type_id;
   if (!shippingTypeId) throw new Error('Cabify: el shipping_type elegido no tiene id');
 
-  // 3. Cotiza.
+  // 3. Cotiza con dimensiones "arreglo grande" — fuerza a Cabify a asignar AUTO.
+  // (Confirmado empíricamente: 30x40x30/3kg → moped, 60x50x50/8kg → car.)
+  // Sobrescribibles con env vars LF_PARCEL_* si necesitas ajustar el default.
   const est = await cabifyEstimate({
     shippingTypeId,
     pickup: { lat: PICKUP_LAT, lon: PICKUP_LON },
     dropoff: { lat: Number(lat), lon: Number(lng) },
-    dimensions: { height: 30, length: 40, width: 30 }, // cm — paquete de flor promedio
-    weight: { value: 3000 },                           // gramos — ramo mediano
+    dimensions: {
+      height: Number(process.env.LF_PARCEL_HEIGHT_CM || 60),
+      length: Number(process.env.LF_PARCEL_LENGTH_CM || 50),
+      width:  Number(process.env.LF_PARCEL_WIDTH_CM  || 50),
+      unit: 'cm',
+    },
+    weight: {
+      value: Number(process.env.LF_PARCEL_WEIGHT_G || 8000),
+      unit: 'g',
+    },
   });
 
-  // 4. Parseo defensivo: la doc no fija un solo shape, probamos varios paths.
-  const parcels = Array.isArray(est?.parcels) ? est.parcels : [];
-  const p0 = parcels[0] || est?.parcel || est;
+  // 4. Parsear la respuesta. Shape real (confirmada empíricamente):
+  //    { deliveries: [{ estimation: { asset_kind, price:{amount,currency}, eta_to_pickup, eta_to_delivery } }] }
+  const estimation = est?.deliveries?.[0]?.estimation;
+  if (!estimation) throw new Error('Cabify: respuesta sin deliveries[0].estimation');
 
-  let priceNum = null, currency = 'PEN';
-  const priceCandidates = [
-    p0?.estimated_price, p0?.price, p0?.fare, p0?.cost, p0?.amount,
-    est?.estimated_price, est?.price, est?.fare,
-  ];
-  for (const c of priceCandidates) {
-    if (c == null) continue;
-    if (typeof c === 'number') { priceNum = c; break; }
-    if (typeof c === 'object') {
-      if (typeof c.value === 'number') { priceNum = c.value; currency = c.currency || currency; break; }
-      if (typeof c.amount === 'number') { priceNum = c.amount; currency = c.currency || currency; break; }
-      if (typeof c.total === 'number') { priceNum = c.total; currency = c.currency || currency; break; }
+  const amount = estimation.price?.amount;
+  if (typeof amount !== 'number') throw new Error('Cabify: respuesta sin price.amount numérico');
+
+  // Cabify devuelve el precio en céntimos para PEN.
+  const priceSoles = amount / 100;
+  const currency = estimation.price?.currency || 'PEN';
+
+  // No devuelven distance/duration directos, pero sí ETAs (RFC3339).
+  // Duración del trip = eta_to_delivery - eta_to_pickup (aproximación).
+  let duration_s = null;
+  try {
+    const tPickup = new Date(estimation.eta_to_pickup).getTime();
+    const tDeliver = new Date(estimation.eta_to_delivery).getTime();
+    if (tPickup && tDeliver && tDeliver > tPickup) {
+      duration_s = Math.round((tDeliver - tPickup) / 1000);
     }
-  }
-  if (priceNum == null) throw new Error(`Cabify: no encontré precio en la respuesta — keys: ${Object.keys(est || {}).join(',')}`);
+  } catch { /* ignore */ }
 
-  // Algunas APIs devuelven en céntimos (1850 = S/18.50). Heurística: si > 200 y la
-  // moneda es PEN, probablemente está en céntimos. Esto se puede afinar al testear.
-  if (priceNum > 200 && (currency === 'PEN' || currency === 'PE')) priceNum = priceNum / 100;
-
-  const distance = p0?.distance ?? p0?.distance_m ?? est?.distance ?? null;
-  const duration = p0?.duration ?? p0?.duration_s ?? est?.duration ?? null;
+  // Map asset_kind → display name español
+  const assetKindLabel = {
+    car: 'AUTO',
+    moped: 'MOTO',
+    motorcycle: 'MOTO',
+    van: 'VAN',
+    truck: 'CAMIÓN',
+    bicycle: 'BICI',
+  }[estimation.asset_kind] || (estimation.asset_kind || 'CABIFY').toUpperCase();
 
   return {
-    price: priceNum,
+    price: priceSoles,
     currency,
-    order_type: chosen.name || 'AUTO',
-    distance_m: typeof distance === 'number' ? distance : null,
-    duration_s: typeof duration === 'number' ? duration : null,
+    order_type: assetKindLabel,
+    distance_m: null, // Cabify no lo expone en el estimate
+    duration_s,
     provider: 'cabify',
+    asset_kind: estimation.asset_kind || null,
   };
 }
 

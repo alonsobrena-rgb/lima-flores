@@ -108,28 +108,27 @@
     totalLabel.textContent = formatSoles(subtotal + currentShip.fee);
   };
 
-  const setShipFromQuote = ({ price, order_type, distance_m, duration_s }, precise) => {
-    // Detalle de distancia/duración para que el cliente vea que la cotización
-    // se hizo desde el atelier hasta su dirección puntual (incluso si el precio
-    // cae en la misma zona tarifaria que otra dirección).
+  const setShipFromQuote = ({ price, order_type, distance_m, duration_s, provider, asset_kind }, precise) => {
     const km  = distance_m != null ? `${(distance_m / 1000).toFixed(1)} km` : null;
     const min = duration_s != null ? `${Math.round(duration_s / 60)} min` : null;
     const detail = [km, min].filter(Boolean).join(' · ');
+    // Etiqueta del courier. Si es Cabify, mostramos "Cabify · AUTO". Si es
+    // Urbaner (fallback), mostramos "Urbaner NEXTDAY".
+    const courierLabel = provider === 'cabify'
+      ? `Cabify · ${order_type || 'AUTO'}`
+      : `Urbaner ${order_type || 'NEXTDAY'}`;
     currentShip = {
       fee: Number(price),
-      label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}${detail ? ' · ' + detail : ''}${precise ? '' : ' · aprox.'}`,
+      label: `${formatSoles(price)} · ${courierLabel}${detail ? ' · ' + detail : ''}${precise ? '' : ' · aprox.'}`,
     };
     renderTotals();
 
-    // Nota explicativa: cuando Urbaner cobra la tarifa mínima de auto para
-    // entregas cortas (típicamente intra-distrito o adyacentes), el precio
-    // sale más alto que para destinos más lejanos. Es una rareza de cómo
-    // Urbaner monetiza su servicio auto, no un error nuestro. Se la
-    // explicamos al cliente para que no piense que es un bug.
+    // Nota condicional. Con Cabify ya no aplica la rareza de "tarifa mínima
+    // local" de Urbaner, así que solo la mostramos si el fallback se disparó.
     if (shipNote) {
-      const isMinFareSmallTrip = Number(price) >= 15 && distance_m != null && distance_m < 3500;
-      if (isMinFareSmallTrip) {
-        shipNote.textContent = 'Tarifa mínima del courier para entregas cercanas en auto. En distritos más lejanos el costo puede ser menor por la ruta amortizada.';
+      const isUrbanerMinFare = provider === 'urbaner' && Number(price) >= 15 && distance_m != null && distance_m < 3500;
+      if (isUrbanerMinFare) {
+        shipNote.textContent = 'Tarifa mínima del courier para entregas cercanas. Cabify no estuvo disponible en este momento; usamos Urbaner como respaldo.';
         shipNote.hidden = false;
       } else {
         shipNote.hidden = true;
