@@ -11,29 +11,78 @@
   let _sdkPromise = null;
   let _disabledReason = null;
 
+  // Debug panel visible si ?debug=1 en la URL — útil para móvil sin DevTools
+  const debugOn = /[?&]debug=1/.test(global.location?.search || '');
+  let _dbgEl = null;
+  function dbg(msg) {
+    if (!debugOn) return;
+    if (!_dbgEl) {
+      _dbgEl = document.createElement('div');
+      _dbgEl.style.cssText = 'position:fixed;top:0;left:0;right:0;background:rgba(0,0,0,0.88);color:#7fff7f;font:11px/1.4 ui-monospace,monospace;padding:10px 12px;z-index:9999999;max-height:50vh;overflow-y:auto;white-space:pre-wrap;border-bottom:2px solid #7fff7f';
+      _dbgEl.innerHTML = '<b style="color:#fff">[debug] LimaGeo</b><br>';
+      (document.body || document.documentElement).appendChild(_dbgEl);
+    }
+    const t = new Date().toISOString().slice(11, 19);
+    _dbgEl.innerHTML += `${t}  ${msg}<br>`;
+    _dbgEl.scrollTop = _dbgEl.scrollHeight;
+    try { console.log('[LimaGeo]', msg); } catch {}
+  }
+  // Lo expongo para que checkout.js también lo use
+  global._LFDebug = { on: debugOn, log: dbg };
+
   // Lima Metropolitana bounding box (incluye Callao y balnearios sur).
   const LIMA_BOUNDS = { sw: { lat: -12.50, lng: -77.25 }, ne: { lat: -11.75, lng: -76.65 } };
 
   function loadConfig() {
+    dbg('fetch /api/config…');
     return fetch('/api/config', { headers: { Accept: 'application/json' } })
-      .then((r) => r.ok ? r.json() : { googleMapsKey: '' })
-      .catch(() => ({ googleMapsKey: '' }));
+      .then((r) => {
+        dbg('/api/config → HTTP ' + r.status);
+        return r.ok ? r.json() : { googleMapsKey: '' };
+      })
+      .then((cfg) => {
+        dbg('config: googleMapsKey ' + (cfg.googleMapsKey ? 'present (len=' + cfg.googleMapsKey.length + ')' : 'MISSING'));
+        return cfg;
+      })
+      .catch((e) => {
+        dbg('config fetch failed: ' + e.message);
+        return { googleMapsKey: '' };
+      });
   }
 
   function loadSDK(apiKey) {
     if (window.google && window.google.maps && window.google.maps.places) {
+      dbg('SDK ya cargado');
       return Promise.resolve(window.google);
     }
     if (_sdkPromise) return _sdkPromise;
     _sdkPromise = new Promise((resolve, reject) => {
       const cbName = '_gmaps_loaded_' + Date.now().toString(36);
-      window[cbName] = function () { delete window[cbName]; resolve(window.google); };
+      window[cbName] = function () {
+        dbg('SDK callback OK — google.maps.places=' + !!(window.google?.maps?.places));
+        delete window[cbName];
+        resolve(window.google);
+      };
       const s = document.createElement('script');
       s.src = 'https://maps.googleapis.com/maps/api/js'
             + '?key=' + encodeURIComponent(apiKey)
             + '&libraries=places&v=weekly&loading=async&callback=' + cbName;
       s.async = true; s.defer = true;
-      s.onerror = () => reject(new Error('No se pudo cargar el SDK de Google Maps'));
+      s.onerror = (e) => {
+        dbg('SDK script onerror — probable: API key rechazada / red / referer');
+        reject(new Error('No se pudo cargar el SDK de Google Maps'));
+      };
+      // Captura errores que Google logguea silenciosamente (deprecation warnings, billing, etc.)
+      const origErr = window.console?.error;
+      if (origErr && !window._lfErrPatched) {
+        window._lfErrPatched = true;
+        window.console.error = function (...args) {
+          const msg = args.map(a => typeof a === 'string' ? a : (a?.message || JSON.stringify(a).slice(0, 200))).join(' ');
+          if (/google|maps|places|api|billing|referer/i.test(msg)) dbg('console.error: ' + msg.slice(0, 300));
+          return origErr.apply(this, args);
+        };
+      }
+      dbg('inyectando script Maps SDK…');
       document.head.appendChild(s);
     });
     return _sdkPromise;
@@ -69,17 +118,19 @@
   // Devuelve una Promise que resuelve cuando el SDK está listo (o se descarta).
   async function attach(inputEl, onPlace) {
     if (!inputEl) return;
+    dbg('attach() inputEl OK, mobile=' + (window.innerWidth <= 768));
     const cfg = await loadConfig();
     if (!cfg.googleMapsKey) {
       _disabledReason = 'no-key';
-      console.info('[geocoder] sin GOOGLE_MAPS_API_KEY — autocomplete desactivado (fallback al centroide del distrito).');
+      dbg('SIN KEY → autocomplete desactivado');
       return;
     }
 
     let google;
     try { google = await loadSDK(cfg.googleMapsKey); }
-    catch (e) { _disabledReason = 'sdk-fail'; console.warn('[geocoder]', e.message); return; }
+    catch (e) { _disabledReason = 'sdk-fail'; dbg('SDK FAIL: ' + e.message); return; }
 
+    dbg('creando Autocomplete widget…');
     const ac = new google.maps.places.Autocomplete(inputEl, {
       componentRestrictions: { country: 'pe' },
       fields: ['geometry', 'formatted_address', 'address_components', 'place_id'],
@@ -87,8 +138,10 @@
       bounds: new google.maps.LatLngBounds(LIMA_BOUNDS.sw, LIMA_BOUNDS.ne),
       strictBounds: false,
     });
+    dbg('Autocomplete listo. Tipea para ver sugerencias.');
 
     ac.addListener('place_changed', () => {
+      dbg('place_changed disparado');
       const place = ac.getPlace();
       if (!place || !place.geometry || !place.geometry.location) {
         // El usuario apretó Enter sin elegir sugerencia → ignoramos; el fallback de distrito sigue activo.
