@@ -26,12 +26,64 @@
   }
   document.getElementById('summary-subtotal').textContent = formatSoles(subtotal);
 
-  // Set min date (today)
+  // ─── Fecha + hora objetivo (mín. +24 h, slots cada 30 min, ventana ±30) ──
+  const ATELIER_OPEN = 9;     // 9:00
+  const ATELIER_CLOSE = 19;   // 19:00 (último slot 18:30)
+  const SLOT_MIN = 30;
+  const LEAD_MS = 24 * 60 * 60 * 1000;
+  const PAD = (n) => String(n).padStart(2, '0');
+  const localISODate = (d) => `${d.getFullYear()}-${PAD(d.getMonth() + 1)}-${PAD(d.getDate())}`;
+  const earliestDate = () => localISODate(new Date(Date.now() + LEAD_MS));
+
   const dateInput = document.getElementById('delivery-date');
-  if (dateInput) {
-    const d = new Date();
-    dateInput.min = d.toISOString().slice(0, 10);
-    dateInput.value = dateInput.min;
+  const timeSelect = document.getElementById('delivery-time');
+  const previewBox = document.getElementById('delivery-window-preview');
+  const wFrom = document.getElementById('window-from');
+  const wTo = document.getElementById('window-to');
+
+  if (dateInput && timeSelect) {
+    const minDate = earliestDate();
+    dateInput.min = minDate;
+    if (!dateInput.value || dateInput.value < minDate) dateInput.value = minDate;
+
+    const populateSlots = (depth = 0) => {
+      timeSelect.innerHTML = '<option value="" selected>—</option>';
+      const dateStr = dateInput.value;
+      if (!dateStr || depth > 7) return;
+      const now = Date.now();
+      for (let h = ATELIER_OPEN; h < ATELIER_CLOSE; h++) {
+        for (let m = 0; m < 60; m += SLOT_MIN) {
+          const t = new Date(`${dateStr}T${PAD(h)}:${PAD(m)}:00`);
+          if (t.getTime() - now < LEAD_MS) continue;
+          const opt = document.createElement('option');
+          opt.value = `${PAD(h)}:${PAD(m)}`;
+          opt.textContent = `${PAD(h)}:${PAD(m)}`;
+          timeSelect.appendChild(opt);
+        }
+      }
+      // Si no hubo slots válidos hoy → avanzar al día siguiente
+      if (timeSelect.children.length === 1) {
+        const next = new Date(`${dateStr}T00:00:00`);
+        next.setDate(next.getDate() + 1);
+        dateInput.value = localISODate(next);
+        populateSlots(depth + 1);
+      }
+    };
+
+    const updatePreview = () => {
+      if (!timeSelect.value || !dateInput.value) { previewBox.style.display = 'none'; return; }
+      const [hh, mm] = timeSelect.value.split(':').map(Number);
+      const center = new Date(`${dateInput.value}T${PAD(hh)}:${PAD(mm)}:00`);
+      const from = new Date(center.getTime() - 30 * 60000);
+      const to   = new Date(center.getTime() + 30 * 60000);
+      wFrom.textContent = `${PAD(from.getHours())}:${PAD(from.getMinutes())}`;
+      wTo.textContent   = `${PAD(to.getHours())}:${PAD(to.getMinutes())}`;
+      previewBox.style.display = '';
+    };
+
+    dateInput.addEventListener('change', () => { populateSlots(); updatePreview(); });
+    timeSelect.addEventListener('change', updatePreview);
+    populateSlots();
   }
 
   // Shipping estimate logic — based on subtotal (placeholder)
@@ -86,7 +138,7 @@
       alert('Tu carrito está vacío. Agrega algo desde el catálogo.');
       return;
     }
-    const required = ['address-street','address-district','delivery-date','recipient-name','recipient-phone','invoice-doc','buyer-name','buyer-email','buyer-phone'];
+    const required = ['address-street','address-district','delivery-date','delivery-time','recipient-name','recipient-phone','invoice-doc','buyer-name','buyer-email','buyer-phone'];
     for (const id of required) {
       const el = document.getElementById(id);
       if (!el.value.trim()) { el.focus(); el.style.borderColor = 'var(--error)'; return; }

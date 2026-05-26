@@ -78,15 +78,15 @@
               <label for="delivery-date" class="has-value">Fecha de entrega</label>
             </div>
             <div class="field">
-              <select id="delivery-window">
+              <select id="delivery-time" required>
                 <option value="" selected>—</option>
-                <option value="09-12">9:00 — 12:00</option>
-                <option value="12-15">12:00 — 15:00</option>
-                <option value="15-18">15:00 — 18:00</option>
-                <option value="18-21">18:00 — 21:00</option>
               </select>
-              <label for="delivery-window" class="has-value">Franja horaria</label>
+              <label for="delivery-time" class="has-value">Hora objetivo (±30 min)</label>
             </div>
+          </div>
+          <div class="field-note" id="delivery-window-preview" style="display:none">
+            <strong>Llega entre <span id="window-from">—</span> y <span id="window-to">—</span></strong>
+            Necesitamos al menos 24 h de anticipación para preparar tu arreglo a mano. La hora exacta puede variar ±30 min según el tráfico y la disponibilidad del repartidor.
           </div>
         </div>
 
