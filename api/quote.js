@@ -37,9 +37,17 @@ module.exports = async (req, res) => {
     if (!lat || !lng) return send(400, { error: 'Faltan lat / lng en la query string.' });
 
     const dropoff = `${lat},${lng}`;
+    // vehicle_type_id en Urbaner (confirmado empíricamente):
+    //   1 = AUTO  — solo NEXTDAY (programado), precio ~2x moto. Encaja con
+    //               nuestro modelo de +24h de antelación. Default correcto
+    //               para flores: no caben en mochila de moto sin dañarse.
+    //   2 = MOTO  — EXPRESS + NEXTDAY, precio bajo. Solo conviene para
+    //               envíos pequeños/planos (sobres, ramos diminutos).
+    //   3 = CAMIONETA — precio ~igual a auto, para cargas voluminosas.
+    // Sobrescribir con URBANER_VEHICLE_ID en Railway si necesitas otro.
     const out = await price({
       destinations: [{ latlon: ATELIER_LATLON }, { latlon: dropoff }],
-      vehicleTypeId: Number(process.env.URBANER_VEHICLE_ID || 2), // 2 = auto
+      vehicleTypeId: Number(process.env.URBANER_VEHICLE_ID || 1),
       isReturn: false,
     });
 
