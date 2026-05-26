@@ -39,14 +39,29 @@
     return _sdkPromise;
   }
 
-  function extractDistrict(addressComponents) {
-    if (!Array.isArray(addressComponents)) return null;
-    const wanted = ['sublocality_level_1', 'locality', 'administrative_area_level_2'];
+  // Devuelve TODOS los nombres candidatos a "distrito" que aparezcan en el
+  // address_components, en orden de prioridad. Esto es porque Google no
+  // siempre devuelve el distrito en el mismo campo: para Lima a veces es
+  // administrative_area_level_3 (el más correcto), otras veces sublocality,
+  // y a veces el campo locality contiene la ciudad ("Lima") en vez del distrito.
+  function extractDistrictCandidates(addressComponents) {
+    if (!Array.isArray(addressComponents)) return [];
+    const wanted = [
+      'administrative_area_level_3', // distrito en Perú (lo más preciso)
+      'sublocality_level_1',
+      'sublocality',
+      'locality',
+      'administrative_area_level_2', // provincia (Lima) — fallback débil
+    ];
+    const out = [];
     for (const want of wanted) {
-      const hit = addressComponents.find((c) => (c.types || []).includes(want));
-      if (hit) return hit.long_name;
+      for (const c of addressComponents) {
+        if (!(c.types || []).includes(want)) continue;
+        if (c.long_name && !out.includes(c.long_name)) out.push(c.long_name);
+        if (c.short_name && !out.includes(c.short_name)) out.push(c.short_name);
+      }
     }
-    return null;
+    return out;
   }
 
   // attach(inputEl, onPlace) — inicializa Autocomplete sobre el input dado.
@@ -79,10 +94,12 @@
         // El usuario apretó Enter sin elegir sugerencia → ignoramos; el fallback de distrito sigue activo.
         return;
       }
+      const candidates = extractDistrictCandidates(place.address_components);
       onPlace({
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
-        district: extractDistrict(place.address_components),
+        district: candidates[0] || null,           // el mejor candidato (compat con código previo)
+        districtCandidates: candidates,             // lista completa para matcher tolerante
         formatted: place.formatted_address || inputEl.value,
         placeId: place.place_id,
       });

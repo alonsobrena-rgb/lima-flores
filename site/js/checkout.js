@@ -107,10 +107,16 @@
     totalLabel.textContent = formatSoles(subtotal + currentShip.fee);
   };
 
-  const setShipFromQuote = ({ price, order_type }, precise) => {
+  const setShipFromQuote = ({ price, order_type, distance_m, duration_s }, precise) => {
+    // Detalle de distancia/duración para que el cliente vea que la cotización
+    // se hizo desde el atelier hasta su dirección puntual (incluso si el precio
+    // cae en la misma zona tarifaria que otra dirección).
+    const km  = distance_m != null ? `${(distance_m / 1000).toFixed(1)} km` : null;
+    const min = duration_s != null ? `${Math.round(duration_s / 60)} min` : null;
+    const detail = [km, min].filter(Boolean).join(' · ');
     currentShip = {
       fee: Number(price),
-      label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}${precise ? '' : ' · aprox.'}`,
+      label: `${formatSoles(price)} · Urbaner ${order_type || 'NEXTDAY'}${detail ? ' · ' + detail : ''}${precise ? '' : ' · aprox.'}`,
     };
     renderTotals();
   };
@@ -159,19 +165,62 @@
   const streetInput = document.getElementById('address-street');
   districtSel.addEventListener('change', (e) => quoteByDistrict(e.target.value));
 
-  // Auto-seleccionar el distrito del <select> a partir del nombre de Google.
-  function selectDistrictByName(name) {
-    if (!name) return false;
-    const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
-    const target = norm(name);
-    for (const opt of districtSel.options) {
-      if (!opt.value || opt.value === 'other') continue;
-      const txt = norm(opt.text);
-      if (txt === target || txt.startsWith(target) || target.includes(txt.split(' ')[0])) {
-        districtSel.value = opt.value;
-        return true;
+  // Auto-seleccionar el distrito del <select> a partir de los candidatos de Google.
+  // Acepta string o array de candidatos. Hace normalización (lowercase, sin tildes,
+  // sin paréntesis) y tiene un mapeo para sinónimos comunes que Google usa.
+  const DISTRICT_SYNONYMS = {
+    'lima': 'cercado de lima',
+    'cercado': 'cercado de lima',
+    'santiago de surco': 'surco',
+    'magdalena vieja': 'pueblo libre',
+    'callao cercado': 'callao',
+    'provincia constitucional del callao': 'callao',
+    'distrito de miraflores': 'miraflores',
+  };
+
+  const normDistrict = (s) => (s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/distrito de /g, '')
+    .replace(/\s*\([^)]*\)\s*/g, ' ')   // quita "(Santiago de Surco)" etc.
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  function selectDistrictByName(nameOrList) {
+    const list = Array.isArray(nameOrList) ? nameOrList : [nameOrList];
+    if (!list.length) return false;
+
+    // 1ª pasada: match exacto / startsWith / sinónimo
+    for (const raw of list) {
+      if (!raw) continue;
+      let target = normDistrict(raw);
+      if (DISTRICT_SYNONYMS[target]) target = DISTRICT_SYNONYMS[target];
+
+      for (const opt of districtSel.options) {
+        if (!opt.value || opt.value === 'other') continue;
+        const txt = normDistrict(opt.text);
+        if (txt === target || txt.startsWith(target) || target.startsWith(txt)) {
+          districtSel.value = opt.value;
+          return true;
+        }
       }
     }
+
+    // 2ª pasada: contains bidireccional sobre tokens (más permisivo)
+    for (const raw of list) {
+      if (!raw) continue;
+      const target = normDistrict(raw);
+      for (const opt of districtSel.options) {
+        if (!opt.value || opt.value === 'other') continue;
+        const txt = normDistrict(opt.text);
+        const txtTokens = txt.split(' ').filter((t) => t.length > 3);
+        if (txtTokens.some((t) => target.includes(t))) {
+          districtSel.value = opt.value;
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
@@ -190,7 +239,7 @@
     LimaGeo.attach(streetInput, (place) => {
       precisePlace = place;
       streetInput.value = place.formatted;
-      const matched = selectDistrictByName(place.district);
+      const matched = selectDistrictByName(place.districtCandidates || place.district);
       setHint(
         matched
           ? `📍 ${place.formatted}`
