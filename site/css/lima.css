@@ -2087,6 +2087,8 @@ p { color: var(--ink); }
   font-weight: 500;
 }
 .recipient-card__heading-wrap { flex: 1; min-width: 0; }
+/* IMPORTANTE: la regla global .checkout h2 aplica uppercase+tracking+::before.
+   La anulamos aquí para que el título de la card sea display italic real. */
 .recipient-card__title {
   font-family: var(--f-display);
   font-style: italic;
@@ -2095,6 +2097,16 @@ p { color: var(--ink); }
   margin: 0 0 10px;
   line-height: 1.1;
   font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  display: block;
+}
+.recipient-card__title::before {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: none !important;
 }
 .recipient-card__subtitle {
   font-size: 0.9375rem;
