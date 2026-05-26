@@ -2265,6 +2265,21 @@ p { color: var(--ink); }
   margin-top: 0;
   font-size: 0.9375rem;
 }
+/* Anular el global .field-row-inline > span que aplica color:var(--ink) */
+.recipient-card .field-row-inline > span {
+  color: var(--bone) !important;
+  font-family: var(--f-body);
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+/* Defensivo: cualquier texto dentro de la card que no tenga override
+   explícito hereda bone en lugar del var(--ink) global. */
+.recipient-card span:not([class]),
+.recipient-card p:not([class]),
+.recipient-card small {
+  color: var(--bone);
+}
 .recipient-card .segmented {
   background: rgba(244, 239, 229, 0.10);
   border: 1px solid rgba(244, 239, 229, 0.28);
