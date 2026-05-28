@@ -35,7 +35,10 @@
 
   function loadConfig() {
     dbg('fetch /api/config…');
-    return fetch('/api/config', { headers: { Accept: 'application/json' } })
+    return fetch('/api/config', {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    })
       .then((r) => {
         dbg('/api/config → HTTP ' + r.status);
         return r.ok ? r.json() : { googleMapsKey: '' };

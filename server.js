@@ -77,10 +77,12 @@ const server = http.createServer(async (req, res) => {
   // ─── /api/config — keys públicas del front (Maps JS, etc.) ───
   // La key de Google Maps JS es client-side por diseño; la seguridad se hace
   // restringiendo HTTP referrer en Google Cloud Console, no ocultándola.
+  // No-cache: si actualizamos GOOGLE_MAPS_API_KEY en Railway, el front la ve
+  // de inmediato (sin esperar el TTL del cache del navegador).
   if (parsed.pathname === '/api/config') {
     res.writeHead(200, {
       'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'no-store',
     });
     return res.end(JSON.stringify({
       googleMapsKey: process.env.GOOGLE_MAPS_API_KEY || '',

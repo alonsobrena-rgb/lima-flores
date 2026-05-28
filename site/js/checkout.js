@@ -289,7 +289,13 @@
       showMap(place.lat, place.lng, place.formatted);
     }).then((ac) => {
       if (!ac && LimaGeo.disabledReason) {
-        setHint('Google Maps no se cargó. Coordinamos el envío por WhatsApp.', 'error');
+        const reason = LimaGeo.disabledReason;
+        const msg = reason === 'no-key'
+          ? 'No se cargó el buscador de direcciones (falta configurar la API key de Google Maps en el servidor). Coordinamos el envío por WhatsApp.'
+          : reason === 'sdk-fail'
+            ? 'No se pudo cargar Google Maps (revisa la restricción de referrer de la API key, o tu conexión). Coordinamos el envío por WhatsApp.'
+            : 'Google Maps no se cargó. Coordinamos el envío por WhatsApp.';
+        setHint(msg, 'error');
         setShipManual('Coordinamos por WhatsApp');
       }
     });
