@@ -137,7 +137,12 @@
       return list[list.length - 1] || null;
     }
 
+    // Flag para pausar el reposicionamiento mientras el usuario tiene un dedo
+    // sobre el dropdown — si lo movemos a media-tap, el click cae en el vacío.
+    let touchingPac = false;
+
     function position() {
+      if (touchingPac) return;
       const pac = getPac();
       if (!pac) return;
       const vv = window.visualViewport;
@@ -190,14 +195,36 @@
     window.addEventListener('resize', position);
     window.addEventListener('scroll', position, { passive: true });
 
-    // Bug histórico: al tocar una sugerencia, el blur del input dispara antes
-    // que el click y Google esconde el dropdown. Prevenir el mousedown evita
-    // que el input pierda foco antes de procesar el tap.
+    // Bug histórico de Android Chrome con el Autocomplete legacy:
+    //  - En desktop, basta con preventDefault en mousedown del .pac-container
+    //    para que el input no pierda foco antes de que el click se registre.
+    //  - En móvil, el orden de eventos es distinto: touchstart → blur del
+    //    input → mousedown (sintético) → click. Para cuando llega el
+    //    mousedown ya es tarde y Google escondió el dropdown.
+    //  - El fix: en touchstart sobre un .pac-item, llamamos preventDefault
+    //    (eso evita el blur), y disparamos manualmente el mousedown que
+    //    Google está escuchando, para que registre la selección.
     const obs = new MutationObserver((muts) => {
       for (const m of muts) {
         for (const n of m.addedNodes) {
           if (n.nodeType === 1 && n.classList && n.classList.contains('pac-container')) {
+            // Desktop / mouse
             n.addEventListener('mousedown', (e) => e.preventDefault());
+            // Touch (Android, iOS)
+            n.addEventListener('touchstart', (e) => {
+              const item = e.target.closest('.pac-item');
+              if (!item) return;
+              touchingPac = true;
+              e.preventDefault(); // bloquea blur del input y los mouse events sintéticos
+              // Disparamos el mousedown que Google escucha para seleccionar la sugerencia
+              const md = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window });
+              item.dispatchEvent(md);
+              const mu = new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window });
+              item.dispatchEvent(mu);
+              dbg('tap táctil → mousedown disparado en .pac-item');
+            }, { passive: false });
+            n.addEventListener('touchend',   () => { setTimeout(() => { touchingPac = false; }, 50); }, { passive: true });
+            n.addEventListener('touchcancel',() => { touchingPac = false; }, { passive: true });
             position();
           }
         }
