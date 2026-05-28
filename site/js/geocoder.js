@@ -113,6 +113,96 @@
     return out;
   }
 
+  // Fix mobile: en Android Chrome el dropdown .pac-container queda oculto detrás
+  // del teclado virtual porque Google lo posiciona justo debajo del input, y al
+  // abrirse el teclado el input queda pegado al borde superior del teclado, sin
+  // espacio debajo. Lo reposicionamos con `position: fixed` usando la
+  // visualViewport API para que siempre quede en el área visible.
+  let _mobileFixDone = false;
+  function setupMobileDropdownFix(inputEl) {
+    if (_mobileFixDone) return;
+    _mobileFixDone = true;
+
+    const isMobile =
+      window.matchMedia('(max-width: 768px)').matches ||
+      (window.matchMedia('(pointer: coarse)').matches && window.innerWidth <= 900);
+    if (!isMobile) return;
+    dbg('aplicando fix de dropdown móvil (visualViewport)');
+
+    function getPac() {
+      const list = document.querySelectorAll('.pac-container');
+      return list[list.length - 1] || null;
+    }
+
+    function position() {
+      const pac = getPac();
+      if (!pac) return;
+      const vv = window.visualViewport;
+      const vvTop    = vv ? vv.offsetTop : 0;
+      const vvHeight = vv ? vv.height    : window.innerHeight;
+      const vvWidth  = vv ? vv.width     : document.documentElement.clientWidth;
+      const inputRect = inputEl.getBoundingClientRect();
+      const margin = 8;
+      const minHeight = 160;
+
+      const spaceBelow = (vvTop + vvHeight) - inputRect.bottom - margin;
+      const spaceAbove = inputRect.top - vvTop - margin;
+
+      // Estilos base con !important — Google reescribe estos inline.
+      pac.style.setProperty('position', 'fixed', 'important');
+      pac.style.setProperty('left', (margin) + 'px', 'important');
+      pac.style.setProperty('width', (vvWidth - margin * 2) + 'px', 'important');
+      pac.style.setProperty('max-width', 'none', 'important');
+      pac.style.setProperty('z-index', '999999', 'important');
+      pac.style.setProperty('overflow-y', 'auto', 'important');
+
+      if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
+        pac.style.setProperty('top', (inputRect.bottom + 4) + 'px', 'important');
+        pac.style.setProperty('bottom', 'auto', 'important');
+        pac.style.setProperty('max-height', Math.max(spaceBelow, minHeight) + 'px', 'important');
+      } else {
+        pac.style.setProperty('top', 'auto', 'important');
+        pac.style.setProperty('bottom', (window.innerHeight - inputRect.top + 4) + 'px', 'important');
+        pac.style.setProperty('max-height', Math.max(spaceAbove, minHeight) + 'px', 'important');
+      }
+    }
+
+    // El .pac-container se crea de forma diferida la primera vez que el usuario
+    // escribe. Reintentamos brevemente al recibir foco hasta encontrarlo.
+    let retry = null;
+    function chase() {
+      if (retry) clearInterval(retry);
+      let n = 0;
+      retry = setInterval(() => {
+        position();
+        if (++n > 12) { clearInterval(retry); retry = null; }
+      }, 80);
+    }
+    inputEl.addEventListener('focus', chase);
+    inputEl.addEventListener('input', () => requestAnimationFrame(position));
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', position);
+      window.visualViewport.addEventListener('scroll', position);
+    }
+    window.addEventListener('resize', position);
+    window.addEventListener('scroll', position, { passive: true });
+
+    // Bug histórico: al tocar una sugerencia, el blur del input dispara antes
+    // que el click y Google esconde el dropdown. Prevenir el mousedown evita
+    // que el input pierda foco antes de procesar el tap.
+    const obs = new MutationObserver((muts) => {
+      for (const m of muts) {
+        for (const n of m.addedNodes) {
+          if (n.nodeType === 1 && n.classList && n.classList.contains('pac-container')) {
+            n.addEventListener('mousedown', (e) => e.preventDefault());
+            position();
+          }
+        }
+      }
+    });
+    obs.observe(document.body, { childList: true });
+  }
+
   // attach(inputEl, onPlace) — inicializa Autocomplete sobre el input dado.
   // onPlace recibe { lat, lng, district, formatted, placeId }.
   // Devuelve una Promise que resuelve cuando el SDK está listo (o se descarta).
@@ -138,6 +228,7 @@
       bounds: new google.maps.LatLngBounds(LIMA_BOUNDS.sw, LIMA_BOUNDS.ne),
       strictBounds: false,
     });
+    setupMobileDropdownFix(inputEl);
     dbg('Autocomplete listo. Tipea para ver sugerencias.');
 
     ac.addListener('place_changed', () => {
