@@ -53,9 +53,46 @@
     .order-card__side { flex-direction: row; flex-wrap: wrap; }
     .order-card__row { grid-template-columns: 100px 1fr; font-size: 0.86rem; }
   }
+
+  /* ─── Login overlay ─────────────────────────────────── */
+  .login-overlay { position: fixed; inset: 0; background: #F4EFE5; display: none; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+  .login-overlay.is-open { display: flex; }
+  .login-card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 36px 32px; width: 100%; max-width: 380px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+  .login-card h2 { font-family: var(--f-display); font-style: italic; font-weight: 400; font-size: 1.8rem; margin: 0 0 6px; color: var(--ink); }
+  .login-card h2 em { color: var(--terra); }
+  .login-card p { margin: 0 0 22px; font-size: 0.88rem; color: var(--ink-soft); }
+  .login-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .login-field label { font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+  .login-field input { width: 100%; padding: 12px 14px; font-size: 16px; font-family: var(--f-body); color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 4px; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
+  .login-field input:focus { outline: none; border-color: var(--terra); }
+  .login-submit { width: 100%; margin-top: 8px; padding: 14px; background: var(--ink); color: var(--bone); border: none; border-radius: 4px; font-family: var(--f-mono); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+  .login-submit:hover:not(:disabled) { background: var(--terra); }
+  .login-submit:disabled { opacity: 0.5; cursor: wait; }
+  .login-error { margin-top: 14px; padding: 10px 12px; background: #fee2e2; color: #991b1b; border-radius: 4px; font-size: 0.85rem; display: none; }
+  .login-error.is-visible { display: block; }
+  .btn-logout { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 4px; padding: 8px 14px; font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+  .btn-logout:hover { color: var(--ink); border-color: var(--ink); }
 </style>
 </head>
 <body>
+
+<div class="login-overlay" id="login-overlay" aria-hidden="true">
+  <form class="login-card" id="login-form" autocomplete="on">
+    <h2>Admin · <em>Lima Flores</em></h2>
+    <p>Ingresa tus credenciales para ver los pedidos.</p>
+    <div class="login-field">
+      <label for="login-user">Usuario</label>
+      <input id="login-user" name="username" type="text" autocomplete="username"
+             autocapitalize="none" autocorrect="off" spellcheck="false" required />
+    </div>
+    <div class="login-field">
+      <label for="login-pass">Contraseña</label>
+      <input id="login-pass" name="password" type="password" autocomplete="current-password" required />
+    </div>
+    <button type="submit" class="login-submit" id="login-submit">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+  </form>
+</div>
 
 <div class="admin-wrap">
   <div class="admin-head">
@@ -63,7 +100,10 @@
       <h1 class="admin-title">Pedidos · <em>Lima Flores</em></h1>
       <div class="admin-meta" id="admin-meta">cargando…</div>
     </div>
-    <a class="admin-meta" href="https://logistics.cabify.com/parcels?group=all&history=actives" target="_blank" rel="noopener">Dashboard Cabify →</a>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <a class="admin-meta" href="https://logistics.cabify.com/parcels?group=all&history=actives" target="_blank" rel="noopener">Dashboard Cabify →</a>
+      <button class="btn-logout" id="btn-logout" type="button">Salir</button>
+    </div>
   </div>
 
   <div class="admin-tabs" role="tablist">
@@ -81,7 +121,33 @@
   const listEl = document.getElementById('orders-list');
   const metaEl = document.getElementById('admin-meta');
   const tabs = document.querySelectorAll('.admin-tab');
+  const loginOverlay = document.getElementById('login-overlay');
+  const loginForm = document.getElementById('login-form');
+  const loginUser = document.getElementById('login-user');
+  const loginPass = document.getElementById('login-pass');
+  const loginSubmit = document.getElementById('login-submit');
+  const loginError = document.getElementById('login-error');
+  const btnLogout = document.getElementById('btn-logout');
   let currentStatus = 'pending';
+
+  function showLogin(msg) {
+    loginOverlay.classList.add('is-open');
+    loginOverlay.setAttribute('aria-hidden', 'false');
+    if (msg) {
+      loginError.textContent = msg;
+      loginError.classList.add('is-visible');
+    } else {
+      loginError.classList.remove('is-visible');
+    }
+    setTimeout(() => loginUser.focus(), 50);
+  }
+
+  function hideLogin() {
+    loginOverlay.classList.remove('is-open');
+    loginOverlay.setAttribute('aria-hidden', 'true');
+    loginError.classList.remove('is-visible');
+    loginPass.value = '';
+  }
 
   const formatSoles = (n) => 'S/ ' + (Number(n) || 0).toFixed(2);
   const escape = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -97,6 +163,7 @@
     listEl.innerHTML = '';
     try {
       const r = await fetch('/api/admin/orders?status=' + encodeURIComponent(status), { credentials: 'include' });
+      if (r.status === 401) { showLogin(); metaEl.textContent = '—'; return; }
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const data = await r.json();
       const orders = data.orders || [];
@@ -232,9 +299,50 @@
     });
   });
 
+  loginForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const user = loginUser.value.trim();
+    const pass = loginPass.value;
+    if (!user || !pass) {
+      loginError.textContent = 'Ingresa usuario y contraseña.';
+      loginError.classList.add('is-visible');
+      return;
+    }
+    loginSubmit.disabled = true;
+    loginSubmit.textContent = 'Entrando…';
+    loginError.classList.remove('is-visible');
+    try {
+      const r = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ user, pass }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      hideLogin();
+      load(currentStatus);
+    } catch (e) {
+      loginError.textContent = e.message || 'No se pudo iniciar sesión.';
+      loginError.classList.add('is-visible');
+      loginPass.select();
+    } finally {
+      loginSubmit.disabled = false;
+      loginSubmit.textContent = 'Entrar';
+    }
+  });
+
+  btnLogout.addEventListener('click', async () => {
+    try { await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' }); }
+    catch (_) { /* ignore */ }
+    showLogin();
+  });
+
   load('pending');
-  // Auto-refresh cada 30s mientras la pestaña esté visible.
-  setInterval(() => { if (!document.hidden) load(currentStatus); }, 30000);
+  // Auto-refresh cada 30s mientras la pestaña esté visible y haya sesión.
+  setInterval(() => {
+    if (!document.hidden && !loginOverlay.classList.contains('is-open')) load(currentStatus);
+  }, 30000);
 })();
 </script>
 </body>

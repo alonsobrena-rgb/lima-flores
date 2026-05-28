@@ -1,7 +1,10 @@
-// /api/admin/* — endpoints protegidos con HTTP Basic Auth.
+// /api/admin/* — endpoints protegidos por cookie de sesión (o Basic Auth como fallback).
 // Credenciales: ADMIN_USER + ADMIN_PASS en env vars (Railway).
 //
 // Rutas:
+//   POST /api/admin/login                   → valida user/pass y emite cookie de sesión
+//   POST /api/admin/logout                  → limpia la cookie
+//   GET  /api/admin/me                      → 200 si la sesión es válida (sirve para el front)
 //   GET  /api/admin/orders                  → lista pedidos (default: pending)
 //   GET  /api/admin/orders/:id              → detalle del pedido
 //   POST /api/admin/orders/:id/dispatch     → crea el parcel en Cabify y marca como 'dispatched'
@@ -9,7 +12,12 @@
 'use strict';
 
 const db = require('../db');
-const { checkBasicAuth } = require('../lib/basic-auth');
+const {
+  checkAdminAuth,
+  credentialsMatch,
+  issueSessionCookie,
+  clearSessionCookie,
+} = require('../lib/basic-auth');
 const {
   shippingTypes: cabifyShippingTypes,
   createParcel: cabifyCreateParcel,
@@ -184,12 +192,64 @@ async function cancelOrder(req, res, id) {
   }
 }
 
+// ─── Login / Logout (cookie de sesión) ──────────────────
+function readJsonBody(req, limit = 4 * 1024) {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks = [];
+    req.on('data', (c) => {
+      size += c.length;
+      if (size > limit) { reject(new Error('body too large')); req.destroy(); return; }
+      chunks.push(c);
+    });
+    req.on('end', () => {
+      const raw = Buffer.concat(chunks).toString('utf8');
+      if (!raw) return resolve({});
+      try { resolve(JSON.parse(raw)); }
+      catch { reject(new Error('invalid JSON')); }
+    });
+    req.on('error', reject);
+  });
+}
+
+async function login(req, res) {
+  if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS) {
+    return send(res, 503, { error: 'Admin no configurado — falta ADMIN_USER/ADMIN_PASS.' });
+  }
+  let body;
+  try { body = await readJsonBody(req); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+  const user = String(body.user || body.username || '').trim();
+  const pass = String(body.pass || body.password || '');
+  if (!user || !pass) return send(res, 400, { error: 'Faltan credenciales.' });
+  if (!credentialsMatch(user, pass)) {
+    return send(res, 401, { error: 'Credenciales inválidas.' });
+  }
+  issueSessionCookie(req, res, user);
+  return send(res, 200, { ok: true });
+}
+
+function logout(req, res) {
+  clearSessionCookie(req, res);
+  return send(res, 200, { ok: true });
+}
+
 // ─── Router ─────────────────────────────────────────────
 module.exports = async (req, res, urlObj) => {
-  if (!checkBasicAuth(req, res)) return;
-  if (!db.enabled) return send(res, 503, { error: 'DB no configurada en el servidor.' });
-
   const p = urlObj.pathname;
+
+  // Login es público (es donde se obtienen las credenciales).
+  if (p === '/api/admin/login' && req.method === 'POST') return login(req, res);
+  // Logout no requiere auth (es idempotente y solo borra la cookie).
+  if (p === '/api/admin/logout' && req.method === 'POST') return logout(req, res);
+
+  // El resto exige sesión válida.
+  if (!checkAdminAuth(req, res)) return;
+
+  // Endpoint barato para que el front sepa si la sesión sigue viva.
+  if (p === '/api/admin/me' && req.method === 'GET') return send(res, 200, { ok: true });
+
+  if (!db.enabled) return send(res, 503, { error: 'DB no configurada en el servidor.' });
 
   if (p === '/api/admin/orders' && req.method === 'GET') return listOrders(req, res, urlObj);
 
