@@ -74,11 +74,10 @@ const server = http.createServer(async (req, res) => {
     return fs.createReadStream(adminFile).pipe(res);
   }
 
-  // ─── /api/config — keys públicas del front (Maps JS, etc.) ───
-  // La key de Google Maps JS es client-side por diseño; la seguridad se hace
-  // restringiendo HTTP referrer en Google Cloud Console, no ocultándola.
-  // No-cache: si actualizamos GOOGLE_MAPS_API_KEY en Railway, el front la ve
-  // de inmediato (sin esperar el TTL del cache del navegador).
+  // ─── /api/config — keys públicas (legacy, kept for backward compat) ───
+  // El checkout ya no depende de esto: el HTML se sirve con la key inlineada
+  // (ver bloque /checkout.html abajo). Este endpoint sigue como red de
+  // seguridad por si algún cliente viejo todavía lo llama.
   if (parsed.pathname === '/api/config') {
     res.writeHead(200, {
       'Content-Type': 'application/json; charset=utf-8',
@@ -87,6 +86,28 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({
       googleMapsKey: process.env.GOOGLE_MAPS_API_KEY || '',
     }));
+  }
+
+  // ─── /checkout.html — HTML con la API key de Maps inlineada ───
+  // Substituimos un placeholder por la key en cada request. Así no existe un
+  // endpoint separado que el navegador pueda cachear con valor vacío: la key
+  // viaja junto al HTML, que ya tiene Cache-Control: no-cache. Resultado:
+  // cualquier cambio de GOOGLE_MAPS_API_KEY en Railway es visible al instante,
+  // sin caches intermedios ni necesidad de hard-refresh.
+  if (parsed.pathname === '/checkout.html' || parsed.pathname === '/checkout') {
+    const filePath = path.join(SITE_DIR, 'checkout.html');
+    return fs.readFile(filePath, 'utf8', (err, html) => {
+      if (err) return send(res, 500, 'read error');
+      const key = process.env.GOOGLE_MAPS_API_KEY || '';
+      // Escapar el valor para evitar romper el contexto de string JS o inyectar código.
+      const safeKey = JSON.stringify(key).slice(1, -1);
+      const out = html.replace(/__LIMA_GMAPS_KEY_PLACEHOLDER__/g, safeKey);
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-store',
+      });
+      res.end(out);
+    });
   }
 
   // ─── Estáticos desde site/ ───

@@ -34,7 +34,16 @@
   const LIMA_BOUNDS = { sw: { lat: -12.50, lng: -77.25 }, ne: { lat: -11.75, lng: -76.65 } };
 
   function loadConfig() {
-    dbg('fetch /api/config…');
+    // La key viene inlineada en el HTML por el server (substituye un placeholder
+    // por process.env.GOOGLE_MAPS_API_KEY). Esto elimina la posibilidad de que
+    // un /api/config cacheado vacío persista en el navegador del usuario.
+    const inline = (typeof window.__LIMA_GMAPS_KEY__ === 'string') ? window.__LIMA_GMAPS_KEY__ : '';
+    if (inline && inline !== '__LIMA_GMAPS_KEY_PLACEHOLDER__') {
+      dbg('config: googleMapsKey inline (len=' + inline.length + ')');
+      return Promise.resolve({ googleMapsKey: inline });
+    }
+    // Fallback (solo si llegó HTML viejo cacheado sin la key inlineada): fetch.
+    dbg('inline ausente → fetch /api/config…');
     return fetch('/api/config', {
       headers: { Accept: 'application/json' },
       cache: 'no-store',
