@@ -8,25 +8,37 @@
 <link rel="icon" type="image/png" href="assets/logo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/lima.css?v=20260528-3" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css?v=20260610-3" />
+<link rel="stylesheet" href="css/lf-design/styles.css?v=20260610-3" />
 <script>window.__LIMA_GMAPS_KEY__ = "__LIMA_GMAPS_KEY_PLACEHOLDER__";</script>
 </head>
 <body>
 
-<header class="header" data-scrolled="false">
-  <div class="container header__inner">
-    <a href="index.html" class="header__logo" aria-label="Lima Flores">
-      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
-    </a>
-    <nav class="header__nav" aria-label="primary">
+<div class="lf-progress" id="lfProgress" aria-hidden="true"></div>
+
+<!-- ─── Header unificado (sistema lf-design) ─── -->
+<header class="lf-header" id="lfHeader">
+  <div class="lf-header__inner">
+    <button class="lf-burger" id="lfBurger" aria-label="Menú" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/></svg>
+    </button>
+    <nav class="lf-header__nav" id="lfNav" aria-label="primary">
       <a href="index.html">Inicio</a>
       <a href="catalogo.html">Catálogo</a>
+      <a href="suscripcion.html">Suscripción</a>
+      <a href="index.html#contacto">Contacto</a>
     </nav>
-    <div class="header__actions">
-      <span class="t-mono" style="color:var(--ink-soft)">Paso 02 / 02</span>
-      <button class="header__menu" aria-label="Menú">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/></svg>
+    <a class="lf-header__logo" href="index.html" aria-label="Lima Flores · Inicio">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" />
+    </a>
+    <div class="lf-header__actions">
+      <span class="lf-header__phone">Paso · <b>02 / 02</b></span>
+      <button class="lf-iconbtn" data-cart-open aria-label="Carrito">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+        </svg>
+        <span class="lf-iconbtn__badge" data-cart-count hidden>0</span>
       </button>
     </div>
   </div>
@@ -242,8 +254,8 @@
   <div class="drawer__foot" id="cart-foot"></div>
 </aside>
 
-<script src="js/data.js?v=20260526-10"></script>
-<script src="js/lima.js?v=20260526-10"></script>
+<script src="js/data.js?v=20260610-3"></script>
+<script src="js/lima.js?v=20260610-3"></script>
 <script src="js/geocoder.js?v=20260528-4"></script>
 <script src="js/checkout.js?v=20260528-2"></script>
 </body>

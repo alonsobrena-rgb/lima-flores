@@ -45,8 +45,8 @@
           <p class="product-card__desc">${p.shortDesc}</p>
         </a>`;
     }).join('');
-    // Re-trigger stagger reveal
-    [...grid.children].forEach((c, i) => c.style.setProperty('--i', i));
+    // Re-trigger stagger reveal — cap el índice para que el delay no se acumule
+    [...grid.children].forEach((c, i) => c.style.setProperty('--i', Math.min(i, 8)));
     requestAnimationFrame(() => grid.classList.add('is-in'));
   };
 

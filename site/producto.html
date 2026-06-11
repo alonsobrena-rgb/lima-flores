@@ -8,29 +8,185 @@
 <link rel="icon" type="image/png" href="assets/logo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/lima.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css?v=20260610-3" />
+<link rel="stylesheet" href="css/lf-design/styles.css?v=20260610-3" />
+<style>
+  /* ──────────────────────────────────────────────────────────
+     Galería de producto + lightbox
+     ────────────────────────────────────────────────────────── */
+  /* Cuando hay galería dentro, libera el aspect-ratio fijo de .pd__media */
+  .pd__media:has(.pd-zoom) {
+    aspect-ratio: auto;
+    overflow: visible;
+    background: transparent;
+    height: auto;
+  }
+  .pd__media:has(.pd-zoom) > * { height: auto; object-fit: unset; }
+
+  .pd-zoom {
+    display: block;
+    width: 100%;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: zoom-in;
+    position: relative;
+    overflow: hidden;
+  }
+  .pd-zoom img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.6s var(--ease-soft);
+  }
+  .pd-zoom:hover img { transform: scale(1.02); }
+  .pd-zoom__hint {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    background: rgba(27, 26, 23, 0.7);
+    color: var(--bone);
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 2px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.25s var(--ease-soft), transform 0.25s var(--ease-soft);
+    pointer-events: none;
+  }
+  .pd-zoom:hover .pd-zoom__hint { opacity: 1; transform: translateY(0); }
+
+  .pd-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .pd-thumb { width: 78px; flex: 0 0 78px; }
+  .pd-thumb {
+    background: none;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 3px;
+    transition: border-color 0.2s var(--ease-soft), opacity 0.2s var(--ease-soft);
+    opacity: 0.7;
+  }
+  .pd-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .pd-thumb:hover { opacity: 1; }
+  .pd-thumb.is-active {
+    border-color: var(--accent);
+    opacity: 1;
+  }
+
+  /* Lightbox overlay */
+  .pd-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 14, 12, 0.94);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    cursor: zoom-out;
+  }
+  .pd-lightbox.is-open { display: flex; }
+  .pd-lightbox__figure {
+    margin: 0;
+    max-width: min(1200px, 92vw);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .pd-lightbox__img {
+    max-width: 100%;
+    max-height: 80vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    cursor: default;
+  }
+  .pd-lightbox__caption {
+    font-family: var(--f-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 229, 0.65);
+  }
+  .pd-lightbox__close,
+  .pd-lightbox__nav {
+    position: absolute;
+    background: rgba(244, 239, 229, 0.1);
+    color: var(--bone);
+    border: 1px solid rgba(244, 239, 229, 0.2);
+    border-radius: 50%;
+    width: 48px; height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: var(--f-body);
+    font-size: 1.4rem;
+    line-height: 1;
+    transition: background 0.2s var(--ease-soft);
+  }
+  .pd-lightbox__close { top: 24px; right: 24px; font-size: 1.1rem; }
+  .pd-lightbox__nav--prev { left: 24px; top: 50%; transform: translateY(-50%); font-size: 2rem; padding-bottom: 4px; }
+  .pd-lightbox__nav--next { right: 24px; top: 50%; transform: translateY(-50%); font-size: 2rem; padding-bottom: 4px; }
+  .pd-lightbox__close:hover,
+  .pd-lightbox__nav:hover { background: rgba(244, 239, 229, 0.22); }
+
+  @media (max-width: 720px) {
+    .pd-lightbox { padding: 20px 8px; }
+    .pd-lightbox__close { top: 14px; right: 14px; width: 40px; height: 40px; }
+    .pd-lightbox__nav { width: 40px; height: 40px; }
+    .pd-lightbox__nav--prev { left: 8px; }
+    .pd-lightbox__nav--next { right: 8px; }
+    .pd-thumb { max-width: 80px; }
+  }
+</style>
 </head>
 <body>
 
-<header class="header" data-scrolled="false">
-  <div class="container header__inner">
-    <a href="index.html" class="header__logo" aria-label="Lima Flores">
-      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
-    </a>
-    <nav class="header__nav" aria-label="primary">
+<div class="lf-progress" id="lfProgress" aria-hidden="true"></div>
+
+<!-- ─── Header unificado (sistema lf-design) ─── -->
+<header class="lf-header" id="lfHeader">
+  <div class="lf-header__inner">
+    <button class="lf-burger" id="lfBurger" aria-label="Menú" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/></svg>
+    </button>
+    <nav class="lf-header__nav" id="lfNav" aria-label="primary">
       <a href="index.html">Inicio</a>
       <a href="catalogo.html">Catálogo</a>
       <a href="suscripcion.html">Suscripción</a>
-      <a href="index.html#atelier">Atelier</a>
       <a href="index.html#contacto">Contacto</a>
     </nav>
-    <div class="header__actions">
-      <button class="header__cart" data-cart-open aria-label="Carrito">
-        Carrito <span class="cart-count" data-cart-count hidden>0</span>
-      </button>
-      <button class="header__menu" aria-label="Menú">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/></svg>
+    <a class="lf-header__logo" href="index.html" aria-label="Lima Flores · Inicio">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" />
+    </a>
+    <div class="lf-header__actions">
+      <a class="lf-header__phone" href="tel:+51999479855">tel · <b>999 479 855</b></a>
+      <button class="lf-iconbtn" data-cart-open aria-label="Carrito">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+        </svg>
+        <span class="lf-iconbtn__badge" data-cart-count hidden>0</span>
       </button>
     </div>
   </div>
@@ -137,8 +293,8 @@
   <div class="drawer__foot" id="cart-foot"></div>
 </aside>
 
-<script src="js/data.js"></script>
-<script src="js/lima.js"></script>
-<script src="js/product.js"></script>
+<script src="js/data.js?v=20260610-3"></script>
+<script src="js/lima.js?v=20260610-3"></script>
+<script src="js/product.js?v=20260610-3"></script>
 </body>
 </html>

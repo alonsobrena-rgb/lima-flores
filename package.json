@@ -11,6 +11,10 @@
     "dev": "node server.js"
   },
   "dependencies": {
+    "@higgsfield/client": "^0.2.1",
     "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.1.0"
   }
 }

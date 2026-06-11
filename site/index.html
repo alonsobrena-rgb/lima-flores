@@ -1,82 +1,102 @@
 <!DOCTYPE html>
-<html lang="es-PE" data-bg="video">
+<html lang="es-PE">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Lima Flores · Atelier botánico hecho a mano desde 2017</title>
 <meta name="description" content="Arte botánico hecho a mano, entregado el mismo día en Lima. Ramos, arreglos, floreros y plantas pensadas tallo por tallo." />
-<meta name="theme-color" content="#1B1A17" />
+<meta name="theme-color" content="#F6F3EC" />
 <link rel="icon" type="image/png" href="assets/logo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Serif+Display:ital@0;1&family=Italiana&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/lima.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Serif+Display:ital@0;1&family=Italiana&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/lima.css?v=20260610-3" />
+<!-- Sistema de diseño unificado (tokens rosa/Jost/ivory + componentes lf-*) -->
+<link rel="stylesheet" href="css/lf-design/styles.css?v=20260610-3" />
 </head>
 <body>
 
-<!-- ─── Global video background (siempre detrás) ─── -->
-<div class="page-bg" aria-hidden="true">
-  <video autoplay muted loop playsinline preload="auto" poster="assets/orquideas.jpg">
-    <source src="assets/hero.mp4" type="video/mp4" />
-  </video>
-</div>
+<!-- Barra de progreso de scroll -->
+<div class="lf-progress" id="lfProgress" aria-hidden="true"></div>
 
-<!-- ─── Header ──────────────────────────────────── -->
-<header class="header" data-theme="dark" data-scrolled="false">
-  <div class="container header__inner">
-    <a href="index.html" class="header__logo" aria-label="Lima Flores">
-      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" class="header__logo-img" />
-    </a>
-    <nav class="header__nav" aria-label="primary">
+<!-- ─── Header unificado (sistema lf-design) ─── -->
+<header class="lf-header" id="lfHeader">
+  <div class="lf-header__inner">
+    <button class="lf-burger" id="lfBurger" aria-label="Menú" aria-expanded="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/></svg>
+    </button>
+    <nav class="lf-header__nav" id="lfNav" aria-label="primary">
       <a href="index.html" class="is-active">Inicio</a>
       <a href="catalogo.html">Catálogo</a>
       <a href="suscripcion.html">Suscripción</a>
-      <a href="#atelier">Atelier</a>
       <a href="#contacto">Contacto</a>
     </nav>
-    <div class="header__actions">
-      <button class="header__cart" data-cart-open aria-label="Carrito">
-        Carrito <span class="cart-count" data-cart-count hidden>0</span>
-      </button>
-      <button class="header__menu" aria-label="Menú">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="14" y2="15"/></svg>
+    <a class="lf-header__logo" href="index.html" aria-label="Lima Flores · Inicio">
+      <img src="assets/logo.png" alt="Lima Flores · Flores y Diseño" />
+    </a>
+    <div class="lf-header__actions">
+      <a class="lf-header__phone" href="tel:+51999479855">tel · <b>999 479 855</b></a>
+      <button class="lf-iconbtn" data-cart-open aria-label="Carrito">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+        </svg>
+        <span class="lf-iconbtn__badge" data-cart-count hidden>0</span>
       </button>
     </div>
   </div>
 </header>
 
-<!-- ─── Hero ────────────────────────────────────── -->
-<section class="hero" id="top">
-  <div class="hero__bg">
-    <img src="assets/orquideas.jpg" alt="" data-parallax="0.18" />
-    <div class="hero__bg-blur"></div>
-  </div>
-
-  <span class="hero__side">Lima · Miraflores · Atelier botánico</span>
-
-  <div class="container hero__inner">
-    <div class="hero__eyebrow" data-reveal>Atelier botánico · Lima, Perú</div>
-
-    <h1 class="hero__title">
-      <span class="reveal-line"><span>Flores que dicen</span></span>
-      <span class="reveal-line" style="--line-delay:140ms"><span>lo que tú <em>callas</em>.</span></span>
-    </h1>
-
-    <div class="hero__bottom">
-      <p class="hero__sub" data-reveal style="--reveal-delay:280ms">
-        Arte botánico hecho a mano, recibido fresco tres veces por semana
-        y entregado el mismo día en Lima Metropolitana.
+<!-- ─── Hero elevado (orquídeas sobre crema, con DNA Lima Flores) ─── -->
+<section class="lf-hero" id="top">
+  <span class="lf-hero__ghost" aria-hidden="true"><em>fiori</em></span>
+  <div class="lf-hero__grid">
+    <div class="lf-hero__copy">
+      <div class="lf-hero__eyebrow" data-reveal style="--reveal-delay:60ms">Orquídeas · La firma de la casa</div>
+      <h1 class="lf-hero__title" data-reveal style="--reveal-delay:140ms">
+        Cuatro tallos,<br/>
+        un mismo <em>arreglo</em>.
+      </h1>
+      <p class="lf-hero__sub" data-reveal style="--reveal-delay:240ms">
+        Phalaenopsis seleccionadas a mano — amarillo, magenta, durazno y rosa pálido — montadas en arco sobre cerámica blanca. Te las llevamos hoy.
       </p>
-      <div class="hero__actions" data-reveal style="--reveal-delay:380ms">
-        <a href="catalogo.html" class="btn btn--ghost-light">Ver catálogo <span class="arrow">→</span></a>
-        <a href="#signature" class="btn btn--ghost-light" style="border-color:transparent;color:rgba(244,239,229,0.85)">La firma de la casa</a>
+      <div class="lf-hero__cta" data-reveal style="--reveal-delay:340ms">
+        <span class="lf-hero__price"><small>Desde</small>S/ 190</span>
+        <a class="lf-btn" href="catalogo.html?cat=plantas">
+          Ver orquídeas
+          <span class="lf-btn__arrow">→</span>
+        </a>
       </div>
     </div>
+    <div class="lf-hero__photo" data-reveal="right" style="--reveal-delay:120ms">
+      <video class="lf-hero__video" id="heroVideo" data-scrub muted playsinline preload="auto"
+             poster="assets/products/orquidea-sunrise-de-dos-varas.jpg" aria-hidden="true">
+        <source src="assets/video/hero-orquideas.mp4" type="video/mp4" />
+      </video>
+    </div>
   </div>
-
-  <span class="hero__corner hero__corner--left">N°&nbsp;01 — La esencia</span>
-  <span class="hero__corner hero__corner--right">Scroll</span>
 </section>
+
+<!-- ─── Dos productos secundarios destacados ─── -->
+<div class="lf-thumbs">
+  <a class="lf-thumb" href="producto.html?id=florero-de-20-tulipanes-2" data-reveal style="--reveal-delay:60ms">
+    <img class="lf-thumb__img" src="assets/products/florero-de-20-tulipanes-2.jpg" alt="" />
+    <div class="lf-thumb__body">
+      <div class="lf-thumb__eyebrow">Floreros</div>
+      <h3 class="lf-thumb__title">Florero de 20 tulipanes</h3>
+      <div class="lf-thumb__price">S/ 275</div>
+    </div>
+    <span class="lf-thumb__arrow" aria-hidden="true">→</span>
+  </a>
+  <a class="lf-thumb" href="producto.html?id=box-de-luxe" data-reveal style="--reveal-delay:140ms">
+    <img class="lf-thumb__img" src="assets/products/box-de-luxe.jpg" alt="" />
+    <div class="lf-thumb__body">
+      <div class="lf-thumb__eyebrow">Arreglos</div>
+      <h3 class="lf-thumb__title">Box de Luxe</h3>
+      <div class="lf-thumb__price">S/ 350</div>
+    </div>
+    <span class="lf-thumb__arrow" aria-hidden="true">→</span>
+  </a>
+</div>
 
 <!-- ─── Marquee ─────────────────────────────────── -->
 <div class="marquee" aria-hidden="true">
@@ -105,6 +125,9 @@
       <div class="philosophy__left">
         <span class="index-mark" data-reveal>No. 02 · Manifiesto</span>
       </div>
+      <figure class="philosophy__bloom" aria-hidden="true">
+        <img src="assets/orquideas-cutout.png" alt="" />
+      </figure>
       <div class="philosophy__right">
         <h2 data-reveal>
           No vendemos flores.<br/>
@@ -133,20 +156,14 @@
   </div>
 </section>
 
-<!-- ─── Video breather ───────────────────────── -->
-<div class="video-gap" aria-hidden="true">
-  <div class="video-gap__caption">
-    <span>Lima · 12.0464°S 77.0428°W</span>
-    <span><em>Sin filtros.</em></span>
-  </div>
-</div>
-
 <!-- ─── Signature product ──────────────────────── -->
 <section class="signature" id="signature">
   <div class="container">
     <div class="signature__grid">
       <div class="signature__media" data-reveal="left">
-        <img src="assets/orquideas.jpg" alt="Phalaenopsis multicolor — cuatro tallos en arco" />
+        <video class="signature__video" data-inview muted playsinline loop preload="none" poster="assets/orquideas.jpg">
+          <source src="assets/video/firma-orquideas.mp4" type="video/mp4" />
+        </video>
       </div>
       <div class="signature__copy">
         <h3 class="eyebrow" data-reveal>La firma de la casa · No. 01</h3>
@@ -168,21 +185,24 @@
         </dl>
         <div class="signature__price" data-reveal style="--reveal-delay:360ms">
           <span class="cur">S/</span>
-          <span class="amt">289</span>
+          <span class="amt">250</span>
           <span class="from">Entrega el mismo día</span>
         </div>
         <div class="signature__actions" data-reveal style="--reveal-delay:440ms">
-          <a href="producto.html?id=orquideas-multicolor" class="btn btn--ghost-light">Ver detalle <span class="arrow">→</span></a>
-          <button class="btn btn--primary" onclick="LimaCart.add('orquideas-multicolor')">Agregar al carrito</button>
+          <a href="producto.html?id=orquideas-grandes-de-dos-varas-en-maceta" class="btn btn--ghost-light">Ver detalle <span class="arrow">→</span></a>
+          <button class="btn btn--primary" onclick="LimaCart.add('orquideas-grandes-de-dos-varas-en-maceta')">Agregar al carrito</button>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── Video breather ───────────────────────── -->
-<div class="video-gap video-gap--small" aria-hidden="true">
-  <div class="video-gap__caption">
+<!-- ─── Franja de video · atelier en movimiento ─── -->
+<div class="video-strip" data-reveal="fade">
+  <video class="video-strip__media" data-inview muted playsinline loop preload="none">
+    <source src="assets/video/franja-ramo.mp4" type="video/mp4" />
+  </video>
+  <div class="video-strip__caption">
     <span>El atelier · en movimiento</span>
     <span><em>※</em></span>
   </div>
@@ -202,9 +222,12 @@
   <div class="cats__track" id="cats-track"></div>
 </section>
 
-<!-- ─── Video breather ───────────────────────── -->
-<div class="video-gap video-gap--small" aria-hidden="true">
-  <div class="video-gap__caption">
+<!-- ─── Franja de video · Instagram ─── -->
+<div class="video-strip" data-reveal="fade">
+  <video class="video-strip__media" data-inview muted playsinline loop preload="none">
+    <source src="assets/video/franja-box.mp4" type="video/mp4" />
+  </video>
+  <div class="video-strip__caption">
     <span>@lima_flores · @limaflores.pe</span>
     <span><em>en Instagram.</em></span>
   </div>
@@ -281,9 +304,12 @@
 
 
 
-<!-- ─── Video breather ───────────────────────── -->
-<div class="video-gap" aria-hidden="true">
-  <div class="video-gap__caption">
+<!-- ─── Franja de video · frescura ─── -->
+<div class="video-strip" data-reveal="fade">
+  <video class="video-strip__media" data-inview muted playsinline loop preload="none">
+    <source src="assets/video/franja-tulipanes.mp4" type="video/mp4" />
+  </video>
+  <div class="video-strip__caption">
     <span>Tres veces por semana</span>
     <span><em>frescas.</em></span>
   </div>
@@ -420,10 +446,10 @@
   <div class="drawer__foot" id="cart-foot"></div>
 </aside>
 
-<script src="js/data.js"></script>
-<script src="js/subs.js"></script>
-<script src="js/lima.js"></script>
-<script src="js/home.js"></script>
+<script src="js/data.js?v=20260610-3"></script>
+<script src="js/subs.js?v=20260610-3"></script>
+<script src="js/lima.js?v=20260610-3"></script>
+<script src="js/home.js?v=20260610-3"></script>
 
 <!-- ─── Tweaks panel (React + Babel) ───────────── -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>

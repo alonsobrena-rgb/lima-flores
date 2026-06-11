@@ -48,43 +48,38 @@
     steps.forEach(s => io.observe(s));
   }
 
-  // ─── Instagram gallery ───────────────────────────
+  // ─── Instagram gallery — feed real con fotos de productos ─────
   const igGrid = document.getElementById('ig-grid');
   if (igGrid) {
-    // Mix one real photo + 5 SVG placeholders themed as IG posts
-    const posts = [
-      { real: true,  caption: 'Orquídeas Multicolor · La firma de la casa', likes: 248 },
-      { palette: '#C99CA9', name: 'Peonías de domingo', caption: 'Peonías y eucalipto · Sábado', likes: 156 },
-      { palette: '#B6855E', name: 'Lunes en el atelier', caption: 'Mesa de trabajo · 7:00 am', likes: 192 },
-      { palette: '#4F5C3F', name: 'Olivo + lavanda', caption: 'Provence en San Isidro', likes: 134 },
-      { palette: '#D4A5B5', name: 'Detalle ranúnculos', caption: 'Macro · ranúnculo crema', likes: 211 },
-      { palette: '#A57F45', name: 'Cinta de algodón', caption: 'Envoltorio para una entrega', likes: 98 },
-      { palette: '#E8DDD0', name: 'Caja Toscana', caption: 'Girasoles + trigo seco', likes: 167 },
-      { palette: '#5C6B4E', name: 'Hortensias azules', caption: 'Amalfi en vidrio soplado', likes: 223 },
-      { real: true,  caption: 'Misma serie · luz del taller', likes: 142 },
-      { palette: '#A8453C', name: 'Rosas rojas París', caption: 'Doce tallos · papel craft', likes: 305 },
-      { palette: '#B8935A', name: 'Bohemia', caption: 'Statice + craspedia + olivo', likes: 178 },
-      { palette: '#C89B7E', name: 'Eucalipto baby', caption: 'Detalle de hoja · macro', likes: 89 }
+    const captions = [
+      'La firma de la casa', 'Sábado en el atelier', 'Recién cortadas',
+      'Para alguien especial', 'Hecho a mano', 'Provence en Lima',
+      'Detalle · macro', 'Mesa de trabajo', 'Envuelto en papel',
+      'De temporada', 'Luz del taller', 'Listo para entregar'
     ];
-    igGrid.innerHTML = posts.map((p, i) => {
-      const media = p.real
-        ? `<img src="assets/orquideas.jpg" alt="${p.caption}" loading="lazy" />`
-        : placeholderSVG({ name: p.name, categoryLabel: '@lima_flores', palette: p.palette });
+    // Repartir 12 productos con foto a lo largo del catálogo
+    const withImg = LIMA.products.filter((p) => p.image);
+    const pick = [];
+    const stepN = Math.max(1, Math.floor(withImg.length / 12));
+    for (let i = 0; i < withImg.length && pick.length < 12; i += stepN) pick.push(withImg[i]);
+
+    igGrid.innerHTML = pick.map((p, i) => {
+      const likes = 96 + ((i * 53) % 240);
       return `
-        <a href="https://instagram.com/lima_flores" target="_blank" rel="noopener" class="ig-tile" data-cursor="link" style="--i:${i}">
-          ${media}
+        <a href="producto.html?id=${p.id}" class="ig-tile" data-cursor="link" style="--i:${i}">
+          <img src="${p.image}" alt="${p.name}" loading="lazy" />
           <div class="ig-tile__overlay">
             <div class="ig-tile__top">
-              <span>${String(i + 1).padStart(2, '0')} / ${String(posts.length).padStart(2, '0')}</span>
+              <span>${String(i + 1).padStart(2, '0')} / ${String(pick.length).padStart(2, '0')}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor" stroke="none"/></svg>
             </div>
             <div class="ig-tile__bottom">
-              <div class="ig-tile__likes">♡ ${p.likes}</div>
-              ${p.caption}
+              <div class="ig-tile__likes">♡ ${likes}</div>
+              ${captions[i % captions.length]}
             </div>
           </div>
         </a>`;
     }).join('');
-    [...igGrid.children].forEach((c, i) => c.style.setProperty('--i', i));
+    [...igGrid.children].forEach((c, i) => c.style.setProperty('--i', Math.min(i, 8)));
   }
 })();

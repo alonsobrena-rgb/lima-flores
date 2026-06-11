@@ -3,6 +3,7 @@ npm-debug.log*
 .DS_Store
 .env
 .railway/
+.claude/
 
 # Presupuestos / documentos privados — no publicar en el repo público
 presupuesto-*

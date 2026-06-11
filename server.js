@@ -124,9 +124,40 @@ const server = http.createServer(async (req, res) => {
     }
     const ext = path.extname(filePath).toLowerCase();
     const type = MIME[ext] || 'application/octet-stream';
+    // HTML/CSS/JS siempre revalidan (evita que el navegador muestre versiones viejas);
+    // imágenes/fuentes/videos sí se cachean (son grandes y casi nunca cambian).
+    const noCache = ext === '.html' || ext === '.css' || ext === '.js' || ext === '.json';
+    const cacheCtl = noCache ? 'no-cache' : 'public, max-age=3600';
+
+    // ─── Soporte de HTTP Range (necesario para hacer "seek"/scrubbing de video) ───
+    const range = req.headers.range;
+    if (range) {
+      const m = /^bytes=(\d*)-(\d*)$/.exec(range);
+      if (m) {
+        let start = m[1] === '' ? undefined : parseInt(m[1], 10);
+        let end = m[2] === '' ? undefined : parseInt(m[2], 10);
+        if (start === undefined) { start = Math.max(0, stat.size - (end || 0)); end = stat.size - 1; }
+        else if (end === undefined || end >= stat.size) { end = stat.size - 1; }
+        if (Number.isNaN(start) || start > end || start >= stat.size) {
+          res.writeHead(416, { 'Content-Range': `bytes */${stat.size}`, 'Accept-Ranges': 'bytes' });
+          return res.end();
+        }
+        res.writeHead(206, {
+          'Content-Type': type,
+          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': end - start + 1,
+          'Cache-Control': cacheCtl,
+        });
+        return fs.createReadStream(filePath, { start, end }).pipe(res);
+      }
+    }
+
     res.writeHead(200, {
       'Content-Type': type,
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+      'Content-Length': stat.size,
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': cacheCtl,
     });
     fs.createReadStream(filePath).pipe(res);
   });
