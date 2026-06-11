@@ -1,0 +1,10 @@
+const puppeteer=require('puppeteer');
+(async()=>{const b=await puppeteer.launch({headless:'new',args:['--no-sandbox']});const p=await b.newPage();
+await p.setViewport({width:390,height:844,deviceScaleFactor:2});
+await p.goto('http://localhost:3000/index.html',{waitUntil:'networkidle2'});
+const r=await p.evaluate(()=>{const vis=el=>{const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='none';};
+const sb=[...document.querySelectorAll('.section-bloom')].map(e=>vis(e));
+const ph=[...document.querySelectorAll('.philosophy__bloom')].map(e=>vis(e));
+const sw=document.documentElement.scrollWidth, cw=document.documentElement.clientWidth;
+return {sectionBloomsVisible:sb.filter(Boolean).length, philosophyVisible:ph.filter(Boolean).length, scrollWidth:sw, clientWidth:cw, horizontalOverflow: sw>cw+2};});
+console.log(JSON.stringify(r));await b.close();})();

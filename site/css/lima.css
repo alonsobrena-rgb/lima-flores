@@ -3394,3 +3394,133 @@ html, body, .header, .hero, .signature, .voices, .footer, .story, .promise,
   color: rgba(244,239,229,0.55);
   text-align: center;
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   LANDING CLARA — todo sobre crema + flores flotantes (recortes del catálogo)
+   Scope: body.home (solo la home; los footers de otras páginas no cambian).
+   Repinta .marquee/.signature/.voices/.footer de --ink → --bone y su texto
+   bone → ink. El acento sigue rosa (--accent).
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Marquee superior ── */
+body.home .marquee {
+  background: var(--bone);
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+body.home .marquee__item { color: var(--ink); }
+
+/* ── Firma · Orquídeas (No. 01) ── */
+body.home .signature { background: var(--bone); color: var(--ink); }
+body.home .signature::before { color: rgba(158,43,94,0.18); }   /* "No. 01" en rosa tenue */
+body.home .signature__copy h3.eyebrow { color: var(--ink-soft); }
+body.home .signature__copy h3.eyebrow::before { background: var(--ink-soft); }
+body.home .signature__title { color: var(--ink); }
+body.home .signature__desc { color: var(--ink-soft); }
+body.home .signature__meta { border-top-color: rgba(27,26,23,0.12); }
+body.home .signature__meta > div { border-bottom-color: rgba(27,26,23,0.12); }
+body.home .signature__meta > div:nth-child(even) { border-left-color: rgba(27,26,23,0.12); }
+body.home .signature__meta dt { color: var(--ink-soft); }
+body.home .signature__meta dd { color: var(--ink); }
+body.home .signature__price .cur { color: var(--ink-soft); }
+body.home .signature__price .amt { color: var(--ink); }
+body.home .signature__price .from { color: var(--ink-soft); }
+/* La media de la firma ahora es el recorte de la orquídea flotando (no foto que rellena un cuadro) */
+body.home .signature__media {
+  background: transparent;
+  aspect-ratio: auto;
+  overflow: visible;
+}
+body.home .signature__media img {
+  width: 100%; height: auto;
+  object-fit: contain;
+  transform: none;
+  filter: drop-shadow(0 30px 50px rgba(27,26,23,0.16));
+}
+body.home .signature__media:hover img { transform: none; }
+body.home .signature__media::after { content: none; }
+
+/* ── Voces (No. 06) ── */
+body.home .voices { background: var(--bone); color: var(--ink); }
+body.home .voices .section-head h2 { color: var(--ink); }
+body.home .voices .index-mark { color: var(--ink-soft); }
+body.home .voices .index-mark::before { background: var(--ink-soft); }
+body.home .voice { border-top-color: rgba(27,26,23,0.14); }
+body.home .voice__quote { color: var(--ink); }
+body.home .voice__byline { color: var(--ink-soft); }
+body.home .voice__byline .name { color: var(--ink); }
+
+/* ── Footer (solo en la home) ── */
+body.home .footer { background: var(--bone); color: var(--ink); }
+body.home .footer__brand { color: var(--ink); }
+body.home .footer__brand-tag { color: var(--ink-soft); }
+body.home .footer__col h4 { color: var(--ink-soft); }
+body.home .footer__col a { color: var(--ink); }
+body.home .footer__col a:hover { color: var(--accent); }
+body.home .footer__big { color: rgba(27,26,23,0.06); }
+body.home .footer__bottom { border-top-color: rgba(27,26,23,0.12); color: var(--ink-soft); }
+body.home .footer__bottom a { color: var(--ink-soft); }
+body.home .footer__bottom a:hover { color: var(--ink); }
+
+/* ── Manifiesto: la flor del bloom queda estática (se quitó el scroll-anim) ── */
+body.home .philosophy__bloom img { transform: rotate(-3deg); }
+
+/* "No. 02 · Manifiesto" alineado con el tope del título "No vendemos flores."
+   (había un top:140px heredado del sticky original que lo empujaba 140px abajo) */
+body.home .philosophy__left { top: 0; }
+
+/* ════════════════════════════════════════════════════════════════════
+   .section-bloom — recorte de flor flotando en una sección (decorativo)
+   Va detrás del contenido (z-index:1); el contenido sube a z-index:2.
+   Oculto en móvil para mantener el texto limpio.
+   ════════════════════════════════════════════════════════════════════ */
+.section-bloom {
+  position: absolute;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+  width: clamp(190px, 20vw, 320px);
+}
+.section-bloom img {
+  width: 100%; height: auto; display: block;
+  filter: drop-shadow(0 28px 46px rgba(27,26,23,0.14));
+}
+.section-bloom--left  { left: 1.5%;  bottom: 6%; }
+.section-bloom--right { right: 1.5%; top: 7%; }
+@media (max-width: 900px) { .section-bloom { display: none; } }
+
+/* Las secciones host deben ser contenedor de posicionamiento, si no el
+   .section-bloom (absolute) escapa al root y aparece arriba de la página. */
+body.home .cats,
+body.home .ig-section,
+body.home .story,
+body.home .subs { position: relative; }
+
+/* El contenido de cada sección host se mantiene sobre la flor */
+body.home .cats .container,
+body.home .cats__track,
+body.home .ig-section .container,
+body.home .story .container,
+body.home .subs .container { position: relative; z-index: 2; }
+
+/* Posiciones/tamaños por sección — flores GRANDES llenando la zona vacía.
+   (Las hi-res van bien grandes; las baja-res se topan en ~su px nativo para no pixelar.) */
+/* Catálogo: las flores del box llenan la banda superior derecha (el tallo/maceta
+   queda detrás de las tarjetas — se lee como flor grande). */
+body.home .cats .section-bloom       { right: 1%;  top: 0%;  bottom: auto; transform: none; width: clamp(340px, 35vw, 470px); }
+body.home .ig-section .section-bloom  { right: 1%;  top: 4%;  width: clamp(210px, 21vw, 300px); }
+body.home .story .section-bloom       { left: auto; right: 1.5%; bottom: 8%; width: clamp(240px, 24vw, 330px); }
+/* Suscripción: arriba-derecha, en el vacío junto al lead y sobre las tarjetas */
+body.home .subs .section-bloom        { left: auto; right: 2%; top: 13%; width: clamp(260px, 26vw, 340px); }
+
+/* Manifiesto (No.02): el ramo vintage más grande, subido para llenar la columna izquierda */
+body.home .philosophy__bloom { width: clamp(320px, 32vw, 470px); left: -1%; bottom: 16%; }
+
+/* Menos espacio en blanco: apretar el padding de las secciones aireadas
+   (base era clamp(96px,14vw,200px)) */
+body.home .cats,
+body.home .ig-section,
+body.home .story,
+body.home .subs,
+body.home .voices { padding-block: clamp(60px, 9vw, 130px); }

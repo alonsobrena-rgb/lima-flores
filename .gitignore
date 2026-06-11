@@ -7,3 +7,4 @@ npm-debug.log*
 
 # Presupuestos / documentos privados — no publicar en el repo público
 presupuesto-*
+tools/hero-try/

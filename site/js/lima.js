@@ -125,67 +125,10 @@
     }
   }
 
-  // ─── Flor del manifiesto (No. 02) — animación ligada al scroll ───
-  // JS puro: se mueve en todos los navegadores (no depende de animation-timeline:view()).
-  const bloomImg = document.querySelector('.philosophy__bloom img');
-  if (bloomImg) {
-    const bloomSec = bloomImg.closest('#philosophy') || bloomImg.closest('.section') || bloomImg.parentElement;
-    let bloomTick = false;
-    const applyBloom = () => {
-      bloomTick = false;
-      const r = bloomSec.getBoundingClientRect();
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-      const prog = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
-      const ty = 70 - prog * 140;    // 70px  → -70px
-      const rot = -7 + prog * 14;    // -7deg → 7deg
-      const sc = 0.9 + prog * 0.18;  // 0.90  → 1.08
-      bloomImg.style.transform = `translateY(${ty}px) rotate(${rot}deg) scale(${sc})`;
-    };
-    const onBloom = () => { if (!bloomTick) { bloomTick = true; requestAnimationFrame(applyBloom); } };
-    window.addEventListener('scroll', onBloom, { passive: true });
-    window.addEventListener('resize', onBloom, { passive: true });
-    applyBloom();
-  }
-
-  // ─── Hero video: avance ligado al scroll (scroll-scrubbing) ───
-  const heroVideo = document.querySelector('video[data-scrub]');
-  if (heroVideo) {
-    let vdur = 0, vtick = false;
-    const setDur = () => { vdur = heroVideo.duration || 0; };
-    heroVideo.addEventListener('loadedmetadata', setDur);
-    if (heroVideo.readyState >= 1) setDur();
-    const scrub = () => {
-      vtick = false;
-      if (!vdur) return;
-      const vh = window.innerHeight || 800;
-      const prog = Math.max(0, Math.min(1, window.scrollY / (vh * 1.15)));
-      const t = prog * Math.max(0, vdur - 0.05);
-      if (Math.abs(heroVideo.currentTime - t) > 0.015) { try { heroVideo.currentTime = t; } catch (e) {} }
-    };
-    const onScrub = () => { if (!vtick) { vtick = true; requestAnimationFrame(scrub); } };
-    window.addEventListener('scroll', onScrub, { passive: true });
-    // "Prime" el decodificado (móvil) y deja el primer frame listo
-    heroVideo.addEventListener('loadeddata', () => {
-      const pr = heroVideo.play();
-      if (pr && pr.then) pr.then(() => { heroVideo.pause(); scrub(); }).catch(() => scrub());
-      else { try { heroVideo.pause(); } catch (e) {} scrub(); }
-    });
-  }
-
-  // ─── Videos en loop (franjas + firma): play sólo en viewport ───
-  const loopVideos = document.querySelectorAll('video[data-inview]');
-  if (loopVideos.length && 'IntersectionObserver' in window) {
-    const vio = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        const v = e.target;
-        if (e.isIntersecting) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
-        else { v.pause(); }
-      });
-    }, { threshold: 0.15 });
-    loopVideos.forEach((v) => vio.observe(v));
-  } else {
-    loopVideos.forEach((v) => { const p = v.play && v.play(); if (p && p.catch) p.catch(() => {}); });
-  }
+  // ─── (Animaciones de scroll retiradas) ───
+  // Se quitaron el scrubbing del hero, el parallax de la flor del manifiesto y
+  // los loops de video de las franjas. La landing ahora es estática (flores
+  // flotantes como recortes). Los .mp4 siguen en assets/video/ por si se retoman.
 
   // ─── Counters ────────────────────────────────────
   document.querySelectorAll('[data-counter]').forEach((el) => {
