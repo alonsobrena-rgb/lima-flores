@@ -42,10 +42,34 @@ function send(res, status, body, type = 'text/plain; charset=utf-8') {
   res.end(body);
 }
 
+// ─── CORS para el app React (deploy aparte) ───
+// Solo afecta peticiones cross-origin desde orígenes permitidos; el sitio vanilla
+// es same-origin y no se ve afectado. Configurable con CORS_ORIGINS (coma-sep).
+const CORS_ORIGINS = new Set(
+  (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:4173')
+    .split(',').map((s) => s.trim()).filter(Boolean)
+);
+function applyCors(req, res) {
+  const origin = req.headers.origin;
+  if (origin && CORS_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   let parsed;
   try { parsed = new URL(req.url, `http://${req.headers.host || 'localhost'}`); }
   catch { return send(res, 400, 'bad url'); }
+
+  // ─── CORS + preflight para /api/* ───
+  if (parsed.pathname.startsWith('/api/')) {
+    applyCors(req, res);
+    if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+  }
 
   // ─── /api/* → función serverless adaptada ───
   if (parsed.pathname === '/api/quote') {
