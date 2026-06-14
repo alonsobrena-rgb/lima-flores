@@ -1,0 +1,271 @@
+// Google Maps (Places) loader + helpers para el checkout.
+// La key viene de VITE_GOOGLE_MAPS_KEY (ver .env.local). Sin key → no-op.
+// Portado de site/js/geocoder.js (misma estrategia de Autocomplete + distrito).
+
+const KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY as string | undefined;
+
+// Lima Metropolitana bounding box (incluye Callao y balnearios sur).
+export const LIMA_BOUNDS = { sw: { lat: -12.50, lng: -77.25 }, ne: { lat: -11.75, lng: -76.65 } };
+
+export const mapsAvailable = () => !!KEY;
+
+let sdkPromise: Promise<any> | null = null;
+
+export function loadMaps(): Promise<any> {
+  const w = window as any;
+  if (w.google?.maps?.places) return Promise.resolve(w.google);
+  if (sdkPromise) return sdkPromise;
+  if (!KEY) return Promise.reject(new Error('no-key'));
+  sdkPromise = new Promise((resolve, reject) => {
+    const cb = '_gmaps_cb_' + Date.now().toString(36);
+    w[cb] = () => { delete w[cb]; resolve(w.google); };
+    const s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(KEY) +
+            '&libraries=places&v=weekly&loading=async&callback=' + cb;
+    s.async = true; s.defer = true;
+    s.onerror = () => reject(new Error('sdk-fail'));
+    document.head.appendChild(s);
+  });
+  return sdkPromise;
+}
+
+// Google no devuelve el distrito siempre en el mismo campo: devolvemos TODOS
+// los candidatos en orden de prioridad para hacer match tolerante.
+export function extractDistrictCandidates(components: any[]): string[] {
+  if (!Array.isArray(components)) return [];
+  const wanted = ['administrative_area_level_3', 'sublocality_level_1', 'sublocality', 'locality', 'administrative_area_level_2'];
+  const out: string[] = [];
+  for (const want of wanted) {
+    for (const c of components) {
+      if (!(c.types || []).includes(want)) continue;
+      if (c.long_name && !out.includes(c.long_name)) out.push(c.long_name);
+      if (c.short_name && !out.includes(c.short_name)) out.push(c.short_name);
+    }
+  }
+  return out;
+}
+
+export function extractDistrict(components: any[]): string | null {
+  return extractDistrictCandidates(components)[0] || null;
+}
+
+export type PlaceResult = {
+  lat: number;
+  lng: number;
+  district: string | null;
+  districtCandidates: string[];
+  formatted: string;
+  placeId?: string;
+};
+
+// ── Fix móvil (portado de site/js/geocoder.js, probado en producción) ──
+// En Android Chrome el dropdown .pac-container queda detrás del teclado y el
+// tap en una sugerencia hace blur antes del mousedown → la selección se pierde
+// ("se bloquea la línea"). Reposicionamos con visualViewport y convertimos el
+// touchstart en el mousedown que Google escucha.
+let _mobileFixDone = false;
+function setupMobileDropdownFix(inputEl: HTMLInputElement) {
+  if (_mobileFixDone) return;
+  _mobileFixDone = true;
+
+  const isMobile =
+    window.matchMedia('(max-width: 768px)').matches ||
+    (window.matchMedia('(pointer: coarse)').matches && window.innerWidth <= 900);
+
+  // En desktop, Google maneja el click sobre .pac-item de forma nativa y bien.
+  // El observer + `mousedown preventDefault` de abajo existen SOLO para el bug
+  // del teclado virtual en móvil; en desktop ese preventDefault interfería con
+  // la selección de la sugerencia ("no puedo clickear las sugerencias").
+  // Igual que el geocoder.js del sitio vanilla (probado en prod), salimos aquí.
+  if (!isMobile) return;
+
+  function getPac(): HTMLElement | null {
+    const list = document.querySelectorAll<HTMLElement>('.pac-container');
+    return list[list.length - 1] || null;
+  }
+
+  let touchingPac = false;
+
+  function position() {
+    if (!isMobile || touchingPac) return;
+    const pac = getPac();
+    if (!pac) return;
+    const vv = window.visualViewport;
+    const vvTop = vv ? vv.offsetTop : 0;
+    const vvHeight = vv ? vv.height : window.innerHeight;
+    const vvWidth = vv ? vv.width : document.documentElement.clientWidth;
+    const inputRect = inputEl.getBoundingClientRect();
+    const margin = 8;
+    const minHeight = 160;
+
+    const spaceBelow = (vvTop + vvHeight) - inputRect.bottom - margin;
+    const spaceAbove = inputRect.top - vvTop - margin;
+
+    pac.style.setProperty('position', 'fixed', 'important');
+    pac.style.setProperty('left', margin + 'px', 'important');
+    pac.style.setProperty('width', (vvWidth - margin * 2) + 'px', 'important');
+    pac.style.setProperty('max-width', 'none', 'important');
+    pac.style.setProperty('z-index', '999999', 'important');
+    pac.style.setProperty('overflow-y', 'auto', 'important');
+
+    if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
+      pac.style.setProperty('top', (inputRect.bottom + 4) + 'px', 'important');
+      pac.style.setProperty('bottom', 'auto', 'important');
+      pac.style.setProperty('max-height', Math.max(spaceBelow, minHeight) + 'px', 'important');
+    } else {
+      pac.style.setProperty('top', 'auto', 'important');
+      pac.style.setProperty('bottom', (window.innerHeight - inputRect.top + 4) + 'px', 'important');
+      pac.style.setProperty('max-height', Math.max(spaceAbove, minHeight) + 'px', 'important');
+    }
+  }
+
+  // El .pac-container se crea diferido la primera vez que el usuario escribe.
+  let retry: ReturnType<typeof setInterval> | null = null;
+  function chase() {
+    if (!isMobile) return;
+    if (retry) clearInterval(retry);
+    let n = 0;
+    retry = setInterval(() => {
+      position();
+      if (++n > 12 && retry) { clearInterval(retry); retry = null; }
+    }, 80);
+  }
+  inputEl.addEventListener('focus', chase);
+  inputEl.addEventListener('input', () => requestAnimationFrame(position));
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', position);
+    window.visualViewport.addEventListener('scroll', position);
+  }
+  window.addEventListener('resize', position);
+  window.addEventListener('scroll', position, { passive: true });
+
+  // touchstart sobre .pac-item → preventDefault (evita el blur) + mousedown
+  // sintético para que Google registre la selección. En desktop basta con
+  // preventDefault del mousedown para no perder el foco del input.
+  const obs = new MutationObserver((muts) => {
+    for (const m of muts) {
+      for (const n of m.addedNodes) {
+        if (n.nodeType === 1 && (n as HTMLElement).classList?.contains('pac-container')) {
+          const pac = n as HTMLElement;
+          pac.addEventListener('mousedown', (e) => e.preventDefault());
+          pac.addEventListener('touchstart', (e) => {
+            const item = (e.target as HTMLElement).closest('.pac-item');
+            if (!item) return;
+            touchingPac = true;
+            e.preventDefault();
+            item.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+            item.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+          }, { passive: false });
+          pac.addEventListener('touchend', () => { setTimeout(() => { touchingPac = false; }, 50); }, { passive: true });
+          pac.addEventListener('touchcancel', () => { touchingPac = false; }, { passive: true });
+          position();
+        }
+      }
+    }
+  });
+  obs.observe(document.body, { childList: true });
+}
+
+// attachAutocomplete(inputEl, onPlace) — Autocomplete + fixes móvil/tap.
+// Devuelve el widget (o null si Maps no está disponible).
+export async function attachAutocomplete(
+  inputEl: HTMLInputElement,
+  onPlace: (p: PlaceResult) => void,
+): Promise<any | null> {
+  // Idempotente: React StrictMode (dev) monta el efecto dos veces y la versión
+  // async hace que el cleanup corra antes de que `ac` exista → se enganchaban
+  // dos Autocomplete y aparecían dos .pac-container superpuestos. Reusamos el
+  // widget si el input ya tiene uno.
+  const existing = (inputEl as any)._lfAutocomplete;
+  if (existing) { (inputEl as any)._lfOnPlace = onPlace; return existing; }
+
+  let g: any;
+  try { g = await loadMaps(); } catch { return null; }
+  // Si otra invocación (StrictMode) creó el widget mientras esperábamos el SDK,
+  // reusamos ese pero ACTUALIZANDO el callback al más reciente. Olvidarlo dejaba
+  // el callback del primer montaje (ya `cancelled`) → place_changed disparaba
+  // pero applyPlace/setPlace nunca corría (el input se llenaba, el mapa no).
+  if ((inputEl as any)._lfAutocomplete) {
+    (inputEl as any)._lfOnPlace = onPlace;
+    return (inputEl as any)._lfAutocomplete;
+  }
+  const ac = new g.maps.places.Autocomplete(inputEl, {
+    componentRestrictions: { country: 'pe' },
+    fields: ['geometry', 'formatted_address', 'address_components', 'place_id', 'name'],
+    // Sin `types` → Autocomplete devuelve TODO: direcciones + establecimientos
+    // (colegios, hospitales, locales, parques, etc.). Restringir a ['address']
+    // ocultaba esos lugares. Mezclar 'establishment'+'geocode' explícitamente no
+    // está permitido en el widget legacy, así que lo omitimos por completo.
+    bounds: new g.maps.LatLngBounds(LIMA_BOUNDS.sw, LIMA_BOUNDS.ne),
+    strictBounds: false,
+  });
+  (inputEl as any)._lfAutocomplete = ac;
+  (inputEl as any)._lfOnPlace = onPlace;
+  setupMobileDropdownFix(inputEl);
+  ac.addListener('place_changed', () => {
+    const place = ac.getPlace();
+    if (!place?.geometry?.location) return; // Enter sin elegir sugerencia → ignorar
+    const candidates = extractDistrictCandidates(place.address_components);
+    const cb = (inputEl as any)._lfOnPlace || onPlace; // usa el callback más reciente
+    // Para establecimientos (colegio, hospital…) anteponemos el nombre del lugar
+    // a la dirección: "Hospital Rebagliati, Av. Rebagliati 490, Jesús María".
+    const placeName = (place as any).name as string | undefined;
+    const addr = place.formatted_address || '';
+    const formatted = placeName && addr && !addr.toLowerCase().startsWith(placeName.toLowerCase())
+      ? `${placeName}, ${addr}`
+      : (addr || placeName || inputEl.value);
+    cb({
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+      district: candidates[0] || null,
+      districtCandidates: candidates,
+      formatted,
+      placeId: place.place_id,
+    });
+  });
+  return ac;
+}
+
+// Geocodifica texto libre (fallback cuando el usuario no eligió sugerencia).
+export async function geocodeText(text: string): Promise<PlaceResult | null> {
+  let g: any;
+  try { g = await loadMaps(); } catch { return null; }
+  return new Promise((resolve) => {
+    new g.maps.Geocoder().geocode(
+      {
+        address: text,
+        componentRestrictions: { country: 'PE' },
+        bounds: new g.maps.LatLngBounds(LIMA_BOUNDS.sw, LIMA_BOUNDS.ne),
+      },
+      (results: any[], status: string) => {
+        const r = status === 'OK' && results && results[0];
+        if (!r?.geometry?.location) return resolve(null);
+        const candidates = extractDistrictCandidates(r.address_components);
+        resolve({
+          lat: r.geometry.location.lat(),
+          lng: r.geometry.location.lng(),
+          district: candidates[0] || null,
+          districtCandidates: candidates,
+          formatted: r.formatted_address || text,
+          placeId: r.place_id,
+        });
+      },
+    );
+  });
+}
+
+// Centroides aproximados por distrito — último recurso para que el pedido
+// siempre lleve lat/lng numéricos (api/order los exige).
+export const DISTRICT_CENTROIDS: Record<string, { lat: number; lng: number }> = {
+  'Miraflores': { lat: -12.1211, lng: -77.0297 },
+  'San Isidro': { lat: -12.0976, lng: -77.0365 },
+  'Surco': { lat: -12.1359, lng: -76.9933 },
+  'Barranco': { lat: -12.1409, lng: -77.0204 },
+  'San Borja': { lat: -12.1066, lng: -76.9990 },
+  'La Molina': { lat: -12.0856, lng: -76.9479 },
+  'Magdalena': { lat: -12.0908, lng: -77.0709 },
+  'Jesús María': { lat: -12.0768, lng: -77.0479 },
+  'Lince': { lat: -12.0833, lng: -77.0333 },
+  'Pueblo Libre': { lat: -12.0719, lng: -77.0631 },
+  'Otro': { lat: -12.0464, lng: -77.0428 }, // centro de Lima
+};

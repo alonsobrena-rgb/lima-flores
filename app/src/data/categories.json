@@ -1,0 +1,22 @@
+[
+  {
+    "slug": "plantas",
+    "label": "Plantas",
+    "count": 8
+  },
+  {
+    "slug": "arreglos",
+    "label": "Arreglos",
+    "count": 24
+  },
+  {
+    "slug": "floreros",
+    "label": "Floreros",
+    "count": 4
+  },
+  {
+    "slug": "ramos",
+    "label": "Ramos",
+    "count": 9
+  }
+]

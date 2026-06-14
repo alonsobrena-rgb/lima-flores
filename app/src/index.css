@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Lima Flores — shadcn tokens mapeados a la paleta de marca
+   (ver site/css/lf-design/tokens/colors.css). HSL triplets.
+   ============================================================ */
+@layer base {
+  :root {
+    --background: 44 33% 94%;          /* ivory-100  #F6F3EC */
+    --foreground: 26 9% 15%;           /* ink-900    #2A2623 */
+    --card: 0 0% 100%;
+    --card-foreground: 26 9% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 26 9% 15%;
+    --primary: 333 57% 39%;            /* rosa-500   #9E2B5E */
+    --primary-foreground: 40 33% 97%;  /* ivory-50   #FBF9F4 */
+    --secondary: 40 28% 91%;           /* ivory-200  #EFEAE0 */
+    --secondary-foreground: 26 9% 15%;
+    --muted: 40 28% 91%;
+    --muted-foreground: 30 6% 41%;     /* ink-500    #6E6862 */
+    --accent: 333 57% 39%;
+    --accent-foreground: 40 33% 97%;
+    --destructive: 354 51% 47%;        /* danger     #B23A48 */
+    --destructive-foreground: 40 33% 97%;
+    --border: 38 25% 85%;              /* ivory-300  #E4DDD0 */
+    --input: 38 25% 85%;
+    --ring: 333 57% 39%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Selección de texto en rosa de marca (detalle "diseñado") */
+  ::selection { background: hsl(var(--primary) / 0.18); color: hsl(var(--foreground)); }
+
+  /* Focus visible elegante: anillo rosa con offset, solo teclado */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--primary) / 0.7);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Scrollbar fino y cálido (WebKit) */
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border: 3px solid hsl(var(--background)); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(30 6% 70%); }
+}
+
+@layer components {
+  /* Panel "esmerilado" editorial: ivory translúcido sobre el wash floral,
+     con hairline y sombra de pétalo. Da el look de papel flotando. */
+  .frost {
+    background: hsl(var(--card) / 0.62);
+    backdrop-filter: blur(8px) saturate(1.04);
+    -webkit-backdrop-filter: blur(8px) saturate(1.04);
+    border: 1px solid hsl(var(--card) / 0.6);
+    box-shadow: 0 1px 0 hsl(0 0% 100% / 0.5) inset, 0 18px 50px -28px rgba(42, 38, 35, 0.28);
+  }
+  /* Subrayado animado para links de navegación / texto */
+  .link-underline {
+    background-image: linear-gradient(hsl(var(--primary)), hsl(var(--primary)));
+    background-size: 0% 1.5px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-underline:hover { background-size: 100% 1.5px; }
+  /* Press sutil para botones (sin bounce, marca pide quietud) */
+  .press { transition: transform 0.18s cubic-bezier(0.22,1,0.36,1); }
+  .press:active { transform: scale(0.975); }
+}
+
+/* ============================================================
+   Google Places dropdown (.pac-container vive en <body>, fuera
+   de React). Sin esto queda sin estilo/mal posicionado y "tapa"
+   el input de dirección. Portado de site/css/lima.css.
+   ============================================================ */
+.pac-container {
+  font-family: 'Jost', system-ui, sans-serif;
+  border-radius: 4px;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 8px 28px rgba(42, 38, 35, 0.14);
+  background: #fff;
+  z-index: 9999 !important;
+}
+.pac-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
+  border-top: 1px solid hsl(var(--border) / 0.6);
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+}
+.pac-item:hover { background: hsl(var(--secondary)); }
+.pac-item-query { color: hsl(var(--foreground)); font-weight: 500; font-size: 14px; }
+.pac-matched { color: hsl(var(--primary)); }
+.pac-logo::after { margin: 4px 8px; }
+
+@media (max-width: 768px) {
+  .pac-container {
+    width: calc(100vw - 24px) !important;
+    max-width: 100vw !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  }
+  .pac-item { padding: 14px 16px; font-size: 14px; line-height: 1.4; }
+  .pac-item-query { font-size: 15px; }
+}
+
+/* ============================================================
+   Fondo ambiental floral (componente Ambient) — pétalos + grano
+   ============================================================ */
+@keyframes lf-petal-fall {
+  0%   { transform: translate3d(0, -14vh, 0) rotate(0deg); opacity: 0; }
+  8%   { opacity: var(--petal-opacity, 0.5); }
+  92%  { opacity: var(--petal-opacity, 0.5); }
+  100% { transform: translate3d(var(--petal-drift, 60px), 114vh, 0) rotate(var(--petal-spin, 200deg)); opacity: 0; }
+}
+.lf-petal {
+  position: absolute;
+  top: 0;
+  will-change: transform, opacity;
+  animation-name: lf-petal-fall;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+}
+
+/* Manchas de acuarela que respiran muy lento (transform-only, GPU) */
+@keyframes lf-wash-a { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(4%, -3%, 0) scale(1.12); } }
+@keyframes lf-wash-b { 0%,100% { transform: translate3d(0,0,0) scale(1.05); } 50% { transform: translate3d(-5%, 4%, 0) scale(0.95); } }
+@keyframes lf-wash-c { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(3%, 5%, 0) scale(1.1); } }
+.lf-wash { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
+
+/* Accesibilidad: sin animaciones para quien las desactiva en el SO */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .lf-petal { display: none; }
+}

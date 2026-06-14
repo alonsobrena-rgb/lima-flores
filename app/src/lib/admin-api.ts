@@ -1,0 +1,50 @@
+// Helpers compartidos para el panel admin (Pedidos · Productos · Studio).
+// El admin habla con el backend Node; si se sirve aparte, VITE_API_BASE apunta
+// a Railway. Vacío = mismo origen. Siempre con credentials para la cookie.
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
+
+export const apiUrl = (path: string) => API_BASE + path;
+
+// Resuelve la ruta de una imagen para mostrarla desde el admin:
+// - URL absoluta → tal cual
+// - /api/... (imagen subida a la BD) → prefija el backend
+// - /products/x.jpg → servida por el origen propio del app
+export function resolveImg(path?: string | null): string {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
+  if (path.startsWith('/api/')) return apiUrl(path);
+  return path;
+}
+
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    r.readAsDataURL(file);
+  });
+}
+
+export class AuthError extends Error {
+  constructor() { super('Sesión expirada'); this.name = 'AuthError'; }
+}
+
+async function parse(r: Response) {
+  const data = await r.json().catch(() => ({}));
+  if (r.status === 401 || r.status === 403) throw new AuthError();
+  if (!r.ok) throw new Error((data as any).error || 'HTTP ' + r.status);
+  return data;
+}
+
+export async function adminGet(path: string) {
+  return parse(await fetch(apiUrl(path), { credentials: 'include' }));
+}
+
+export async function adminSend(path: string, method: string, body?: unknown) {
+  return parse(await fetch(apiUrl(path), {
+    method,
+    credentials: 'include',
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  }));
+}

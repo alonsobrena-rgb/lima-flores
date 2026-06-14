@@ -1,0 +1,18 @@
+[
+  { "id": "ramo-de-24-rosas", "name": "Ramo de 24 Rosas", "price": 160, "category": "Ramos", "image": "/products/ramo-de-24-rosas.jpg" },
+  { "id": "box-de-luxe", "name": "Box de Luxe", "price": 350, "category": "Arreglos", "image": "/products/box-de-luxe.jpg" },
+  { "id": "florero-de-20-tulipanes-2", "name": "Florero de 20 Tulipanes", "price": 275, "category": "Floreros", "image": "/products/florero-de-20-tulipanes-2.jpg" },
+  { "id": "orquidea-rosado-vintage", "name": "Orquídea Rosado Vintage", "price": 200, "category": "Plantas", "image": "/products/orquidea-rosado-vintage.jpg" },
+  { "id": "ramo-de-10-tulipanes", "name": "Ramo de 10 Tulipanes", "price": 185, "category": "Ramos", "image": "/products/ramo-de-10-tulipanes.jpg" },
+  { "id": "box-sensacion", "name": "BOX Sensación", "price": 225, "category": "Arreglos", "image": "/products/box-sensacion.jpg" },
+  { "id": "tulipanes-de-amor", "name": "Tulipanes de Amor", "price": 195, "category": "Floreros", "image": "/products/tulipanes-de-amor.jpg" },
+  { "id": "orquidea-sunrise-de-dos-varas", "name": "Orquídea Sunrise", "price": 215, "category": "Plantas", "image": "/products/orquidea-sunrise-de-dos-varas.jpg" },
+  { "id": "ramo-de-flores-vintage", "name": "Ramo de Flores Vintage", "price": 180, "category": "Ramos", "image": "/products/ramo-de-flores-vintage.jpg" },
+  { "id": "arreglo-rossie", "name": "Arreglo Rossie", "price": 245, "category": "Arreglos", "image": "/products/arreglo-rossie.jpg" },
+  { "id": "florero-de-10-tulipanes-2", "name": "Florero de 10 Tulipanes", "price": 195, "category": "Floreros", "image": "/products/florero-de-10-tulipanes-2.jpg" },
+  { "id": "orquideas-grandes-en-maceta", "name": "Orquídeas Grandes en Maceta", "price": 200, "category": "Plantas", "image": "/products/orquideas-grandes-en-maceta.jpg" },
+  { "id": "ramo-luciana", "name": "Ramo Luciana", "price": 175, "category": "Ramos", "image": "/products/ramo-luciana.jpg" },
+  { "id": "box-valentina", "name": "Box Valentina", "price": 250, "category": "Arreglos", "image": "/products/box-valentina.jpg" },
+  { "id": "arreglo-andrea", "name": "Arreglo Andrea", "price": 165, "category": "Arreglos", "image": "/products/arreglo-andrea.jpg" },
+  { "id": "anturios-rosados-en-maceta", "name": "Anturios Rosados en Maceta", "price": 145, "category": "Plantas", "image": "/products/anturios-rosados-en-maceta.jpg" }
+]
