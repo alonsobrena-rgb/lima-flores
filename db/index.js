@@ -4,15 +4,23 @@
 // /api/order responderá 503 en vez de crashear el server).
 'use strict';
 
-const { Pool } = require('pg');
-
 const DATABASE_URL = process.env.DATABASE_URL || '';
-const enabled = !!DATABASE_URL;
+// PG_MEM=1 → Postgres en memoria (pg-mem) para desarrollo/pruebas sin servidor.
+// Carga perezosa: en producción nunca se importa pg-mem.
+const USE_PG_MEM = process.env.PG_MEM === '1';
+const enabled = !!DATABASE_URL || USE_PG_MEM;
 
 let pool = null;
 let migrated = false;
 
-if (enabled) {
+if (USE_PG_MEM) {
+  const { newDb } = require('pg-mem');
+  const mem = newDb();
+  const pg = mem.adapters.createPg();
+  pool = new pg.Pool();
+  console.log('[db] usando pg-mem (Postgres en memoria) — solo dev/pruebas');
+} else if (DATABASE_URL) {
+  const { Pool } = require('pg');
   // Railway expone DATABASE_URL con SSL requerido. Aceptamos cert no verificado
   // porque es comunicación intra-Railway, no internet expuesto.
   pool = new Pool({
@@ -69,6 +77,65 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE INDEX IF NOT EXISTS orders_status_idx     ON orders (status);
 CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at DESC);
+
+-- Tarjeta de regalo autogenerada (PNG) a partir de card_note.
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_template     TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_png          BYTEA;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_generated_at TIMESTAMPTZ;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_error        TEXT;
+
+-- Catálogo editable desde el admin. Se siembra una vez desde db/products.seed.json
+-- (ver db/products-store.js → ensureSeeded). Tras la siembra, esta tabla es la
+-- fuente de verdad; el JSON queda solo como snapshot inicial.
+CREATE TABLE IF NOT EXISTS products (
+  id              TEXT PRIMARY KEY,
+  name            TEXT NOT NULL,
+  category        TEXT,
+  category_label  TEXT,
+  price           NUMERIC,
+  image           TEXT,           -- imagen principal (ruta /products/x.jpg o URL absoluta)
+  images          JSONB,          -- galería (array de rutas)
+  palette         TEXT,
+  short_desc      TEXT,
+  description     TEXT,
+  tags            JSONB,
+  badge           TEXT,
+  details         JSONB,
+  active          BOOLEAN NOT NULL DEFAULT TRUE,
+  sort_order      INTEGER NOT NULL DEFAULT 0,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS products_active_idx ON products (active);
+CREATE INDEX IF NOT EXISTS products_sort_idx   ON products (sort_order, created_at);
+
+-- Imágenes subidas desde el admin. En Railway el disco es efímero, así que el
+-- binario vive en la BD y se sirve por GET /api/products/img/:id.
+CREATE TABLE IF NOT EXISTS product_images (
+  id          TEXT PRIMARY KEY,
+  product_id  TEXT,
+  data        BYTEA NOT NULL,
+  mime        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Ads generados con Higgsfield (Marketing Studio). El binario (PNG/MP4) vive en
+-- la BD por la misma razón que las imágenes. Ver integrations/higgsfield/studio.js.
+CREATE TABLE IF NOT EXISTS marketing_assets (
+  id          TEXT PRIMARY KEY,
+  product_id  TEXT,
+  kind        TEXT,        -- 'image' | 'video'
+  size        TEXT,        -- 'square' | 'vertical'
+  vibe        TEXT,
+  prompt      TEXT,
+  job_set_id  TEXT,
+  status      TEXT NOT NULL DEFAULT 'generating',  -- generating | completed | failed
+  error       TEXT,
+  media       BYTEA,
+  mime        TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS marketing_assets_product_idx ON marketing_assets (product_id, created_at DESC);
 `;
 
 async function migrate() {

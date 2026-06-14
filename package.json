@@ -8,13 +8,12 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "seed": "node scripts/seed-products.js"
   },
   "dependencies": {
     "@higgsfield/client": "^0.2.1",
-    "pg": "^8.11.5"
-  },
-  "devDependencies": {
+    "pg": "^8.11.5",
     "puppeteer": "^25.1.0"
   }
 }

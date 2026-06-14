@@ -10,10 +10,13 @@ const { URL } = require('url');
 
 // Carga .env local si existe (en Railway las vars las inyecta el dashboard).
 require('./integrations/urbaner/load-env')();
+// Credenciales Higgsfield para el Marketing Studio (HF_API_KEY / HF_API_SECRET).
+try { require('./integrations/higgsfield/load-env')(); } catch { /* opcional */ }
 
 const quoteHandler = require('./api/quote');
 const orderHandler = require('./api/order');
 const adminHandler = require('./api/admin');
+const productsHandler = require('./api/products');
 
 const SITE_DIR = path.join(__dirname, 'site');
 const PORT = Number(process.env.PORT) || 3000;
@@ -55,7 +58,7 @@ function applyCors(req, res) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   }
 }
@@ -81,6 +84,11 @@ const server = http.createServer(async (req, res) => {
   // ─── POST /api/order — crea pedido en BD (status: pending) ───
   if (parsed.pathname === '/api/order') {
     return orderHandler(req, res);
+  }
+
+  // ─── /api/products* — catálogo público (solo lectura) ───
+  if (parsed.pathname === '/api/products' || parsed.pathname.startsWith('/api/products/')) {
+    return productsHandler(req, res, parsed);
   }
 
   // ─── /api/admin/* — listar/despachar/cancelar (Basic Auth) ───

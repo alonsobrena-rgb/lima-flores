@@ -1,0 +1,791 @@
+[
+  {
+    "id": "orquidea-sunrise-de-dos-varas",
+    "name": "Orquídea Sunrise de dos varas",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 215,
+    "image": "/products/orquidea-sunrise-de-dos-varas.jpg",
+    "images": [
+      "/products/orquidea-sunrise-de-dos-varas.jpg",
+      "/products/orquidea-sunrise-de-dos-varas-2.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Phalaenopsis color anaranjada de dos varas en maceta. Incluye tarjeta de dedicatoria",
+    "description": "Phalaenopsis color anaranjada de dos varas en maceta. Incluye tarjeta de dedicatoria",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "box-rogelia",
+    "name": "Box  Rogelia",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 210,
+    "image": "/products/box-rogelia.jpg",
+    "images": [
+      "/products/box-rogelia.jpg",
+      "/products/box-rogelia-2.jpg",
+      "/products/box-rogelia-3.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "25 Rosas rojas decoradas con follaje verde. Disponibles en rojo, fucsia, amarillo o lila.",
+    "description": "25 Rosas rojas decoradas con follaje verde. Disponibles en rojo, fucsia, amarillo o lila.",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "minis-sandra",
+    "name": "Minis Sandra",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 210,
+    "image": "/products/minis-sandra.jpg",
+    "images": [
+      "/products/minis-sandra.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Arreglo de minirosas con follaje verde y globo de estrella morado metálico. Escoge el color de tus minis: fucsia, amarillas, naranjas o blancas",
+    "description": "Arreglo de minirosas con follaje verde y globo de estrella morado metálico. Escoge el color de tus minis: fucsia, amarillas, naranjas o blancas",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "boxsito-ramon",
+    "name": "Boxsito Crespito",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 180,
+    "image": "/products/boxsito-ramon.jpg",
+    "images": [
+      "/products/boxsito-ramon.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Osito con arreglo de mini rosas amarillas, naranjas y toques azules, follaje verde y un pequeño globo morado metálico.",
+    "description": "Osito con arreglo de mini rosas amarillas, naranjas y toques azules, follaje verde y un pequeño globo morado metálico.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "box-gaby-cafe",
+    "name": "Box Gaby Café",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 210,
+    "image": "/products/box-gaby-cafe.jpg",
+    "images": [
+      "/products/box-gaby-cafe.jpg",
+      "/products/box-gaby-cafe-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad 250 gr. y dos tacitas de expreso.",
+    "description": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad 250 gr. y dos tacitas de expreso.",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "box-chococafe",
+    "name": "Box Chococafé",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 220,
+    "image": "/products/box-chococafe.jpg",
+    "images": [
+      "/products/box-chococafe.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad (250 gr), chocolate al 70% con arándanos y una tacita de expreso.",
+    "description": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad (250 gr), chocolate al 70% con arándanos y una tacita de expreso.",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "box-lupita",
+    "name": "Box Lupita",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 220,
+    "image": "/products/box-lupita.jpg",
+    "images": [
+      "/products/box-lupita.jpg",
+      "/products/box-lupita-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box blanco con una combinación perfecta de 12 rosas amarillas y 12 rosas lilas acompañadas de follaje verde. Ideal para celebraciones.",
+    "description": "Box blanco con una combinación perfecta de 12 rosas amarillas y 12 rosas lilas acompañadas de follaje verde. Ideal para celebraciones.",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  },
+  {
+    "id": "box-yani",
+    "name": "Box Yani",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 180,
+    "image": "/products/box-yani.jpg",
+    "images": [
+      "/products/box-yani.jpg",
+      "/products/box-yani-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box de madera con una combinación de flores como mini rosas, claveles, toques morados. Incluye copa falauta de vidrio y una botella de Riccadona de 200 ml. Prohibida la venta a menores de edad. Tomar…",
+    "description": "Box de madera con una combinación de flores como mini rosas, claveles, toques morados. Incluye copa falauta de vidrio y una botella de Riccadona de 200 ml. Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  },
+  {
+    "id": "florero-forti",
+    "name": "Florero Forti",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 210,
+    "image": "/products/florero-forti.jpg",
+    "images": [
+      "/products/florero-forti.jpg",
+      "/products/florero-forti-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Combinación perfecta de 06 girasoles, mini rosas amarillas y blancas junto con pompones amarillos y margaritas, acompañadas de follaje verde.",
+    "description": "Combinación perfecta de 06 girasoles, mini rosas amarillas y blancas junto con pompones amarillos y margaritas, acompañadas de follaje verde.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "arreglo-andrea",
+    "name": "Arreglo Andrea",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 165,
+    "image": "/products/arreglo-andrea.jpg",
+    "images": [
+      "/products/arreglo-andrea.jpg",
+      "/products/arreglo-andrea-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Combinación de mini rosas anaranjadas, claveles sugerirse, toques morados y follaje verde en contenedor de loza blanco",
+    "description": "Combinación de mini rosas anaranjadas, claveles sugerirse, toques morados y follaje verde en contenedor de loza blanco",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "box-lila",
+    "name": "BOX LILA",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 180,
+    "image": "/products/box-lila.jpg",
+    "images": [
+      "/products/box-lila.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box blanco con 24 rosas importadas de color lila y rojas, acompañadas con follaje verde. El box incluye una tarjeta de dedicatoria.",
+    "description": "Box de lux con 24 rosas importadas de color lila y rojas, acompañadas con follaje verde. El arreglo incluye una tarjeta de dedicatoria.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "box-lucy",
+    "name": "BOX LUCY",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 210,
+    "image": "/products/box-lucy.jpg",
+    "images": [
+      "/products/box-lucy.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box con 6 girasoles acompañados con mini rosas naranjas, claveles morados grandes y follaje verde.",
+    "description": "Box con 6 girasoles acompañados con mini rosas naranjas, claveles morados grandes y follaje verde.",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "box-sensacion",
+    "name": "BOX Sensación",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 225,
+    "image": "/products/box-sensacion.jpg",
+    "images": [
+      "/products/box-sensacion.jpg",
+      "/products/box-sensacion-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box con 12 rosas amarillas acompañadas con mini rosas naranjas y claveles morados importados junto con follaje verde brillante.",
+    "description": "Box de 12 rosas amarillas acompañadas con mini rosas naranjas y claveles morados grandes junto con follaje verde brillante. El arreglo incliuye una tarjeta de decicatoria.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "box-simona",
+    "name": "BOX SIMONA",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 176,
+    "image": "/products/box-simona.jpg",
+    "images": [
+      "/products/box-simona.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box blanco con una combinación perfecta de 12 rosas amarillas y 12 rosas lilas acompañadas de follaje verde. Ideal para celebraciones El arreglo incluye una tarjeta de dec¿dicatoria.",
+    "description": "Combinación perfecta de 12 amarillas y 12 rosas lilas acompañadas de follaje verde.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "14536",
+    "name": "ARREGLO FLORENCIA",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 220,
+    "image": "/products/14536.jpg",
+    "images": [
+      "/products/14536.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Latón de girasoles enanos con hortensias moradas, acompañado de flores de seda con toques azules y morados. Ademas al arreglo es decorado con follaje verde.",
+    "description": "Latón de girasoles enanos con hortensias moradas, acompañado de flores de seda con toques azules y morados. Ademas al arreglo es decorado con follaje verde.",
+    "tags": []
+  },
+  {
+    "id": "orquideas-amarillas-con-lineas-fucsias",
+    "name": "Orquídeas amarillas con líneas fucsias",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 215,
+    "image": "/products/orquideas-amarillas-con-lineas-fucsias.jpg",
+    "images": [
+      "/products/orquideas-amarillas-con-lineas-fucsias.jpg",
+      "/products/orquideas-amarillas-con-lineas-fucsias-2.jpg",
+      "/products/orquideas-amarillas-con-lineas-fucsias-3.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Orquídeas amarillas con líneas fucsias (Phalaenopsis) de dos varas. Color fondo amarillo con líneas y centro fucsia. Viene en maceta color cobre. El arreglo incluye una tarjeta de dedicatoria",
+    "description": "Orquídeas amarillas con líneas fucsias (Phalaenopsis) de dos varas. Color fondo amarillo con líneas y centro fucsia. Viene en maceta color cobre. El arreglo incluye una tarjeta de dedicatoria",
+    "tags": [
+      "amor",
+      "regalos"
+    ]
+  },
+  {
+    "id": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
+    "name": "Florero con tulipanes lilas",
+    "category": "floreros",
+    "categoryLabel": "Floreros",
+    "price": 195,
+    "image": "/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
+    "images": [
+      "/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
+      "/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-2.jpg",
+      "/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-3.jpg",
+      "/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-4.jpg",
+      "/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-5.jpg"
+    ],
+    "palette": "#4F5C3F",
+    "shortDesc": "Florero de 10 tulipanes, incluye florero de vidrio y una tarjeta de dedicatoria. Puede elegir el color de las flores.",
+    "description": "Florero de 10 tulipanes, incluye florero de vidrio y una tarjeta de dedicatoria. Puede elegir el color de las flores.",
+    "tags": [
+      "amor",
+      "regalos"
+    ]
+  },
+  {
+    "id": "tulipanes-de-amor",
+    "name": "Tulipanes de amor",
+    "category": "floreros",
+    "categoryLabel": "Floreros",
+    "price": 195,
+    "image": "/products/tulipanes-de-amor.jpg",
+    "images": [
+      "/products/tulipanes-de-amor.jpg",
+      "/products/tulipanes-de-amor-2.jpg"
+    ],
+    "palette": "#4F5C3F",
+    "shortDesc": "Florero de vidrio, contiene 10 tulipanes de un color o mix de colores. Colores disponibles para tulipanes en amarillo, rojo, morado, naranja y blanco. Incluye papel decorativo y una tarjeta de dedica…",
+    "description": "Hermoso arreglo de 10 tulipanes en florero de vidrio de un color o mix de colores. Colores disponibles para tulipanes en amarillo, rojo, morado, naranja y blanco. Incluye papel decorativo y una tarjeta de dedicatoria.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "orquidea-rosado-vintage",
+    "name": "Orquídea Rosado Vintage",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 200,
+    "image": "/products/orquidea-rosado-vintage.jpg",
+    "images": [
+      "/products/orquidea-rosado-vintage.jpg",
+      "/products/orquidea-rosado-vintage-2.jpg",
+      "/products/orquidea-rosado-vintage-3.jpg",
+      "/products/orquidea-rosado-vintage-4.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Orquidea Phalaenopsis rosado vintage, viene en maceta blanca. Imagen Referencial",
+    "description": "Orquidea Phalaenopsis rosado vintage, viene en maceta blanca.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "ramo-de-24-rosas-con-papel-de-estrellas",
+    "name": "Ramo de rosas con papel de estrellas",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 190,
+    "image": "/products/ramo-de-24-rosas-con-papel-de-estrellas.jpg",
+    "images": [
+      "/products/ramo-de-24-rosas-con-papel-de-estrellas.jpg",
+      "/products/ramo-de-24-rosas-con-papel-de-estrellas-2.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de 24 rosas rojas, envueltas en papel de estrellas.",
+    "description": "Ramo de 24 rosas importadas envueltas en papel de estrellas. El ramo incluye una tarjeda a dedicatoria",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "ramo-luciana",
+    "name": "Ramo Luciana",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 175,
+    "image": "/products/ramo-luciana.jpg",
+    "images": [
+      "/products/ramo-luciana.jpg",
+      "/products/ramo-luciana-2.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de mini girasoles amarillos, claveles fucsia, acompañados con pompones verde limon, toques azules y follaje verde. Viene con na tarjeta de dedicatoria.",
+    "description": "Ramo de mini girasoles amarillos, claveles fucsia, acompañados con pompones verde limon, toques azules y follaje verde. Viene con na tarjeta de dedicatoria.",
+    "tags": []
+  },
+  {
+    "id": "arreglo-rossie",
+    "name": "Arreglo Rossie",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 245,
+    "image": "/products/arreglo-rossie.jpg",
+    "images": [
+      "/products/arreglo-rossie.jpg",
+      "/products/arreglo-rossie-2.jpg",
+      "/products/arreglo-rossie-3.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Arreglo de rosas rojas, acompañadas con gerberas, claveles y toques rojos. Viene en florero de vidrio, con papel blanco. Medidas aproximadas 30&#215;50 cm. Ademas, se incluye una tarjeta con la dedic…",
+    "description": "Arreglo de flores rojas con pequeñas rosas, acompañadas con gerberas, claveles importados y toques de pepitas rojas. Viene en florero de vidrio y papel blanco. Medidas aproximadas 30x50cm. Imagen referencial.",
+    "tags": []
+  },
+  {
+    "id": "box-de-luxe",
+    "name": "Box de Luxe",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 350,
+    "image": "/products/box-de-luxe.jpg",
+    "images": [
+      "/products/box-de-luxe.jpg",
+      "/products/box-de-luxe-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Arreglo de rosas rojas en un box blanco, con 50 rosas. Medidas aproximadas de AAxBB",
+    "description": "Arreglo de rosas rojas en un box blanco, con 50 rosas. Medidas aproximadas de AAxBB",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  },
+  {
+    "id": "box-valentina",
+    "name": "Box Valentina",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 250,
+    "image": "/products/box-valentina.jpg",
+    "images": [
+      "/products/box-valentina.jpg",
+      "/products/box-valentina-2.jpg",
+      "/products/box-valentina-3.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Arreglo de flores, viene en un box cuadrado blanco con rosas amarillas, gerberas amarillas con naranja, claveles. Acompañadas por toques blancos y follaje verde.",
+    "description": "Arreglo de flores, viene en un box cuadrado blanco con rosas amarillas, gerberas amarillas con naranja, claveles. Acompañadas por toques blancos y follaje verde.",
+    "tags": []
+  },
+  {
+    "id": "arreglo-sol",
+    "name": "Arreglo Sol",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 215,
+    "image": "/products/arreglo-sol.jpg",
+    "images": [
+      "/products/arreglo-sol.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Latón de 10 rosas amarillas combinadas con hortensias verdes, mini rosas amarillas y naranjas. Incluye toques de flores blancas y morados. Acompañados con follaje verde",
+    "description": "Latón de 10 rosas amarillas combinadas con hortensias verdes, mini rosas amarillas y naranjas. Además toques de flores blancas y morados. Acompañados con follaje verde",
+    "tags": []
+  },
+  {
+    "id": "ramo-luana",
+    "name": "Ramo Luana",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 180,
+    "image": "/products/ramo-luana.jpg",
+    "images": [
+      "/products/ramo-luana.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de flores con mini rosas naranjas, siemprevivas moradas, pompones verdes y toques amariloos,acompañados con folaje verde.",
+    "description": "Ramo de flores con mini rosas naranjas, siemprevivas moradas, pompones verdes y toques amariloos,acompañados con folaje verde.",
+    "tags": []
+  },
+  {
+    "id": "arreglo-de-rosas-fucsias-ideales-para-el-dia-de-mama",
+    "name": "Arreglo Mari",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 180,
+    "image": "/products/arreglo-de-rosas-fucsias-ideales-para-el-dia-de-mama.jpg",
+    "images": [
+      "/products/arreglo-de-rosas-fucsias-ideales-para-el-dia-de-mama.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Florero de vidrio. Incluye 15 rosas fucsias acompañadas de flores lilas con centro amarillo y follaje variegado.",
+    "description": "Lata redonda con 24 rosas en tono ivory y rosado vintage, acompañadas con lisianthus morados y follaje verde.",
+    "tags": []
+  },
+  {
+    "id": "anturios-rosados-en-maceta-2",
+    "name": "Anturios rosados en maceta",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 119,
+    "image": "/products/anturios-rosados-en-maceta-2.jpg",
+    "images": [
+      "/products/anturios-rosados-en-maceta-2.jpg",
+      "/products/anturios-rosados-en-maceta-2-2.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Maceta color cobre con anturios pink 14x38cm.",
+    "description": "Maceta color cobre con anturios pink 14x38cm.",
+    "tags": []
+  },
+  {
+    "id": "cajita-jimena",
+    "name": "Cajita Jimena",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 70,
+    "image": "/products/cajita-jimena.jpg",
+    "images": [
+      "/products/cajita-jimena.jpg",
+      "/products/cajita-jimena-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Dos macetas pequeñas de loza con suculentas en caja de madera.",
+    "description": "Dos macetas pequeñas de loza con suculentas en caja de madera.",
+    "tags": [
+      "regalos"
+    ]
+  },
+  {
+    "id": "anturios-rosados-en-maceta",
+    "name": "Anturios rosados en maceta grande",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 145,
+    "image": "/products/anturios-rosados-en-maceta.jpg",
+    "images": [
+      "/products/anturios-rosados-en-maceta.jpg",
+      "/products/anturios-rosados-en-maceta-2.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Maceta color cobre con Anturios pink. Medidas 18x52cm.",
+    "description": "Maceta color cobre con Anturios pink. Medidas 18x52cm. Imagen referencial.",
+    "tags": []
+  },
+  {
+    "id": "anturios-rojos-en-maceta",
+    "name": "Anturios rojos en maceta grande",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 145,
+    "image": "/products/anturios-rojos-en-maceta.jpg",
+    "images": [
+      "/products/anturios-rojos-en-maceta.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Maceta color cobre con anturios rojos. 18x52cm.",
+    "description": "Maceta color cobre con anturios rojos. 18x52cm.",
+    "tags": []
+  },
+  {
+    "id": "orquideas-grandes-de-dos-varas-en-maceta",
+    "name": "Orquideas grandes de dos varas en maceta",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 250,
+    "image": "/products/orquideas-grandes-de-dos-varas-en-maceta.jpg",
+    "images": [
+      "/products/orquideas-grandes-de-dos-varas-en-maceta.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Orquideas Phalaenopsis en maceta decorativa, incluye tarjeta con dedicatoria e instrucciones de mantenimiento.",
+    "description": "Orquideas Phalaenopsis en maceta decorativa, incluye tarjeta con dedicatoria e instrucciones de mantenimiento.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "orquideas-grandes-en-maceta",
+    "name": "Orquideas grandes en maceta",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 200,
+    "image": "/products/orquideas-grandes-en-maceta.jpg",
+    "images": [
+      "/products/orquideas-grandes-en-maceta.jpg",
+      "/products/orquideas-grandes-en-maceta-2.jpg",
+      "/products/orquideas-grandes-en-maceta-3.jpg",
+      "/products/orquideas-grandes-en-maceta-4.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Orquideas Phalaenopsis en maceta decorativa, incluye tarjeta con dedicatoria e instrucciones de mantenimiento.",
+    "description": "Orquideas Phalaenopsis en maceta decorativa, incluye tarjeta con dedicatoria e instrucciones de mantenimiento.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "orquideas-enanas-maceta-2",
+    "name": "Orquideas enanas maceta",
+    "category": "plantas",
+    "categoryLabel": "Plantas",
+    "price": 210,
+    "image": "/products/orquideas-enanas-maceta-2.jpg",
+    "images": [
+      "/products/orquideas-enanas-maceta-2.jpg",
+      "/products/orquideas-enanas-maceta-2-2.jpg"
+    ],
+    "palette": "#A57F45",
+    "shortDesc": "Orquideas Phalaenopsis minis de dos a mas varas en maceta decorativa, incluye tarjeta con dedicatoria e instrucciones de mantenimiento.",
+    "description": "Orquideas Phalaenopsis minis de dos a mas varas en maceta decorativa, incluye tarjeta con dedicatoria e instrucciones de mantenimiento.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "arreglo-micaela",
+    "name": "Arreglo Micaela",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 200,
+    "image": "/products/arreglo-micaela.jpg",
+    "images": [
+      "/products/arreglo-micaela.jpg",
+      "/products/arreglo-micaela-2.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "12 rosas amarillas en latón con toques lilas, azules y follaje variegado en tonos verdes.",
+    "description": "12 rosas amarillas en latón con toques lilas, azules y follaje variegado en tonos verdes.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "arreglo-victoria",
+    "name": "Arreglo Victoria",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 200,
+    "image": "/products/arreglo-victoria.jpg",
+    "images": [
+      "/products/arreglo-victoria.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Latón con 12 rosas rojas, toque blancos, morados y follaje verde, Incluye una tarjeta con la dedicatoria",
+    "description": "Latón con 12 rosas rojas, toque blancos, morados y follaje verde, Incluye una tarjeta con la dedicatoria",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  },
+  {
+    "id": "box-de-madera-rafaela",
+    "name": "Box de madera Rafaela",
+    "category": "arreglos",
+    "categoryLabel": "Arreglos",
+    "price": 178,
+    "image": "/products/box-de-madera-rafaela.jpg",
+    "images": [
+      "/products/box-de-madera-rafaela.jpg"
+    ],
+    "palette": "#B6855E",
+    "shortDesc": "Box de madera con Espumante Riccadonna de 200 ml, un frasco de Paté a las finas hierbas,una cajita de Pita chips , 80 gr de mix de frutos secos y un frasco de flores siemprevivas.",
+    "description": "Box de madera con Espumante Riccadonna de 200 ml, un frasco de Paté a las finas hierbas, una cajita de Pita chips , 80 gr de mix de frutos secos y un frasco de flores siemprevivas. PROHIBIDA LA VENTA DE LICORES A MENORES DE EDAD.",
+    "tags": []
+  },
+  {
+    "id": "ramo-de-24-rosas",
+    "name": "Ramo de 24 Rosas",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 160,
+    "image": "/products/ramo-de-24-rosas.jpg",
+    "images": [
+      "/products/ramo-de-24-rosas.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de 24 rosas rojas con papel plateado.",
+    "description": "Ramo de 24 rosas rojas con papel plateado.",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  },
+  {
+    "id": "ramo-de-12-rosas",
+    "name": "Ramo de 12 Rosas",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 150,
+    "image": "/products/ramo-de-12-rosas.jpg",
+    "images": [
+      "/products/ramo-de-12-rosas.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de 12 rosas rojas con papel plateado.",
+    "description": "Ramo de 12 rosas rojas con papel plateado.",
+    "tags": [
+      "amor"
+    ]
+  },
+  {
+    "id": "ramo-melissa",
+    "name": "Ramo Melissa",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 150,
+    "image": "/products/ramo-melissa.jpg",
+    "images": [
+      "/products/ramo-melissa.jpg",
+      "/products/ramo-melissa-2.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de flores con una combinación perfecta de claveles blancos acompañado con pompones verde limón, toques morados y follaje verde.",
+    "description": "Ramo de flores con una combinación perfecta de claveles blancos acompañado con pompones verde limón, toques morados y follaje verde.",
+    "tags": []
+  },
+  {
+    "id": "ramo-de-flores-sofia",
+    "name": "Ramo de flores Sofia",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 160,
+    "image": "/products/ramo-de-flores-sofia.jpg",
+    "images": [
+      "/products/ramo-de-flores-sofia.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de 12 rosas blancas con pompones verde limón, flor exotica amarilla, toques morados y follaje verde.",
+    "description": "Ramo de 12 rosas blancas con pompones verde limón, flor exotica amarilla, toques morados y follaje verde.",
+    "tags": []
+  },
+  {
+    "id": "ramo-de-flores-vintage",
+    "name": "Ramo de flores vintage",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 180,
+    "image": "/products/ramo-de-flores-vintage.jpg",
+    "images": [
+      "/products/ramo-de-flores-vintage.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de 24 rosas rosado vintage acompañadas con follaje verde.",
+    "description": "Ramo de 24 rosas rosado vintage con follaje verde",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "florero-de-20-tulipanes-2",
+    "name": "Florero de 20 tulipanes de colores",
+    "category": "floreros",
+    "categoryLabel": "Floreros",
+    "price": 275,
+    "image": "/products/florero-de-20-tulipanes-2.jpg",
+    "images": [
+      "/products/florero-de-20-tulipanes-2.jpg"
+    ],
+    "palette": "#4F5C3F",
+    "shortDesc": "Florero de vidrio con 20 tulipanes de colores. Incluye dedicatotoa. Pídelo en el color que mas te guste. Mix de colores o en blanco, morado, anaranjado, rojo, fucsia y amarillo.",
+    "description": "Florero de vidrio con 20 tulipanes de colores. Ademas , incluye una tarjeta con la dedicatoria. Es el regalo perfecto. Puedes elegir el color que mas te guste: amarillo, blanco, mix de colores,morado, anaranjado y rojo.",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  },
+  {
+    "id": "florero-de-10-tulipanes-2",
+    "name": "Florero de 10 tulipanes",
+    "category": "floreros",
+    "categoryLabel": "Floreros",
+    "price": 195,
+    "image": "/products/florero-de-10-tulipanes-2.jpg",
+    "images": [
+      "/products/florero-de-10-tulipanes-2.jpg",
+      "/products/florero-de-10-tulipanes-2-2.jpg",
+      "/products/florero-de-10-tulipanes-2-3.jpg"
+    ],
+    "palette": "#4F5C3F",
+    "shortDesc": "Florero con tulipanes: mix de colores o en blanco, morado, naranja, rojo, fucsia, amarillo.",
+    "description": "Floreros con tulipanes: mix de colores o blanco, morado, anaranjado, rojo, fucsia, amarillo.",
+    "tags": [
+      "mama"
+    ]
+  },
+  {
+    "id": "ramo-de-10-tulipanes",
+    "name": "Ramo de 10 tulipanes de colores",
+    "category": "ramos",
+    "categoryLabel": "Ramos",
+    "price": 185,
+    "image": "/products/ramo-de-10-tulipanes.jpg",
+    "images": [
+      "/products/ramo-de-10-tulipanes.jpg",
+      "/products/ramo-de-10-tulipanes-2.jpg",
+      "/products/ramo-de-10-tulipanes-3.jpg",
+      "/products/ramo-de-10-tulipanes-4.jpg",
+      "/products/ramo-de-10-tulipanes-5.jpg"
+    ],
+    "palette": "#C99CA9",
+    "shortDesc": "Ramo de 10 tulipanes en colores variados: blanco, morado, anaranjado, rojo, fucsia, amarillo.",
+    "description": "Ramo de 10 tulipanes en mix colores. El ramo incluye una tarjeta con la dedicatoria Tambien puedes elegir el color de las flores entre blanco, morado, anaranjado, rojo, fucsia, amarillo.",
+    "tags": [
+      "amor",
+      "mama"
+    ]
+  }
+]

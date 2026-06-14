@@ -22,6 +22,11 @@ const {
   shippingTypes: cabifyShippingTypes,
   createParcel: cabifyCreateParcel,
 } = require('../integrations/cabify/client');
+const { generateAndStoreCard } = require('../integrations/cards/order-card');
+const products = require('../db/products-store');
+const adminStudio = require('./admin-studio');
+
+const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
 
 const ATELIER_LATLON = process.env.URBANER_PICKUP_LATLON || '-12.122272,-77.035838';
 const [PICKUP_LAT_STR, PICKUP_LON_STR] = ATELIER_LATLON.split(',');
@@ -38,6 +43,15 @@ function send(res, code, payload) {
   res.end(typeof payload === 'string' ? payload : JSON.stringify(payload));
 }
 
+// El PNG de la tarjeta (bytea) no debe viajar en los JSON de listado/detalle:
+// es pesado y se sirve por su propia ruta. Lo sustituimos por un flag has_card.
+function stripCardPng(row) {
+  if (!row) return row;
+  const { card_png, ...rest } = row;
+  rest.has_card = !!card_png;
+  return rest;
+}
+
 // ─── Listar pedidos ─────────────────────────────────────
 async function listOrders(req, res, urlObj) {
   const status = urlObj.searchParams.get('status') || 'pending';
@@ -49,7 +63,7 @@ async function listOrders(req, res, urlObj) {
         : `SELECT * FROM orders WHERE status = $1 ORDER BY created_at DESC LIMIT $2`,
       status === 'all' ? [limit] : [status, limit]
     );
-    return send(res, 200, { orders: rows });
+    return send(res, 200, { orders: rows.map(stripCardPng) });
   } catch (e) {
     console.error('[admin] listOrders error:', e.message);
     return send(res, 500, { error: e.message });
@@ -61,10 +75,51 @@ async function getOrder(req, res, id) {
   try {
     const { rows } = await db.query(`SELECT * FROM orders WHERE id = $1`, [id]);
     if (!rows.length) return send(res, 404, { error: 'No existe ese pedido' });
-    return send(res, 200, rows[0]);
+    return send(res, 200, stripCardPng(rows[0]));
   } catch (e) {
     return send(res, 500, { error: e.message });
   }
+}
+
+// ─── Tarjeta de regalo (PNG) ────────────────────────────
+// GET  → devuelve el PNG (lo genera al vuelo si aún no existe).
+// POST → fuerza regenerar (nueva plantilla al azar).
+async function getCard(req, res, id, { force = false } = {}) {
+  let order;
+  try {
+    const { rows } = await db.query(`SELECT * FROM orders WHERE id = $1`, [id]);
+    if (!rows.length) return send(res, 404, { error: 'No existe ese pedido' });
+    order = rows[0];
+  } catch (e) {
+    return send(res, 500, { error: e.message });
+  }
+
+  if (!order.card_note || !order.card_note.trim()) {
+    return send(res, 404, { error: 'Este pedido no tiene mensaje de tarjeta.' });
+  }
+
+  // Si no hay PNG todavía (o se pide regenerar), lo generamos ahora.
+  if (force || !order.card_png) {
+    const r = await generateAndStoreCard(order);
+    if (!r.ok) return send(res, 502, { error: 'No se pudo generar la tarjeta: ' + r.error });
+    const png = r.buffer;
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': png.length,
+      'Cache-Control': 'no-store',
+      'Content-Disposition': `inline; filename="tarjeta-${id}.png"`,
+    });
+    return res.end(png);
+  }
+
+  const png = order.card_png; // bytea → Buffer vía pg
+  res.writeHead(200, {
+    'Content-Type': 'image/png',
+    'Content-Length': png.length,
+    'Cache-Control': 'no-store',
+    'Content-Disposition': `inline; filename="tarjeta-${id}.png"`,
+  });
+  return res.end(png);
 }
 
 // ─── Despachar (crear parcel en Cabify) ─────────────────
@@ -234,6 +289,67 @@ function logout(req, res) {
   return send(res, 200, { ok: true });
 }
 
+// ─── Productos (CRUD) ───────────────────────────────────
+async function listProducts(req, res) {
+  try { return send(res, 200, { products: await products.listAll() }); }
+  catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+async function getProductAdmin(req, res, id) {
+  try {
+    const p = await products.getById(id, { internal: true });
+    return p ? send(res, 200, p) : send(res, 404, { error: 'No existe ese producto' });
+  } catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+async function createProduct(req, res) {
+  let body;
+  try { body = await readJsonBody(req, 256 * 1024); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+  try { return send(res, 201, await products.create(body)); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+}
+
+async function updateProduct(req, res, id) {
+  let body;
+  try { body = await readJsonBody(req, 256 * 1024); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+  try {
+    const p = await products.update(id, body);
+    return p ? send(res, 200, p) : send(res, 404, { error: 'No existe ese producto' });
+  } catch (e) { return send(res, 400, { error: e.message }); }
+}
+
+async function deleteProduct(req, res, id) {
+  try {
+    const ok = await products.remove(id);
+    return ok ? send(res, 200, { id, deleted: true }) : send(res, 404, { error: 'No existe ese producto' });
+  } catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+// POST /api/admin/products/upload-image  body: { dataBase64, mime, productId? }
+// Guarda el binario en product_images y devuelve una URL absoluta servible.
+async function uploadProductImage(req, res) {
+  let body;
+  try { body = await readJsonBody(req, 12 * 1024 * 1024); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+  let { dataBase64, mime, productId } = body || {};
+  if (!dataBase64) return send(res, 400, { error: 'Falta dataBase64.' });
+  // Acepta data URLs (data:image/png;base64,....).
+  const m = /^data:([^;]+);base64,(.*)$/s.exec(dataBase64);
+  if (m) { mime = mime || m[1]; dataBase64 = m[2]; }
+  let buf;
+  try { buf = Buffer.from(dataBase64, 'base64'); }
+  catch { return send(res, 400, { error: 'base64 inválido.' }); }
+  if (!buf.length) return send(res, 400, { error: 'Imagen vacía.' });
+  if (buf.length > 10 * 1024 * 1024) return send(res, 413, { error: 'Imagen demasiado grande (máx 10MB).' });
+  try {
+    const id = await products.saveImage({ productId: productId || null, data: buf, mime: mime || 'image/jpeg' });
+    const rel = `/api/products/img/${id}`;
+    return send(res, 201, { id, url: PUBLIC_BASE_URL ? PUBLIC_BASE_URL + rel : rel, path: rel });
+  } catch (e) { return send(res, 500, { error: e.message }); }
+}
+
 // ─── Router ─────────────────────────────────────────────
 module.exports = async (req, res, urlObj) => {
   const p = urlObj.pathname;
@@ -253,13 +369,31 @@ module.exports = async (req, res, urlObj) => {
 
   if (p === '/api/admin/orders' && req.method === 'GET') return listOrders(req, res, urlObj);
 
-  const m = p.match(/^\/api\/admin\/orders\/([A-Za-z0-9_\-]+)(?:\/(dispatch|cancel))?$/);
+  // ── Marketing Studio ──
+  if (p.startsWith('/api/admin/studio/')) return adminStudio(req, res, urlObj);
+
+  // ── Productos ──
+  if (p === '/api/admin/products' && req.method === 'GET')  return listProducts(req, res);
+  if (p === '/api/admin/products' && req.method === 'POST') return createProduct(req, res);
+  if (p === '/api/admin/products/upload-image' && req.method === 'POST') return uploadProductImage(req, res);
+  const pm = p.match(/^\/api\/admin\/products\/([^/]+)$/);
+  if (pm) {
+    const pid = decodeURIComponent(pm[1]);
+    if (req.method === 'GET')    return getProductAdmin(req, res, pid);
+    if (req.method === 'PUT')    return updateProduct(req, res, pid);
+    if (req.method === 'PATCH')  return updateProduct(req, res, pid);
+    if (req.method === 'DELETE') return deleteProduct(req, res, pid);
+  }
+
+  const m = p.match(/^\/api\/admin\/orders\/([A-Za-z0-9_\-]+)(?:\/(dispatch|cancel|card))?$/);
   if (m) {
     const id = m[1];
     const action = m[2];
     if (!action && req.method === 'GET')                 return getOrder(req, res, id);
     if (action === 'dispatch' && req.method === 'POST')  return dispatchOrder(req, res, id);
     if (action === 'cancel'   && req.method === 'POST')  return cancelOrder(req, res, id);
+    if (action === 'card'     && req.method === 'GET')   return getCard(req, res, id);
+    if (action === 'card'     && req.method === 'POST')  return getCard(req, res, id, { force: true });
   }
 
   return send(res, 404, { error: 'admin route not found' });
