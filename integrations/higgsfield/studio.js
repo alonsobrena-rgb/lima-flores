@@ -16,8 +16,6 @@ const https = require('https');
 const KEY = process.env.HF_API_KEY;
 const SECRET = process.env.HF_API_SECRET;
 const HOST = 'platform.higgsfield.ai';
-// style_id de Soul (opcional). Si tu cuenta lo exige, define HF_SOUL_STYLE_ID.
-const SOUL_STYLE_ID = process.env.HF_SOUL_STYLE_ID || '';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -25,6 +23,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SIZE_MAP = {
   square: '1536x1536',   // 1:1  feed
   vertical: '1152x2048', // 9:16 stories / reels
+};
+
+// Seedream usa aspect_ratio (no width_and_height). Mapeo a los formatos de Meta.
+const SEEDREAM_ASPECT = {
+  square: '1:1',    // feed
+  vertical: '9:16', // stories / reels
 };
 
 function isConfigured() { return !!(KEY && SECRET); }
@@ -102,18 +106,23 @@ async function poll(id, { onTick } = {}) {
 }
 
 // ─── Generadores ───────────────────────────────────────────────────────────────
-async function createImageJob({ productImageUrl, prompt, size = 'square', styleStrength = 0.6, quality = '1080p' }) {
+// Seedream 4.5: modelo de edición/transformación que PARTE de la foto real del
+// producto (input_images) y la conserva — el arreglo de flores sale idéntico, solo
+// cambia el entorno/luz/escena según el prompt. (Soul usaba la foto solo como
+// referencia de estilo e inventaba un arreglo distinto.)
+async function createImageJob({ productImageUrl, prompt, size = 'square', quality = 'high' }) {
+  if (!productImageUrl) {
+    throw new Error('Seedream necesita la foto del producto (input_images). Falta la URL pública.');
+  }
   const params = {
     prompt,
-    width_and_height: SIZE_MAP[size] || SIZE_MAP.square,
-    quality,
-    enhance_prompt: true,
+    input_images: [{ type: 'image_url', image_url: productImageUrl }],
+    aspect_ratio: SEEDREAM_ASPECT[size] || SEEDREAM_ASPECT.square,
+    quality, // 'basic' | 'high'
   };
-  if (productImageUrl) { params.image_url = productImageUrl; params.style_strength = styleStrength; }
-  if (SOUL_STYLE_ID) params.style_id = SOUL_STYLE_ID;
-  const created = await api('POST', '/v1/text2image/soul', { params });
+  const created = await api('POST', '/v1/text2image/seedream', { params });
   const id = jobIdOf(created);
-  if (!id) throw new Error('Sin id en la respuesta de text2image/soul: ' + JSON.stringify(created).slice(0, 300));
+  if (!id) throw new Error('Sin id en la respuesta de text2image/seedream: ' + JSON.stringify(created).slice(0, 300));
   return id;
 }
 

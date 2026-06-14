@@ -51,9 +51,10 @@ const VIBE_LEAD = {
 function buildFallbackPrompt(product, vibe, size) {
   const lead = VIBE_LEAD[vibe] || 'Elegant';
   const sizeRule = size === 'vertical'
-    ? 'Vertical 9:16 frame with generous empty space in the top 15% and bottom 20% for text and platform UI.'
-    : 'Balanced 1:1 composition with comfortable breathing room on all edges.';
-  return `${lead} advertising photograph of ${product.name}, a premium fresh flower arrangement, styled for a luxury Peruvian boutique florist (Lima Flores). Soft natural directional light, marble or warm linen surface, elegant editorial composition, the arrangement anchored in the CENTER. ${sizeRule} Refined, aspirational, true-to-life colors, medium-format, shallow depth of field, high-end commercial photography, 8k.`;
+    ? 'Vertical 9:16 framing with generous empty space in the top 15% and bottom 20% for text and platform UI.'
+    : 'Balanced 1:1 framing with comfortable breathing room on all edges.';
+  // Prompt de edición para Seedream: conserva el arreglo real de la foto.
+  return `${lead} editorial advertising photo for a luxury Peruvian boutique florist (Lima Flores). Keep the EXACT same flower arrangement from the reference image (${product.name}) — identical flowers, colors, shapes and composition, completely unchanged; do NOT redesign, replace or add flowers. Only restyle the scene around it with a marble or warm linen surface, soft natural directional light, elegant editorial composition, arrangement centered and fully visible. ${sizeRule} Refined, aspirational, true-to-life colors, shallow depth of field, high-end commercial advertising photography, 8k.`;
 }
 
 // Corre la generación en segundo plano (1–3 min) y persiste el resultado.
@@ -136,8 +137,11 @@ async function asset(req, res, id, urlObj) {
 async function listAssets(req, res, urlObj) {
   try {
     const productId = urlObj.searchParams.get('productId');
-    if (!productId) return send(res, 400, { error: 'Falta productId.' });
-    return send(res, 200, { assets: await studioStore.listByProduct(productId) });
+    // Sin productId → galería global (todos los ads de todos los productos).
+    const assets = productId
+      ? await studioStore.listByProduct(productId)
+      : await studioStore.listAll();
+    return send(res, 200, { assets });
   } catch (e) { return send(res, 500, { error: e.message }); }
 }
 

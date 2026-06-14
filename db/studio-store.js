@@ -56,4 +56,14 @@ async function listByProduct(productId) {
   return rows;
 }
 
-module.exports = { createAsset, setJob, markCompleted, markFailed, getMeta, getMedia, listByProduct };
+// Todos los ads (de todos los productos) — para la galería global del Studio.
+async function listAll(limit = 200) {
+  const { rows } = await db.query(
+    `SELECT id, product_id, kind, size, vibe, status, mime, created_at
+       FROM marketing_assets ORDER BY created_at DESC LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
+module.exports = { createAsset, setJob, markCompleted, markFailed, getMeta, getMedia, listByProduct, listAll };
