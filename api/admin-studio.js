@@ -120,12 +120,41 @@ async function asset(req, res, id, urlObj) {
     if (!row) return send(res, 404, { error: 'Aún no está listo o no existe.' });
     const meta = await studioStore.getMeta(id);
     if (urlObj.searchParams.get('raw') === '1') {
-      const ext = (row.mime || '').includes('mp4') ? 'mp4' : (row.mime || '').includes('png') ? 'png' : 'jpg';
+      const mime = row.mime || 'application/octet-stream';
+      const ext = mime.includes('mp4') ? 'mp4' : mime.includes('webp') ? 'webp' : mime.includes('png') ? 'png' : 'jpg';
+      const total = row.media.length;
+      // Por defecto inline (para mostrar <img>/<video> en el panel); attachment
+      // solo con ?download=1 (botón "Descargar").
+      const disposition = `${urlObj.searchParams.get('download') === '1' ? 'attachment' : 'inline'}; filename="lima-ad-${id}.${ext}"`;
+      // Soporte de Range (206) — el navegador lo necesita para reproducir <video>.
+      const range = req.headers.range;
+      const m = range && /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+      if (m) {
+        let start = m[1] === '' ? 0 : parseInt(m[1], 10);
+        let end = m[2] === '' ? total - 1 : parseInt(m[2], 10);
+        if (!Number.isFinite(start) || start < 0) start = 0;
+        if (!Number.isFinite(end) || end >= total) end = total - 1;
+        if (start > end) {
+          res.writeHead(416, { 'Content-Range': `bytes */${total}`, 'Accept-Ranges': 'bytes' });
+          return res.end();
+        }
+        const chunk = row.media.subarray(start, end + 1);
+        res.writeHead(206, {
+          'Content-Type': mime,
+          'Content-Range': `bytes ${start}-${end}/${total}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunk.length,
+          'Cache-Control': 'no-store',
+          'Content-Disposition': disposition,
+        });
+        return res.end(chunk);
+      }
       res.writeHead(200, {
-        'Content-Type': row.mime || 'application/octet-stream',
-        'Content-Length': row.media.length,
+        'Content-Type': mime,
+        'Content-Length': total,
+        'Accept-Ranges': 'bytes',
         'Cache-Control': 'no-store',
-        'Content-Disposition': `attachment; filename="lima-ad-${id}.${ext}"`,
+        'Content-Disposition': disposition,
       });
       return res.end(row.media);
     }

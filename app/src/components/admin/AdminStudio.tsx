@@ -266,10 +266,11 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
             <div className="flex flex-wrap gap-2">
               {gallery.map((a) => (
                 <button key={a.id} onClick={() => enlarge(a)} disabled={a.status !== 'completed'} title={`${a.kind} · ${a.size} · ${a.status} — ampliar`}
-                  className={`h-16 w-16 overflow-hidden rounded-sm border border-border ${a.status === 'completed' ? 'hover:border-rosa-500' : 'opacity-50'}`}>
-                  {a.status === 'completed'
-                    ? <img src={apiUrl('/api/admin/studio/asset/' + a.id + '?raw=1')} alt="" className="h-full w-full object-cover" />
-                    : <span className="flex h-full items-center justify-center text-[9px] text-foreground/50">{a.status === 'failed' ? '✕' : '…'}</span>}
+                  className={`relative h-16 w-16 overflow-hidden rounded-sm border border-border ${a.status === 'completed' ? 'hover:border-rosa-500' : 'opacity-50'}`}>
+                  <Thumb a={a} />
+                  {a.kind === 'video' && a.status === 'completed' && (
+                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-ivory-50 drop-shadow">▶</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -299,9 +300,7 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
                   title={`${p ? p.name + ' · ' : ''}${a.kind} · ${a.size} · ${a.status} — ampliar`}
                   className={`group relative overflow-hidden rounded-sm border border-border ${a.status === 'completed' ? 'hover:border-rosa-500' : 'opacity-60'}`}>
                   <div className="aspect-square w-full bg-ivory-200">
-                    {a.status === 'completed'
-                      ? <img src={apiUrl('/api/admin/studio/asset/' + a.id + '?raw=1')} alt={p?.name || ''} loading="lazy" className="h-full w-full object-cover" />
-                      : <span className="flex h-full items-center justify-center text-[10px] text-foreground/50">{a.status === 'failed' ? '✕ falló' : '…'}</span>}
+                    <Thumb a={a} name={p?.name} />
                   </div>
                   <span className="absolute left-1 top-1 rounded-sm bg-ink-900/70 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-ivory-50">
                     {a.kind === 'video' ? '▶' : '◧'} {a.size === 'vertical' ? '9:16' : '1:1'}
@@ -323,10 +322,10 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/85 p-4 backdrop-blur-sm" onClick={() => setLightbox(null)}>
           <div className="relative flex max-h-[92vh] max-w-[92vw] flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
             {lightbox.kind === 'video'
-              ? <video src={apiUrl('/api/admin/studio/asset/' + lightbox.id + '?raw=1')} controls autoPlay loop className="max-h-[80vh] max-w-full rounded-sm bg-ink-900 shadow-2xl" />
+              ? <video src={apiUrl('/api/admin/studio/asset/' + lightbox.id + '?raw=1')} controls autoPlay loop muted playsInline className="max-h-[80vh] max-w-full rounded-sm bg-ink-900 shadow-2xl" />
               : <img src={apiUrl('/api/admin/studio/asset/' + lightbox.id + '?raw=1')} alt="" className="max-h-[80vh] max-w-full rounded-sm shadow-2xl" />}
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <a href={apiUrl('/api/admin/studio/asset/' + lightbox.id + '?raw=1')}
+              <a href={apiUrl('/api/admin/studio/asset/' + lightbox.id + '?raw=1&download=1')} download
                 className="bg-rosa-500 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-600">⬇ Descargar</a>
               <button onClick={() => { const lb = lightbox; setLightbox(null); openAsset(lb); }}
                 className="border border-ivory-50/40 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:border-ivory-50">✎ Usar en editor</button>
@@ -338,6 +337,18 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
       )}
     </div>
   );
+}
+
+// Miniatura de un asset en las galerías. Un <img> no puede renderizar un mp4
+// (salía en blanco): para video usamos <video> (muestra el primer fotograma).
+function Thumb({ a, name }: { a: any; name?: string }) {
+  if (a.status !== 'completed') {
+    return <span className="flex h-full w-full items-center justify-center text-[10px] text-foreground/50">{a.status === 'failed' ? '✕' : '…'}</span>;
+  }
+  const src = apiUrl('/api/admin/studio/asset/' + a.id + '?raw=1');
+  return a.kind === 'video'
+    ? <video src={src} muted playsInline preload="metadata" className="pointer-events-none h-full w-full object-cover" />
+    : <img src={src} alt={name || ''} loading="lazy" className="h-full w-full object-cover" />;
 }
 
 // Overlay de safe zones para el preview de VIDEO (el video no se compone en
