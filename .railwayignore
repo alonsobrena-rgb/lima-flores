@@ -4,3 +4,13 @@ node_modules
 npm-debug.log*
 .DS_Store
 .env
+
+# Este servicio (lima-flores) es el backend Node: solo sirve site/ + /api. Lo de
+# abajo no lo usa el runtime y reventaba el límite de subida de `railway up`
+# (tools/ ~340MB de capturas; app/ = panel React, deploya aparte).
+app/
+tools/
+_wc/
+.claude/
+integrations/higgsfield/out/
+integrations/cards/out/
