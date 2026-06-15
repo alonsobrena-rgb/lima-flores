@@ -97,7 +97,7 @@ export const LimaHero = ({ imageSrc, imageAlt, navLinks, socials, locationText =
             El wrapper lleva el parallax de scroll (baja + se desvanece); el h1 la entrada. */}
         <motion.div
           style={{ y: textY, opacity: textOpacity }}
-          className="pointer-events-none absolute inset-x-4 top-[9%] z-10 select-none md:inset-y-0 md:inset-x-auto md:right-[3%] md:top-0 md:w-[58%]"
+          className="pointer-events-none absolute inset-x-4 top-[15%] z-10 select-none md:inset-y-0 md:inset-x-auto md:right-[3%] md:top-0 md:w-[58%]"
         >
           <motion.h1
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
@@ -114,7 +114,7 @@ export const LimaHero = ({ imageSrc, imageAlt, navLinks, socials, locationText =
             intermedia lleva el parallax de scroll; la img solo anima opacidad+y de
             entrada — así nadie pisa el translate-x del centrado.
             móvil: centrada abajo; desktop: izquierda, grande */}
-        <div className="absolute bottom-0 left-1/2 z-20 h-[52%] -translate-x-1/2 sm:h-[58%] md:left-[3%] md:h-[82%] md:translate-x-0 lg:h-[88%]">
+        <div className="absolute bottom-0 left-1/2 z-20 h-[58%] -translate-x-1/2 sm:h-[63%] md:left-[3%] md:h-[82%] md:translate-x-0 lg:h-[88%]">
           <motion.div style={{ y: figureY }} className="h-full">
             <motion.img
               src={imageSrc} alt={imageAlt}

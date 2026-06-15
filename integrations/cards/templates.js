@@ -90,19 +90,19 @@ function shell({ key, css, body }) {
   }
   .wordmark {
     font-family:'Italiana',serif; letter-spacing:.18em; text-transform:uppercase;
-    font-size:48px;
+    font-size:64px;
   }
   .para {
     font-family:'Jost',sans-serif; font-weight:400; letter-spacing:.34em;
-    text-transform:uppercase; font-size:38px; margin-bottom:58px;
+    text-transform:uppercase; font-size:50px; margin-bottom:48px;
   }
   .message {
     font-family:'Cormorant Garamond',serif; font-weight:300; font-style:italic;
-    line-height:1.18; max-width:880px;
+    line-height:1.16; max-width:960px;
   }
   .firma {
     font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:400;
-    font-size:64px; margin-top:58px;
+    font-size:86px; margin-top:48px;
   }
   .sprig { width:120px; height:60px; }
   .bloom { width:80px; height:80px; }
@@ -118,15 +118,15 @@ function shell({ key, css, body }) {
         if (!el) return;
         var box = el.getBoundingClientRect();
         var maxH = ${'${MAX_MSG_HEIGHT}'};
-        var size = 116;                      // tamaño base (px) para textos cortos
+        var size = 154;                      // tamaño base (px) para textos cortos
         var len = el.textContent.trim().length;
-        if (len > 60)  size = 98;
-        if (len > 110) size = 84;
-        if (len > 160) size = 70;
+        if (len > 60)  size = 128;
+        if (len > 110) size = 106;
+        if (len > 160) size = 86;
         el.style.fontSize = size + 'px';
         // Ajuste fino: encoge hasta que no desborde su contenedor vertical.
         var guard = 0;
-        while (el.scrollHeight > el.clientHeight + 2 && size > 34 && guard < 60) {
+        while (el.scrollHeight > el.clientHeight + 2 && size > 44 && guard < 60) {
           size -= 2; el.style.fontSize = size + 'px'; guard++;
         }
       }
@@ -136,7 +136,7 @@ function shell({ key, css, body }) {
       setTimeout(function () { window.__cardReady = true; }, 2500); // failsafe
     })();
   </script>
-</body></html>`.replace(/\$\{MAX_MSG_HEIGHT\}/g, '520');
+</body></html>`.replace(/\$\{MAX_MSG_HEIGHT\}/g, '690');
 }
 
 // ─── Las 5 plantillas ───────────────────────────────────────────────────────
@@ -146,7 +146,7 @@ function atelier(d) {
   return shell({
     key: 'atelier',
     css: `
-      .card { background:#FBF8F1; color:#1B1A17; padding:96px; }
+      .card { background:#FBF8F1; color:#1B1A17; padding:64px; }
       .frame { position:absolute; inset:46px; border:1.5px solid #9E2B5E; }
       .frame::before { content:''; position:absolute; inset:10px; border:.5px solid #E7AFC2; }
       .wordmark { color:#9E2B5E; position:absolute; top:104px; left:0; right:0; }
@@ -171,7 +171,7 @@ function jardin(d) {
   return shell({
     key: 'jardin',
     css: `
-      .card { background:radial-gradient(120% 80% at 50% 0%, #3a472d 0%, #2F3925 60%, #232b1c 100%); color:#F4EFE5; padding:110px; }
+      .card { background:radial-gradient(120% 80% at 50% 0%, #3a472d 0%, #2F3925 60%, #232b1c 100%); color:#F4EFE5; padding:76px; }
       .frame { position:absolute; inset:54px; border:1px solid rgba(165,127,69,.55); }
       .wordmark { color:#C9A96A; position:absolute; top:112px; left:0; right:0; }
       .para { color:#bcae8d; opacity:.9; }
@@ -195,7 +195,7 @@ function blush(d) {
   return shell({
     key: 'blush',
     css: `
-      .card { background:linear-gradient(160deg, #FBEEF2 0%, #F7DCE6 55%, #F0C9D8 100%); color:#6A1A3B; padding:104px; }
+      .card { background:linear-gradient(160deg, #FBEEF2 0%, #F7DCE6 55%, #F0C9D8 100%); color:#6A1A3B; padding:72px; }
       .frame { position:absolute; inset:50px; border:1px solid rgba(158,43,94,.35); border-radius:8px; }
       .wordmark { color:#9E2B5E; position:absolute; top:108px; left:0; right:0; }
       .para { color:#9E2B5E; opacity:.8; }
@@ -222,7 +222,7 @@ function botanica(d) {
   return shell({
     key: 'botanica',
     css: `
-      .card { background:#F4EFE5; color:#2F3925; padding:120px 110px; }
+      .card { background:#F4EFE5; color:#2F3925; padding:86px 76px; }
       .wordmark { color:#B6855E; position:absolute; top:108px; left:0; right:0; letter-spacing:.22em; }
       .para { color:#8A9477; }
       .message { color:#2F3925; }
@@ -259,12 +259,12 @@ function minimal(d) {
   return shell({
     key: 'minimal',
     css: `
-      .card { background:#FFFFFF; color:#1B1A17; padding:140px; justify-content:flex-start; }
+      .card { background:#FFFFFF; color:#1B1A17; padding:92px; justify-content:flex-start; }
       .dot { width:12px; height:12px; border-radius:50%; background:#9E2B5E; margin-top:120px; margin-bottom:120px; }
       .para { color:#9A9389; letter-spacing:.4em; }
       .message { color:#1B1A17; font-style:italic; font-weight:300; }
       .firma { color:#1B1A17; opacity:.85; }
-      .wordmark { color:#9A9389; position:absolute; bottom:96px; left:0; right:0; font-size:36px; letter-spacing:.34em; }
+      .wordmark { color:#9A9389; position:absolute; bottom:84px; left:0; right:0; font-size:46px; letter-spacing:.34em; }
       .center { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; }
     `,
     body: `

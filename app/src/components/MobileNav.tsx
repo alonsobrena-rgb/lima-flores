@@ -1,6 +1,7 @@
 // Burger + sheet de navegación móvil — compartido por el hero del home y el
 // SiteHeader de las páginas internas. Maneja su propio estado.
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -20,9 +21,10 @@ export const MobileNav = ({ tone = 'ink' }: { tone?: 'ink' | 'light' }) => {
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round"><line x1="4" y1="8" x2="20" y2="8" /><line x1="4" y1="14" x2="15" y2="14" /></svg>
       </button>
 
-      <AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
         {menu && (
-          <div className="fixed inset-0 z-[80] md:hidden">
+          <div className="fixed inset-0 z-[120] md:hidden">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setMenu(false)} className="absolute inset-0 bg-ink-900/45 backdrop-blur-sm"
@@ -60,7 +62,9 @@ export const MobileNav = ({ tone = 'ink' }: { tone?: 'ink' | 'light' }) => {
             </motion.nav>
           </div>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   );
 };
