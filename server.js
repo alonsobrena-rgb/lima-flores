@@ -12,6 +12,8 @@ const { URL } = require('url');
 require('./integrations/urbaner/load-env')();
 // Credenciales Higgsfield para el Marketing Studio (HF_API_KEY / HF_API_SECRET).
 try { require('./integrations/higgsfield/load-env')(); } catch { /* opcional */ }
+// Credenciales Meta para Promociones por WhatsApp (WA_TOKEN / WA_PHONE_NUMBER_ID…).
+try { require('./integrations/whatsapp/load-env')(); } catch { /* opcional */ }
 
 const quoteHandler = require('./api/quote');
 const orderHandler = require('./api/order');
@@ -19,6 +21,12 @@ const adminHandler = require('./api/admin');
 const productsHandler = require('./api/products');
 
 const SITE_DIR = path.join(__dirname, 'site');
+// Build del panel/tienda React (app/dist). Si existe, es el frontend principal y
+// el sitio vanilla queda solo como respaldo + fuente de /assets (fotos de producto
+// que usa el Studio). Si NO existe (build falló), cae al sitio vanilla → nunca se
+// cae el deploy por esto.
+const APP_DIST = path.join(__dirname, 'app', 'dist');
+const APP_DIST_EXISTS = fs.existsSync(path.join(APP_DIST, 'index.html'));
 const PORT = Number(process.env.PORT) || 3000;
 
 const MIME = {
@@ -96,11 +104,9 @@ const server = http.createServer(async (req, res) => {
     return adminHandler(req, res, parsed);
   }
 
-  // ─── /admin · /admin.html — panel del atelier ───
-  // El HTML es público; el login se hace con un formulario propio que llama
-  // a /api/admin/login y emite una cookie de sesión firmada. Así evitamos el
-  // popup nativo de Basic Auth, que es buggy en móviles y autofill.
-  if (parsed.pathname === '/admin' || parsed.pathname === '/admin.html') {
+  // ─── /admin · /admin.html — panel vanilla (solo si NO hay build React) ───
+  // Con el panel React activo (app/dist), /admin lo maneja el SPA (más abajo).
+  if (!APP_DIST_EXISTS && (parsed.pathname === '/admin' || parsed.pathname === '/admin.html')) {
     const adminFile = path.join(SITE_DIR, 'admin.html');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
     return fs.createReadStream(adminFile).pipe(res);
@@ -126,7 +132,7 @@ const server = http.createServer(async (req, res) => {
   // viaja junto al HTML, que ya tiene Cache-Control: no-cache. Resultado:
   // cualquier cambio de GOOGLE_MAPS_API_KEY en Railway es visible al instante,
   // sin caches intermedios ni necesidad de hard-refresh.
-  if (parsed.pathname === '/checkout.html' || parsed.pathname === '/checkout') {
+  if (!APP_DIST_EXISTS && (parsed.pathname === '/checkout.html' || parsed.pathname === '/checkout')) {
     const filePath = path.join(SITE_DIR, 'checkout.html');
     return fs.readFile(filePath, 'utf8', (err, html) => {
       if (err) return send(res, 500, 'read error');
@@ -142,58 +148,70 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  // ─── Estáticos desde site/ ───
+  // ─── Estáticos: app/dist (React) → site/ (assets/legacy) → SPA fallback ───
   let pathname = decodeURIComponent(parsed.pathname);
   if (pathname.endsWith('/')) pathname += 'index.html';
-  // Protección contra traversal
-  const filePath = path.normalize(path.join(SITE_DIR, pathname));
-  if (!filePath.startsWith(SITE_DIR)) return send(res, 403, 'forbidden');
 
-  fs.stat(filePath, (err, stat) => {
-    if (err || stat.isDirectory()) {
-      // 404 → servir index.html con 404 para SPAs amigables; aquí devolvemos texto plano.
-      return send(res, 404, `not found: ${pathname}`);
-    }
-    const ext = path.extname(filePath).toLowerCase();
-    const type = MIME[ext] || 'application/octet-stream';
-    // HTML/CSS/JS siempre revalidan (evita que el navegador muestre versiones viejas);
-    // imágenes/fuentes/videos sí se cachean (son grandes y casi nunca cambian).
-    const noCache = ext === '.html' || ext === '.css' || ext === '.js' || ext === '.json';
-    const cacheCtl = noCache ? 'no-cache' : 'public, max-age=3600';
+  // Roots a probar en orden. Con build React, va primero; site/ aporta /assets/*
+  // (fotos de producto que usa el Studio) y el resto del sitio vanilla legacy.
+  const roots = APP_DIST_EXISTS ? [APP_DIST, SITE_DIR] : [SITE_DIR];
+  for (const root of roots) {
+    const fp = path.normalize(path.join(root, pathname));
+    if (!fp.startsWith(root)) continue; // anti-traversal
+    let stat;
+    try { stat = fs.statSync(fp); } catch { stat = null; }
+    if (stat && stat.isFile()) return serveFile(req, res, fp, stat);
+  }
 
-    // ─── Soporte de HTTP Range (necesario para hacer "seek"/scrubbing de video) ───
-    const range = req.headers.range;
-    if (range) {
-      const m = /^bytes=(\d*)-(\d*)$/.exec(range);
-      if (m) {
-        let start = m[1] === '' ? undefined : parseInt(m[1], 10);
-        let end = m[2] === '' ? undefined : parseInt(m[2], 10);
-        if (start === undefined) { start = Math.max(0, stat.size - (end || 0)); end = stat.size - 1; }
-        else if (end === undefined || end >= stat.size) { end = stat.size - 1; }
-        if (Number.isNaN(start) || start > end || start >= stat.size) {
-          res.writeHead(416, { 'Content-Range': `bytes */${stat.size}`, 'Accept-Ranges': 'bytes' });
-          return res.end();
-        }
-        res.writeHead(206, {
-          'Content-Type': type,
-          'Content-Range': `bytes ${start}-${end}/${stat.size}`,
-          'Accept-Ranges': 'bytes',
-          'Content-Length': end - start + 1,
-          'Cache-Control': cacheCtl,
-        });
-        return fs.createReadStream(filePath, { start, end }).pipe(res);
-      }
-    }
+  // SPA fallback: rutas de cliente del React (sin extensión) → index.html.
+  if (APP_DIST_EXISTS && !path.extname(pathname)) {
+    const indexFp = path.join(APP_DIST, 'index.html');
+    try { return serveFile(req, res, indexFp, fs.statSync(indexFp)); }
+    catch { /* cae a 404 */ }
+  }
 
-    res.writeHead(200, {
-      'Content-Type': type,
-      'Content-Length': stat.size,
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': cacheCtl,
-    });
-    fs.createReadStream(filePath).pipe(res);
-  });
+  return send(res, 404, `not found: ${pathname}`);
 });
+
+// Sirve un archivo estático con cache y soporte de HTTP Range (seek de video).
+function serveFile(req, res, filePath, stat) {
+  const ext = path.extname(filePath).toLowerCase();
+  const type = MIME[ext] || 'application/octet-stream';
+  // HTML/CSS/JS revalidan (evita versiones viejas); imágenes/fuentes/videos se cachean.
+  const noCache = ext === '.html' || ext === '.css' || ext === '.js' || ext === '.json';
+  const cacheCtl = noCache ? 'no-cache' : 'public, max-age=3600';
+
+  const range = req.headers.range;
+  if (range) {
+    const m = /^bytes=(\d*)-(\d*)$/.exec(range);
+    if (m) {
+      let start = m[1] === '' ? undefined : parseInt(m[1], 10);
+      let end = m[2] === '' ? undefined : parseInt(m[2], 10);
+      if (start === undefined) { start = Math.max(0, stat.size - (end || 0)); end = stat.size - 1; }
+      else if (end === undefined || end >= stat.size) { end = stat.size - 1; }
+      if (Number.isNaN(start) || start > end || start >= stat.size) {
+        res.writeHead(416, { 'Content-Range': `bytes */${stat.size}`, 'Accept-Ranges': 'bytes' });
+        return res.end();
+      }
+      res.writeHead(206, {
+        'Content-Type': type,
+        'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': end - start + 1,
+        'Cache-Control': cacheCtl,
+      });
+      return fs.createReadStream(filePath, { start, end }).pipe(res);
+    }
+  }
+
+  res.writeHead(200, {
+    'Content-Type': type,
+    'Content-Length': stat.size,
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': cacheCtl,
+  });
+  fs.createReadStream(filePath).pipe(res);
+}
 
 server.listen(PORT, () => {
   console.log(`Lima Flores → http://localhost:${PORT}`);
