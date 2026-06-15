@@ -119,8 +119,14 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
       setSize(a.size); setKind(a.kind);
       if (a.kind === 'video') setVideoUrl(d.dataUrl);
       else { const img = await loadImage(d.dataUrl); setBgImg(img); setVideoUrl(null); }
+      // Prefill con la info del producto del ad (titular + precio), igual que al
+      // elegir un producto — así el editor sale listo para componer.
       const p = a.product_id ? productById.get(a.product_id) : null;
-      if (p && p.id !== selected?.id) setSelected(p);
+      if (p) {
+        setSelected(p);
+        setHeadline(p.name);
+        setPrice('S/ ' + p.price);
+      }
     } catch (e) { if (!fail(e)) setErr((e as Error).message); }
   };
 
