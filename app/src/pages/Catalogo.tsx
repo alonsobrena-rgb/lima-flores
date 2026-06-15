@@ -8,15 +8,35 @@ import { money, useProducts } from '@/lib/cart';
 
 const chips = [{ slug: 'all', label: 'Todos' }, ...categories];
 
+// Rangos de precio (filtro). Se combinan con la categoría; ambos viven en la URL.
+const PRICE_RANGES = [
+  { key: 'all', label: 'Cualquier precio', test: (_n: number) => true },
+  { key: 'u150', label: 'Hasta S/150', test: (n: number) => n <= 150 },
+  { key: '150-250', label: 'S/150 – 250', test: (n: number) => n > 150 && n <= 250 },
+  { key: '250-350', label: 'S/250 – 350', test: (n: number) => n > 250 && n <= 350 },
+  { key: 'o350', label: 'Más de S/350', test: (n: number) => n > 350 },
+];
+
 export default function Catalogo() {
   const { products } = useProducts();
-  // Filtro en la URL (?cat=ramos) — llegan así desde la sección Categorías
-  // del home y queda compartible/navegable con back/forward.
+  // Filtros en la URL (?cat=ramos&precio=150-250) — compartible/navegable con
+  // back/forward; las categorías llegan así desde la sección del home.
   const [params, setParams] = useSearchParams();
   const raw = params.get('cat') || 'all';
   const cat = chips.some((c) => c.slug === raw) ? raw : 'all';
-  const setCat = (slug: string) => setParams(slug === 'all' ? {} : { cat: slug }, { replace: true });
-  const list = cat === 'all' ? products : products.filter((p) => p.category === cat);
+  const rawPrice = params.get('precio') || 'all';
+  const priceKey = PRICE_RANGES.some((r) => r.key === rawPrice) ? rawPrice : 'all';
+  const priceRange = PRICE_RANGES.find((r) => r.key === priceKey)!;
+  const setParam = (key: string, val: string) => {
+    const next = new URLSearchParams(params);
+    if (!val || val === 'all') next.delete(key); else next.set(key, val);
+    setParams(next, { replace: true });
+  };
+  const setCat = (slug: string) => setParam('cat', slug);
+  const setPrice = (key: string) => setParam('precio', key);
+  const list = products.filter(
+    (p) => (cat === 'all' || p.category === cat) && priceRange.test(Number(p.price) || 0)
+  );
 
   return (
     <div className="relative min-h-screen">
@@ -39,7 +59,11 @@ export default function Catalogo() {
           <h1 className="mt-3 font-display text-[2.75rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[4rem]">
             Flores de estación, <em className="italic text-rosa-500">hechas a mano.</em>
           </h1>
-          <p className="mt-5 max-w-md text-ink-700">{products.length} creaciones, armadas tallo por tallo y entregadas el mismo día en Lima.</p>
+          <p className="mt-5 max-w-md text-ink-700">
+            {cat === 'all' && priceKey === 'all'
+              ? `${products.length} creaciones, armadas tallo por tallo y entregadas el mismo día en Lima.`
+              : `${list.length} ${list.length === 1 ? 'creación' : 'creaciones'} con estos filtros.`}
+          </p>
 
           <div className="mt-8 flex flex-wrap gap-2.5">
             {chips.map((c) => (
@@ -49,6 +73,20 @@ export default function Catalogo() {
                   cat === c.slug ? 'border-rosa-500 bg-rosa-500 text-ivory-50' : 'border-ink-900/15 text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
               >
                 {c.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Filtro de precio */}
+          <div className="mt-4 flex flex-wrap items-center gap-2.5">
+            <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
+            {PRICE_RANGES.map((r) => (
+              <button
+                key={r.key} onClick={() => setPrice(r.key)}
+                className={`rounded-full border px-4 py-1.5 text-[12px] font-medium tracking-[0.03em] transition-colors ${
+                  priceKey === r.key ? 'border-rosa-500 bg-rosa-500 text-ivory-50' : 'border-ink-900/15 text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
+              >
+                {r.label}
               </button>
             ))}
           </div>
@@ -88,6 +126,12 @@ export default function Catalogo() {
             </motion.div>
           ))}
         </div>
+        {list.length === 0 && (
+          <div className="py-24 text-center">
+            <p className="font-display text-2xl italic text-ink-700">No hay creaciones con esos filtros.</p>
+            <button onClick={() => setParams({}, { replace: true })} className="mt-4 text-[13px] font-medium uppercase tracking-[0.14em] text-rosa-500 hover:text-rosa-600">Limpiar filtros</button>
+          </div>
+        )}
       </section>
       </div>
       <SiteFooter />

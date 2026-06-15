@@ -144,6 +144,12 @@ export default function Checkout() {
 
   const field = 'mt-1.5 w-full border border-border bg-surface px-4 py-3 text-ink-900 outline-none transition-colors focus:border-rosa-500';
   const label = 'text-[12px] font-medium uppercase tracking-[0.14em] text-foreground/55';
+  // Campos sobre la tarjeta verde oscuro (claro sobre verde). color-scheme:dark
+  // hace que el ícono del date/select nativo salga claro y legible.
+  const darkField = 'mt-1.5 w-full rounded border border-ivory-100/25 bg-ivory-100/10 px-4 py-3 text-ivory-50 outline-none transition-colors placeholder:text-ivory-100/40 [color-scheme:dark] focus:border-ivory-100 focus:bg-ivory-100/20';
+  const darkLabel = 'text-[12px] font-medium uppercase tracking-[0.14em] text-ivory-100/70';
+  // Aclaración (nota) dentro de la tarjeta verde: borde-acento + texto claro.
+  const note = 'border-l-[3px] bg-ivory-100/10 px-4 py-3.5 text-[13px] leading-relaxed text-ivory-100/90';
 
   return (
     <div className="min-h-screen">
@@ -165,62 +171,84 @@ export default function Checkout() {
               <div><label className={label}>Email</label><input required type="email" value={buyer.email} onChange={(e) => setBuyer({ ...buyer, email: e.target.value })} className={field} placeholder="tu@correo.com" /></div>
             </fieldset>
 
-            {/* Destinatario + entrega */}
-            <fieldset className="frost space-y-5 p-6 md:p-8">
-              <legend className="mb-3 flex items-baseline gap-3 px-1">
-                <span className="font-display text-2xl italic text-rosa-500">02</span>
-                <span className="font-display text-xl text-ink-900">Entrega (quien recibe)</span>
+            {/* Destinatario + entrega — toda la info de quien recibe sobre una
+                tarjeta verde oscuro, con sus aclaraciones. */}
+            <fieldset className="space-y-5 rounded-lg border border-ivory-100/10 bg-[#2F3925] p-6 text-ivory-100 shadow-[0_24px_56px_-16px_rgba(47,57,37,0.45)] md:p-8">
+              <legend className="mb-1 flex flex-wrap items-center gap-3 px-1">
+                <span className="font-display text-2xl italic text-[#E7AFC2]">02</span>
+                <span className="rounded-sm bg-[#B6855E] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#2F3925]">Para</span>
+                <span className="font-display text-xl text-ivory-50">Quien recibe las flores</span>
               </legend>
+              <p className="px-1 text-sm leading-relaxed text-ivory-100/80">Estos son los datos de la persona que abrirá la puerta — su ubicación exacta, su nombre y su teléfono.</p>
+
               <div className="grid gap-5 sm:grid-cols-2">
-                <div><label className={label}>Nombre de quien recibe</label><input required value={recip.name} onChange={(e) => setRecip({ ...recip, name: e.target.value })} className={field} placeholder="Ej. Ana Torres" /></div>
-                <div><label className={label}>Teléfono de quien recibe</label><input required type="tel" value={recip.phone} onChange={(e) => setRecip({ ...recip, phone: e.target.value })} className={field} placeholder="999 999 999" /></div>
+                <div><label className={darkLabel}>Nombre de quien recibe</label><input required value={recip.name} onChange={(e) => setRecip({ ...recip, name: e.target.value })} className={darkField} placeholder="Ej. Ana Torres" /></div>
+                <div><label className={darkLabel}>Teléfono de quien recibe</label><input required type="tel" value={recip.phone} onChange={(e) => setRecip({ ...recip, phone: e.target.value })} className={darkField} placeholder="999 999 999" /></div>
               </div>
+
+              {/* Aclaración · el teléfono es del destinatario */}
+              <div className={`${note} border-ivory-50/80`}>
+                <strong className="block font-display italic text-ivory-50">Importante · este teléfono es de quien recibe las flores</strong>
+                Usamos el número de quien recibirá el pedido (no el tuyo) solo al momento de la entrega, para coordinar si no podemos dejar el paquete en la puerta. No es para confirmaciones previas ni spam.
+              </div>
+
               <div>
-                <label className={label}>Dirección {mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-rosa-500">· elige una sugerencia o escríbela completa</span>}</label>
-                <input ref={addressRef} required className={field} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
+                <label className={darkLabel}>Dirección {mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
+                <input ref={addressRef} required className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
               </div>
               {place && (
                 <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-sm text-ink-600">
-                    <svg className="h-4 w-4 shrink-0 text-rosa-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                  <p className="mb-2 flex items-center gap-1.5 text-sm text-ivory-100/85">
+                    <svg className="h-4 w-4 shrink-0 text-[#E7AFC2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                     {place.formatted}
                   </p>
-                  <div ref={mapRef} className="h-52 w-full overflow-hidden rounded-sm border border-border" />
-                  <p className="mt-1.5 text-[12px] text-foreground/50">Arrastra el pin para ajustar el punto exacto.</p>
+                  <div ref={mapRef} className="h-52 w-full overflow-hidden rounded-sm border border-ivory-100/20" />
+                  {/* Aclaración · el pin manda */}
+                  <div className={`mt-2 flex gap-3 rounded-r-sm ${note} border-[#B6855E]`}>
+                    <span className="shrink-0 text-base leading-none">📍</span>
+                    <span><strong className="block font-display italic text-ivory-50">Las flores se entregan exactamente donde está el pin.</strong>Si no coincide con la puerta del edificio o casa, arrástralo. La dirección escrita es solo referencia — lo que cuenta es la posición del mapa.</span>
+                  </div>
                 </div>
               )}
               <div className="grid gap-5 sm:grid-cols-2">
-                <div><label className={label}>Referencia (opcional)</label><input value={recip.ref} onChange={(e) => setRecip({ ...recip, ref: e.target.value })} className={field} placeholder="Casa blanca, reja negra…" /></div>
-                <div><label className={label}>Dpto / Interior (opcional)</label><input value={recip.apt} onChange={(e) => setRecip({ ...recip, apt: e.target.value })} className={field} placeholder="301" /></div>
+                <div><label className={darkLabel}>Referencia (opcional)</label><input value={recip.ref} onChange={(e) => setRecip({ ...recip, ref: e.target.value })} className={darkField} placeholder="Casa blanca, reja negra…" /></div>
+                <div><label className={darkLabel}>Dpto / Interior (opcional)</label><input value={recip.apt} onChange={(e) => setRecip({ ...recip, apt: e.target.value })} className={darkField} placeholder="301" /></div>
               </div>
               <div className="grid gap-5 sm:grid-cols-3">
                 <div>
-                  <label className={label}>Distrito</label>
-                  <select required className={field} value={district} onChange={(e) => setDistrict(e.target.value)}>
+                  <label className={darkLabel}>Distrito</label>
+                  <select required className={darkField} value={district} onChange={(e) => setDistrict(e.target.value)}>
                     <option value="" disabled>Selecciona…</option>
                     {districts.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
-                <div><label className={label}>Fecha</label><input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={field} /></div>
+                <div><label className={darkLabel}>Fecha</label><input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={darkField} /></div>
                 <div>
-                  <label className={label}>Horario</label>
-                  <select required className={field} value={time} onChange={(e) => setTime(e.target.value)}>
+                  <label className={darkLabel}>Horario</label>
+                  <select required className={darkField} value={time} onChange={(e) => setTime(e.target.value)}>
                     <option value="" disabled>Selecciona…</option>
                     {timeSlots.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
               </div>
-              <label className="flex items-center gap-2.5 text-sm text-ink-700">
-                <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-rosa-500" />
+              <label className="flex items-center gap-2.5 text-sm text-ivory-100/90">
+                <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
                 Hay alguien que pueda recibir en esa dirección
               </label>
+
+              {/* Mensaje de la tarjeta — va con quien recibe */}
+              <div className="border-t border-dashed border-ivory-100/20 pt-5">
+                <label className={darkLabel}>Mensaje en la tarjeta (opcional)</label>
+                <textarea rows={3} maxLength={220} value={cardNote} onChange={(e) => setCardNote(e.target.value)} className={darkField} placeholder="Lo que quieras que escribamos a mano…" />
+                <p className="mt-1.5 text-[12px] text-ivory-100/55">Lo imprimimos en una tarjeta que acompaña tu arreglo. {cardNote.length}/220</p>
+              </div>
             </fieldset>
 
-            {/* Pago + tarjeta */}
+            {/* Pago */}
             <fieldset className="frost space-y-5 p-6 md:p-8">
               <legend className="mb-3 flex items-baseline gap-3 px-1">
                 <span className="font-display text-2xl italic text-rosa-500">03</span>
-                <span className="font-display text-xl text-ink-900">Pago y tarjeta</span>
+                <span className="font-display text-xl text-ink-900">Pago</span>
               </legend>
               <div>
                 <label className={label}>Método de pago</label>
@@ -229,7 +257,6 @@ export default function Checkout() {
                   {payments.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
-              <div><label className={label}>Mensaje para la tarjeta (opcional)</label><textarea rows={3} value={cardNote} onChange={(e) => setCardNote(e.target.value)} className={field} placeholder="Lo que quieras que escribamos a mano…" /></div>
             </fieldset>
 
             {error && <p className="bg-red-100 px-4 py-3 text-sm text-red-800">{error}</p>}
