@@ -76,9 +76,9 @@ export function AdminOrders({ onAuthError }: { onAuthError: () => void }) {
         {orders.length === 0 ? (
           <div className="py-20 text-center font-display text-xl italic text-foreground/50">No hay pedidos {status === 'all' ? 'todavía' : 'en este estado'}.</div>
         ) : orders.map((o) => (
-          <div key={o.id} className="grid gap-5 border border-border bg-surface-card p-6 sm:grid-cols-[1fr_auto]">
-            <div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">
+          <div key={o.id} className="grid gap-5 border border-border bg-surface-card p-5 sm:grid-cols-[1fr_auto] sm:p-6">
+            <div className="min-w-0">
+              <div className="break-words font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">
                 {o.id} · <span className={`rounded px-2 py-0.5 ${badgeCls[o.status] || 'bg-ivory-200'}`}>{o.status}</span> · {fmtDate(o.created_at)}
               </div>
               <h3 className="mt-2 font-display text-2xl italic text-ink-900">Para {o.recipient_name}</h3>
@@ -172,8 +172,10 @@ function OrderCard({ order }: { order: Order }) {
 }
 
 const Row = ({ k, v }: { k: string; v: any }) => (
-  <div className="grid grid-cols-[110px_1fr] gap-3">
+  <div className="grid grid-cols-[92px_1fr] gap-3">
     <dt className="font-mono text-[11px] uppercase tracking-[0.06em] text-foreground/50">{k}</dt>
-    <dd className="text-ink-800">{v || '—'}</dd>
+    {/* min-w-0 + break-words: tokens largos sin espacios (email, id) se cortan y
+        no se salen de la tarjeta en móvil. */}
+    <dd className="min-w-0 break-words text-ink-800">{v || '—'}</dd>
   </div>
 );

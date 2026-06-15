@@ -33,6 +33,9 @@ export const FeaturedProducts = () => (
         {featured.map((p, i) => (
           <motion.div
             key={p.id}
+            // En móvil mostramos solo 8 (las demás aparecen desde md+); el resto se
+            // ve en "Ver todo el catálogo".
+            className={i >= 8 ? 'max-md:hidden' : undefined}
             initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.6, ease, delay: (i % 4) * 0.08 }}
           >
