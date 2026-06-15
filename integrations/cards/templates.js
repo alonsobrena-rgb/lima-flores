@@ -90,19 +90,19 @@ function shell({ key, css, body }) {
   }
   .wordmark {
     font-family:'Italiana',serif; letter-spacing:.18em; text-transform:uppercase;
-    font-size:36px;
+    font-size:48px;
   }
   .para {
     font-family:'Jost',sans-serif; font-weight:400; letter-spacing:.34em;
-    text-transform:uppercase; font-size:30px; margin-bottom:54px;
+    text-transform:uppercase; font-size:38px; margin-bottom:58px;
   }
   .message {
     font-family:'Cormorant Garamond',serif; font-weight:300; font-style:italic;
-    line-height:1.18; max-width:820px;
+    line-height:1.18; max-width:880px;
   }
   .firma {
     font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:400;
-    font-size:50px; margin-top:54px;
+    font-size:64px; margin-top:58px;
   }
   .sprig { width:120px; height:60px; }
   .bloom { width:80px; height:80px; }
@@ -118,15 +118,15 @@ function shell({ key, css, body }) {
         if (!el) return;
         var box = el.getBoundingClientRect();
         var maxH = ${'${MAX_MSG_HEIGHT}'};
-        var size = 98;                       // tamaño base (px) para textos cortos
+        var size = 116;                      // tamaño base (px) para textos cortos
         var len = el.textContent.trim().length;
-        if (len > 60)  size = 84;
-        if (len > 110) size = 72;
-        if (len > 160) size = 60;
+        if (len > 60)  size = 98;
+        if (len > 110) size = 84;
+        if (len > 160) size = 70;
         el.style.fontSize = size + 'px';
         // Ajuste fino: encoge hasta que no desborde su contenedor vertical.
         var guard = 0;
-        while (el.scrollHeight > el.clientHeight + 2 && size > 30 && guard < 60) {
+        while (el.scrollHeight > el.clientHeight + 2 && size > 34 && guard < 60) {
           size -= 2; el.style.fontSize = size + 'px'; guard++;
         }
       }
@@ -136,7 +136,7 @@ function shell({ key, css, body }) {
       setTimeout(function () { window.__cardReady = true; }, 2500); // failsafe
     })();
   </script>
-</body></html>`.replace(/\$\{MAX_MSG_HEIGHT\}/g, '480');
+</body></html>`.replace(/\$\{MAX_MSG_HEIGHT\}/g, '520');
 }
 
 // ─── Las 5 plantillas ───────────────────────────────────────────────────────
@@ -264,7 +264,7 @@ function minimal(d) {
       .para { color:#9A9389; letter-spacing:.4em; }
       .message { color:#1B1A17; font-style:italic; font-weight:300; }
       .firma { color:#1B1A17; opacity:.85; }
-      .wordmark { color:#9A9389; position:absolute; bottom:96px; left:0; right:0; font-size:28px; letter-spacing:.34em; }
+      .wordmark { color:#9A9389; position:absolute; bottom:96px; left:0; right:0; font-size:36px; letter-spacing:.34em; }
       .center { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; }
     `,
     body: `

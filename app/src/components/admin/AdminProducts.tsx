@@ -120,6 +120,8 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [zoom, setZoom] = useState<string | null>(null);
 
   const set = (k: string, v: any) => setF((p) => ({ ...p, [k]: v }));
 
@@ -149,7 +151,7 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
       const url = data.url || data.path;
       setF((p) => {
         const images = [...(p.images || []), url];
-        return { ...p, images, image: p.image || url };
+        return { ...p, images, image: images[0] }; // la primera = principal
       });
     } catch (e: any) { setErr('Subida: ' + e.message); }
     finally { setUploading(false); }
@@ -157,10 +159,17 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
 
   const removeImg = (src: string) => setF((p) => {
     const images = (p.images || []).filter((x: string) => x !== src);
-    const image = p.image === src ? (images[0] || '') : p.image;
-    return { ...p, images, image };
+    return { ...p, images, image: images[0] || '' };
   });
-  const makeMain = (src: string) => set('image', src);
+
+  // Reordena la galería arrastrando. La primera siempre es la principal (image).
+  const moveImage = (from: number, to: number) => setF((p) => {
+    const images = [...(p.images || [])];
+    if (from < 0 || to < 0 || from >= images.length || to >= images.length || from === to) return p;
+    const [moved] = images.splice(from, 1);
+    images.splice(to, 0, moved);
+    return { ...p, images, image: images[0] || '' };
+  });
 
   const save = async () => {
     if (!f.name || !String(f.name).trim()) { setErr('El nombre es obligatorio.'); return; }
@@ -168,7 +177,7 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
     const payload: Product = {
       name: f.name, category: f.category, categoryLabel: f.categoryLabel,
       price: f.price === '' ? null : Number(f.price),
-      image: f.image || (f.images || [])[0] || null,
+      image: (f.images || [])[0] || f.image || null,
       images: f.images || [],
       shortDesc: f.shortDesc || null, description: f.description || null,
       tags: f.tags || [], badge: f.badge || null, palette: f.palette || null,
@@ -233,14 +242,21 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
         <div className="mt-6">
           <label className={label}>Imágenes</label>
           <div className="mt-2 flex flex-wrap gap-3">
-            {(f.images || []).map((src: string) => (
-              <div key={src} className={`relative h-24 w-20 overflow-hidden rounded-sm border-2 ${f.image === src ? 'border-rosa-500' : 'border-border'}`}>
-                <img src={resolveImg(src)} alt="" className="h-full w-full object-cover" />
+            {(f.images || []).map((src: string, i: number) => (
+              <div key={src}
+                draggable
+                onDragStart={() => setDragIdx(i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => { e.preventDefault(); if (dragIdx !== null) moveImage(dragIdx, i); setDragIdx(null); }}
+                onDragEnd={() => setDragIdx(null)}
+                title="Arrastra para reordenar"
+                className={`relative h-24 w-20 cursor-move overflow-hidden rounded-sm border-2 transition-opacity ${i === 0 ? 'border-rosa-500' : 'border-border'} ${dragIdx === i ? 'opacity-40' : ''}`}>
+                <img src={resolveImg(src)} alt="" draggable={false} className="h-full w-full object-cover" />
                 <div className="absolute inset-x-0 bottom-0 flex justify-between bg-ink-900/70 px-1 py-0.5">
-                  <button type="button" title="Principal" onClick={() => makeMain(src)} className="text-[9px] text-ivory-50/90 hover:text-rosa-300">★</button>
-                  <button type="button" title="Quitar" onClick={() => removeImg(src)} className="text-[9px] text-ivory-50/90 hover:text-red-300">✕</button>
+                  <button type="button" title="Ampliar" onClick={() => setZoom(resolveImg(src))} className="text-[11px] leading-none text-ivory-50/90 hover:text-rosa-300">⤢</button>
+                  <button type="button" title="Quitar" onClick={() => removeImg(src)} className="text-[11px] leading-none text-ivory-50/90 hover:text-red-300">✕</button>
                 </div>
-                {f.image === src && <span className="absolute left-0 top-0 bg-rosa-500 px-1 text-[8px] uppercase tracking-wide text-ivory-50">Main</span>}
+                {i === 0 && <span className="absolute left-0 top-0 bg-rosa-500 px-1 text-[8px] uppercase tracking-wide text-ivory-50">Main</span>}
               </div>
             ))}
             <label className="flex h-24 w-20 cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed border-border text-center text-[10px] text-foreground/50 hover:border-rosa-500 hover:text-rosa-500">
@@ -248,7 +264,7 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
               <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) upload(file); e.target.value = ''; }} />
             </label>
           </div>
-          <p className="mt-1.5 text-[11px] text-foreground/45">★ = imagen principal. La primera se usa si no marcas otra.</p>
+          <p className="mt-1.5 text-[11px] text-foreground/45">Arrastra para reordenar — <strong className="font-medium text-foreground/60">la primera es la principal</strong>. ⤢ amplía · ✕ quita.</p>
         </div>
 
         {err && <p className="mt-4 bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
@@ -263,6 +279,16 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
           </div>
         </div>
       </div>
+
+      {/* Lightbox: ampliar imagen del producto */}
+      {zoom && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-ink-900/85 p-6"
+          onClick={(e) => { e.stopPropagation(); setZoom(null); }}>
+          <img src={zoom} alt="" className="max-h-[90vh] max-w-[92vw] rounded-sm object-contain shadow-2xl" />
+          <button onClick={(e) => { e.stopPropagation(); setZoom(null); }}
+            className="absolute right-4 top-4 bg-ink-900/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-ink-900">Cerrar ✕</button>
+        </div>
+      )}
     </div>
   );
 }
