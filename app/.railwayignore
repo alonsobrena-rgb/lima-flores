@@ -1,0 +1,6 @@
+# El panel React se construye en Railway (npm install + vite build). No subir
+# artefactos pesados ni locales — se regeneran en el build.
+node_modules
+dist
+.env
+.env.local
