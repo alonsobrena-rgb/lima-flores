@@ -126,19 +126,20 @@ const STYLES = {
     inside: `<div class="pad center mid"><div class="dot rosa"></div></div>`,
   },
 
-  // 3 · JARDÍN — acuarela en el borde inferior.
+  // 3 · JARDÍN — fresco, logo protagonista + guirnalda botánica fina (sin ramo grande).
   jardin: {
     ground: '#FFFFFF', tint: 'verde',
-    front: `<div class="pad center jardin-front">
-        <img class="logo j-logo" src="${LOGO}">
-        <img class="border-bq j-bq" src="${BOUQUET}">
+    front: `<div class="pad center mid">
+        <img class="logo j-logo2" src="${LOGO}">
+        <div class="eyebrow verde mt2">flores frescas · de temporada</div>
+        <div class="garland">${sprig(72, '#A9B894')}</div>
       </div>`,
     back: `<div class="pad center jardin-back">
         <div class="script rosa">con flores</div>
         ${contact('mini')}
-        <img class="border-bq j-bq-sm" src="${BOUQUET}">
+        <div class="garland bottom">${sprig(58, '#A9B894')}</div>
       </div>`,
-    inside: `<div class="pad"><img class="border-bq faint" src="${BOUQUET}"></div>`,
+    inside: `<div class="pad center mid"><div class="sprig-soft">${sprig(64, '#C9D3BC')}</div></div>`,
   },
 
   // 4 · BOTÁNICA → "Esquinas": ramas en esquinas opuestas.
@@ -230,7 +231,7 @@ html,body{margin:0;padding:0;}
 .script.rosa{color:var(--rosa-500);}
 .eyebrow{font-family:'Jost',sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.28em; font-size:5pt; color:var(--ink-400);}
 .eyebrow.ink{color:var(--ink-500);} .eyebrow.ink2{color:var(--ink-400);}
-.eyebrow.rosa{color:var(--rosa-500);}
+.eyebrow.rosa{color:var(--rosa-500);} .eyebrow.verde{color:var(--verde-500);}
 
 .logo{width:52mm; height:auto;}
 .bq-sm{width:26mm; height:auto;}
@@ -239,11 +240,11 @@ html,body{margin:0;padding:0;}
 .bq-watermark.soft{opacity:.22;}
 .border-bq{position:absolute; left:50%; bottom:-3mm; transform:translateX(-50%); width:64mm; height:auto;}
 .border-bq.faint{opacity:.18; width:44mm; bottom:-2mm;}
-.jardin-front{justify-content:flex-start;}
-.j-logo{width:40mm; margin-top:3mm;}
-.j-bq{width:52mm; bottom:-2mm;}
+.j-logo2{width:46mm; height:auto;}
+.garland{margin-top:3mm;}
+.garland.bottom{position:absolute; left:50%; bottom:5mm; transform:translateX(-50%); margin:0;}
 .jardin-back{justify-content:flex-start; gap:3mm;}
-.j-bq-sm{width:42mm; bottom:-2mm;}
+.sprig-soft{opacity:.5;}
 
 .contact{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1.4mm;}
 .contact li{display:flex; align-items:center; gap:1.6mm; font-family:'Jost',sans-serif; font-weight:400; font-size:6pt; color:var(--ink-500); letter-spacing:.02em;}
