@@ -124,6 +124,15 @@ const server = http.createServer(async (req, res) => {
     return adminHandler(req, res, parsed);
   }
 
+  // ─── /admin → /admin/orders ───
+  // Cada sección del panel tiene su propia URL; /admin redirige a la sección por
+  // defecto (Pedidos) del lado del servidor, para que la URL quede canónica al
+  // instante (sin parpadeo) y al recargar se mantenga.
+  if (APP_DIST_EXISTS && (parsed.pathname === '/admin' || parsed.pathname === '/admin/' || parsed.pathname === '/admin.html')) {
+    res.writeHead(302, { Location: '/admin/orders', 'Cache-Control': 'no-store' });
+    return res.end();
+  }
+
   // ─── /admin · /admin.html — panel vanilla (solo si NO hay build React) ───
   // Con el panel React activo (app/dist), /admin lo maneja el SPA (más abajo).
   if (!APP_DIST_EXISTS && (parsed.pathname === '/admin' || parsed.pathname === '/admin.html')) {
