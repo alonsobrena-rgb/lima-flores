@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { adminGet, adminSend, adminGetBlob, AuthError } from '@/lib/admin-api';
+import { adminGet, adminSend, adminGetBlob, adminPostBlob, AuthError } from '@/lib/admin-api';
 
 type Order = Record<string, any>;
 const STATUSES = [
@@ -119,21 +119,35 @@ export function AdminOrders({ onAuthError }: { onAuthError: () => void }) {
 // servidor + descarga del PDF de 2 páginas listo para imprimir y doblar.
 function OrderCard({ order, onAuthError }: { order: Order; onAuthError: () => void }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [tpl, setTpl] = useState(order.card_template || '');
   const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false);       // descarga PDF
+  const [redoing, setRedoing] = useState(false); // rediseñar
   const [zoom, setZoom] = useState(false);
-  const tpl = order.card_template || '';
+  const urlRef = useRef<string | null>(null);
+
+  const showBlob = (b: Blob, template?: string | null) => {
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    const u = URL.createObjectURL(b);
+    urlRef.current = u;
+    setPreviewUrl(u);
+    if (template) setTpl(template);
+  };
 
   useEffect(() => {
     let alive = true;
-    let url: string | null = null;
     setErr('');
     setPreviewUrl(null);
+    setTpl(order.card_template || '');
     adminGetBlob(`/api/admin/orders/${order.id}/card?format=png`)
-      .then((b) => { if (!alive) return; url = URL.createObjectURL(b); setPreviewUrl(url); })
+      .then((b) => { if (alive) showBlob(b); })
       .catch((e) => { if (!alive) return; if (e instanceof AuthError) onAuthError(); else setErr(e.message || 'No se pudo generar la tarjeta'); });
-    return () => { alive = false; if (url) URL.revokeObjectURL(url); };
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order.id, order.card_note, order.recipient_name, order.buyer_name, order.card_template, onAuthError]);
+
+  // Libera el último objectURL al desmontar.
+  useEffect(() => () => { if (urlRef.current) URL.revokeObjectURL(urlRef.current); }, []);
 
   useEffect(() => {
     if (!zoom) return;
@@ -142,6 +156,17 @@ function OrderCard({ order, onAuthError }: { order: Order; onAuthError: () => vo
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
   }, [zoom]);
+
+  // Rediseña: el servidor elige un estilo NUEVO al azar y reemplaza el cache.
+  const redesign = async () => {
+    setRedoing(true); setErr('');
+    try {
+      const { blob, headers } = await adminPostBlob(`/api/admin/orders/${order.id}/card?format=png`);
+      showBlob(blob, headers.get('X-Card-Template'));
+    } catch (e: any) {
+      if (e instanceof AuthError) onAuthError(); else setErr(e.message || 'No se pudo rediseñar la tarjeta');
+    } finally { setRedoing(false); }
+  };
 
   const downloadPdf = async () => {
     setBusy(true);
@@ -166,19 +191,27 @@ function OrderCard({ order, onAuthError }: { order: Order; onAuthError: () => vo
         <button type="button" onClick={() => setZoom(true)} title="Click para ampliar"
           className="group relative self-center overflow-hidden rounded-sm border border-border shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rosa-500">
           <img src={previewUrl} alt={`Tarjeta ${order.id}`} className="block w-full max-w-[150px]" />
+          {redoing && <span className="absolute inset-0 flex items-center justify-center bg-ivory-50/70 text-[10px] font-medium uppercase tracking-[0.12em] text-ink-900">rediseñando…</span>}
           <span className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-ink-900/55 to-transparent pb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-ivory-50 opacity-0 transition-opacity group-hover:opacity-100">⤢ Ampliar</span>
         </button>
       ) : (
         <div className="self-center text-[11px] text-foreground/45">generando…</div>
       )}
-      <button onClick={downloadPdf} disabled={busy} className="bg-ink-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">{busy ? 'preparando…' : '⬇ Descargar PDF (doblar)'}</button>
+      <div className="flex gap-2">
+        <button onClick={redesign} disabled={redoing || !previewUrl} title="Elige un estilo nuevo al azar"
+          className="flex-1 border border-ink-900 px-2 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-900 hover:bg-ink-900 hover:text-ivory-50 disabled:opacity-40">{redoing ? '…' : '↻ Rediseñar'}</button>
+        <button onClick={downloadPdf} disabled={busy} className="flex-1 bg-ink-900 px-2 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">{busy ? '…' : '⬇ PDF'}</button>
+      </div>
 
       {zoom && previewUrl && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink-900/85 p-4 md:p-8" onClick={() => setZoom(false)} role="dialog" aria-modal="true" aria-label={`Tarjeta del pedido ${order.id}`}>
           <button type="button" onClick={() => setZoom(false)} aria-label="Cerrar" className="absolute right-5 top-5 text-2xl text-ivory-50/80 hover:text-ivory-50">✕</button>
           <div className="flex max-h-full flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <img src={previewUrl} alt={`Tarjeta ${order.id}`} className="max-h-[82vh] w-auto rounded-sm shadow-2xl" />
-            <button onClick={downloadPdf} disabled={busy} className="bg-rosa-500 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-50">{busy ? 'preparando…' : '⬇ Descargar PDF (doblar)'}</button>
+            <img src={previewUrl} alt={`Tarjeta ${order.id}`} className="max-h-[78vh] w-auto rounded-sm shadow-2xl" />
+            <div className="flex gap-3">
+              <button onClick={redesign} disabled={redoing} className="border border-ivory-50/70 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-ivory-50 hover:text-ink-900 disabled:opacity-50">{redoing ? 'rediseñando…' : '↻ Rediseñar'}</button>
+              <button onClick={downloadPdf} disabled={busy} className="bg-rosa-500 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-50">{busy ? 'preparando…' : '⬇ Descargar PDF'}</button>
+            </div>
           </div>
         </div>
       )}

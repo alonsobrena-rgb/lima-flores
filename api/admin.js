@@ -24,6 +24,7 @@ const {
 } = require('../integrations/cabify/client');
 const { generateAndStoreCard } = require('../integrations/cards/order-card');
 const { generateCard } = require('../integrations/cards/generate');
+const { STYLE_KEYS } = require('../integrations/cards/folded');
 const products = require('../db/products-store');
 const adminStudio = require('./admin-studio');
 
@@ -103,15 +104,25 @@ async function getCard(req, res, id, { force = false, format = 'png' } = {}) {
   const isPdf = format === 'pdf';
   let png = order.card_png;
   let pdf = order.card_pdf;
+  let tpl = order.card_template;
 
   // Una tarjeta del sistema plegado SIEMPRE tiene PDF. Si falta, es una tarjeta
-  // vieja (formato de una cara) o nunca generada → la regeneramos (plegada). Para
-  // no cambiar el estilo elegido, reusamos card_template salvo que se fuerce.
+  // vieja (formato de una cara) o nunca generada → la regeneramos (plegada).
   const stale = !pdf || !png;
   if (force || stale) {
-    const r = await generateAndStoreCard(order, force ? {} : { template: order.card_template || undefined });
+    let opts;
+    if (force) {
+      // "Rediseñar": elige un estilo NUEVO al azar, distinto del actual, y
+      // sobrescribe el cache (card_png/card_pdf) con el nuevo.
+      const others = STYLE_KEYS.filter((k) => k !== order.card_template);
+      opts = { template: others[Math.floor(Math.random() * others.length)] };
+    } else {
+      // Regeneración por estar obsoleta: conserva el estilo elegido.
+      opts = { template: order.card_template || undefined };
+    }
+    const r = await generateAndStoreCard(order, opts);
     if (!r.ok) return send(res, 502, { error: 'No se pudo generar la tarjeta: ' + r.error });
-    png = r.png; pdf = r.pdf;
+    png = r.png; pdf = r.pdf; tpl = r.template;
   }
 
   const body = isPdf ? pdf : png;
@@ -120,6 +131,7 @@ async function getCard(req, res, id, { force = false, format = 'png' } = {}) {
     'Content-Type': isPdf ? 'application/pdf' : 'image/png',
     'Content-Length': body.length,
     'Cache-Control': 'no-store',
+    'X-Card-Template': tpl || '',
     'Content-Disposition': `inline; filename="tarjeta-${id}.${isPdf ? 'pdf' : 'png'}"`,
   });
   return res.end(body);
