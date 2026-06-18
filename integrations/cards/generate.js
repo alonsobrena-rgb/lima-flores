@@ -152,7 +152,12 @@ async function probeChromium() {
     try { const p = browser.process && browser.process(); executablePath = p && p.spawnfile; } catch { /* ignore */ }
     let version = 'unknown';
     try { version = await browser.version(); } catch { /* ignore */ }
-    return { ok: true, version, executablePath, candidates };
+    // Prueba el PIPELINE COMPLETO: renderiza una tarjeta de muestra (PDF + PNG).
+    const card = await generateCard({ note: 'Prueba de diagnóstico — Lima Flores', recipientName: 'Ana', buyerName: 'Equipo' });
+    return {
+      ok: true, version, executablePath, candidates,
+      render: { ok: true, template: card.template, pdfBytes: card.pdf.length, pngBytes: card.png.length },
+    };
   } catch (e) {
     const msg = e && e.message ? e.message.split('\n').slice(0, 3).join(' | ') : String(e);
     return { ok: false, error: msg, candidates };
