@@ -49,12 +49,20 @@ function chromiumCandidates() {
   const out = [];
   const push = (p) => { if (p && !out.includes(p)) out.push(p); };
 
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) push(process.env.PUPPETEER_EXECUTABLE_PATH);
-  // Chromium "real" del sistema (Nixpacks en Railway lo instala aquí).
+  if (exists(process.env.PUPPETEER_EXECUTABLE_PATH)) push(process.env.PUPPETEER_EXECUTABLE_PATH);
+  // Resolver por PATH: Nixpacks instala chromium con Nix en /nix/store y lo expone
+  // en el PATH como `chromium` (la base es Ubuntu, donde el apt `chromium` es un
+  // stub de snap roto, así que NO usamos /usr/bin/chromium del apt).
+  try {
+    const { execSync } = require('child_process');
+    const found = execSync('command -v chromium chromium-browser google-chrome-stable google-chrome 2>/dev/null || true', { encoding: 'utf8', timeout: 4000, stdio: ['ignore', 'pipe', 'ignore'] });
+    found.split(/\r?\n/).map((s) => s.trim()).forEach((p) => { if (exists(p)) push(p); });
+  } catch { /* ignore: Windows / sin shell POSIX */ }
+  // Rutas fijas del sistema.
   for (const c of ['/usr/bin/chromium', '/usr/bin/google-chrome-stable', '/usr/bin/google-chrome']) {
     if (exists(c)) push(c);
   }
-  // El Chrome bundleado de puppeteer (si se descargó).
+  // El Chrome bundleado de puppeteer (si se descargó; en dev local).
   try { const p = puppeteer().executablePath(); if (exists(p)) push(p); } catch { /* ignore */ }
   out.push(undefined); // deja que puppeteer decida
   // Último recurso: el stub de snap (suele estar roto, por eso va al final).
@@ -134,7 +142,24 @@ async function generateCard(opts = {}) {
   }
 }
 
-module.exports = { generateCard, closeBrowser };
+// Diagnóstico: intenta arrancar Chromium y devuelve qué ejecutable usó (o el
+// error). Sirve para verificar el deploy sin tener que crear una tarjeta real.
+async function probeChromium() {
+  const candidates = chromiumCandidates().filter((c) => typeof c === 'string');
+  try {
+    const browser = await getBrowser();
+    let executablePath = null;
+    try { const p = browser.process && browser.process(); executablePath = p && p.spawnfile; } catch { /* ignore */ }
+    let version = 'unknown';
+    try { version = await browser.version(); } catch { /* ignore */ }
+    return { ok: true, version, executablePath, candidates };
+  } catch (e) {
+    const msg = e && e.message ? e.message.split('\n').slice(0, 3).join(' | ') : String(e);
+    return { ok: false, error: msg, candidates };
+  }
+}
+
+module.exports = { generateCard, closeBrowser, probeChromium };
 
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 if (require.main === module) {

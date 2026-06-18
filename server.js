@@ -19,6 +19,11 @@ const quoteHandler = require('./api/quote');
 const orderHandler = require('./api/order');
 const adminHandler = require('./api/admin');
 const productsHandler = require('./api/products');
+const cardGen = require('./integrations/cards/generate');
+
+// Resultado cacheado del probe de Chromium (evita relanzar el navegador en cada hit).
+let _chromiumProbe = null;
+let _chromiumProbeAt = 0;
 
 const SITE_DIR = path.join(__dirname, 'site');
 // Build del panel/tienda React (app/dist). Si existe, es el frontend principal y
@@ -92,6 +97,21 @@ const server = http.createServer(async (req, res) => {
   // ─── POST /api/order — crea pedido en BD (status: pending) ───
   if (parsed.pathname === '/api/order') {
     return orderHandler(req, res);
+  }
+
+  // ─── GET /api/diag/chromium — auto-test de Chromium (para verificar el deploy) ───
+  // Cacheado 5 min para que no se pueda abusar relanzando el navegador.
+  if (parsed.pathname === '/api/diag/chromium') {
+    const force = parsed.searchParams.get('force') === '1';
+    const respond = (probe) => {
+      res.writeHead(probe.ok ? 200 : 503, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify(probe, null, 2));
+    };
+    if (_chromiumProbe && !force && Date.now() - _chromiumProbeAt < 5 * 60 * 1000) return respond(_chromiumProbe);
+    cardGen.probeChromium()
+      .then((probe) => { _chromiumProbe = probe; _chromiumProbeAt = Date.now(); respond(probe); })
+      .catch((e) => respond({ ok: false, error: String(e && e.message || e) }));
+    return;
   }
 
   // ─── /api/products* — catálogo público (solo lectura) ───
