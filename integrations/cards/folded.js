@@ -96,9 +96,9 @@ const SIG = {
 // Todas las PORTADAS usan el logo real de Lima Flores (img), centrado y con aire.
 // El cuerpo (contraportada/interior) varía fuentes y acentos por estilo.
 const STYLES = {
-  // 1 · ATELIER — marfil cálido, acento rosa.
+  // 1 · ATELIER — papel blanco, acento rosa.
   atelier: {
-    ground: '#FBF9F4', tint: 'ink',
+    ground: '#FFFFFF', tint: 'ink',
     front: `<div class="pad center mid">
         <img class="logo" src="${LOGO}">
         <div class="eyebrow rosa mt3">para alguien especial</div>
@@ -110,9 +110,9 @@ const STYLES = {
     inside: `<div class="pad center mid"><img class="bq-watermark" src="${BOUQUET}"></div>`,
   },
 
-  // 2 · MINIMAL — marfil, sobrio, un filete fino.
+  // 2 · MINIMAL — papel blanco, sobrio, un filete fino.
   minimal: {
-    ground: '#F6F3EC', tint: 'ink',
+    ground: '#FFFFFF', tint: 'ink',
     front: `<div class="pad center mid">
         <img class="logo" src="${LOGO}">
         <div class="rule mt3"></div>
@@ -141,9 +141,9 @@ const STYLES = {
     inside: `<div class="pad center mid"><div class="sprig-soft">${sprig(64, '#C9D3BC')}</div></div>`,
   },
 
-  // 4 · BOTÁNICA — ramas en esquinas opuestas, logo centrado.
+  // 4 · BOTÁNICA — papel blanco, ramas en esquinas opuestas, logo centrado.
   botanica: {
-    ground: '#FBF9F4', tint: 'ink',
+    ground: '#FFFFFF', tint: 'ink',
     front: `<div class="pad center mid">
         <div class="corner tl">${corner(64)}</div>
         <div class="corner br flip">${corner(64)}</div>
@@ -158,9 +158,9 @@ const STYLES = {
     inside: `<div class="pad center mid"><div class="corner tl">${corner(56, '#D7CBB6')}</div></div>`,
   },
 
-  // 5 · BLUSH — rosado, acento rosa fuerte.
+  // 5 · BLUSH — papel blanco, acento rosa fuerte.
   blush: {
-    ground: '#FBEEF2', tint: 'rosa',
+    ground: '#FFFFFF', tint: 'rosa',
     front: `<div class="pad center mid">
         <img class="logo" src="${LOGO}">
         <div class="eyebrow rosa mt3">con todo nuestro cariño</div>
