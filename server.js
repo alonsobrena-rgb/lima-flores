@@ -100,14 +100,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   // ─── GET /api/diag/chromium — auto-test de Chromium (para verificar el deploy) ───
-  // Cacheado 5 min para que no se pueda abusar relanzando el navegador.
+  // Resultado cacheado: como mucho un render cada 5 min, sin importar el tráfico
+  // (no hay bypass), para que no se pueda abusar relanzando el navegador.
   if (parsed.pathname === '/api/diag/chromium') {
-    const force = parsed.searchParams.get('force') === '1';
     const respond = (probe) => {
       res.writeHead(probe.ok ? 200 : 503, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify(probe, null, 2));
     };
-    if (_chromiumProbe && !force && Date.now() - _chromiumProbeAt < 5 * 60 * 1000) return respond(_chromiumProbe);
+    if (_chromiumProbe && Date.now() - _chromiumProbeAt < 5 * 60 * 1000) return respond(_chromiumProbe);
     cardGen.probeChromium()
       .then((probe) => { _chromiumProbe = probe; _chromiumProbeAt = Date.now(); respond(probe); })
       .catch((e) => respond({ ok: false, error: String(e && e.message || e) }));
