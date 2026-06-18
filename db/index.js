@@ -138,6 +138,60 @@ CREATE TABLE IF NOT EXISTS marketing_assets (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS marketing_assets_product_idx ON marketing_assets (product_id, created_at DESC);
+
+-- ─── Promociones por WhatsApp (Meta Cloud API) ──────────────────────────────
+-- Base de clientes para campañas de marketing por plantillas aprobadas por Meta.
+CREATE TABLE IF NOT EXISTS wa_contacts (
+  id          TEXT PRIMARY KEY,
+  name        TEXT,
+  phone       TEXT NOT NULL UNIQUE,   -- E.164 normalizado (+51...)
+  phone_raw   TEXT,
+  opted_out   BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Plantillas de mensaje creadas/sincronizadas con Meta. El binario del header
+-- (foto) vive en la BD para re-subirlo al enviar (Railway borra el disco).
+CREATE TABLE IF NOT EXISTS wa_templates (
+  id              TEXT PRIMARY KEY,
+  meta_id         TEXT,                            -- id de la plantilla en Meta
+  name            TEXT NOT NULL,                   -- snake_case, requerido por Meta
+  language        TEXT NOT NULL DEFAULT 'es',
+  category        TEXT NOT NULL DEFAULT 'MARKETING',
+  status          TEXT NOT NULL DEFAULT 'PENDING', -- PENDING|APPROVED|REJECTED|...
+  body_text       TEXT,                            -- con {{1}} para el nombre
+  header_kind     TEXT,                            -- 'image' | 'none'
+  header_image    BYTEA,                           -- bytes del header (subir al enviar)
+  header_mime     TEXT,
+  buttons         JSONB,
+  rejected_reason TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Campañas de envío (un envío masivo de una plantilla a una audiencia).
+CREATE TABLE IF NOT EXISTS wa_campaigns (
+  id          TEXT PRIMARY KEY,
+  name        TEXT,
+  template_id TEXT,
+  status      TEXT NOT NULL DEFAULT 'draft',       -- draft|sending|done|failed
+  total       INTEGER NOT NULL DEFAULT 0,
+  sent        INTEGER NOT NULL DEFAULT 0,
+  failed      INTEGER NOT NULL DEFAULT 0,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Un registro por destinatario de cada campaña (estado de entrega).
+CREATE TABLE IF NOT EXISTS wa_messages (
+  id            TEXT PRIMARY KEY,
+  campaign_id   TEXT,
+  contact_id    TEXT,
+  phone         TEXT,
+  status        TEXT NOT NULL DEFAULT 'queued',    -- queued|sent|failed
+  wa_message_id TEXT,
+  error         TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS wa_messages_campaign_idx ON wa_messages (campaign_id, created_at);
 `;
 
 async function migrate() {

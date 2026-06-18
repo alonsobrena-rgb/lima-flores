@@ -423,6 +423,9 @@ module.exports = async (req, res, urlObj) => {
   // ── Marketing Studio ──
   if (p.startsWith('/api/admin/studio/')) return adminStudio(req, res, urlObj);
 
+  // ── Promociones por WhatsApp ──
+  if (p.startsWith('/api/admin/wa/')) return require('./admin-whatsapp')(req, res, urlObj);
+
   // ── Productos ──
   if (p === '/api/admin/products' && req.method === 'GET')  return listProducts(req, res);
   if (p === '/api/admin/products' && req.method === 'POST') return createProduct(req, res);

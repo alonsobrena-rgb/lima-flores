@@ -1,21 +1,33 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiUrl, adminGet, AuthError } from '@/lib/admin-api';
 import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminStudio } from '@/components/admin/AdminStudio';
+import { AdminWhatsapp } from '@/components/admin/AdminWhatsapp';
 import { AdminCreateCard } from '@/components/admin/AdminCreateCard';
 
-type Section = 'orders' | 'cards' | 'products' | 'studio';
+type Section = 'orders' | 'cards' | 'products' | 'studio' | 'whatsapp';
 const SECTIONS: { key: Section; label: string }[] = [
   { key: 'orders', label: 'Pedidos' },
   { key: 'cards', label: 'Tarjetas' },
   { key: 'products', label: 'Productos' },
   { key: 'studio', label: 'Marketing Studio' },
+  { key: 'whatsapp', label: 'Promociones WhatsApp' },
 ];
 
 export default function Admin() {
   const [authed, setAuthed] = useState<boolean | null>(null);
-  const [section, setSection] = useState<Section>('orders');
+
+  // La sección activa vive en la URL (/admin/:section), así al recargar se
+  // mantiene. Si la sub-ruta falta o es inválida, normalizamos a /admin/orders.
+  const { section: sectionParam } = useParams();
+  const navigate = useNavigate();
+  const section: Section = SECTIONS.find((s) => s.key === sectionParam)?.key ?? 'orders';
+  useEffect(() => {
+    if (!SECTIONS.some((s) => s.key === sectionParam)) navigate('/admin/orders', { replace: true });
+  }, [sectionParam, navigate]);
+  const goto = (key: Section) => navigate('/admin/' + key);
 
   // Sesión: una llamada barata a /api/admin/me al montar.
   const checkSession = useCallback(async () => {
@@ -50,7 +62,7 @@ export default function Admin() {
         {/* Navegación de secciones */}
         <div className="mt-6 flex gap-2 border-b border-border">
           {SECTIONS.map((s) => (
-            <button key={s.key} onClick={() => setSection(s.key)}
+            <button key={s.key} onClick={() => goto(s.key)}
               className={`-mb-px border-b-2 px-4 py-3 font-mono text-[12px] uppercase tracking-[0.1em] transition-colors ${section === s.key ? 'border-rosa-500 text-ink-900' : 'border-transparent text-foreground/45 hover:text-ink-900'}`}>
               {s.label}
             </button>
@@ -62,6 +74,7 @@ export default function Admin() {
           {section === 'cards' && <AdminCreateCard onAuthError={onAuthError} />}
           {section === 'products' && <AdminProducts onAuthError={onAuthError} />}
           {section === 'studio' && <AdminStudio onAuthError={onAuthError} />}
+          {section === 'whatsapp' && <AdminWhatsapp onAuthError={onAuthError} />}
         </div>
       </div>
     </div>

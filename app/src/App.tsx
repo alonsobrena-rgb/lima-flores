@@ -25,7 +25,9 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       {/* Crossfade entre rutas (sin transform → no rompe sticky/fixed internos) */}
       <motion.div
-        key={location.pathname}
+        // Para /admin/* usamos una key estable: cambiar de sección (pestaña) no
+        // debe re-montar el panel ni reanimar; solo cambia la sub-ruta de la URL.
+        key={location.pathname.startsWith('/admin') ? 'admin' : location.pathname}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -39,6 +41,7 @@ function AnimatedRoutes() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/confirmacion" element={<Confirmacion />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/:section" element={<Admin />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </motion.div>
