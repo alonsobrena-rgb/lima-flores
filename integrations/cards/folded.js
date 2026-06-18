@@ -93,84 +93,81 @@ const SIG = {
   atelier: 'Con cariño,', jardin: '—', blush: 'Con amor,', botanica: '—', minimal: '—',
 };
 
+// Todas las PORTADAS usan el logo real de Lima Flores (img), centrado y con aire.
+// El cuerpo (contraportada/interior) varía fuentes y acentos por estilo.
 const STYLES = {
-  // 1 · ATELIER — acuarela, portada con logo completo.
+  // 1 · ATELIER — marfil cálido, acento rosa.
   atelier: {
     ground: '#FBF9F4', tint: 'ink',
     front: `<div class="pad center mid">
         <img class="logo" src="${LOGO}">
-        <div class="eyebrow rosa mt">para alguien especial</div>
+        <div class="eyebrow rosa mt3">para alguien especial</div>
       </div>`,
-    back: `<div class="pad center between">
-        <div class="script rosa top">grazie</div>
+    back: `<div class="pad center mid gapped">
+        <div class="script rosa">grazie</div>
         ${contact('mini')}
-        <img class="bq-sm" src="${BOUQUET}">
       </div>`,
     inside: `<div class="pad center mid"><img class="bq-watermark" src="${BOUQUET}"></div>`,
   },
 
-  // 2 · MINIMAL → "Hairline": vector minimal, wordmark serif.
+  // 2 · MINIMAL — marfil, sobrio, un filete fino.
   minimal: {
     ground: '#F6F3EC', tint: 'ink',
     front: `<div class="pad center mid">
-        <div class="sprig-c small">${sprig(46, '#B6C2A7')}</div>
-        <div class="wordmark">Lima Flores</div>
-        <div class="eyebrow ink2 mt">flores y diseño</div>
-        <div class="rule"></div>
-        <div class="eyebrow rosa">lima · perú</div>
+        <img class="logo" src="${LOGO}">
+        <div class="rule mt3"></div>
+        <div class="eyebrow rosa mt">lima · perú</div>
       </div>`,
-    back: `<div class="pad center mid">
-        <div class="sprig-c">${sprig(64, '#C7B9A0')}</div>
-        ${contact('mini stack')}
+    back: `<div class="pad center mid gapped">
+        ${contact('mini')}
+        <div>${sprig(58, '#C7B9A0')}</div>
       </div>`,
     inside: `<div class="pad center mid"><div class="dot rosa"></div></div>`,
   },
 
-  // 3 · JARDÍN — fresco, logo protagonista + guirnalda botánica fina (sin ramo grande).
+  // 3 · JARDÍN — fresco, guirnalda botánica fina.
   jardin: {
     ground: '#FFFFFF', tint: 'verde',
     front: `<div class="pad center mid">
-        <img class="logo j-logo2" src="${LOGO}">
+        <img class="logo" src="${LOGO}">
         <div class="eyebrow verde mt2">flores frescas · de temporada</div>
         <div class="garland">${sprig(72, '#A9B894')}</div>
       </div>`,
-    back: `<div class="pad center jardin-back">
+    back: `<div class="pad center mid gapped">
         <div class="script rosa">con flores</div>
         ${contact('mini')}
-        <div class="garland bottom">${sprig(58, '#A9B894')}</div>
+        <div>${sprig(58, '#A9B894')}</div>
       </div>`,
     inside: `<div class="pad center mid"><div class="sprig-soft">${sprig(64, '#C9D3BC')}</div></div>`,
   },
 
-  // 4 · BOTÁNICA → "Esquinas": ramas en esquinas opuestas.
+  // 4 · BOTÁNICA — ramas en esquinas opuestas, logo centrado.
   botanica: {
     ground: '#FBF9F4', tint: 'ink',
     front: `<div class="pad center mid">
-        <div class="corner tl">${corner(78)}</div>
-        <div class="corner br flip">${corner(78)}</div>
-        <div class="wordmark sm">Lima Flores</div>
-        <div class="eyebrow ink2 mt">flores · de temporada · hecho a mano</div>
+        <div class="corner tl">${corner(64)}</div>
+        <div class="corner br flip">${corner(64)}</div>
+        <img class="logo" src="${LOGO}">
+        <div class="eyebrow ink2 mt3">hecho a mano · de temporada</div>
       </div>`,
     back: `<div class="pad center mid">
-        <div class="corner tl">${corner(70)}</div>
-        <div class="corner br flip">${corner(70)}</div>
-        ${contact('mini stack')}
+        <div class="corner tl">${corner(58)}</div>
+        <div class="corner br flip">${corner(58)}</div>
+        ${contact('mini')}
       </div>`,
-    inside: `<div class="pad"><div class="corner tl">${corner(60, '#D7CBB6')}</div></div>`,
+    inside: `<div class="pad center mid"><div class="corner tl">${corner(56, '#D7CBB6')}</div></div>`,
   },
 
-  // 5 · BLUSH → "Rosa": editorial, acento rosa fuerte.
+  // 5 · BLUSH — rosado, acento rosa fuerte.
   blush: {
     ground: '#FBEEF2', tint: 'rosa',
     front: `<div class="pad center mid">
-        <img class="bq-top" src="${BOUQUET}">
-        <div class="wordmark rosa">Lima Flores</div>
-        <div class="eyebrow rosa mt">para alguien especial</div>
+        <img class="logo" src="${LOGO}">
+        <div class="eyebrow rosa mt3">con todo nuestro cariño</div>
       </div>`,
-    back: `<div class="pad center between">
-        <div class="eyebrow rosa top">flores y diseño</div>
-        ${contact('mini rosa-ink')}
+    back: `<div class="pad center mid gapped">
         <div class="script rosa">grazie</div>
+        ${contact('mini rosa-ink')}
       </div>`,
     inside: `<div class="pad center mid"><img class="bq-watermark soft" src="${BOUQUET}"></div>`,
   },
@@ -187,7 +184,7 @@ function messagePanel(style, d) {
   const para = d.recipient ? `<div class="eyebrow para">Para ${esc(d.recipient)}</div>` : '';
   const firma = d.buyer ? `<div class="firma">${sigWord} ${esc(d.buyer)}</div>` : '';
   return `<div class="pad msg center mid t-${tint}">
-      <div class="sprig-top">${sprig(44)}</div>
+      <div class="msg-sprig">${sprig(42, '#C2CBB2')}</div>
       ${para}
       <div class="message">${note}</div>
       ${firma}
@@ -222,28 +219,19 @@ html,body{margin:0;padding:0;}
 .center{align-items:center; text-align:center;}
 .mid{justify-content:center;}
 .between{justify-content:space-between;}
-.mt{margin-top:1.4mm;} .mt2{margin-top:2.5mm;}
+.mt{margin-top:1.4mm;} .mt2{margin-top:2.5mm;} .mt3{margin-top:3.5mm;}
+.gapped{gap:4mm;}
 
-.wordmark{font-family:'Pinyon Script',cursive; color:var(--ink-400); font-size:30pt; line-height:.9;}
-.wordmark.sm{font-size:24pt;}
-.wordmark.rosa{color:var(--rosa-600);}
 .script{font-family:'Pinyon Script',cursive; font-size:22pt; line-height:1;}
 .script.rosa{color:var(--rosa-500);}
 .eyebrow{font-family:'Jost',sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.28em; font-size:5pt; color:var(--ink-400);}
 .eyebrow.ink{color:var(--ink-500);} .eyebrow.ink2{color:var(--ink-400);}
 .eyebrow.rosa{color:var(--rosa-500);} .eyebrow.verde{color:var(--verde-500);}
 
-.logo{width:52mm; height:auto;}
-.bq-sm{width:26mm; height:auto;}
-.bq-top{width:24mm; height:auto; margin-bottom:1mm;}
-.bq-watermark{width:46mm; height:auto; opacity:.16;}
-.bq-watermark.soft{opacity:.22;}
-.border-bq{position:absolute; left:50%; bottom:-3mm; transform:translateX(-50%); width:64mm; height:auto;}
-.border-bq.faint{opacity:.18; width:44mm; bottom:-2mm;}
-.j-logo2{width:46mm; height:auto;}
+.logo{width:46mm; height:auto;}
+.bq-watermark{width:44mm; height:auto; opacity:.14;}
+.bq-watermark.soft{opacity:.2;}
 .garland{margin-top:3mm;}
-.garland.bottom{position:absolute; left:50%; bottom:5mm; transform:translateX(-50%); margin:0;}
-.jardin-back{justify-content:flex-start; gap:3mm;}
 .sprig-soft{opacity:.5;}
 
 .contact{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1.4mm;}
@@ -254,10 +242,9 @@ html,body{margin:0;padding:0;}
 .contact.stack{align-items:flex-start;}
 .contact.mini li{font-size:5.6pt;}
 
-.rule{width:18mm; height:.3mm; background:var(--ink-300); margin:2mm 0;}
-.sprig-top{position:absolute; left:50%; top:4mm; transform:translateX(-50%);}
-.sprig-c{margin-bottom:2.5mm;}
-.sprig-c.small{margin-bottom:1.5mm;}
+.rule{width:18mm; height:.3mm; background:var(--ink-300); margin:0;}
+.rule.mt3{margin-top:3.5mm;}
+.msg-sprig{margin-bottom:3.5mm;}
 .dot{width:1.6mm; height:1.6mm; border-radius:50%;}
 .dot.rosa{background:var(--rosa-500);}
 .corner{position:absolute;}
@@ -300,18 +287,20 @@ function pageHtml(ground, topHtml, topRot, botHtml, botRot, marksOn) {
   </div>`;
 }
 
-// Script que ajusta el tamaño del mensaje hasta que cabe sin desbordar.
+// Script que reduce el tamaño del mensaje hasta que el bloque cabe en el panel
+// (que tiene overflow:hidden) — así un "Te amo" se ve grande y 220 caracteres
+// siguen entrando sin recortarse ni pegarse a los bordes.
 const FIT_SCRIPT = `
 <script>(function(){
-  var el=document.querySelector('.message');
+  var msg=document.querySelector('.message');
+  var pad=msg&&msg.closest('.pad.msg');
   function fit(){
-    if(!el) return;
-    var len=(el.textContent||'').trim().length;
+    if(!msg||!pad) return;
+    var len=(msg.textContent||'').trim().length;
     var size= len>160?13: len>110?15: len>60?17: 20;   // pt
-    el.style.fontSize=size+'pt';
-    var box=el.closest('.panel')||el.parentElement;
+    msg.style.fontSize=size+'pt';
     var guard=0;
-    while(el.scrollHeight>el.clientHeight && size>9 && guard<60){ size-=0.5; el.style.fontSize=size+'pt'; guard++; }
+    while(pad.scrollHeight>pad.clientHeight+1 && size>8 && guard<80){ size-=0.5; msg.style.fontSize=size+'pt'; guard++; }
   }
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){fit();window.__cardReady=true;});}
   else{fit();window.__cardReady=true;}
