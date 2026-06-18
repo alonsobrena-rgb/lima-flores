@@ -3,10 +3,12 @@ import { apiUrl, adminGet, AuthError } from '@/lib/admin-api';
 import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminStudio } from '@/components/admin/AdminStudio';
+import { AdminCreateCard } from '@/components/admin/AdminCreateCard';
 
-type Section = 'orders' | 'products' | 'studio';
+type Section = 'orders' | 'cards' | 'products' | 'studio';
 const SECTIONS: { key: Section; label: string }[] = [
   { key: 'orders', label: 'Pedidos' },
+  { key: 'cards', label: 'Tarjetas' },
   { key: 'products', label: 'Productos' },
   { key: 'studio', label: 'Marketing Studio' },
 ];
@@ -57,6 +59,7 @@ export default function Admin() {
 
         <div className="mt-7">
           {section === 'orders' && <AdminOrders onAuthError={onAuthError} />}
+          {section === 'cards' && <AdminCreateCard onAuthError={onAuthError} />}
           {section === 'products' && <AdminProducts onAuthError={onAuthError} />}
           {section === 'studio' && <AdminStudio onAuthError={onAuthError} />}
         </div>

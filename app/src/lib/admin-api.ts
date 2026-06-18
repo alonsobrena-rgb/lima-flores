@@ -51,6 +51,23 @@ export async function adminGetBlob(path: string): Promise<Blob> {
   return r.blob();
 }
 
+// POST con JSON que devuelve binario (imagen/PDF). Devuelve el blob y las headers
+// (p. ej. X-Card-Template para saber qué plantilla salió al azar).
+export async function adminPostBlob(path: string, body: unknown): Promise<{ blob: Blob; headers: Headers }> {
+  const r = await fetch(apiUrl(path), {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (r.status === 401 || r.status === 403) throw new AuthError();
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error((data as any).error || 'HTTP ' + r.status);
+  }
+  return { blob: await r.blob(), headers: r.headers };
+}
+
 export async function adminSend(path: string, method: string, body?: unknown) {
   return parse(await fetch(apiUrl(path), {
     method,

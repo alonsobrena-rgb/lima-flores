@@ -23,6 +23,7 @@ const {
   createParcel: cabifyCreateParcel,
 } = require('../integrations/cabify/client');
 const { generateAndStoreCard } = require('../integrations/cards/order-card');
+const { generateCard } = require('../integrations/cards/generate');
 const products = require('../db/products-store');
 const adminStudio = require('./admin-studio');
 
@@ -122,6 +123,39 @@ async function getCard(req, res, id, { force = false, format = 'png' } = {}) {
     'Content-Disposition': `inline; filename="tarjeta-${id}.${isPdf ? 'pdf' : 'png'}"`,
   });
   return res.end(body);
+}
+
+// ─── Crear una tarjeta a la medida (sin pedido) ─────────
+// POST /api/admin/card?format=png|pdf  body { note, recipient, buyer, template? }
+// Si no se manda template (o es inválido), se elige uno al azar. No se guarda.
+async function createCardAdhoc(req, res, urlObj) {
+  let body;
+  try { body = await readJsonBody(req, 8 * 1024); }
+  catch (e) { return send(res, 400, { error: 'Datos inválidos: ' + e.message }); }
+
+  const note = String(body.note || '').trim();
+  if (!note) return send(res, 400, { error: 'El mensaje de la tarjeta es obligatorio.' });
+
+  const isPdf = urlObj.searchParams.get('format') === 'pdf';
+  try {
+    const { pdf, png, template } = await generateCard({
+      note,
+      recipientName: body.recipient,
+      buyerName: body.buyer,
+      template: body.template,
+    });
+    const buf = isPdf ? pdf : png;
+    res.writeHead(200, {
+      'Content-Type': isPdf ? 'application/pdf' : 'image/png',
+      'Content-Length': buf.length,
+      'Cache-Control': 'no-store',
+      'X-Card-Template': template,
+      'Content-Disposition': `inline; filename="tarjeta.${isPdf ? 'pdf' : 'png'}"`,
+    });
+    return res.end(buf);
+  } catch (e) {
+    return send(res, 502, { error: 'No se pudo generar la tarjeta: ' + e.message });
+  }
 }
 
 // ─── Despachar (crear parcel en Cabify) ─────────────────
@@ -366,6 +400,9 @@ module.exports = async (req, res, urlObj) => {
 
   // Endpoint barato para que el front sepa si la sesión sigue viva.
   if (p === '/api/admin/me' && req.method === 'GET') return send(res, 200, { ok: true });
+
+  // Crear tarjeta a la medida (sin pedido). No necesita BD → va antes del guard.
+  if (p === '/api/admin/card' && req.method === 'POST') return createCardAdhoc(req, res, urlObj);
 
   if (!db.enabled) return send(res, 503, { error: 'DB no configurada en el servidor.' });
 
