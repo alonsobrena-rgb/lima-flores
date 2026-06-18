@@ -40,6 +40,17 @@ export async function adminGet(path: string) {
   return parse(await fetch(apiUrl(path), { credentials: 'include' }));
 }
 
+// Descarga binaria (imagen/PDF) con la cookie de sesión. Lanza AuthError en 401/403.
+export async function adminGetBlob(path: string): Promise<Blob> {
+  const r = await fetch(apiUrl(path), { credentials: 'include' });
+  if (r.status === 401 || r.status === 403) throw new AuthError();
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error((data as any).error || 'HTTP ' + r.status);
+  }
+  return r.blob();
+}
+
 export async function adminSend(path: string, method: string, body?: unknown) {
   return parse(await fetch(apiUrl(path), {
     method,

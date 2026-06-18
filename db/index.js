@@ -78,9 +78,11 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE INDEX IF NOT EXISTS orders_status_idx     ON orders (status);
 CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at DESC);
 
--- Tarjeta de regalo autogenerada (PNG) a partir de card_note.
+-- Tarjeta de regalo plegada autogenerada a partir de card_note.
+-- card_png = previsualización (caras apiladas) · card_pdf = lámina para imprenta.
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_template     TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_png          BYTEA;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_pdf          BYTEA;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_generated_at TIMESTAMPTZ;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_error        TEXT;
 

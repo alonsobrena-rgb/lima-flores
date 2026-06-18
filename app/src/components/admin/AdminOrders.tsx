@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { renderCard, downloadCanvas } from '@/lib/card-canvas';
-import { adminGet, adminSend, AuthError } from '@/lib/admin-api';
+import { adminGet, adminSend, adminGetBlob, AuthError } from '@/lib/admin-api';
 
 type Order = Record<string, any>;
 const STATUSES = [
@@ -107,7 +106,7 @@ export function AdminOrders({ onAuthError }: { onAuthError: () => void }) {
               {(o.recipient_lat && o.recipient_lng) && (
                 <a href={`https://www.google.com/maps?q=${o.recipient_lat},${o.recipient_lng}`} target="_blank" rel="noopener noreferrer" className="border border-border px-4 py-2.5 text-center text-sm text-foreground/70 hover:border-ink-900 hover:text-ink-900">📍 Ver en mapa</a>
               )}
-              {o.card_note && <OrderCard order={o} />}
+              {o.card_note && <OrderCard order={o} onAuthError={onAuthError} />}
             </div>
           </div>
         ))}
@@ -116,54 +115,70 @@ export function AdminOrders({ onAuthError }: { onAuthError: () => void }) {
   );
 }
 
-// Tarjeta de regalo generada EN EL NAVEGADOR (canvas) — sin cambios respecto al
-// admin original.
-function OrderCard({ order }: { order: Order }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const [tpl, setTpl] = useState('');
-  const [zoomUrl, setZoomUrl] = useState<string | null>(null);
+// Tarjeta de regalo PLEGADA: previsualización (caras apiladas) renderizada en el
+// servidor + descarga del PDF de 2 páginas listo para imprimir y doblar.
+function OrderCard({ order, onAuthError }: { order: Order; onAuthError: () => void }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [zoom, setZoom] = useState(false);
+  const tpl = order.card_template || '';
 
   useEffect(() => {
-    const c = ref.current;
-    if (!c) return;
     let alive = true;
-    renderCard(c, {
-      id: order.id,
-      note: order.card_note || '',
-      recipient: order.recipient_name,
-      buyer: order.buyer_name,
-      template: order.card_template || undefined,
-    }).then((k) => { if (alive) setTpl(k); }).catch(() => {});
-    return () => { alive = false; };
-  }, [order.id, order.card_note, order.recipient_name, order.buyer_name, order.card_template]);
+    let url: string | null = null;
+    setErr('');
+    setPreviewUrl(null);
+    adminGetBlob(`/api/admin/orders/${order.id}/card?format=png`)
+      .then((b) => { if (!alive) return; url = URL.createObjectURL(b); setPreviewUrl(url); })
+      .catch((e) => { if (!alive) return; if (e instanceof AuthError) onAuthError(); else setErr(e.message || 'No se pudo generar la tarjeta'); });
+    return () => { alive = false; if (url) URL.revokeObjectURL(url); };
+  }, [order.id, order.card_note, order.recipient_name, order.buyer_name, order.card_template, onAuthError]);
 
   useEffect(() => {
-    if (!zoomUrl) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setZoomUrl(null); };
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setZoom(false); };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [zoomUrl]);
+  }, [zoom]);
 
-  const download = () => ref.current && downloadCanvas(ref.current, `tarjeta-${order.id}.png`);
-  const openZoom = () => { if (ref.current) setZoomUrl(ref.current.toDataURL('image/png')); };
+  const downloadPdf = async () => {
+    setBusy(true);
+    try {
+      const b = await adminGetBlob(`/api/admin/orders/${order.id}/card?format=pdf`);
+      const url = URL.createObjectURL(b);
+      const a = document.createElement('a');
+      a.href = url; a.download = `tarjeta-${order.id}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e: any) {
+      if (e instanceof AuthError) onAuthError(); else setErr(e.message || 'No se pudo descargar el PDF');
+    } finally { setBusy(false); }
+  };
 
   return (
     <div className="mt-1 flex flex-col gap-2 rounded-sm border border-border bg-surface p-3">
-      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-foreground/45">Tarjeta{tpl ? ` · ${tpl}` : ''}</span>
-      <button type="button" onClick={openZoom} title="Click para ampliar"
-        className="group relative self-center overflow-hidden rounded-sm border border-border shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rosa-500">
-        <canvas ref={ref} className="block w-full max-w-[200px]" style={{ height: 'auto', aspectRatio: '1080 / 1771' }} />
-        <span className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-ink-900/55 to-transparent pb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-ivory-50 opacity-0 transition-opacity group-hover:opacity-100">⤢ Ampliar</span>
-      </button>
-      <button onClick={download} className="bg-ink-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500">⬇ Descargar PNG</button>
+      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-foreground/45">Tarjeta plegada{tpl ? ` · ${tpl}` : ''}</span>
+      {err ? (
+        <p className="text-[11px] text-red-600">{err}</p>
+      ) : previewUrl ? (
+        <button type="button" onClick={() => setZoom(true)} title="Click para ampliar"
+          className="group relative self-center overflow-hidden rounded-sm border border-border shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rosa-500">
+          <img src={previewUrl} alt={`Tarjeta ${order.id}`} className="block w-full max-w-[150px]" />
+          <span className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-ink-900/55 to-transparent pb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-ivory-50 opacity-0 transition-opacity group-hover:opacity-100">⤢ Ampliar</span>
+        </button>
+      ) : (
+        <div className="self-center text-[11px] text-foreground/45">generando…</div>
+      )}
+      <button onClick={downloadPdf} disabled={busy} className="bg-ink-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">{busy ? 'preparando…' : '⬇ Descargar PDF (doblar)'}</button>
 
-      {zoomUrl && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink-900/85 p-4 md:p-8" onClick={() => setZoomUrl(null)} role="dialog" aria-modal="true" aria-label={`Tarjeta del pedido ${order.id}`}>
-          <button type="button" onClick={() => setZoomUrl(null)} aria-label="Cerrar" className="absolute right-5 top-5 text-2xl text-ivory-50/80 hover:text-ivory-50">✕</button>
+      {zoom && previewUrl && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink-900/85 p-4 md:p-8" onClick={() => setZoom(false)} role="dialog" aria-modal="true" aria-label={`Tarjeta del pedido ${order.id}`}>
+          <button type="button" onClick={() => setZoom(false)} aria-label="Cerrar" className="absolute right-5 top-5 text-2xl text-ivory-50/80 hover:text-ivory-50">✕</button>
           <div className="flex max-h-full flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <img src={zoomUrl} alt={`Tarjeta ${order.id}`} className="max-h-[82vh] w-auto rounded-sm shadow-2xl" />
-            <button onClick={download} className="bg-rosa-500 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-600">⬇ Descargar PNG</button>
+            <img src={previewUrl} alt={`Tarjeta ${order.id}`} className="max-h-[82vh] w-auto rounded-sm shadow-2xl" />
+            <button onClick={downloadPdf} disabled={busy} className="bg-rosa-500 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-50">{busy ? 'preparando…' : '⬇ Descargar PDF (doblar)'}</button>
           </div>
         </div>
       )}

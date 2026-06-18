@@ -1,0 +1,16 @@
+# Nixpacks (servicio backend en Railway).
+#
+# Puppeteer genera las tarjetas de regalo (integrations/cards) en el servidor.
+# Con .puppeteerrc.cjs → skipDownload:true NO bajamos el Chrome de puppeteer, así
+# que necesitamos un Chromium del sistema. Sin esto, la base solo trae el stub de
+# snap /usr/bin/chromium-browser (roto: "requires the chromium snap"), y la
+# generación falla con "Failed to launch the browser process".
+#
+# El paquete apt `chromium` de la base Debian de Nixpacks instala /usr/bin/chromium
+# (binario real). Las fuentes evitan recuadros en glifos del sistema.
+[phases.setup]
+aptPkgs = ["chromium", "fonts-liberation", "fonts-noto-core", "fonts-noto-color-emoji", "ca-certificates"]
+
+[variables]
+# Ruta que usa integrations/cards/generate.js (primer candidato).
+PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium"

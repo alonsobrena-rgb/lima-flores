@@ -1,26 +1,29 @@
 // integrations/cards/generate.js
-// Rasteriza una tarjeta (1080×1350) a PNG usando Puppeteer + Chromium headless.
+// Genera la tarjeta de regalo PLEGADA con Puppeteer + Chromium headless:
+// un PDF de 2 páginas (96×136 mm, para imprimir y doblar) + un PNG de
+// previsualización (caras apiladas en orientación de lectura).
 //
 // API:
-//   const { generateCardPng } = require('./generate');
-//   const { buffer, template } = await generateCardPng({ recipientName, buyerName, note });
+//   const { generateCard } = require('./generate');
+//   const { pdf, png, template } = await generateCard({ recipientName, buyerName, note });
 //
 // CLI (previsualizar):
-//   node integrations/cards/generate.js --all                 → genera las 5 plantillas
-//   node integrations/cards/generate.js "Mensaje" "Para" "De" → una al azar
+//   node integrations/cards/generate.js --all                 → genera los 5 estilos
+//   node integrations/cards/generate.js "Mensaje" "Para" "De" → uno al azar
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const {
-  renderCard,
-  randomTemplateKey,
-  TEMPLATE_KEYS,
-  CARD_NOTE_MAX,
-} = require('./templates');
+  renderFoldedDoc,
+  randomStyle,
+  STYLE_KEYS,
+  NOTE_MAX,
+} = require('./folded');
 
-const CARD_W = 1080;
-const CARD_H = 1350;
+// Compat: nombres antiguos esperados por otros módulos / CLI.
+const TEMPLATE_KEYS = STYLE_KEYS;
+const CARD_NOTE_MAX = NOTE_MAX;
 const SCALE = 2; // deviceScaleFactor → PNG nítido para impresión / pantalla retina
 
 // Lazy require: si Puppeteer no está instalado (p. ej. en un entorno mínimo),
@@ -35,17 +38,28 @@ function puppeteer() {
   return _puppeteer;
 }
 
-// Ruta al Chromium a usar. En Railway no descargamos el Chrome de puppeteer
-// (ver .npmrc → puppeteer_skip_download), así que usamos el chromium del sistema
-// que instala Nixpacks. En local, si no hay ninguno, devolvemos undefined y
-// puppeteer usa su Chrome bundleado.
-function resolveChromium() {
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+// Candidatos de ejecutable de Chromium, en orden de preferencia. Probamos cada
+// uno hasta que UNO ARRANCA de verdad: así, si un binario existe pero está roto
+// (p. ej. el stub de snap en /usr/bin/chromium-browser, que pide `snap install
+// chromium`), seguimos con el siguiente en vez de fallar. `undefined` = el
+// Chrome que trae puppeteer (bundleado en dev local).
+function chromiumCandidates() {
   const fs = require('fs');
-  for (const c of ['/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome-stable', '/usr/bin/google-chrome']) {
-    try { if (fs.existsSync(c)) return c; } catch { /* ignore */ }
+  const exists = (p) => { try { return typeof p === 'string' && p.length > 0 && fs.existsSync(p); } catch { return false; } };
+  const out = [];
+  const push = (p) => { if (p && !out.includes(p)) out.push(p); };
+
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) push(process.env.PUPPETEER_EXECUTABLE_PATH);
+  // Chromium "real" del sistema (Nixpacks en Railway lo instala aquí).
+  for (const c of ['/usr/bin/chromium', '/usr/bin/google-chrome-stable', '/usr/bin/google-chrome']) {
+    if (exists(c)) push(c);
   }
-  return undefined; // puppeteer usará su Chrome bundleado (dev local)
+  // El Chrome bundleado de puppeteer (si se descargó).
+  try { const p = puppeteer().executablePath(); if (exists(p)) push(p); } catch { /* ignore */ }
+  out.push(undefined); // deja que puppeteer decida
+  // Último recurso: el stub de snap (suele estar roto, por eso va al final).
+  if (exists('/usr/bin/chromium-browser')) push('/usr/bin/chromium-browser');
+  return out;
 }
 
 // Navegador compartido entre llamadas (arranque ~1s; reusarlo abarata cada tarjeta).
@@ -54,14 +68,26 @@ let _browserPromise = null;
 async function getBrowser() {
   if (_browser && _browser.connected !== false) return _browser;
   if (_browserPromise) return _browserPromise;
-  _browserPromise = puppeteer()
-    .launch({ headless: 'new', executablePath: resolveChromium(), args: ['--no-sandbox', '--disable-dev-shm-usage'] })
-    .then((b) => {
-      _browser = b;
-      b.on('disconnected', () => { _browser = null; });
-      return b;
-    })
-    .finally(() => { _browserPromise = null; });
+  _browserPromise = (async () => {
+    const args = ['--no-sandbox', '--disable-dev-shm-usage'];
+    let lastErr;
+    for (const executablePath of chromiumCandidates()) {
+      try {
+        const b = await puppeteer().launch({ headless: 'new', executablePath, args });
+        b.on('disconnected', () => { _browser = null; });
+        _browser = b;
+        return b;
+      } catch (e) {
+        lastErr = e;
+        // Probar el siguiente candidato.
+      }
+    }
+    throw new Error(
+      'No se pudo arrancar Chromium para generar la tarjeta. Instala un Chromium ' +
+      'funcional (p. ej. `apt-get install -y chromium`) o define PUPPETEER_EXECUTABLE_PATH. ' +
+      'Detalle: ' + (lastErr && lastErr.message ? lastErr.message.split('\n')[0] : 'desconocido')
+    );
+  })().finally(() => { _browserPromise = null; });
   return _browserPromise;
 }
 
@@ -70,39 +96,45 @@ async function closeBrowser() {
 }
 
 /**
- * Genera el PNG de una tarjeta.
+ * Genera la tarjeta PLEGADA de un pedido: un PDF de 2 páginas listo para
+ * imprenta (exterior + interior, impuesto para doblar) y un PNG de
+ * previsualización (las dos caras en orientación de lectura, apiladas).
+ *
  * @param {object} opts
  * @param {string} [opts.recipientName] "Para …"
  * @param {string} [opts.buyerName]     firma
  * @param {string} opts.note            mensaje de la tarjeta
- * @param {string} [opts.template]      clave de plantilla; al azar si se omite
- * @returns {Promise<{ buffer: Buffer, template: string }>}
+ * @param {string} [opts.template]      clave de estilo; al azar si se omite
+ * @returns {Promise<{ pdf: Buffer, png: Buffer, template: string }>}
  */
-async function generateCardPng(opts = {}) {
-  const template = TEMPLATE_KEYS.includes(opts.template) ? opts.template : randomTemplateKey();
+async function generateCard(opts = {}) {
+  const template = TEMPLATE_KEYS.includes(opts.template) ? opts.template : randomStyle();
   const note = String(opts.note || '').slice(0, CARD_NOTE_MAX);
-  const html = renderCard(template, {
-    recipientName: opts.recipientName,
-    buyerName: opts.buyerName,
-    note,
-  });
+  const common = { style: template, recipient: opts.recipientName, buyer: opts.buyerName, note };
 
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
-    await page.setViewport({ width: CARD_W, height: CARD_H, deviceScaleFactor: SCALE });
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 20000 });
-    // Espera a que el script de auto-ajuste termine de medir/encoger el texto.
+    // 1) PDF imprenta (impuesto para doblar) — 2 páginas de 96×136 mm.
+    await page.setContent(renderFoldedDoc({ ...common, mode: 'print' }), { waitUntil: 'load', timeout: 20000 });
+    await page.evaluate(async () => { if (document.fonts) await document.fonts.ready; });
     await page.waitForFunction('window.__cardReady === true', { timeout: 5000 }).catch(() => {});
-    const el = await page.$('.card');
-    const buffer = await (el || page).screenshot({ type: 'png' });
-    return { buffer, template };
+    const pdf = await page.pdf({ width: '96mm', height: '136mm', printBackground: true, pageRanges: '1-2' });
+
+    // 2) PNG de previsualización (orientación de lectura) — caras apiladas.
+    await page.setContent(renderFoldedDoc({ ...common, mode: 'view' }), { waitUntil: 'load', timeout: 20000 });
+    await page.evaluate(async () => { if (document.fonts) await document.fonts.ready; });
+    await page.waitForFunction('window.__cardReady === true', { timeout: 5000 }).catch(() => {});
+    await page.setViewport({ width: 363, height: 1028, deviceScaleFactor: SCALE });
+    const png = await page.screenshot({ type: 'png', fullPage: true });
+
+    return { pdf: Buffer.from(pdf), png: Buffer.from(png), template };
   } finally {
     await page.close().catch(() => {});
   }
 }
 
-module.exports = { generateCardPng, closeBrowser, CARD_W, CARD_H };
+module.exports = { generateCard, closeBrowser };
 
 // ─── CLI ─────────────────────────────────────────────────────────────────────
 if (require.main === module) {
@@ -114,21 +146,21 @@ if (require.main === module) {
     if (args[0] === '--all') {
       const sample = 'Que cada pétalo te recuerde lo mucho que te quiero. Feliz cumpleaños, mi vida.';
       for (const key of TEMPLATE_KEYS) {
-        const { buffer } = await generateCardPng({
+        const { pdf, png } = await generateCard({
           template: key, note: sample, recipientName: 'Valentina', buyerName: 'Alonso',
         });
-        const file = path.join(outDir, `card-${key}.png`);
-        fs.writeFileSync(file, buffer);
-        console.log('✓', file);
+        fs.writeFileSync(path.join(outDir, `card-${key}.pdf`), pdf);
+        fs.writeFileSync(path.join(outDir, `card-${key}.png`), png);
+        console.log('✓', `card-${key}.pdf / .png`);
       }
     } else {
       const note = args[0] || 'Con todo mi cariño en este día tan especial.';
       const recipientName = args[1] || 'Valentina';
       const buyerName = args[2] || 'Alonso';
-      const { buffer, template } = await generateCardPng({ note, recipientName, buyerName });
-      const file = path.join(outDir, `card-${template}.png`);
-      fs.writeFileSync(file, buffer);
-      console.log('✓', file, `(plantilla: ${template})`);
+      const { pdf, png, template } = await generateCard({ note, recipientName, buyerName });
+      fs.writeFileSync(path.join(outDir, `card-${template}.pdf`), pdf);
+      fs.writeFileSync(path.join(outDir, `card-${template}.png`), png);
+      console.log('✓', `card-${template}.pdf / .png`, `(estilo: ${template})`);
     }
 
     await closeBrowser();

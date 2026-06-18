@@ -47,7 +47,7 @@ function send(res, code, payload) {
 // es pesado y se sirve por su propia ruta. Lo sustituimos por un flag has_card.
 function stripCardPng(row) {
   if (!row) return row;
-  const { card_png, ...rest } = row;
+  const { card_png, card_pdf, ...rest } = row;
   rest.has_card = !!card_png;
   return rest;
 }
@@ -81,10 +81,11 @@ async function getOrder(req, res, id) {
   }
 }
 
-// ─── Tarjeta de regalo (PNG) ────────────────────────────
-// GET  → devuelve el PNG (lo genera al vuelo si aún no existe).
-// POST → fuerza regenerar (nueva plantilla al azar).
-async function getCard(req, res, id, { force = false } = {}) {
+// ─── Tarjeta de regalo plegada ──────────────────────────
+// GET  ?format=png  → previsualización (caras apiladas) · por defecto.
+// GET  ?format=pdf  → lámina lista para imprenta (2 páginas, para doblar).
+// POST              → fuerza regenerar (nuevo estilo al azar).
+async function getCard(req, res, id, { force = false, format = 'png' } = {}) {
   let order;
   try {
     const { rows } = await db.query(`SELECT * FROM orders WHERE id = $1`, [id]);
@@ -98,28 +99,29 @@ async function getCard(req, res, id, { force = false } = {}) {
     return send(res, 404, { error: 'Este pedido no tiene mensaje de tarjeta.' });
   }
 
-  // Si no hay PNG todavía (o se pide regenerar), lo generamos ahora.
-  if (force || !order.card_png) {
-    const r = await generateAndStoreCard(order);
+  const isPdf = format === 'pdf';
+  let png = order.card_png;
+  let pdf = order.card_pdf;
+
+  // Una tarjeta del sistema plegado SIEMPRE tiene PDF. Si falta, es una tarjeta
+  // vieja (formato de una cara) o nunca generada → la regeneramos (plegada). Para
+  // no cambiar el estilo elegido, reusamos card_template salvo que se fuerce.
+  const stale = !pdf || !png;
+  if (force || stale) {
+    const r = await generateAndStoreCard(order, force ? {} : { template: order.card_template || undefined });
     if (!r.ok) return send(res, 502, { error: 'No se pudo generar la tarjeta: ' + r.error });
-    const png = r.buffer;
-    res.writeHead(200, {
-      'Content-Type': 'image/png',
-      'Content-Length': png.length,
-      'Cache-Control': 'no-store',
-      'Content-Disposition': `inline; filename="tarjeta-${id}.png"`,
-    });
-    return res.end(png);
+    png = r.png; pdf = r.pdf;
   }
 
-  const png = order.card_png; // bytea → Buffer vía pg
+  const body = isPdf ? pdf : png;
+  if (!body) return send(res, 404, { error: 'Tarjeta no disponible.' });
   res.writeHead(200, {
-    'Content-Type': 'image/png',
-    'Content-Length': png.length,
+    'Content-Type': isPdf ? 'application/pdf' : 'image/png',
+    'Content-Length': body.length,
     'Cache-Control': 'no-store',
-    'Content-Disposition': `inline; filename="tarjeta-${id}.png"`,
+    'Content-Disposition': `inline; filename="tarjeta-${id}.${isPdf ? 'pdf' : 'png'}"`,
   });
-  return res.end(png);
+  return res.end(body);
 }
 
 // ─── Despachar (crear parcel en Cabify) ─────────────────
@@ -392,8 +394,9 @@ module.exports = async (req, res, urlObj) => {
     if (!action && req.method === 'GET')                 return getOrder(req, res, id);
     if (action === 'dispatch' && req.method === 'POST')  return dispatchOrder(req, res, id);
     if (action === 'cancel'   && req.method === 'POST')  return cancelOrder(req, res, id);
-    if (action === 'card'     && req.method === 'GET')   return getCard(req, res, id);
-    if (action === 'card'     && req.method === 'POST')  return getCard(req, res, id, { force: true });
+    const cardFormat = urlObj.searchParams.get('format') === 'pdf' ? 'pdf' : 'png';
+    if (action === 'card'     && req.method === 'GET')   return getCard(req, res, id, { format: cardFormat });
+    if (action === 'card'     && req.method === 'POST')  return getCard(req, res, id, { force: true, format: cardFormat });
   }
 
   return send(res, 404, { error: 'admin route not found' });

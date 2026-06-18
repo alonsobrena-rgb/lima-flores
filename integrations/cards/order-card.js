@@ -1,12 +1,12 @@
 // integrations/cards/order-card.js
-// Pegamento entre el pedido y el generador de tarjetas: genera el PNG a partir
-// de card_note y lo guarda en la columna orders.card_png. Pensado para correr
-// en segundo plano tras crear el pedido (no bloquea la respuesta al cliente) y
-// también bajo demanda desde el panel /admin.
+// Pegamento entre el pedido y el generador de tarjetas: genera la tarjeta plegada
+// a partir de card_note (PDF para imprenta + PNG de previsualización) y la guarda
+// en orders.card_pdf / orders.card_png. Pensado para correr en segundo plano tras
+// crear el pedido (no bloquea la respuesta al cliente) y bajo demanda desde /admin.
 'use strict';
 
 const db = require('../../db');
-const { generateCardPng } = require('./generate');
+const { generateCard } = require('./generate');
 
 /**
  * Genera la tarjeta de un pedido y la persiste en BD. Idempotente-ish: cada
@@ -23,7 +23,7 @@ async function generateAndStoreCard(order, opts = {}) {
   if (!note) return { ok: false, error: 'sin mensaje de tarjeta' };
 
   try {
-    const { buffer, template } = await generateCardPng({
+    const { pdf, png, template } = await generateCard({
       note,
       recipientName: order.recipient_name,
       buyerName: order.buyer_name,
@@ -33,13 +33,13 @@ async function generateAndStoreCard(order, opts = {}) {
     if (db.enabled) {
       await db.query(
         `UPDATE orders
-            SET card_png = $1, card_template = $2,
+            SET card_png = $1, card_pdf = $2, card_template = $3,
                 card_generated_at = NOW(), card_error = NULL
-          WHERE id = $3`,
-        [buffer, template, order.id]
+          WHERE id = $4`,
+        [png, pdf, template, order.id]
       );
     }
-    return { ok: true, template, buffer };
+    return { ok: true, template, png, pdf };
   } catch (e) {
     const msg = e && e.message ? e.message : String(e);
     console.error(`[card] generación falló para ${order.id}:`, msg);
