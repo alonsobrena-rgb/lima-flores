@@ -155,14 +155,15 @@ export default function Checkout() {
       culqi_charge_id: null as string | null,
     };
 
-    // Pago con tarjeta → cobramos con Culqi ANTES de registrar el pedido.
-    if (payment === 'Tarjeta' && CULQI_PK) {
-      try { await payWithCulqi(payload); }
+    // Tarjeta o Yape → cobramos en línea con Culqi ANTES de registrar el pedido.
+    if ((payment === 'Tarjeta' || payment === 'Yape') && CULQI_PK) {
+      try { await payWithCulqi(payload, payment); }
       catch (err: any) { setError(err?.message || 'No se pudo procesar el pago.'); setSending(false); }
       return; // el flujo continúa en el callback del modal de Culqi
     }
 
-    // Resto de métodos: registramos el pedido y coordinamos el pago por WhatsApp.
+    // Resto de métodos (Plin/transferencia/efectivo): registramos el pedido y
+    // coordinamos el pago por WhatsApp.
     await placeOrder(payload);
   };
 
@@ -181,16 +182,21 @@ export default function Checkout() {
     } finally { setSending(false); }
   };
 
-  // Abre el modal de Culqi, cobra la tarjeta vía /api/culqi/charge y, si aprueba,
-  // registra el pedido con el charge_id. La tarjeta nunca pasa por nuestro server.
-  const payWithCulqi = async (payload: Record<string, unknown>) => {
+  // Abre el modal de Culqi (tarjeta o Yape), cobra vía /api/culqi/charge y, si
+  // aprueba, registra el pedido con el charge_id. Tarjeta/Yape generan un token
+  // en el dispositivo del cliente; sus datos nunca pasan por nuestro server. Yape
+  // se cobra igual que tarjeta (token → /v2/charges con source_id).
+  const payWithCulqi = async (payload: Record<string, unknown>, method: 'Tarjeta' | 'Yape') => {
     await loadCulqi();
     const w = window as any;
     const Culqi = w.Culqi;
     const amountCents = Math.round((total ?? subtotal) * 100);
     Culqi.publicKey = CULQI_PK;
     Culqi.settings({ title: 'Lima Flores', currency: 'PEN', amount: amountCents });
-    Culqi.options({ lang: 'auto', installments: false, paymentMethods: { tarjeta: true, yape: false, bancaMovil: false, agente: false, billetera: false, cuotealo: false } });
+    const paymentMethods = method === 'Yape'
+      ? { tarjeta: false, yape: true, bancaMovil: false, agente: false, billetera: false, cuotealo: false }
+      : { tarjeta: true, yape: false, bancaMovil: false, agente: false, billetera: false, cuotealo: false };
+    Culqi.options({ lang: 'auto', installments: false, paymentMethods });
 
     w.culqi = async () => {
       if (Culqi.token && Culqi.token.id) {
@@ -201,7 +207,7 @@ export default function Checkout() {
           });
           const d = await r.json().catch(() => ({}));
           if (!r.ok || !d.ok) throw new Error(d.error || 'El pago fue rechazado.');
-          await placeOrder({ ...payload, payment_method: 'Tarjeta (Culqi)', culqi_charge_id: d.charge_id });
+          await placeOrder({ ...payload, payment_method: `${method} (Culqi)`, culqi_charge_id: d.charge_id });
         } catch (err: any) {
           setError(err?.message || 'No se pudo procesar el pago.'); setSending(false);
         }
@@ -334,13 +340,19 @@ export default function Checkout() {
                   <option value="" disabled>Selecciona…</option>
                   {payments.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
-                {payment === 'Tarjeta' && (
+                {CULQI_PK && payment === 'Tarjeta' && (
                   <p className="mt-2 flex items-center gap-1.5 text-[12px] text-foreground/55">
                     <svg className="h-3.5 w-3.5 shrink-0 text-verde-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                     Pago seguro con tarjeta vía Culqi (con verificación 3-D Secure). Se cobra al confirmar.
                   </p>
                 )}
-                {payment && payment !== 'Tarjeta' && (
+                {CULQI_PK && payment === 'Yape' && (
+                  <p className="mt-2 flex items-center gap-1.5 text-[12px] text-foreground/55">
+                    <svg className="h-3.5 w-3.5 shrink-0 text-verde-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                    Pago con Yape vía Culqi. Ten a la mano el <strong>código de aprobación</strong> de tu app Yape. Se cobra al confirmar.
+                  </p>
+                )}
+                {payment && !(CULQI_PK && (payment === 'Tarjeta' || payment === 'Yape')) && (
                   <p className="mt-2 text-[12px] text-foreground/55">Coordinamos el pago por {payment === 'Yape' || payment === 'Plin' ? payment : 'WhatsApp'} al confirmar el pedido.</p>
                 )}
               </div>
@@ -348,7 +360,7 @@ export default function Checkout() {
 
             {error && <p className="bg-red-100 px-4 py-3 text-sm text-red-800">{error}</p>}
             <button disabled={sending} className="press w-full bg-rosa-500 py-4 text-sm font-medium uppercase tracking-[0.18em] text-ivory-50 transition-colors hover:bg-rosa-600 disabled:opacity-60">
-              {sending ? 'Procesando…' : payment === 'Tarjeta' && total !== null ? `Pagar con tarjeta · ${money(total)}` : total !== null ? `Confirmar pedido · ${money(total)}` : 'Confirmar pedido'}
+              {sending ? 'Procesando…' : CULQI_PK && (payment === 'Tarjeta' || payment === 'Yape') && total !== null ? `Pagar con ${payment} · ${money(total)}` : total !== null ? `Confirmar pedido · ${money(total)}` : 'Confirmar pedido'}
             </button>
             <p className="text-center text-[12px] text-foreground/50">Al confirmar, te contactamos por WhatsApp en menos de 30 min para coordinar el pago y la entrega.</p>
           </form>
