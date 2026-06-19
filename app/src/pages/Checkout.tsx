@@ -27,9 +27,9 @@ function loadCulqi(): Promise<void> {
 }
 const districts = ['Ancón', 'Ate', 'Barranco', 'Breña', 'Carabayllo', 'Chaclacayo', 'Chorrillos', 'Cieneguilla', 'Comas', 'El Agustino', 'Independencia', 'Jesús María', 'La Molina', 'La Victoria', 'Lima', 'Lince', 'Los Olivos', 'Lurigancho-Chosica', 'Lurín', 'Magdalena del Mar', 'Miraflores', 'Pachacámac', 'Pucusana', 'Pueblo Libre', 'Puente Piedra', 'Punta Hermosa', 'Punta Negra', 'Rímac', 'San Bartolo', 'San Borja', 'San Isidro', 'San Juan de Lurigancho', 'San Juan de Miraflores', 'San Luis', 'San Martín de Porres', 'San Miguel', 'Santa Anita', 'Santa María del Mar', 'Santa Rosa', 'Santiago de Surco', 'Surquillo', 'Villa El Salvador', 'Villa María del Triunfo', 'Otro'];
 const timeSlots = ['09:00 – 13:00', '13:00 – 17:00', '17:00 – 20:00'];
-// "Tarjeta" se cobra en línea con Culqi (solo si hay llave pública). El resto se
-// coordina por WhatsApp tras confirmar (Yape/Plin/transferencia/efectivo).
-const payments = [...(CULQI_PK ? ['Tarjeta'] : []), 'Yape', 'Plin', 'Transferencia BCP', 'Efectivo contra entrega'];
+// Solo 2 métodos: Yape (cobro en línea con Culqi si hay llave pública) y
+// Transferencia BCP (se coordina por WhatsApp tras confirmar).
+const payments = ['Yape', 'Transferencia BCP'];
 
 type Place = { lat: number; lng: number; district: string | null; formatted: string };
 type Shipping = { fee: number | null; provider: string | null; label: string };
@@ -352,8 +352,11 @@ export default function Checkout() {
                     Pago con Yape vía Culqi. Ten a la mano el <strong>código de aprobación</strong> de tu app Yape. Se cobra al confirmar.
                   </p>
                 )}
-                {payment && !(CULQI_PK && (payment === 'Tarjeta' || payment === 'Yape')) && (
-                  <p className="mt-2 text-[12px] text-foreground/55">Coordinamos el pago por {payment === 'Yape' || payment === 'Plin' ? payment : 'WhatsApp'} al confirmar el pedido.</p>
+                {payment === 'Transferencia BCP' && (
+                  <p className="mt-2 text-[12px] text-foreground/55">Te enviamos los datos de la cuenta BCP por WhatsApp al confirmar el pedido.</p>
+                )}
+                {payment === 'Yape' && !CULQI_PK && (
+                  <p className="mt-2 text-[12px] text-foreground/55">Coordinamos el pago por Yape al confirmar el pedido.</p>
                 )}
               </div>
             </fieldset>
