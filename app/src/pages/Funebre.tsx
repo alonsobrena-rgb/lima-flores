@@ -25,7 +25,16 @@ export default function Funebre() {
   ] as typeof funebre;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen">
+      {/* Fondo: cementerio sereno al atardecer (generado con Higgsfield) con velo
+          ivory + leve blur para que el texto y las tarjetas se lean. */}
+      <div aria-hidden className="fixed inset-0 -z-10">
+        <img src="/bg/funebre-cementerio.webp" alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/72 via-ivory-100/60 to-ivory-100/76" />
+        <div className="absolute inset-0 backdrop-blur-[1.5px]" />
+      </div>
+
+      <div className="relative z-10">
       <SiteHeader />
 
       {/* Intro · Condolencias */}
@@ -80,6 +89,7 @@ export default function Funebre() {
       </section>
 
       <SiteFooter />
+      </div>
     </div>
   );
 }
