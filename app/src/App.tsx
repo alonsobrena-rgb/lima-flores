@@ -7,6 +7,7 @@ import { Ambient } from '@/components/motion/Ambient';
 import { ScrollProgress } from '@/components/motion/ScrollProgress';
 import Home from '@/pages/Home';
 import Catalogo from '@/pages/Catalogo';
+import Funebre from '@/pages/Funebre';
 import Producto from '@/pages/Producto';
 import Suscripcion from '@/pages/Suscripcion';
 import Checkout from '@/pages/Checkout';
@@ -36,6 +37,7 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/catalogo" element={<Catalogo />} />
+          <Route path="/funebre" element={<Funebre />} />
           <Route path="/producto/:id" element={<Producto />} />
           <Route path="/suscripcion" element={<Suscripcion />} />
           <Route path="/checkout" element={<Checkout />} />

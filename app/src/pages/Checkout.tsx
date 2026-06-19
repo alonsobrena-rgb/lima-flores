@@ -5,13 +5,34 @@ import { useCart, money } from '@/lib/cart';
 import { attachAutocomplete, geocodeText, mapsAvailable, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
-const districts = ['Miraflores', 'San Isidro', 'Surco', 'Barranco', 'San Borja', 'La Molina', 'Magdalena', 'Jesús María', 'Lince', 'Pueblo Libre', 'Otro'];
+// Llave pública de Culqi (segura de exponer). Sin ella, "Tarjeta" no aparece y
+// el pago se coordina manualmente como Yape/Plin.
+const CULQI_PK = (import.meta.env.VITE_CULQI_PUBLIC_KEY as string | undefined) || '';
+const CULQI_JS = 'https://checkout.culqi.com/js/v4';
+
+// Carga el script de Culqi v4 una sola vez. Resuelve cuando window.Culqi existe.
+let culqiLoading: Promise<void> | null = null;
+function loadCulqi(): Promise<void> {
+  const w = window as any;
+  if (w.Culqi) return Promise.resolve();
+  if (culqiLoading) return culqiLoading;
+  culqiLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = CULQI_JS; s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => { culqiLoading = null; reject(new Error('No se pudo cargar Culqi.')); };
+    document.body.appendChild(s);
+  });
+  return culqiLoading;
+}
+const districts = ['Ancón', 'Ate', 'Barranco', 'Breña', 'Carabayllo', 'Chaclacayo', 'Chorrillos', 'Cieneguilla', 'Comas', 'El Agustino', 'Independencia', 'Jesús María', 'La Molina', 'La Victoria', 'Lima', 'Lince', 'Los Olivos', 'Lurigancho-Chosica', 'Lurín', 'Magdalena del Mar', 'Miraflores', 'Pachacámac', 'Pucusana', 'Pueblo Libre', 'Puente Piedra', 'Punta Hermosa', 'Punta Negra', 'Rímac', 'San Bartolo', 'San Borja', 'San Isidro', 'San Juan de Lurigancho', 'San Juan de Miraflores', 'San Luis', 'San Martín de Porres', 'San Miguel', 'Santa Anita', 'Santa María del Mar', 'Santa Rosa', 'Santiago de Surco', 'Surquillo', 'Villa El Salvador', 'Villa María del Triunfo', 'Otro'];
 const timeSlots = ['09:00 – 13:00', '13:00 – 17:00', '17:00 – 20:00'];
-const payments = ['Yape', 'Plin', 'Transferencia BCP', 'Efectivo contra entrega'];
-const FLAT = 15;
+// "Tarjeta" se cobra en línea con Culqi (solo si hay llave pública). El resto se
+// coordina por WhatsApp tras confirmar (Yape/Plin/transferencia/efectivo).
+const payments = [...(CULQI_PK ? ['Tarjeta'] : []), 'Yape', 'Plin', 'Transferencia BCP', 'Efectivo contra entrega'];
 
 type Place = { lat: number; lng: number; district: string | null; formatted: string };
-type Shipping = { fee: number; provider: string | null; label: string };
+type Shipping = { fee: number | null; provider: string | null; label: string };
 
 export default function Checkout() {
   const { items, productById, subtotal, clear } = useCart();
@@ -26,8 +47,9 @@ export default function Checkout() {
   const [payment, setPayment] = useState('');
   const [reception, setReception] = useState(true);
   const [cardNote, setCardNote] = useState('');
+  const [cardAnon, setCardAnon] = useState(false);
   const [place, setPlace] = useState<Place | null>(null);
-  const [shipping, setShipping] = useState<Shipping>({ fee: FLAT, provider: null, label: 'Estimado' });
+  const [shipping, setShipping] = useState<Shipping>({ fee: null, provider: null, label: 'Por calcular' });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,14 +58,15 @@ export default function Checkout() {
   const mapObj = useRef<any>(null);
   const markerObj = useRef<any>(null);
 
-  // cotización real de envío por coordenadas (Cabify/Urbaner) — fallback a tarifa plana
+  // cotización real de envío por coordenadas (Cabify/Urbaner). Sin coords no hay
+  // monto: el envío queda "por calcular" hasta que el usuario ponga su ubicación.
   const quoteByCoords = async (lat: number, lng: number) => {
     try {
       const r = await fetch(`${API_BASE}/api/quote?lat=${lat}&lng=${lng}`, { headers: { Accept: 'application/json' } });
       if (!r.ok) return;
       const d = await r.json();
       if (typeof d.price === 'number') setShipping({ fee: d.price, provider: d.provider || null, label: d.provider ? `vía ${d.provider}` : 'Cotizado' });
-    } catch { /* sin CORS/red → se mantiene la tarifa plana */ }
+    } catch { /* sin CORS/red → se mantiene "por calcular" */ }
   };
 
   // Match tolerante de distrito: cualquier candidato de Google vs nuestra lista
@@ -104,7 +127,7 @@ export default function Checkout() {
     );
   }
 
-  const total = subtotal + shipping.fee;
+  const total = shipping.fee !== null ? subtotal + shipping.fee : null;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -126,10 +149,26 @@ export default function Checkout() {
       recipient_address_ref: recip.ref || null, recipient_apt: recip.apt || null, recipient_has_reception: reception,
       recipient_lat: coords.lat, recipient_lng: coords.lng,
       delivery_date: date, delivery_time: time,
-      payment_method: payment, card_note: cardNote || null,
+      payment_method: payment, card_note: cardNote || null, card_anonymous: cardAnon,
       items: items.map((it) => { const p = productById(it.id); return { id: it.id, name: p?.name, price: p?.price, qty: it.qty }; }),
-      subtotal, shipping_fee: shipping.fee, shipping_provider: shipping.provider, shipping_label: shipping.label, total,
+      subtotal, shipping_fee: shipping.fee ?? 0, shipping_provider: shipping.provider, shipping_label: shipping.label, total: total ?? subtotal,
+      culqi_charge_id: null as string | null,
     };
+
+    // Pago con tarjeta → cobramos con Culqi ANTES de registrar el pedido.
+    if (payment === 'Tarjeta' && CULQI_PK) {
+      try { await payWithCulqi(payload); }
+      catch (err: any) { setError(err?.message || 'No se pudo procesar el pago.'); setSending(false); }
+      return; // el flujo continúa en el callback del modal de Culqi
+    }
+
+    // Resto de métodos: registramos el pedido y coordinamos el pago por WhatsApp.
+    await placeOrder(payload);
+  };
+
+  // Registra el pedido en el backend. Comparte el manejo de errores entre el
+  // flujo manual (Yape/Plin/…) y el de tarjeta (tras el cobro aprobado).
+  const placeOrder = async (payload: Record<string, unknown>) => {
     try {
       const r = await fetch(`${API_BASE}/api/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (r.ok) { clear(); navigate('/confirmacion'); return; }
@@ -140,6 +179,41 @@ export default function Checkout() {
       if (err instanceof TypeError) { clear(); navigate('/confirmacion'); return; }
       setError(err.message || 'No pudimos guardar el pedido.');
     } finally { setSending(false); }
+  };
+
+  // Abre el modal de Culqi, cobra la tarjeta vía /api/culqi/charge y, si aprueba,
+  // registra el pedido con el charge_id. La tarjeta nunca pasa por nuestro server.
+  const payWithCulqi = async (payload: Record<string, unknown>) => {
+    await loadCulqi();
+    const w = window as any;
+    const Culqi = w.Culqi;
+    const amountCents = Math.round((total ?? subtotal) * 100);
+    Culqi.publicKey = CULQI_PK;
+    Culqi.settings({ title: 'Lima Flores', currency: 'PEN', amount: amountCents });
+    Culqi.options({ lang: 'auto', installments: false, paymentMethods: { tarjeta: true, yape: false, bancaMovil: false, agente: false, billetera: false, cuotealo: false } });
+
+    w.culqi = async () => {
+      if (Culqi.token && Culqi.token.id) {
+        try {
+          const r = await fetch(`${API_BASE}/api/culqi/charge`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: Culqi.token.id, email: buyer.email, items: payload.items, shipping_fee: payload.shipping_fee }),
+          });
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok || !d.ok) throw new Error(d.error || 'El pago fue rechazado.');
+          await placeOrder({ ...payload, payment_method: 'Tarjeta (Culqi)', culqi_charge_id: d.charge_id });
+        } catch (err: any) {
+          setError(err?.message || 'No se pudo procesar el pago.'); setSending(false);
+        }
+      } else if (Culqi.error) {
+        setError(Culqi.error.user_message || Culqi.error.merchant_message || 'No se pudo procesar el pago.'); setSending(false);
+      } else {
+        // Modal cerrado sin completar.
+        setSending(false);
+      }
+    };
+
+    Culqi.open();
   };
 
   const field = 'mt-1.5 w-full border border-border bg-surface px-4 py-3 text-ink-900 outline-none transition-colors focus:border-rosa-500';
@@ -160,10 +234,10 @@ export default function Checkout() {
           <form onSubmit={onSubmit} className="space-y-6">
             {/* Comprador */}
             <fieldset className="frost space-y-5 p-6 md:p-8">
-              <legend className="mb-3 flex items-baseline gap-3 px-1">
+              <div className="mb-3 flex items-baseline gap-3 px-1">
                 <span className="font-display text-2xl italic text-rosa-500">01</span>
                 <span className="font-display text-xl text-ink-900">Tus datos (quien compra)</span>
-              </legend>
+              </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <div><label className={label}>Nombre completo</label><input required value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} className={field} placeholder="Ej. María Pérez" /></div>
                 <div><label className={label}>Teléfono / WhatsApp</label><input required type="tel" value={buyer.phone} onChange={(e) => setBuyer({ ...buyer, phone: e.target.value })} className={field} placeholder="999 999 999" /></div>
@@ -174,11 +248,11 @@ export default function Checkout() {
             {/* Destinatario + entrega — toda la info de quien recibe sobre una
                 tarjeta verde oscuro, con sus aclaraciones. */}
             <fieldset className="space-y-5 rounded-lg border border-ivory-100/10 bg-[#2F3925] p-6 text-ivory-100 shadow-[0_24px_56px_-16px_rgba(47,57,37,0.45)] md:p-8">
-              <legend className="mb-1 flex flex-wrap items-center gap-3 px-1">
+              <div className="mb-1 flex flex-wrap items-center gap-3 px-1">
                 <span className="font-display text-2xl italic text-[#E7AFC2]">02</span>
                 <span className="rounded-sm bg-[#B6855E] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#2F3925]">Para</span>
                 <span className="font-display text-xl text-ivory-50">Quien recibe las flores</span>
-              </legend>
+              </div>
               <p className="px-1 text-sm leading-relaxed text-ivory-100/80">Estos son los datos de la persona que abrirá la puerta — su ubicación exacta, su nombre y su teléfono.</p>
 
               <div className="grid gap-5 sm:grid-cols-2">
@@ -217,7 +291,7 @@ export default function Checkout() {
               <div className="grid gap-5 sm:grid-cols-3">
                 <div>
                   <label className={darkLabel}>Distrito</label>
-                  <select required className={darkField} value={district} onChange={(e) => setDistrict(e.target.value)}>
+                  <select required className={`${darkField} dark-select`} value={district} onChange={(e) => setDistrict(e.target.value)}>
                     <option value="" disabled>Selecciona…</option>
                     {districts.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
@@ -225,7 +299,7 @@ export default function Checkout() {
                 <div><label className={darkLabel}>Fecha</label><input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={darkField} /></div>
                 <div>
                   <label className={darkLabel}>Horario</label>
-                  <select required className={darkField} value={time} onChange={(e) => setTime(e.target.value)}>
+                  <select required className={`${darkField} dark-select`} value={time} onChange={(e) => setTime(e.target.value)}>
                     <option value="" disabled>Selecciona…</option>
                     {timeSlots.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -241,27 +315,40 @@ export default function Checkout() {
                 <label className={darkLabel}>Mensaje en la tarjeta (opcional)</label>
                 <textarea rows={3} maxLength={220} value={cardNote} onChange={(e) => setCardNote(e.target.value)} className={darkField} placeholder="Lo que quieras que escribamos a mano…" />
                 <p className="mt-1.5 text-[12px] text-ivory-100/55">Lo imprimimos en una tarjeta que acompaña tu arreglo. {cardNote.length}/220</p>
+                <label className="mt-3 flex items-center gap-2.5 text-sm text-ivory-100/90">
+                  <input type="checkbox" checked={cardAnon} onChange={(e) => setCardAnon(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
+                  Enviar como anónimo — no incluir mi nombre en la tarjeta
+                </label>
               </div>
             </fieldset>
 
             {/* Pago */}
             <fieldset className="frost space-y-5 p-6 md:p-8">
-              <legend className="mb-3 flex items-baseline gap-3 px-1">
+              <div className="mb-3 flex items-baseline gap-3 px-1">
                 <span className="font-display text-2xl italic text-rosa-500">03</span>
                 <span className="font-display text-xl text-ink-900">Pago</span>
-              </legend>
+              </div>
               <div>
                 <label className={label}>Método de pago</label>
                 <select required className={field} value={payment} onChange={(e) => setPayment(e.target.value)}>
                   <option value="" disabled>Selecciona…</option>
                   {payments.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
+                {payment === 'Tarjeta' && (
+                  <p className="mt-2 flex items-center gap-1.5 text-[12px] text-foreground/55">
+                    <svg className="h-3.5 w-3.5 shrink-0 text-verde-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                    Pago seguro con tarjeta vía Culqi (con verificación 3-D Secure). Se cobra al confirmar.
+                  </p>
+                )}
+                {payment && payment !== 'Tarjeta' && (
+                  <p className="mt-2 text-[12px] text-foreground/55">Coordinamos el pago por {payment === 'Yape' || payment === 'Plin' ? payment : 'WhatsApp'} al confirmar el pedido.</p>
+                )}
               </div>
             </fieldset>
 
             {error && <p className="bg-red-100 px-4 py-3 text-sm text-red-800">{error}</p>}
             <button disabled={sending} className="press w-full bg-rosa-500 py-4 text-sm font-medium uppercase tracking-[0.18em] text-ivory-50 transition-colors hover:bg-rosa-600 disabled:opacity-60">
-              {sending ? 'Enviando…' : `Confirmar pedido · ${money(total)}`}
+              {sending ? 'Procesando…' : payment === 'Tarjeta' && total !== null ? `Pagar con tarjeta · ${money(total)}` : total !== null ? `Confirmar pedido · ${money(total)}` : 'Confirmar pedido'}
             </button>
             <p className="text-center text-[12px] text-foreground/50">Al confirmar, te contactamos por WhatsApp en menos de 30 min para coordinar el pago y la entrega.</p>
           </form>
@@ -288,9 +375,21 @@ export default function Checkout() {
             </div>
             <dl className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
               <div className="flex justify-between text-ink-600"><dt>Subtotal</dt><dd>{money(subtotal)}</dd></div>
-              <div className="flex justify-between text-ink-600"><dt>Envío {shipping.provider && <span className="text-[11px] text-foreground/45">({shipping.label})</span>}</dt><dd>{money(shipping.fee)}</dd></div>
-              <div className="flex justify-between border-t border-border pt-3 font-display text-xl text-ink-900"><dt>Total</dt><dd>{money(total)}</dd></div>
+              <div className="flex justify-between text-ink-600"><dt>Envío {shipping.provider && <span className="text-[11px] text-foreground/45">({shipping.label})</span>}</dt><dd>{shipping.fee !== null ? money(shipping.fee) : <span className="text-foreground/45">— por calcular</span>}</dd></div>
+              <div className="flex justify-between border-t border-border pt-3 font-display text-xl text-ink-900"><dt>Total</dt><dd>{total !== null ? money(total) : <span className="text-base font-normal text-foreground/45">— por calcular</span>}</dd></div>
             </dl>
+            <a
+              href={`https://wa.me/51999479855?text=${encodeURIComponent('Hola, necesito ayuda con mi pedido en Lima Flores')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Pedir ayuda por WhatsApp"
+              className="mt-6 flex items-center justify-center gap-2 border-t border-border pt-5 text-[12px] font-medium uppercase tracking-[0.14em] text-rosa-500 transition-colors hover:text-rosa-600"
+            >
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+              </svg>
+              ¿Necesitas ayuda? · WhatsApp
+            </a>
           </aside>
         </div>
       </div>

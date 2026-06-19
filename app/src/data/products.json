@@ -787,5 +787,95 @@
       "amor",
       "mama"
     ]
+  },
+  {
+    "id": "funebre-corona-eternidad",
+    "name": "Corona Eternidad",
+    "category": "funebre",
+    "categoryLabel": "Fúnebre",
+    "price": 420,
+    "image": "/products/funebre-corona-eternidad.jpg",
+    "images": [
+      "/products/funebre-corona-eternidad.jpg"
+    ],
+    "palette": "#9DAE8B",
+    "shortDesc": "Corona fúnebre en tonos blancos con Liliums, Gerberas, Rosas y Hortensias. Incluye tarjeta de dedicatoria y base.",
+    "description": "Corona fúnebre en tonos blancos compuesta por Liliums, Gerberas, Rosas y Hortensias. Incluye tarjeta de dedicatoria y base. Medida referencial: 1,65 m de alto × 70 cm de ancho. La imagen es referencial. Precio incluye IGV.",
+    "tags": [
+      "funebre",
+      "condolencias"
+    ]
+  },
+  {
+    "id": "funebre-lagrima-esperanza",
+    "name": "Lágrima Esperanza",
+    "category": "funebre",
+    "categoryLabel": "Fúnebre",
+    "price": 220,
+    "image": "/products/funebre-lagrima-esperanza.jpg",
+    "images": [
+      "/products/funebre-lagrima-esperanza.jpg"
+    ],
+    "palette": "#A7B59A",
+    "shortDesc": "Lágrima de piso en tonos blancos con Gerberas de centro negro, Rosas Ivory y follaje verde. Incluye tarjeta de dedicatoria.",
+    "description": "Lágrima de piso en tonos blancos, compuesta por Gerberas de centro negro, Rosas Ivory y follaje verde. Incluye tarjeta de dedicatoria. Medida referencial: 1,65 m de alto × 70 cm de ancho. La imagen es referencial. Precio incluye IGV.",
+    "tags": [
+      "funebre",
+      "condolencias"
+    ]
+  },
+  {
+    "id": "funebre-corona-perpetua",
+    "name": "Corona Perpetua",
+    "category": "funebre",
+    "categoryLabel": "Fúnebre",
+    "price": 415,
+    "image": "/products/funebre-corona-perpetua.jpg",
+    "images": [
+      "/products/funebre-corona-perpetua.jpg"
+    ],
+    "palette": "#7C93B0",
+    "shortDesc": "Corona de Hortensias en tonos azul, verde y blanco con follaje verde. Incluye tarjeta de dedicatoria y base.",
+    "description": "Corona compuesta por Hortensias en tonos azul, verde y blanco, acompañadas de follaje verde. Incluye tarjeta de dedicatoria y base. Medida referencial: 1,65 m de alto × 70 cm de ancho. La imagen es referencial. Precio incluye IGV.",
+    "tags": [
+      "funebre",
+      "condolencias"
+    ]
+  },
+  {
+    "id": "funebre-corona-buen-viaje",
+    "name": "Corona Buen Viaje",
+    "category": "funebre",
+    "categoryLabel": "Fúnebre",
+    "price": 455,
+    "image": "/products/funebre-corona-buen-viaje.jpg",
+    "images": [
+      "/products/funebre-corona-buen-viaje.jpg"
+    ],
+    "palette": "#E0A23D",
+    "shortDesc": "Corona en tonos amarillos, naranjas, blancos y verdes con Rosas amarillas, Lirios azules y Hortensias verdes. Incluye tarjeta de dedicatoria y base.",
+    "description": "Corona en tonos amarillos, naranjas, blancos y verdes, compuesta por Rosas amarillas, Lirios azules, Hortensias verdes y follaje variado. Incluye tarjeta de dedicatoria y base. Medida referencial: 1,65 m de alto × 70 cm de ancho. La imagen es referencial. El precio del envío es adicional según el distrito. Precio incluye IGV.",
+    "tags": [
+      "funebre",
+      "condolencias"
+    ]
+  },
+  {
+    "id": "funebre-box-rayo-de-luz",
+    "name": "Box Rayo de Luz",
+    "category": "funebre",
+    "categoryLabel": "Fúnebre",
+    "price": 225,
+    "image": "/products/funebre-box-rayo-de-luz.jpg",
+    "images": [
+      "/products/funebre-box-rayo-de-luz.jpg"
+    ],
+    "palette": "#CDB99A",
+    "shortDesc": "Arreglo en box blanco con Mini Rosas, Rosas y detalles en tono crema y follaje verde. Incluye tarjeta de dedicatoria y base cúbica blanca.",
+    "description": "Arreglo en box blanco con Mini Rosas, Rosas y detalles en tono crema, acompañados de follaje verde. Incluye tarjeta de dedicatoria y base cúbica blanca. Medida referencial: 35 cm de alto × 35 cm de diámetro. La imagen es referencial. El precio del envío es adicional según el distrito. Precio incluye IGV.",
+    "tags": [
+      "funebre",
+      "condolencias"
+    ]
   }
 ]

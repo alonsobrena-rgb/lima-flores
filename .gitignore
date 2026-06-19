@@ -1,5 +1,8 @@
 node_modules/
 npm-debug.log*
+
+# App React (Vite) — artefactos de build
+app/dist/
 .DS_Store
 .env
 .railway/
@@ -8,3 +11,6 @@ npm-debug.log*
 # Presupuestos / documentos privados — no publicar en el repo público
 presupuesto-*
 tools/hero-try/
+
+# Tarjetas de regalo generadas (previews locales)
+integrations/cards/out/

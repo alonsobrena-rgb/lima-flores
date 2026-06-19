@@ -68,6 +68,14 @@
     border: 1px solid hsl(var(--card) / 0.6);
     box-shadow: 0 1px 0 hsl(0 0% 100% / 0.5) inset, 0 18px 50px -28px rgba(42, 38, 35, 0.28);
   }
+  /* Selects sobre la tarjeta verde oscuro: la lista nativa de opciones hereda
+     el texto claro del campo con fondo casi blanco → blanco sobre blanco. Fijamos
+     colores sólidos legibles en las <option> (afecta solo la lista desplegada). */
+  .dark-select option {
+    background-color: #2F3925;
+    color: #F7F4EC;
+  }
+
   /* Subrayado animado para links de navegación / texto */
   .link-underline {
     background-image: linear-gradient(hsl(var(--primary)), hsl(var(--primary)));

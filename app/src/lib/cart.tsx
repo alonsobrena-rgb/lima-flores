@@ -52,7 +52,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     fetch(API_BASE + '/api/products')
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
       .then((list) => {
-        if (alive && Array.isArray(list) && list.length) setProducts(list as Product[]);
+        if (!alive || !Array.isArray(list) || !list.length) return;
+        const live = list as Product[];
+        // Red de seguridad para la línea Fúnebre: mientras el backend no haya
+        // sembrado estos productos en su BD (deploys separados), la API responde
+        // sin ellos y, al reemplazar el bundle, la página Fúnebre quedaría vacía.
+        // Sumamos los fúnebres del bundle que aún no estén en la respuesta en vivo
+        // (dedup por id; lo que venga de la API manda). Una vez sembrados, esto no
+        // añade nada.
+        const liveIds = new Set(live.map((p) => p.id));
+        const fallbackFunebre = (bundledProducts as Product[]).filter(
+          (p) => p.category === 'funebre' && !liveIds.has(p.id)
+        );
+        setProducts([...live, ...fallbackFunebre]);
       })
       .catch(() => { /* se mantiene el bundle */ })
       .finally(() => { if (alive) setLoadingProducts(false); });

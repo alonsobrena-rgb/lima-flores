@@ -86,9 +86,42 @@ async function ensureSeeded() {
   console.log(`[products] sembrados ${seed.length} productos`);
 }
 
+// ─── Alta idempotente de productos curados que se añaden después de la siembra ──
+// La siembra inicial solo corre con la tabla vacía, así que productos nuevos del
+// seed (p. ej. la línea Fúnebre) no entrarían en una BD ya sembrada. Este paso
+// inserta esos productos en cada arranque con ON CONFLICT DO NOTHING: no duplica,
+// no pisa ediciones del admin, y hace que el deploy los recoja sin tocar la BD a
+// mano. Se identifican por categoría 'funebre'.
+let extrasEnsured = false;
+async function ensureExtras() {
+  if (extrasEnsured || !db.enabled) return;
+  let seed = [];
+  try { seed = require(SEED_FILE); } catch { seed = []; }
+  const extras = seed.filter((p) => p.category === 'funebre');
+  for (let i = 0; i < extras.length; i++) {
+    const p = extras[i];
+    await db.query(
+      `INSERT INTO products
+         (id, name, category, category_label, price, image, images, palette,
+          short_desc, description, tags, badge, details, sort_order, active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,TRUE)
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        p.id || slugify(p.name), p.name, p.category || null, p.categoryLabel || null,
+        p.price ?? null, p.image || null, JSON.stringify(p.images || null), p.palette || null,
+        p.shortDesc || null, p.description || null, JSON.stringify(p.tags || null),
+        p.badge || null, JSON.stringify(p.details || null), 100 + i,
+      ]
+    );
+  }
+  extrasEnsured = true;
+  if (extras.length) console.log(`[products] asegurados ${extras.length} productos fúnebres`);
+}
+
 // ─── Lecturas ──────────────────────────────────────────────────────────────────
 async function listPublic() {
   await ensureSeeded();
+  await ensureExtras();
   const { rows } = await db.query(
     `SELECT * FROM products WHERE active = TRUE ORDER BY sort_order ASC, created_at ASC`
   );
@@ -97,6 +130,7 @@ async function listPublic() {
 
 async function listAll() {
   await ensureSeeded();
+  await ensureExtras();
   const { rows } = await db.query(
     `SELECT * FROM products ORDER BY sort_order ASC, created_at ASC`
   );
@@ -196,7 +230,7 @@ async function getImage(id) {
 }
 
 module.exports = {
-  rowToProduct, slugify, ensureSeeded,
+  rowToProduct, slugify, ensureSeeded, ensureExtras,
   listPublic, listAll, getById,
   create, update, remove,
   saveImage, getImage,

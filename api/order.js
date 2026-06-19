@@ -3,15 +3,23 @@
 'use strict';
 
 const db = require('../db');
+const { generateAndStoreCard } = require('../integrations/cards/order-card');
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
-    let raw = '';
+    // Acumulamos Buffers y decodificamos UTF-8 al final con Buffer.concat. Hacer
+    // `raw += chunk` decodifica cada chunk por separado y rompe los caracteres
+    // multibyte (ñ, tildes, emojis) si quedan partidos en el límite de un chunk
+    // de red → "Breña" se corrompía a "Bre�a". (api/admin.js ya lo hacía así.)
+    const chunks = [];
+    let size = 0;
     req.on('data', (chunk) => {
-      raw += chunk;
-      if (raw.length > 1e6) { reject(new Error('payload demasiado grande')); req.destroy(); }
+      size += chunk.length;
+      if (size > 1e6) { reject(new Error('payload demasiado grande')); req.destroy(); return; }
+      chunks.push(chunk);
     });
     req.on('end', () => {
+      const raw = Buffer.concat(chunks).toString('utf8');
       if (!raw) return resolve({});
       try { resolve(JSON.parse(raw)); }
       catch (e) { reject(new Error('JSON inválido')); }
@@ -76,7 +84,8 @@ module.exports = async (req, res) => {
         delivery_date, delivery_time,
         invoice_type, invoice_doc, invoice_name,
         payment_method, card_note,
-        items, subtotal, shipping_fee, shipping_provider, shipping_label, total
+        items, subtotal, shipping_fee, shipping_provider, shipping_label, total,
+        culqi_charge_id, card_anonymous
       ) VALUES (
         $1, 'pending',
         $2, $3, $4,
@@ -85,7 +94,8 @@ module.exports = async (req, res) => {
         $13, $14,
         $15, $16, $17,
         $18, $19,
-        $20, $21, $22, $23, $24, $25
+        $20, $21, $22, $23, $24, $25,
+        $26, $27
       )`,
       [
         id,
@@ -97,8 +107,24 @@ module.exports = async (req, res) => {
         b.payment_method || null, b.card_note || null,
         JSON.stringify(b.items),
         b.subtotal, b.shipping_fee ?? null, b.shipping_provider || null, b.shipping_label || null, b.total,
+        b.culqi_charge_id || null, !!b.card_anonymous,
       ]
     );
+    // Respondemos al cliente de inmediato; la tarjeta se rasteriza en segundo
+    // plano (Puppeteer tarda ~1-2s) y se guarda en orders.card_png cuando está
+    // lista. Si falla, no afecta al pedido — queda registrado en card_error.
+    if (b.card_note && String(b.card_note).trim()) {
+      setImmediate(() => {
+        generateAndStoreCard({
+          id,
+          card_note: b.card_note,
+          recipient_name: b.recipient_name,
+          buyer_name: b.buyer_name,
+          card_anonymous: !!b.card_anonymous,
+        }).catch((err) => console.error('[order] card bg error:', err.message));
+      });
+    }
+
     return send(res, 201, { id, status: 'pending' });
   } catch (e) {
     console.error('[order] insert error:', e.message);

@@ -12,6 +12,7 @@ import { SiteFooter } from '@/components/sections/SiteFooter';
 const navLinks = [
   { label: 'Inicio', href: '/' },
   { label: 'Catálogo', href: '/catalogo' },
+  { label: 'Fúnebre', href: '/funebre' },
   { label: 'Suscripción', href: '/suscripcion' },
   { label: 'Contacto', href: 'https://wa.me/51999479855' },
 ];

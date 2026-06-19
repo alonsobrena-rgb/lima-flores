@@ -86,6 +86,12 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_pdf          BYTEA;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_generated_at TIMESTAMPTZ;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_error        TEXT;
 
+-- Pago con tarjeta vía Culqi: id del cargo aprobado (charge_id) para conciliar.
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS culqi_charge_id   TEXT;
+
+-- Tarjeta anónima: el comprador pidió NO incluir su nombre (sin firma).
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS card_anonymous    BOOLEAN DEFAULT FALSE;
+
 -- Catálogo editable desde el admin. Se siembra una vez desde db/products.seed.json
 -- (ver db/products-store.js → ensureSeeded). Tras la siembra, esta tabla es la
 -- fuente de verdad; el JSON queda solo como snapshot inicial.

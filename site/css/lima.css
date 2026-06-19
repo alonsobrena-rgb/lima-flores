@@ -2326,6 +2326,27 @@ p { color: var(--ink); }
   font-size: 0.8125rem;
   line-height: 1.6;
 }
+
+/* Pista + contador bajo el mensaje de la tarjeta */
+.note-hint {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--ink-mute);
+  line-height: 1.5;
+}
+.recipient-card .note-hint { color: rgba(244, 239, 229, 0.66); }
+.note-count {
+  flex: none;
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.note-count.is-near { color: var(--accent); font-weight: 500; }
+.recipient-card .note-count.is-near { color: var(--rosa-200); }
 .recipient-card .field-note strong {
   color: var(--bone);
   font-family: var(--f-display);

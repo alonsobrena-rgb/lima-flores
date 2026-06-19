@@ -26,7 +26,8 @@ async function generateAndStoreCard(order, opts = {}) {
     const { pdf, png, template } = await generateCard({
       note,
       recipientName: order.recipient_name,
-      buyerName: order.buyer_name,
+      // Tarjeta anónima → sin firma (no se imprime el nombre de quien envía).
+      buyerName: order.card_anonymous ? '' : order.buyer_name,
       template: opts.template,
     });
 

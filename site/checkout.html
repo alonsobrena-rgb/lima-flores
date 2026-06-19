@@ -147,8 +147,16 @@
             </div>
 
             <div class="field">
-              <textarea id="note" placeholder=" " maxlength="280"></textarea>
+              <textarea id="note" placeholder=" " maxlength="220"></textarea>
               <label for="note">Mensaje en la tarjeta</label>
+              <div class="note-hint">
+                <span>Lo imprimimos en una tarjeta que acompaña tu arreglo.</span>
+                <span id="note-count" class="note-count">0/220</span>
+              </div>
+              <label class="note-anon" style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:0.875rem;cursor:pointer;">
+                <input type="checkbox" id="note-anon" />
+                <span>Enviar como anónimo — no incluir mi nombre en la tarjeta</span>
+              </label>
             </div>
           </div>
         </section>

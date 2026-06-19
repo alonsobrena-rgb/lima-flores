@@ -18,5 +18,10 @@
     "slug": "ramos",
     "label": "Ramos",
     "count": 9
+  },
+  {
+    "slug": "funebre",
+    "label": "Fúnebre",
+    "count": 5
   }
 ]

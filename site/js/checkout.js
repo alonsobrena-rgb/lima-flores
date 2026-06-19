@@ -26,6 +26,20 @@
   }
   document.getElementById('summary-subtotal').textContent = formatSoles(subtotal);
 
+  // ─── Contador del mensaje de la tarjeta ──────────────────────────────────
+  const noteEl = document.getElementById('note');
+  const noteCount = document.getElementById('note-count');
+  if (noteEl && noteCount) {
+    const max = noteEl.getAttribute('maxlength') || 220;
+    const updateCount = () => {
+      const n = noteEl.value.length;
+      noteCount.textContent = `${n}/${max}`;
+      noteCount.classList.toggle('is-near', n >= max - 20);
+    };
+    noteEl.addEventListener('input', updateCount);
+    updateCount();
+  }
+
   // ─── Fecha + hora objetivo (mín. +24 h, slots cada 30 min, ventana ±30) ──
   const ATELIER_OPEN = 8;     // 8:00
   const ATELIER_CLOSE = 21;   // 21:00 (último slot 20:30)
@@ -379,6 +393,7 @@
 
       payment_method: document.querySelector('input[name="payment"]:checked')?.value || 'yape',
       card_note:      document.getElementById('note').value.trim() || null,
+      card_anonymous: !!document.getElementById('note-anon')?.checked,
 
       items: fullItems,
       subtotal,

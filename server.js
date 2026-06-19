@@ -119,6 +119,11 @@ const server = http.createServer(async (req, res) => {
     return productsHandler(req, res, parsed);
   }
 
+  // ─── /api/culqi/* — pasarela de pago Culqi (cobro de tarjeta) ───
+  if (parsed.pathname.startsWith('/api/culqi/')) {
+    return require('./api/culqi')(req, res, parsed);
+  }
+
   // ─── /api/admin/* — listar/despachar/cancelar (Basic Auth) ───
   if (parsed.pathname.startsWith('/api/admin/')) {
     return adminHandler(req, res, parsed);

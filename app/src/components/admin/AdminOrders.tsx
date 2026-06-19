@@ -86,6 +86,7 @@ export function AdminOrders({ onAuthError }: { onAuthError: () => void }) {
                 <Row k="Dirección" v={o.recipient_address} />
                 <Row k="Tel. recibe" v={o.recipient_phone} />
                 {o.card_note && <Row k="Tarjeta" v={`"${o.card_note}"`} />}
+                {o.card_anonymous && <Row k="Firma" v={<span className="rounded bg-amber-100 px-2 py-0.5 text-[12px] font-medium text-amber-800">🕶 Anónimo · no incluir nombre de quien envía</span>} />}
                 <Row k="Comprador" v={`${o.buyer_name ?? ''} · ${o.buyer_email ?? ''} · ${o.buyer_phone ?? ''}`} />
                 <Row k="Pago" v={o.payment_method} />
               </dl>

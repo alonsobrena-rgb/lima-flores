@@ -48,6 +48,15 @@
   .error-bar { padding: 8px 12px; background: #fee2e2; color: #991b1b; border-radius: 4px; font-size: 0.85rem; margin-top: 8px; }
   .status-info { padding: 10px 12px; background: #f3f4f6; color: var(--ink-soft); border-radius: 4px; font-size: 0.85rem; margin-top: 8px; line-height: 1.4; }
   .dispatched-link { font-size: 0.85rem; color: var(--terra); text-decoration: underline; }
+  .card-preview { margin-top: 12px; padding: 14px; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; }
+  .card-preview__label { font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; }
+  .card-preview__img { width: 180px; max-width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 4px; box-shadow: 0 6px 22px rgba(27,26,23,0.12); display: block; background: var(--bone); }
+  .card-preview__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .btn-card { padding: 8px 12px; font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 4px; cursor: pointer; text-decoration: none; border: 1px solid var(--ink); background: var(--ink); color: var(--bone); }
+  .btn-card:hover { background: var(--terra); border-color: var(--terra); }
+  .btn-card--ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+  .btn-card--ghost:hover { background: transparent; color: var(--ink); border-color: var(--ink); }
+  .btn-card:disabled { opacity: 0.5; cursor: not-allowed; }
   @media (max-width: 720px) {
     .order-card { grid-template-columns: 1fr; }
     .order-card__side { flex-direction: row; flex-wrap: wrap; }
@@ -228,6 +237,7 @@
             <div class="order-card__row"><dt>Recepción</dt><dd>${o.recipient_has_reception ? 'Sí hay' : 'No hay'}</dd></div>
             <div class="order-card__row"><dt>Tel. recibe</dt><dd>${escape(o.recipient_phone)}</dd></div>
             ${o.card_note ? `<div class="order-card__row"><dt>Tarjeta</dt><dd>"${escape(o.card_note)}"</dd></div>` : ''}
+            ${o.card_anonymous ? `<div class="order-card__row"><dt>Firma</dt><dd><span class="badge" style="background:#fde68a;color:#92400e;">🕶 Anónimo · no incluir nombre de quien envía</span></dd></div>` : ''}
             <div class="order-card__row"><dt>Comprador</dt><dd>${escape(o.buyer_name)} · ${escape(o.buyer_email)} · ${escape(o.buyer_phone)}</dd></div>
             <div class="order-card__row"><dt>Comprobante</dt><dd>${escape(o.invoice_type)} · ${escape(o.invoice_doc)}${o.invoice_name ? ' · ' + escape(o.invoice_name) : ''}</dd></div>
             <div class="order-card__row"><dt>Pago</dt><dd>${escape(o.payment_method)}</dd></div>
@@ -238,12 +248,30 @@
             <div class="order-card__item"><span>Envío estimado</span><span>${formatSoles(o.shipping_fee)}</span></div>
             <div class="order-card__total"><span>Total</span><span>${formatSoles(o.total)}</span></div>
           </div>
+          ${o.card_note ? cardPreview(o) : ''}
           ${errorBar}
           ${dispatchedInfo}
         </div>
         <div class="order-card__side">${actions}</div>
       </div>
     `;
+  }
+
+  // Vista previa de la tarjeta de regalo (PNG autogenerado a partir del mensaje).
+  // La imagen se sirve por /api/admin/orders/:id/card (la genera al vuelo si falta).
+  function cardPreview(o) {
+    const id = escape(o.id);
+    const src = `/api/admin/orders/${encodeURIComponent(o.id)}/card`;
+    const tpl = o.card_template ? ` · plantilla ${escape(o.card_template)}` : '';
+    return `
+      <div class="card-preview" data-card-id="${id}">
+        <div class="card-preview__label">Tarjeta de regalo${tpl}</div>
+        <img class="card-preview__img" src="${src}" alt="Tarjeta de ${id}" loading="lazy" />
+        <div class="card-preview__actions">
+          <a class="btn-card" href="${src}" download="tarjeta-${id}.png">⬇ Descargar PNG</a>
+          <button class="btn-card btn-card--ghost" data-action="card-regen" data-id="${id}">↻ Otra plantilla</button>
+        </div>
+      </div>`;
   }
 
   function bindActions() {
@@ -253,6 +281,33 @@
     listEl.querySelectorAll('[data-action="cancel"]').forEach((btn) => {
       btn.addEventListener('click', () => cancelOrder(btn.dataset.id, btn));
     });
+    listEl.querySelectorAll('[data-action="card-regen"]').forEach((btn) => {
+      btn.addEventListener('click', () => regenCard(btn.dataset.id, btn));
+    });
+  }
+
+  async function regenCard(id, btn) {
+    const wrap = btn.closest('.card-preview');
+    const img = wrap && wrap.querySelector('.card-preview__img');
+    const prev = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Generando…';
+    try {
+      const r = await fetch(`/api/admin/orders/${encodeURIComponent(id)}/card`, {
+        method: 'POST', credentials: 'include',
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error(j.error || ('HTTP ' + r.status));
+      }
+      // Forzar recarga de la imagen (cache-bust con timestamp).
+      if (img) img.src = `/api/admin/orders/${encodeURIComponent(id)}/card?t=${Date.now()}`;
+    } catch (e) {
+      alert('No se pudo regenerar la tarjeta: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = prev;
+    }
   }
 
   async function dispatchOrder(id, btn) {

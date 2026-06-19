@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminGet, adminSend, apiUrl, AuthError, resolveImg } from '@/lib/admin-api';
 import { useProducts, type Product } from '@/lib/cart';
-import { renderAd, loadImage, downloadCanvas, AD_DIMS, SAFE, type AdSize, type AdTheme, type TextPlacement } from '@/lib/ad-canvas';
+import { renderAd, renderPromoAd, loadImage, downloadCanvas, AD_DIMS, PROMO_DIMS, SAFE, type AdSize, type AdTheme, type TextPlacement } from '@/lib/ad-canvas';
+
+type Template = 'simple' | 'promo';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -14,9 +16,11 @@ const VIBES: Vibe[] = [
   { key: 'sympathy', label: 'Condolencias sobrio', lead: 'Sober respectful sympathy', surface: 'muted greys and whites with soft diffused light', extra: 'calm, dignified, serene' },
 ];
 
-function buildPrompt(p: Product, vibeKey: string, size: AdSize): string {
+function buildPrompt(p: Product, vibeKey: string, size: AdSize, template: Template = 'simple'): string {
   const v = VIBES.find((x) => x.key === vibeKey) || VIBES[0];
-  const sizeRule = size === 'vertical'
+  const sizeRule = template === 'promo'
+    ? 'Square 1:1 framing. Place the flower arrangement clearly on the LEFT side of the frame; keep the RIGHT 45% as clean, simple negative space (soft wall or surface) so a text panel can sit there.'
+    : size === 'vertical'
     ? 'Vertical 9:16 framing; keep the top 15% and bottom 20% as clean negative space for text and platform UI.'
     : 'Balanced 1:1 framing with comfortable breathing room on all edges.';
   // Prompt de edición para Seedream: conserva el arreglo REAL de la foto de
@@ -29,8 +33,19 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
   const [selected, setSelected] = useState<Product | null>(null);
   const [kind, setKind] = useState<'image' | 'video'>('image');
   const [size, setSize] = useState<AdSize>('vertical');
+  const [template, setTemplate] = useState<Template>('simple');
   const [vibe, setVibe] = useState('romantic');
   const [prompt, setPrompt] = useState('');
+
+  // Campos de la plantilla promocional (tarjeta de oferta)
+  const [promoTag, setPromoTag] = useState('FLORES FRESCAS CADA 15 DÍAS');
+  const [promoCategory, setPromoCategory] = useState('FLORES DE ESTACIÓN · LIMA');
+  const [promoSubline, setPromoSubline] = useState('');
+  const [promoPriceLabel, setPromoPriceLabel] = useState('FLORES FRESCAS CADA 15 DÍAS');
+  const [promoNote, setPromoNote] = useState('2 ramos al mes · Delivery Incluido');
+  const [promoBullets, setPromoBullets] = useState('Siempre frescas, siempre distintas\nSe abren en tu casa\nDuran cerca de 2 semanas\nRamo diferente cada 15 días');
+  const [promoCta, setPromoCta] = useState('¡Suscríbete este mes!');
+  const [promoZones, setPromoZones] = useState('Miraflores, Barranco, San Isidro, Magdalena del Mar, Chorrillos');
 
   // Composición (ad completo)
   const [headline, setHeadline] = useState('');
@@ -72,19 +87,28 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
   const pick = useCallback(async (p: Product) => {
     setSelected(p); setErr(''); setVideoUrl(null);
     setHeadline(p.name); setPrice('S/ ' + p.price);
-    setPrompt(buildPrompt(p, vibe, size));
+    setPrompt(buildPrompt(p, vibe, size, template));
     try { const img = await loadImage(resolveImg(p.image)); setBgImg(img); } catch { setBgImg(null); }
     loadGallery(p.id);
-  }, [vibe, size, loadGallery]);
+  }, [vibe, size, template, loadGallery]);
 
-  // Reconstruir prompt al cambiar vibe/size (mantiene editable después).
-  useEffect(() => { if (selected) setPrompt(buildPrompt(selected, vibe, size)); /* eslint-disable-next-line */ }, [vibe, size]);
+  // Reconstruir prompt al cambiar vibe/size/plantilla (mantiene editable después).
+  useEffect(() => { if (selected) setPrompt(buildPrompt(selected, vibe, size, template)); /* eslint-disable-next-line */ }, [vibe, size, template]);
+
+  // Contenido de la plantilla promocional a partir de los campos del editor.
+  const promoContent = useCallback(() => ({
+    bg: bgImg, brand: 'LIMA FLORES', tag: promoTag, headline, category: promoCategory,
+    subline: promoSubline, priceLabel: promoPriceLabel, price, priceNote: promoNote,
+    bullets: promoBullets.split('\n'), cta: promoCta, zonesLabel: 'ZONAS DE DELIVERY',
+    zones: promoZones.split(','),
+  }), [bgImg, promoTag, headline, promoCategory, promoSubline, promoPriceLabel, price, promoNote, promoBullets, promoCta, promoZones]);
 
   // Re-render del canvas cuando cambian fondo o textos (solo modo imagen).
   useEffect(() => {
     if (kind !== 'image' || !canvasRef.current) return;
+    if (template === 'promo') { renderPromoAd(canvasRef.current, promoContent()).catch(() => {}); return; }
     renderAd(canvasRef.current, { size, bg: bgImg, headline, subtitle, price, cta, placement, theme, showGuides }).catch(() => {});
-  }, [kind, size, bgImg, headline, subtitle, price, cta, placement, theme, showGuides]);
+  }, [template, promoContent, kind, size, bgImg, headline, subtitle, price, cta, placement, theme, showGuides]);
 
   async function pollAsset(assetId: string): Promise<{ dataUrl: string; kind: string }> {
     for (let i = 0; i < 90; i++) {
@@ -101,7 +125,8 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
     if (!selected) { setErr('Elige un producto primero.'); return; }
     setGenerating(true); setErr(''); setGenStatus('enviando…'); setVideoUrl(null);
     try {
-      const r = await adminSend('/api/admin/studio/generate', 'POST', { productId: selected.id, kind, size, vibe, prompt });
+      const genSize: AdSize = template === 'promo' ? 'square' : size;
+      const r = await adminSend('/api/admin/studio/generate', 'POST', { productId: selected.id, kind, size: genSize, vibe, prompt });
       setGenStatus('generando… (1–3 min)');
       const result = await pollAsset(r.assetId);
       if (kind === 'video') setVideoUrl(result.dataUrl);
@@ -142,6 +167,11 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
     // Exportar SIEMPRE sin las guías de safe-zone (son solo ayuda visual del
     // editor). Render a una canvas temporal limpia → no toca el preview.
     const tmp = document.createElement('canvas');
+    if (template === 'promo') {
+      await renderPromoAd(tmp, promoContent());
+      downloadCanvas(tmp, `lima-promo-${selected?.id || 'producto'}.png`);
+      return;
+    }
     await renderAd(tmp, { size, bg: bgImg, headline, subtitle, price, cta, placement, theme, showGuides: false });
     downloadCanvas(tmp, `lima-ad-${selected?.id || 'producto'}-${size}.png`);
   };
@@ -150,8 +180,9 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
   const field = 'mt-1.5 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-rosa-500';
   const label = 'block text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/55';
 
-  const dims = AD_DIMS[size];
+  const dims = template === 'promo' ? PROMO_DIMS : AD_DIMS[size];
   const previewMaxH = 560;
+  const isPromo = template === 'promo';
 
   return (
     <div className="space-y-10">
@@ -172,7 +203,18 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
           {selected && <p className="mt-1.5 truncate text-sm text-ink-800">{selected.name} · <span className="text-foreground/55">S/ {selected.price}</span></p>}
         </div>
 
-        {/* Formato + tamaño */}
+        {/* Plantilla */}
+        <div>
+          <label className={label}>Plantilla</label>
+          <div className="mt-1.5 flex">
+            <button onClick={() => setTemplate('simple')} className={seg(template === 'simple') + ' rounded-l-sm'}>Anuncio simple</button>
+            <button onClick={() => { setTemplate('promo'); setKind('image'); setSize('square'); }} className={seg(template === 'promo') + ' -ml-px rounded-r-sm'}>Promoción / oferta</button>
+          </div>
+          {isPromo && <p className="mt-1.5 text-[11px] leading-relaxed text-foreground/45">Tarjeta cuadrada (1080×1080): foto a la izquierda + panel con precio, beneficios, CTA y zonas de delivery.</p>}
+        </div>
+
+        {/* Formato + tamaño (no aplican en promo: siempre foto cuadrada) */}
+        {!isPromo && (
         <div className="flex flex-wrap gap-4">
           <div>
             <label className={label}>Formato</label>
@@ -189,6 +231,7 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
             </div>
           </div>
         </div>
+        )}
 
         {/* Vibe */}
         <div>
@@ -227,9 +270,9 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">Vista previa · {dims.w}×{dims.h}{showGuides ? ' · con guías' : ''}</p>
           <div className="flex flex-wrap gap-2">
-            <label className="flex items-center gap-1.5 text-xs text-ink-800"><input type="checkbox" checked={showGuides} onChange={(e) => setShowGuides(e.target.checked)} /> Guías safe-zone</label>
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="border border-border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">Texto: {theme === 'dark' ? 'claro' : 'oscuro'}</button>
-            <button onClick={() => setPlacement(placement === 'bottom' ? 'top' : 'bottom')} className="border border-border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">Texto: {placement === 'bottom' ? 'abajo' : 'arriba'}</button>
+            {!isPromo && <label className="flex items-center gap-1.5 text-xs text-ink-800"><input type="checkbox" checked={showGuides} onChange={(e) => setShowGuides(e.target.checked)} /> Guías safe-zone</label>}
+            {!isPromo && <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="border border-border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">Texto: {theme === 'dark' ? 'claro' : 'oscuro'}</button>}
+            {!isPromo && <button onClick={() => setPlacement(placement === 'bottom' ? 'top' : 'bottom')} className="border border-border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">Texto: {placement === 'bottom' ? 'abajo' : 'arriba'}</button>}
             <button onClick={download} className="bg-rosa-500 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-600">⬇ Descargar</button>
           </div>
         </div>
@@ -249,18 +292,36 @@ export function AdminStudio({ onAuthError }: { onAuthError: () => void }) {
                 </div>
               )
             ) : (
-              <canvas ref={canvasRef} className="border border-border bg-ivory-200 shadow-lg" style={{ height: previewMaxH, width: 'auto', maxWidth: '100%' }} />
+              <canvas ref={canvasRef} className="border border-border bg-ivory-200 shadow-lg" style={{ maxHeight: previewMaxH, maxWidth: '100%', height: 'auto', width: 'auto' }} />
             )}
           </div>
 
-          {/* Campos de composición (solo foto) */}
-          {kind === 'image' && (
+          {/* Campos de composición — anuncio simple */}
+          {kind === 'image' && !isPromo && (
             <div className="w-full max-w-xs space-y-3">
               <div><label className={label}>Titular</label><input value={headline} onChange={(e) => setHeadline(e.target.value)} className={field} /></div>
               <div><label className={label}>Subtítulo</label><input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className={field} /></div>
               <div><label className={label}>Precio</label><input value={price} onChange={(e) => setPrice(e.target.value)} className={field} /></div>
               <div><label className={label}>CTA</label><input value={cta} onChange={(e) => setCta(e.target.value)} className={field} /></div>
               <p className="text-[11px] leading-relaxed text-foreground/45">El bloque de texto se mantiene dentro de la zona segura (las bandas rojas marcan dónde la UI de Meta tapa el contenido).</p>
+            </div>
+          )}
+
+          {/* Campos de composición — promoción / oferta */}
+          {isPromo && (
+            <div className="w-full max-w-xs space-y-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/45">Lado foto (izquierda)</p>
+              <div><label className={label}>Etiqueta (píldora)</label><input value={promoTag} onChange={(e) => setPromoTag(e.target.value)} className={field} /></div>
+              <div><label className={label}>Titular</label><input value={headline} onChange={(e) => setHeadline(e.target.value)} className={field} /></div>
+              <div><label className={label}>Categoría</label><input value={promoCategory} onChange={(e) => setPromoCategory(e.target.value)} className={field} /></div>
+              <div><label className={label}>Sublínea</label><input value={promoSubline} onChange={(e) => setPromoSubline(e.target.value)} className={field} placeholder="2 ramos frescos al mes · S/ 130" /></div>
+              <p className="pt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/45">Panel (derecha)</p>
+              <div><label className={label}>Etiqueta del panel</label><input value={promoPriceLabel} onChange={(e) => setPromoPriceLabel(e.target.value)} className={field} /></div>
+              <div><label className={label}>Precio</label><input value={price} onChange={(e) => setPrice(e.target.value)} className={field} placeholder="S/ 130" /></div>
+              <div><label className={label}>Nota del precio</label><input value={promoNote} onChange={(e) => setPromoNote(e.target.value)} className={field} /></div>
+              <div><label className={label}>Beneficios (uno por línea)</label><textarea value={promoBullets} onChange={(e) => setPromoBullets(e.target.value)} rows={4} className={field + ' text-[13px]'} /></div>
+              <div><label className={label}>Botón (CTA)</label><input value={promoCta} onChange={(e) => setPromoCta(e.target.value)} className={field} /></div>
+              <div><label className={label}>Zonas de delivery (separadas por coma)</label><input value={promoZones} onChange={(e) => setPromoZones(e.target.value)} className={field} /></div>
             </div>
           )}
         </div>
