@@ -26,34 +26,42 @@ export default function Funebre() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Fondo: cementerio sereno al atardecer (generado con Higgsfield) con velo
-          ivory + leve blur para que el texto y las tarjetas se lean. */}
+      {/* Fondo: cementerio de día (generado con Higgsfield) con velo ivory suave.
+          La legibilidad la garantizan el plinto esmerilado del intro y el degradado
+          a ivory de la grilla (abajo) — no el velo — así el cementerio se ve nítido. */}
       <div aria-hidden className="fixed inset-0 -z-10">
         <img src="/bg/funebre-cementerio.webp" alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/72 via-ivory-100/60 to-ivory-100/76" />
-        <div className="absolute inset-0 backdrop-blur-[1.5px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/45 via-ivory-100/40 to-ivory-100/70" />
+        <div className="absolute inset-0 backdrop-blur-[1px]" />
       </div>
 
       <div className="relative z-10">
       <SiteHeader />
 
-      {/* Intro · Condolencias */}
-      <header className="mx-auto max-w-3xl px-6 pb-12 pt-16 text-center md:pt-24">
-        <span className="text-[12px] font-medium uppercase tracking-[0.3em] text-ink-500">— Condolencias</span>
-        <h1 className="mt-4 font-display text-[2.6rem] font-light leading-[1.05] tracking-tight text-ink-900 md:text-[3.75rem]">
-          Acompañamos tu adiós <em className="italic text-rosa-500">con flores.</em>
-        </h1>
-        <p className="mx-auto mt-6 max-w-xl leading-relaxed text-ink-700">
-          Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir a quien partió.
-          Cada pieza se arma con flores frescas de la semana, incluye tarjeta de dedicatoria y se
-          entrega el mismo día en Lima. Estamos contigo en este momento. Las imágenes son referenciales.
-        </p>
-        <p className="mt-5 text-[13px] uppercase tracking-[0.18em] text-foreground/50">
-          ¿Necesitas ayuda? <a href="https://wa.me/51999479855" target="_blank" rel="noopener noreferrer" className="text-rosa-500 hover:text-rosa-600">Escríbenos por WhatsApp →</a>
-        </p>
+      {/* Intro · Condolencias — sobre un plinto ivory esmerilado para que el texto
+          se lea nítido sobre el cementerio. */}
+      <header className="mx-auto max-w-3xl px-6 pb-12 pt-12 md:pt-20">
+        <div className="mx-auto max-w-2xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-9 text-center shadow-[0_28px_70px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-11 md:py-11">
+          <span className="text-[12px] font-medium uppercase tracking-[0.3em] text-ink-500">— Condolencias</span>
+          <h1 className="mt-4 font-display text-[2.4rem] font-light leading-[1.05] tracking-tight text-ink-900 md:text-[3.4rem]">
+            Acompañamos tu adiós <em className="italic text-rosa-500">con flores.</em>
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl leading-relaxed text-ink-700">
+            Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir a quien partió.
+            Cada pieza se arma con flores frescas de la semana, incluye tarjeta de dedicatoria y se
+            entrega el mismo día en Lima. Estamos contigo en este momento. Las imágenes son referenciales.
+          </p>
+          <p className="mt-5 text-[13px] uppercase tracking-[0.18em] text-foreground/55">
+            ¿Necesitas ayuda? <a href="https://wa.me/51999479855" target="_blank" rel="noopener noreferrer" className="text-rosa-500 hover:text-rosa-600">Escríbenos por WhatsApp →</a>
+          </p>
+        </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24 md:px-12 md:pb-32">
+      {/* La grilla lleva su propio velo ivory (se desvanece desde el intro) para que
+          los nombres, precios y descripciones se lean nítidos sobre el cementerio. */}
+      <div className="relative">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: 'linear-gradient(to bottom, rgba(246,243,236,0) 0px, rgba(246,243,236,0.92) 320px)' }} />
+        <section className="mx-auto max-w-7xl px-6 pb-24 md:px-12 md:pb-32">
         <div className="grid grid-cols-1 gap-x-7 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((p, i) => (
             <motion.div
@@ -86,7 +94,8 @@ export default function Funebre() {
         {list.length === 0 && (
           <p className="py-24 text-center font-display text-2xl italic text-ink-700">Pronto sumaremos nuestros arreglos fúnebres.</p>
         )}
-      </section>
+        </section>
+      </div>
 
       <SiteFooter />
       </div>
