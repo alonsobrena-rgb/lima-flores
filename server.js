@@ -249,4 +249,7 @@ function serveFile(req, res, filePath, stat) {
 
 server.listen(PORT, () => {
   console.log(`Lima Flores → http://localhost:${PORT}`);
+  // Vigía de franjas de entrega → avisos por Google Chat al iniciar cada horario.
+  try { require('./integrations/notify/delivery-watch').start(); }
+  catch (e) { console.error('[delivery-watch] no se pudo iniciar:', e.message); }
 });

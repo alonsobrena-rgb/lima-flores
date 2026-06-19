@@ -4,6 +4,7 @@
 
 const db = require('../db');
 const { generateAndStoreCard } = require('../integrations/cards/order-card');
+const gchat = require('../integrations/notify/gchat');
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -124,6 +125,12 @@ module.exports = async (req, res) => {
         }).catch((err) => console.error('[order] card bg error:', err.message));
       });
     }
+
+    // Aviso de pedido nuevo a Google Chat (fire-and-forget; no bloquea ni rompe
+    // el pedido si el webhook falla o no está configurado).
+    setImmediate(() => {
+      gchat.notifyNewOrder({ id, ...b }).catch((err) => console.error('[order] gchat error:', err.message));
+    });
 
     return send(res, 201, { id, status: 'pending' });
   } catch (e) {
