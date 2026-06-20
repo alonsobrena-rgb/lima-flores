@@ -79,7 +79,7 @@ export default function Producto() {
             </div>
 
             <ul className="mt-10 space-y-2.5 border-t border-border pt-6 text-sm text-ink-600">
-              <li>· Entrega el mismo día en Lima Metropolitana.</li>
+              <li>· Entrega a domicilio en Lima Metropolitana.</li>
               <li>· Armado a mano con flores frescas de la semana.</li>
               <li>· Incluye tarjeta de dedicatoria sin costo.</li>
             </ul>

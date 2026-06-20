@@ -61,7 +61,7 @@ export default function Catalogo() {
           </h1>
           <p className="mt-5 max-w-md text-ink-700">
             {cat === 'all' && priceKey === 'all'
-              ? `${products.length} creaciones, armadas tallo por tallo y entregadas el mismo día en Lima.`
+              ? `${products.length} creaciones, armadas tallo por tallo y entregadas en Lima.`
               : `${list.length} ${list.length === 1 ? 'creación' : 'creaciones'} con estos filtros.`}
           </p>
 

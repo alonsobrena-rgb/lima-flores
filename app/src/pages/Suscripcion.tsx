@@ -67,7 +67,7 @@ export default function Suscripcion() {
             </StaggerItem>
           ))}
         </Stagger>
-        <p className="mt-10 text-center text-[12px] uppercase tracking-[0.14em] text-foreground/45">Todas las suscripciones incluyen entrega a domicilio dentro de Lima Metropolitana.</p>
+        <p className="mt-10 text-center text-[12px] uppercase tracking-[0.14em] text-ivory-50 drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)]">Todas las suscripciones incluyen entrega a domicilio dentro de Lima Metropolitana.</p>
       </section>
       <SiteFooter />
       </div>

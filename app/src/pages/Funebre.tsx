@@ -50,8 +50,8 @@ export default function Funebre() {
           </h1>
           <p className="mx-auto mt-5 max-w-xl leading-relaxed text-ink-700">
             Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir a quien partió.
-            Cada pieza se arma con flores frescas de la semana, incluye tarjeta de dedicatoria y se
-            entrega el mismo día en Lima. Estamos contigo en este momento. Las imágenes son referenciales.
+            Cada pieza se arma con flores frescas de la semana, incluye tarjeta de dedicatoria y la
+            entregamos en Lima. Estamos contigo en este momento. Las imágenes son referenciales.
           </p>
           <p className="mt-5 text-[13px] uppercase tracking-[0.18em] text-foreground/55">
             ¿Necesitas ayuda? <a href="https://wa.me/51999479855" target="_blank" rel="noopener noreferrer" className="text-rosa-500 hover:text-rosa-600">Escríbenos por WhatsApp →</a>

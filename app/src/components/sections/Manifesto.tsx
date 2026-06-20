@@ -44,7 +44,7 @@ export const Manifesto = () => (
           className="mt-8 max-w-xl text-base leading-relaxed text-ink-700"
         >
           Cada arreglo lo armamos a mano, con flores que recibimos frescas tres veces por semana. Nada de stock, nada de
-          plantillas — flores de estación pensadas tallo por tallo y entregadas el mismo día en Lima.
+          plantillas — flores de estación pensadas tallo por tallo y entregadas en Lima.
         </motion.p>
       </div>
     </div>

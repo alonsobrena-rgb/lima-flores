@@ -13,7 +13,7 @@
   document.getElementById('pd-price').innerHTML = `
     <span class="cur">S/</span>
     <span class="amt">${p.price}</span>
-    <span style="font-family:var(--f-body); font-size:var(--fs-nano); letter-spacing:var(--tr-eyebrow); text-transform:uppercase; color:var(--ink-soft); margin-left:8px">Entrega el mismo día</span>
+    <span style="font-family:var(--f-body); font-size:var(--fs-nano); letter-spacing:var(--tr-eyebrow); text-transform:uppercase; color:var(--ink-soft); margin-left:8px">Entrega a domicilio</span>
   `;
   document.getElementById('pd-desc').textContent = p.description || p.shortDesc || '';
 

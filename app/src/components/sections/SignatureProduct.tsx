@@ -46,7 +46,6 @@ export const SignatureProduct = () => {
           <Reveal delay={0.26}>
             <div className="mt-8 flex items-baseline gap-3">
               <span className="font-display text-5xl">{money(250)}</span>
-              <span className="text-[12px] uppercase tracking-[0.14em] text-ivory-100/50">Entrega el mismo día</span>
             </div>
             <div className="mt-7 flex flex-wrap gap-3">
               <button
