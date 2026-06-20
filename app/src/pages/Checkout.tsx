@@ -131,7 +131,9 @@ export default function Checkout() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(''); setSending(true);
+    setError('');
+    if (!payment) { setError('Elige un método de pago.'); return; }
+    setSending(true);
     // Coordenadas: lugar elegido → geocodificar el texto libre → centroide del
     // distrito. El pedido SIEMPRE lleva lat/lng numéricos (la API los exige) y
     // escribir a mano nunca bloquea el envío.
@@ -336,10 +338,25 @@ export default function Checkout() {
               </div>
               <div>
                 <label className={label}>Método de pago</label>
-                <select required className={field} value={payment} onChange={(e) => setPayment(e.target.value)}>
-                  <option value="" disabled>Selecciona…</option>
-                  {payments.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <div className="mt-1.5 grid gap-3 sm:grid-cols-2">
+                  {payments.map((p) => {
+                    const active = payment === p;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPayment(p)}
+                        aria-pressed={active}
+                        className={`flex items-center gap-3 border px-4 py-3 text-left transition-colors ${active ? 'border-rosa-500 bg-rosa-50' : 'border-border bg-surface hover:border-rosa-300'}`}
+                      >
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${active ? 'border-rosa-500' : 'border-border'}`}>
+                          {active && <span className="h-2.5 w-2.5 rounded-full bg-rosa-500" />}
+                        </span>
+                        <span className="text-sm font-medium text-ink-900">{p}</span>
+                      </button>
+                    );
+                  })}
+                </div>
                 {CULQI_PK && payment === 'Tarjeta' && (
                   <p className="mt-2 flex items-center gap-1.5 text-[12px] text-foreground/55">
                     <svg className="h-3.5 w-3.5 shrink-0 text-verde-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
