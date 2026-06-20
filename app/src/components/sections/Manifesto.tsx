@@ -17,7 +17,7 @@ export const Manifesto = () => (
         {/* Flor: ramo de tulipanes de colores (motivo del hero), flotando */}
         <motion.div
           initial={{ opacity: 0, y: 28, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 1, ease }}
-          className="relative mt-8 hidden md:block"
+          className="relative mt-8 block"
         >
           {/* wash cálido detrás de las orquídeas */}
           <div aria-hidden className="absolute left-1/2 top-1/2 -z-10 h-[130%] w-[120%] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'radial-gradient(circle, rgba(231,184,198,0.5) 0%, rgba(240,217,181,0.28) 48%, transparent 72%)', filter: 'blur(10px)' }} />
