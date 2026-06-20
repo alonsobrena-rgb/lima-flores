@@ -30,7 +30,7 @@ export default function Funebre() {
           La legibilidad la garantizan el plinto esmerilado del intro y el degradado
           a ivory de la grilla (abajo) — no el velo — así el cementerio se ve nítido. */}
       <div aria-hidden className="fixed inset-0 -z-10">
-        <img src="/bg/funebre-cementerio.webp" alt="" className="h-full w-full object-cover" />
+        <img src="/bg/funebre-cementerio-2.webp" alt="" className="h-full w-full object-cover" />
         {/* Velo muy suave arriba (el cementerio se ve nítido en el hero) y se va
             cerrando hacia abajo; la legibilidad de la grilla la da su propio
             degradado a ivory, así que aquí podemos dejar la imagen clara. */}
