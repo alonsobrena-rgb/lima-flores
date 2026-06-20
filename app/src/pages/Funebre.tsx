@@ -31,8 +31,10 @@ export default function Funebre() {
           a ivory de la grilla (abajo) — no el velo — así el cementerio se ve nítido. */}
       <div aria-hidden className="fixed inset-0 -z-10">
         <img src="/bg/funebre-cementerio.webp" alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/45 via-ivory-100/40 to-ivory-100/70" />
-        <div className="absolute inset-0 backdrop-blur-[1px]" />
+        {/* Velo muy suave arriba (el cementerio se ve nítido en el hero) y se va
+            cerrando hacia abajo; la legibilidad de la grilla la da su propio
+            degradado a ivory, así que aquí podemos dejar la imagen clara. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/10 via-ivory-100/25 to-ivory-100/60" />
       </div>
 
       <div className="relative z-10">
