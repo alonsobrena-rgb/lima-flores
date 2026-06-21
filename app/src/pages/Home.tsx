@@ -26,9 +26,9 @@ const socials = [
 export default function Home() {
   return (
     <>
-      {/* Fondo floral fijo para toda la landing (flores clásicas y coloridas).
+      {/* Fondo fijo para toda la landing (jardín de rosas a contraluz, desenfocado).
           El video va solo en el hero. */}
-      <HomeFloralBg src="/bg/landing-floral.webp" />
+      <HomeFloralBg src="/bg/landing-jardin.webp" />
       <LimaHero
         navLinks={navLinks}
         socials={socials}
@@ -38,7 +38,7 @@ export default function Home() {
       />
       {/* Velo ivory translúcido sobre el fondo floral: deja ver las flores pero
           mantiene legible el contenido de las secciones (más blanco = más legible). */}
-      <div className="relative bg-ivory-100/[0.82]">
+      <div className="relative bg-ivory-100/[0.78]">
         <Marquee />
         <Manifesto />
         <FeaturedProducts />
