@@ -11,6 +11,8 @@ interface LimaHeroProps {
   navLinks: NavLink[];
   socials: Social[];
   locationText?: string;
+  videoSrc: string;
+  poster: string;
 }
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -33,9 +35,11 @@ const Icon = {
   arrowR: (c: string) => (<svg className={c} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>),
 };
 
-// El hero es solo el overlay (barra, titular, labels). El video de fondo vive
-// fijo detrás de toda la landing en <HomeVideoBg/> y se scrubea con el scroll.
-export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima' }: LimaHeroProps) => {
+// El hero lleva su PROPIO video (mujer recibiendo flores) reproduciéndose en
+// loop, confinado a esta sección. El resto de la landing tiene un fondo floral
+// fijo aparte (<HomeFloralBg/>). Encima del video van la barra, el titular y
+// los labels, con un velo ivory para que el titular oscuro se lea.
+export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima', videoSrc, poster }: LimaHeroProps) => {
   const { open: openCart, count } = useCart();
   const sectionRef = useRef<HTMLElement>(null);
   // Parallax/fade sutil del titular y del hint al hacer scroll.
@@ -45,7 +49,24 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
   const hintOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
 
   return (
-    <section ref={sectionRef} className="relative h-screen min-h-[620px] w-full overflow-hidden bg-transparent">
+    <section ref={sectionRef} className="relative h-screen min-h-[620px] w-full overflow-hidden bg-ivory-100">
+      {/* ── Video de fondo del hero (loop, confinado a esta sección) ── */}
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      >
+        <source src={videoSrc} type="video/mp4" />
+      </video>
+      {/* Velo ivory para asentar el video y que el titular oscuro se lea (más
+          denso a la derecha, donde cae "Flores dan Amor") */}
+      <div className="absolute inset-0 bg-gradient-to-r from-ivory-100/10 via-transparent to-ivory-100/45" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/15 via-transparent to-ivory-100/30" />
+
       {/* ── Barra superior ── */}
       <motion.header
         initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }}

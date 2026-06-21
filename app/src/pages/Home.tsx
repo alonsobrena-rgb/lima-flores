@@ -1,5 +1,5 @@
 import { LimaHero } from '@/components/ui/lima-hero';
-import { HomeVideoBg } from '@/components/HomeVideoBg';
+import { HomeFloralBg } from '@/components/HomeFloralBg';
 import { Marquee } from '@/components/sections/Marquee';
 import { Manifesto } from '@/components/sections/Manifesto';
 import { SignatureProduct } from '@/components/sections/SignatureProduct';
@@ -26,16 +26,19 @@ const socials = [
 export default function Home() {
   return (
     <>
-      {/* Video de fondo fijo para toda la landing (se mantiene hasta abajo). */}
-      <HomeVideoBg videoSrc="/hero/mujer-recibe-flores.mp4" poster="/hero/mujer-recibe-flores-poster.webp" />
+      {/* Fondo floral fijo para toda la landing (flores clásicas y coloridas).
+          El video va solo en el hero. */}
+      <HomeFloralBg src="/bg/landing-floral.webp" />
       <LimaHero
         navLinks={navLinks}
         socials={socials}
         locationText="Miraflores · Lima"
+        videoSrc="/hero/mujer-recibe-flores-2.mp4"
+        poster="/hero/mujer-recibe-flores-2-poster.webp"
       />
-      {/* Wash ivory sobre el video para que el contenido se lea; el video sigue
-          presente detrás (más tenue) y el hero queda vívido (va fuera del wash). */}
-      <div className="relative bg-ivory-100/42 backdrop-blur-xl">
+      {/* Velo ivory translúcido sobre el fondo floral: deja ver las flores pero
+          mantiene legible el contenido de las secciones. */}
+      <div className="relative bg-ivory-100/[0.70]">
         <Marquee />
         <Manifesto />
         <FeaturedProducts />

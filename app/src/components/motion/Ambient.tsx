@@ -55,8 +55,8 @@ function makePetals(count: number) {
 export const Ambient = () => {
   const { pathname } = useLocation();
   const variant: Variant =
-    // El Home ('/') trae su propio fondo de video (HomeVideoBg) → sin Ambient para
-    // que no lo tape. /suscripcion y /catalogo traen su carretilla de Milán.
+    // El Home ('/') trae su propio fondo floral fijo (HomeFloralBg) → sin Ambient
+    // para que no lo tape. /suscripcion y /catalogo traen su carretilla de Milán.
     (pathname === '/' || pathname.startsWith('/admin') || pathname.startsWith('/suscripcion') || pathname.startsWith('/catalogo')) ? 'none'
     : (pathname.startsWith('/checkout') || pathname.startsWith('/confirmacion')) ? 'soft'
     : 'rich';
