@@ -81,7 +81,7 @@ export default function Funebre() {
                 <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">{p.categoryLabel}</p>
                 <div className="mt-1 flex items-start justify-between gap-2">
                   <Link to={`/producto/${p.id}`} className="font-display text-[19px] font-medium leading-tight text-ink-900 transition-colors hover:text-rosa-500">{p.name}</Link>
-                  <span className="shrink-0 font-display text-base italic text-ink-700">{money(p.price)}</span>
+                  <span className="shrink-0 font-display text-lg italic text-ink-700">{money(p.price)}</span>
                 </div>
                 <p className="mt-2 text-[13px] leading-relaxed text-ink-600">{p.shortDesc}</p>
                 <AddToCart

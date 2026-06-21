@@ -45,7 +45,7 @@ export const FloatingProduct = ({ id, className, bob = 10, delay = 0, tilt = 0, 
           <div className="px-1 pb-0.5 pt-2.5">
             {label && <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-rosa-500">{label}</p>}
             <p className="truncate font-display text-[15px] font-medium leading-tight text-ink-900">{p.name}</p>
-            <p className="mt-0.5 font-display text-sm italic text-ink-700">{money(p.price)}</p>
+            <p className="mt-0.5 font-display text-[15px] italic text-ink-700">{money(p.price)}</p>
           </div>
         </Link>
       </motion.div>

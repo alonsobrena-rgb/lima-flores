@@ -112,15 +112,19 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
       {/* ── Titular gigante "Flores dan Amor" sobre el video ── */}
       <motion.div
         style={{ y: textY, opacity: textOpacity }}
-        className="pointer-events-none absolute inset-x-4 top-[14%] z-30 select-none md:inset-y-0 md:inset-x-auto md:right-[5%] md:top-0 md:w-[56%]"
+        className="pointer-events-none absolute inset-4 z-30 select-none md:inset-y-0 md:inset-x-auto md:right-[5%] md:w-[56%]"
       >
         <motion.h1
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }}
-          className="flex flex-col items-center text-center font-display font-medium leading-[0.86] text-ink-900 [text-shadow:0_2px_30px_rgba(246,243,236,0.7)] md:h-full md:items-end md:justify-center md:text-right"
+          className="flex h-full flex-col items-center justify-center text-center font-display font-medium leading-[0.86] text-ink-900 [text-shadow:0_2px_30px_rgba(246,243,236,0.7)] md:items-end md:text-right"
         >
-          <span className="text-[15vw] md:text-[13vw] lg:text-[160px]">Flores</span>
-          <span className="-mt-[1vw] text-[10vw] italic text-rosa-500 md:text-[8vw] lg:text-[96px]">dan</span>
-          <span className="-mt-[1vw] text-[15vw] md:text-[13vw] lg:text-[160px]">Amor</span>
+          {/* En móvil va un panel blanco translúcido ligero para que el titular se
+              lea bien sobre el video; en desktop no lleva panel (queda igual). */}
+          <span className="flex flex-col items-center rounded-[1.75rem] bg-white/25 px-6 py-4 backdrop-blur-[3px] md:items-end md:rounded-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+            <span className="text-[15vw] md:text-[13vw] lg:text-[160px]">Flores</span>
+            <span className="-mt-[1vw] text-[10vw] italic text-rosa-500 md:text-[8vw] lg:text-[96px]">dan</span>
+            <span className="-mt-[1vw] text-[15vw] md:text-[13vw] lg:text-[160px]">Amor</span>
+          </span>
         </motion.h1>
       </motion.div>
 

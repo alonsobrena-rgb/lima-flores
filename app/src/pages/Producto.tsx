@@ -96,7 +96,7 @@ export default function Producto() {
                     <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
                   </div>
                   <h3 className="mt-3 font-display text-base font-medium text-ink-900">{p.name}</h3>
-                  <span className="text-sm italic text-ink-600">{money(p.price)}</span>
+                  <span className="text-[15px] italic text-ink-600">{money(p.price)}</span>
                 </Link>
               ))}
             </div>
