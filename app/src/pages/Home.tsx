@@ -26,8 +26,9 @@ export default function Home() {
   return (
     <>
       <LimaHero
-        imageSrc="/hero/mujer-tulipanes-hq.webp"
-        imageAlt="Mujer sosteniendo un ramo de 20 tulipanes de colores de Lima Flores"
+        videoSrc="/hero/mujer-recibe-flores.mp4"
+        poster="/hero/mujer-recibe-flores-poster.webp"
+        imageAlt="Una mujer recibiendo un ramo de flores de Lima Flores"
         navLinks={navLinks}
         socials={socials}
         locationText="Miraflores · Lima"

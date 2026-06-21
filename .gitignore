@@ -14,3 +14,6 @@ tools/hero-try/
 
 # Tarjetas de regalo generadas (previews locales)
 integrations/cards/out/
+
+# Videos/imágenes crudos generados con Higgsfield (el asset optimizado va en app/public)
+integrations/higgsfield/out/
