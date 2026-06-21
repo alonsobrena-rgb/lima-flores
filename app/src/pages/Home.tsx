@@ -37,8 +37,8 @@ export default function Home() {
         poster="/hero/mujer-recibe-flores-2-poster.webp"
       />
       {/* Velo ivory translúcido sobre el fondo floral: deja ver las flores pero
-          mantiene legible el contenido de las secciones. */}
-      <div className="relative bg-ivory-100/[0.70]">
+          mantiene legible el contenido de las secciones (más blanco = más legible). */}
+      <div className="relative bg-ivory-100/[0.82]">
         <Marquee />
         <Manifesto />
         <FeaturedProducts />
