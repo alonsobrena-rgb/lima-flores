@@ -26,19 +26,22 @@ const cents = (soles) => Math.round(Number(soles) * 100);
 
 // Cada entrada: key estable, modelo, tier, precio (soles) del cobro y cada cuántos
 // meses se cobra (interval_count). `monthlyHint` es solo informativo para la UI.
+// Precio único: S/130 al mes para todos los planes. El modelo B cobra el total
+// del periodo por adelantado (130 × meses): trimestral 390, semestral 780, anual 1560.
+const MONTHLY = 130;
 const PLANS = [
   // Compartido por A y B (mensual es mensual en ambos).
-  { key: 'mensual',     models: ['A', 'B'], tier: 'mensual',    label: 'Mensual',    amountSoles: 190,  intervalCount: 1,  monthlyHint: 190 },
+  { key: 'mensual',     models: ['A', 'B'], tier: 'mensual',    label: 'Mensual',    amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
 
-  // Modelo A — cobro mensual al precio mensual con descuento del tier.
-  { key: 'a_trimestral', models: ['A'], tier: 'trimestral', label: 'Trimestral',  amountSoles: 180,  intervalCount: 1,  monthlyHint: 180 },
-  { key: 'a_semestral',  models: ['A'], tier: 'semestral',  label: 'Semestral',   amountSoles: 170,  intervalCount: 1,  monthlyHint: 170 },
-  { key: 'a_anual',      models: ['A'], tier: 'anual',      label: 'Anual',       amountSoles: 160,  intervalCount: 1,  monthlyHint: 160 },
+  // Modelo A — cobro mensual de S/130.
+  { key: 'a_trimestral', models: ['A'], tier: 'trimestral', label: 'Trimestral',  amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
+  { key: 'a_semestral',  models: ['A'], tier: 'semestral',  label: 'Semestral',   amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
+  { key: 'a_anual',      models: ['A'], tier: 'anual',      label: 'Anual',       amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
 
-  // Modelo B — cobro del total del periodo cada N meses.
-  { key: 'b_trimestral', models: ['B'], tier: 'trimestral', label: 'Trimestral',  amountSoles: 540,  intervalCount: 3,  monthlyHint: 180 },
-  { key: 'b_semestral',  models: ['B'], tier: 'semestral',  label: 'Semestral',   amountSoles: 1020, intervalCount: 6,  monthlyHint: 170 },
-  { key: 'b_anual',      models: ['B'], tier: 'anual',      label: 'Anual',       amountSoles: 1920, intervalCount: 12, monthlyHint: 160 },
+  // Modelo B — cobro del total del periodo (130 × meses) cada N meses.
+  { key: 'b_trimestral', models: ['B'], tier: 'trimestral', label: 'Trimestral',  amountSoles: MONTHLY * 3,  intervalCount: 3,  monthlyHint: MONTHLY },
+  { key: 'b_semestral',  models: ['B'], tier: 'semestral',  label: 'Semestral',   amountSoles: MONTHLY * 6,  intervalCount: 6,  monthlyHint: MONTHLY },
+  { key: 'b_anual',      models: ['B'], tier: 'anual',      label: 'Anual',       amountSoles: MONTHLY * 12, intervalCount: 12, monthlyHint: MONTHLY },
 ];
 
 const byKey = (key) => PLANS.find((p) => p.key === key) || null;

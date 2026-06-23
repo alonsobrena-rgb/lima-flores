@@ -141,12 +141,20 @@ async function charge(req, res) {
 // Se lee perezosamente y se cachea; si el archivo no existe, no hay planes
 // aprovisionados todavía y /subscribe responde 503 con un mensaje claro.
 let _planMap = null;
-function planIdFor(key) {
+function planMap() {
   if (_planMap == null) {
     try { _planMap = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'integrations', 'culqi', 'plans.json'), 'utf8')); }
     catch { _planMap = {}; }
   }
-  return _planMap[key] || null;
+  return _planMap;
+}
+function planIdFor(key) { return planMap()[key] || null; }
+
+// GET /api/culqi/plans-status → { ready } : true si hay planes aprovisionados y
+// la llave secreta está configurada (el front decide si abre Culqi o coordina por WA).
+function plansStatus(req, res) {
+  const ready = !!SECRET() && Object.keys(planMap()).length > 0;
+  return send(res, 200, { ready });
 }
 
 function splitName(name) {
@@ -268,6 +276,7 @@ async function webhook(req, res, parsed) {
 
 module.exports = async (req, res, parsed) => {
   const p = parsed.pathname;
+  if (p === '/api/culqi/plans-status' && req.method === 'GET') return plansStatus(req, res);
   if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
   if (p === '/api/culqi/charge') return charge(req, res);
   if (p === '/api/culqi/subscribe') return subscribe(req, res);

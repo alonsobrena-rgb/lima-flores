@@ -26,6 +26,7 @@ const { generateAndStoreCard } = require('../integrations/cards/order-card');
 const { generateCard } = require('../integrations/cards/generate');
 const { STYLE_KEYS } = require('../integrations/cards/folded');
 const products = require('../db/products-store');
+const subsStore = require('../db/subscriptions-store');
 const adminStudio = require('./admin-studio');
 
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || '').replace(/\/+$/, '');
@@ -68,6 +69,17 @@ async function listOrders(req, res, urlObj) {
     return send(res, 200, { orders: rows.map(stripCardPng) });
   } catch (e) {
     console.error('[admin] listOrders error:', e.message);
+    return send(res, 500, { error: e.message });
+  }
+}
+
+// ─── Listar suscripciones ───────────────────────────────
+async function listSubscriptions(req, res) {
+  try {
+    const subscriptions = await subsStore.listAll();
+    return send(res, 200, { subscriptions });
+  } catch (e) {
+    console.error('[admin] listSubscriptions error:', e.message);
     return send(res, 500, { error: e.message });
   }
 }
@@ -419,6 +431,9 @@ module.exports = async (req, res, urlObj) => {
   if (!db.enabled) return send(res, 503, { error: 'DB no configurada en el servidor.' });
 
   if (p === '/api/admin/orders' && req.method === 'GET') return listOrders(req, res, urlObj);
+
+  // ── Suscripciones (recurrencia Culqi) ──
+  if (p === '/api/admin/subscriptions' && req.method === 'GET') return listSubscriptions(req, res);
 
   // ── Marketing Studio ──
   if (p.startsWith('/api/admin/studio/')) return adminStudio(req, res, urlObj);
