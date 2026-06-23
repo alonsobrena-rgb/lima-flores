@@ -198,6 +198,50 @@ CREATE TABLE IF NOT EXISTS wa_messages (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS wa_messages_campaign_idx ON wa_messages (campaign_id, created_at);
+
+-- ─── Suscripciones recurrentes (Culqi) ──────────────────────────────────────
+-- Una fila por suscripción activa de flores. id = sxn_ de Culqi. Culqi cobra
+-- automáticamente cada periodo; los eventos llegan por webhook (culqi_events).
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id                 TEXT PRIMARY KEY,                 -- sxn_ de Culqi
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  status             TEXT NOT NULL DEFAULT 'active',   -- active|paused|cancelled
+  plan_key           TEXT,                             -- clave del catálogo (mensual, b_anual…)
+  plan_id            TEXT,                             -- pln_ de Culqi
+  model              TEXT,                             -- 'A' | 'B'
+  tier               TEXT,                             -- mensual|trimestral|semestral|anual
+  amount             NUMERIC,                          -- soles del cobro por periodo
+  interval_count     INTEGER,                          -- cada cuántos meses cobra
+
+  customer_id        TEXT,                             -- cus_ de Culqi
+  card_id            TEXT,                             -- crd_ de Culqi
+
+  buyer_name         TEXT,
+  buyer_email        TEXT,
+  buyer_phone        TEXT,
+
+  recipient_name     TEXT,
+  recipient_phone    TEXT,
+  recipient_address  TEXT,
+  recipient_district TEXT,
+  delivery_pref      TEXT,                             -- día/horario preferido de entrega
+  notes              TEXT,
+
+  last_event         TEXT,
+  last_event_at      TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS subscriptions_status_idx     ON subscriptions (status);
+CREATE INDEX IF NOT EXISTS subscriptions_created_at_idx ON subscriptions (created_at DESC);
+
+-- Bitácora de eventos de Culqi (webhook): cobros de recurrencia, cancelaciones, etc.
+CREATE TABLE IF NOT EXISTS culqi_events (
+  id              TEXT PRIMARY KEY,                    -- id del evento (o uuid local)
+  type            TEXT,                                -- p.ej. charge.creation, subscription.*
+  subscription_id TEXT,                                -- sxn_ relacionado (si aplica)
+  payload         JSONB,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS culqi_events_sub_idx ON culqi_events (subscription_id, created_at DESC);
 `;
 
 async function migrate() {
