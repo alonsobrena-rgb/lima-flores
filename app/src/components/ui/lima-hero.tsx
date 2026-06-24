@@ -66,6 +66,9 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
           denso a la derecha, donde cae "Flores dan Amor") */}
       <div className="absolute inset-0 bg-gradient-to-r from-ivory-100/10 via-transparent to-ivory-100/45" />
       <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/15 via-transparent to-ivory-100/30" />
+      {/* Scrim marfil dedicado bajo la barra: el nav/iconos van en tinta oscura,
+          así que necesitan fondo claro arriba para leerse sobre el video. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-32 bg-gradient-to-b from-ivory-100/85 via-ivory-100/40 to-transparent md:h-36" />
 
       {/* ── Barra superior ── */}
       <motion.header
@@ -81,11 +84,11 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
         <nav className="hidden items-center gap-9 md:flex">
           {navLinks.map((l) => (
             l.href.startsWith('/')
-              ? <Link key={l.label} to={l.href} className="text-[13px] font-medium uppercase tracking-[0.18em] text-foreground/55 transition-colors hover:text-foreground">{l.label}</Link>
-              : <a key={l.label} href={l.href} className="text-[13px] font-medium uppercase tracking-[0.18em] text-foreground/55 transition-colors hover:text-foreground">{l.label}</a>
+              ? <Link key={l.label} to={l.href} className="text-[13px] font-medium uppercase tracking-[0.18em] text-foreground/80 transition-colors hover:text-foreground">{l.label}</Link>
+              : <a key={l.label} href={l.href} className="text-[13px] font-medium uppercase tracking-[0.18em] text-foreground/80 transition-colors hover:text-foreground">{l.label}</a>
           ))}
         </nav>
-        <div className="flex items-center gap-5 text-foreground/70">
+        <div className="flex items-center gap-5 text-foreground/90">
           <button aria-label="Buscar" className="transition-colors hover:text-foreground">{Icon.search('h-[18px] w-[18px]')}</button>
           <button aria-label="Favoritos" className="hidden transition-colors hover:text-foreground sm:block">{Icon.heart('h-[18px] w-[18px]')}</button>
           <button onClick={openCart} aria-label="Carrito" className="relative transition-colors hover:text-foreground">
