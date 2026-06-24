@@ -116,7 +116,10 @@ export default function Suscripcion() {
             <span className="text-[12px] text-ink-600">{model === 'A' ? 'Una sola suscripción: S/130 cada mes, sin permanencia.' : 'Pagas el periodo completo por adelantado (S/130/mes): 3, 6 o 12 meses.'}</span>
           </div>
 
-          <Stagger className={single ? 'mx-auto max-w-sm' : 'mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3'}>
+          {/* key={model}: al alternar A/B cambian las tarjetas; sin remount, los
+              StaggerItem nuevos montan bajo un Stagger cuyo whileInView ya disparó
+              (once) y se quedan en opacity:0 (invisibles). Remontar re-anima. */}
+          <Stagger key={model} className={single ? 'mx-auto max-w-sm' : 'mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3'}>
             {visiblePlans.map((p) => {
               const pr = priceFor(p);
               return (
