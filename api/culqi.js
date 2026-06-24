@@ -163,6 +163,15 @@ function splitName(name) {
   return { first: parts.slice(0, -1).join(' '), last: parts[parts.length - 1] };
 }
 
+// Culqi rechaza acentos/caracteres especiales en varios campos → texto ASCII simple.
+// (La dirección real, con tildes y todo, queda intacta en nuestra tabla subscriptions.)
+function culqiText(s, max, fallback) {
+  const out = String(s == null ? '' : s)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Za-z0-9 -]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+  return out.length ? out : (fallback || 'NA');
+}
+
 // POST /api/culqi/subscribe — crea customer + card + subscription en Culqi.
 // La tarjeta nunca toca el server (llega como token tkn_ del modal v4).
 async function subscribe(req, res) {
@@ -200,9 +209,11 @@ async function subscribe(req, res) {
   try {
     // 1) Customer
     const cust = await culqiPost('/v2/customers', {
-      first_name: first, last_name: last, email,
-      address: String(b.recipient_address).slice(0, 100),
-      address_city: String(b.recipient_district || 'Lima').slice(0, 30),
+      first_name: culqiText(first, 50, 'Cliente'),
+      last_name: culqiText(last, 50, 'Lima Flores'),
+      email,
+      address: culqiText(b.recipient_address, 100, 'Lima'),
+      address_city: culqiText(b.recipient_district || 'Lima', 30, 'Lima'),
       country_code: 'PE',
       phone_number: String(b.buyer_phone).replace(/[^\d+]/g, '').slice(0, 15),
     });
@@ -219,7 +230,7 @@ async function subscribe(req, res) {
     }
 
     // 3) Subscription
-    const sub = await culqiPost('/v2/subscriptions', {
+    const sub = await culqiPost('/v2/recurrent/subscriptions/create', {
       card_id: cardId, plan_id: planId, tyc: true,
       metadata: { plan_key: planKey, model, source: 'web-suscripcion' },
     });

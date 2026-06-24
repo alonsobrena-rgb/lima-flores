@@ -79,7 +79,7 @@ function writeMap(map) {
   for (const entry of PLANS) {
     if (map[entry.key]) { console.log(`= ${entry.key} ya existe (${map[entry.key]}) — salto.`); continue; }
     process.stdout.write(`▸ creando ${entry.key} … `);
-    const { status, json } = await culqiPost('/v2/plans', planBody(entry));
+    const { status, json } = await culqiPost('/v2/recurrent/plans/create', planBody(entry));
     const id = json && (json.id || json.plan_id);
     if ((status === 200 || status === 201) && id) {
       map[entry.key] = id;

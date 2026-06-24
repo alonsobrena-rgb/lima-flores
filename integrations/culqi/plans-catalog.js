@@ -51,16 +51,17 @@ function planBody(entry) {
   const intervalLabel = entry.intervalCount === 1
     ? 'mensual'
     : `cada ${entry.intervalCount} meses`;
+  // Culqi rechaza caracteres especiales/no-ASCII en name/description → texto plano.
   return {
-    name: `Lima Flores — ${entry.label} (${entry.models.join('/')})`,
+    name: `Lima Flores ${entry.label} ${entry.models.join('-')}`,
     short_name: `lf-${entry.key}`.replace(/_/g, '-'),
-    description: `Suscripción de flores Lima Flores · ${entry.label} · cobro ${intervalLabel}.`,
+    description: `Suscripcion de flores de estacion Lima Flores plan ${entry.label} cobro ${intervalLabel}`,
     amount: cents(entry.amountSoles),
-    currency: CURRENCY, // el ejemplo de planes de Culqi usa "currency" (no "currency_code")
-    interval_unit_time: INTERVAL_MONTH,
+    currency: CURRENCY, // planes de Culqi usan "currency" (no "currency_code")
+    interval_unit_time: INTERVAL_MONTH, // 1 = mensual (confirmado en SDK de Culqi)
     interval_count: entry.intervalCount,
     initial_cycles: { count: 0, has_initial_charge: false, amount: 0, interval_unit_time: INTERVAL_MONTH },
-    metadata: { plan_key: entry.key, model: entry.models.join('/'), tier: entry.tier },
+    metadata: { plan_key: entry.key, model: entry.models.join('-'), tier: entry.tier },
   };
 }
 
