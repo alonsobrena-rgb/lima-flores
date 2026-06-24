@@ -11,7 +11,8 @@ type Sub = {
   amount: number;
   intervalCount: number;
   buyer: { name: string; email: string; phone: string };
-  recipient: { name: string; phone: string; address: string; district: string | null };
+  recipient: { name: string; phone: string; address: string; district: string | null; ref?: string | null; apt?: string | null; hasReception?: boolean | null };
+  deliveryTime?: string | null;
   deliveryPref: string | null;
   lastEvent: string | null;
   lastEventAt: string | null;
@@ -100,8 +101,9 @@ export function AdminSubscriptions({ onAuthError }: { onAuthError: () => void })
                   <td className="px-3 py-3 text-ink-800">{billing(s)}</td>
                   <td className="px-3 py-3">
                     <p className="text-ink-900">{s.recipient.name || '—'}</p>
-                    <p className="text-[12px] text-foreground/55">{s.recipient.district || ''}</p>
-                    {s.deliveryPref && <p className="text-[12px] text-foreground/45">{s.deliveryPref}</p>}
+                    {s.recipient.address && <p className="text-[12px] text-foreground/55">{s.recipient.address}{s.recipient.apt ? `, ${s.recipient.apt}` : ''}</p>}
+                    <p className="text-[12px] text-foreground/55">{[s.recipient.district, s.recipient.ref].filter(Boolean).join(' · ')}</p>
+                    {(s.deliveryTime || s.deliveryPref) && <p className="text-[12px] text-foreground/45">Horario: {s.deliveryTime || s.deliveryPref}</p>}
                   </td>
                   <td className="px-3 py-3">
                     <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLE[s.status] || 'bg-ivory-200 text-foreground/60'}`}>{s.status}</span>

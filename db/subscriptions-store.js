@@ -19,7 +19,15 @@ function rowToSub(r) {
     customerId: r.customer_id,
     cardId: r.card_id,
     buyer: { name: r.buyer_name, email: r.buyer_email, phone: r.buyer_phone },
-    recipient: { name: r.recipient_name, phone: r.recipient_phone, address: r.recipient_address, district: r.recipient_district },
+    recipient: {
+      name: r.recipient_name, phone: r.recipient_phone,
+      address: r.recipient_address, district: r.recipient_district,
+      ref: r.recipient_address_ref, apt: r.recipient_apt,
+      lat: r.recipient_lat == null ? null : Number(r.recipient_lat),
+      lng: r.recipient_lng == null ? null : Number(r.recipient_lng),
+      hasReception: r.recipient_has_reception,
+    },
+    deliveryTime: r.delivery_time,
     deliveryPref: r.delivery_pref,
     notes: r.notes,
     lastEvent: r.last_event,
@@ -35,20 +43,25 @@ async function create(s) {
        customer_id, card_id,
        buyer_name, buyer_email, buyer_phone,
        recipient_name, recipient_phone, recipient_address, recipient_district,
-       delivery_pref, notes
+       recipient_address_ref, recipient_apt, recipient_lat, recipient_lng, recipient_has_reception,
+       delivery_time, delivery_pref, notes
      ) VALUES (
        $1, 'active', $2, $3, $4, $5, $6, $7,
        $8, $9,
        $10, $11, $12,
        $13, $14, $15, $16,
-       $17, $18
+       $17, $18, $19, $20, $21,
+       $22, $23, $24
      )`,
     [
       s.id, s.planKey, s.planId, s.model, s.tier, s.amount, s.intervalCount,
       s.customerId, s.cardId,
       s.buyerName, s.buyerEmail, s.buyerPhone,
       s.recipientName, s.recipientPhone, s.recipientAddress, s.recipientDistrict,
-      s.deliveryPref || null, s.notes || null,
+      s.recipientAddressRef || null, s.recipientApt || null,
+      s.recipientLat ?? null, s.recipientLng ?? null,
+      s.recipientHasReception == null ? null : !!s.recipientHasReception,
+      s.deliveryTime || null, s.deliveryPref || null, s.notes || null,
     ]
   );
   return s.id;

@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 import { money } from '@/lib/cart';
 import { plans, type Plan } from '@/data/plans';
 import { Stagger, StaggerItem } from '@/components/motion/Reveal';
 import { FloatingFlowers } from '@/components/motion/FloatingFlowers';
+import { attachAutocomplete, geocodeText, mapsAvailable, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
+import { districts, timeSlots } from '@/lib/delivery';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
 const CULQI_PK = (import.meta.env.VITE_CULQI_PUBLIC_KEY as string | undefined) || '';
@@ -164,26 +166,105 @@ export default function Suscripcion() {
 }
 
 // ─── Modal de suscripción ──────────────────────────────────────────────────────
+// Pide los MISMOS datos que el checkout (comprador + quien recibe con dirección,
+// mapa, referencia, dpto, distrito, horario y recepción), excepto los datos
+// "de la tarjeta": el mensaje de la tarjeta y la fecha de envío (en una suscripción
+// las entregas son recurrentes, no una fecha única).
 function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Model; ready: boolean; onClose: () => void }) {
-  const [f, setF] = useState({ buyerName: '', email: '', buyerPhone: '', recipientName: '', recipientPhone: '', address: '', district: '', deliveryPref: '', tyc: false });
+  const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
+  const [recip, setRecip] = useState({ name: '', phone: '', ref: '', apt: '' });
+  const [district, setDistrict] = useState('');
+  const [time, setTime] = useState('');
+  const [reception, setReception] = useState(true);
+  const [place, setPlace] = useState<{ lat: number; lng: number; district: string | null; formatted: string } | null>(null);
+  const [tyc, setTyc] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState<null | 'ok' | 'wa'>(null);
 
+  const addressRef = useRef<HTMLInputElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapObj = useRef<any>(null);
+  const markerObj = useRef<any>(null);
+
   const planKey = model === 'A' ? plan.keyA : plan.keyB;
   const totalSoles = model === 'A' || plan.months === 1 ? plan.monthly : plan.monthly * plan.months;
-  const set = (k: keyof typeof f, v: any) => setF((s) => ({ ...s, [k]: v }));
+
+  const matchDistrict = (candidates: string[]) => {
+    for (const cand of candidates) {
+      const m = districts.find((x) => x.toLowerCase() === cand.toLowerCase() || cand.toLowerCase().includes(x.toLowerCase()));
+      if (m) return m;
+    }
+    return candidates.length ? 'Otro' : '';
+  };
+  const applyPlace = (loc: PlaceResult) => {
+    setPlace({ lat: loc.lat, lng: loc.lng, district: loc.district, formatted: loc.formatted });
+    const m = matchDistrict(loc.districtCandidates);
+    if (m) setDistrict(m);
+    if (addressRef.current && loc.formatted) addressRef.current.value = loc.formatted;
+  };
+
+  // Autocomplete de Google Places sobre el campo de dirección (igual que el checkout).
+  useEffect(() => {
+    let ac: any; let cancelled = false;
+    if (!addressRef.current) return;
+    attachAutocomplete(addressRef.current, (loc) => { if (!cancelled) applyPlace(loc); })
+      .then((widget) => { ac = widget; })
+      .catch(() => { /* sin key/referrer → input de texto normal */ });
+    return () => { cancelled = true; const w = window as any; if (ac && w.google) w.google.maps.event.clearInstanceListeners(ac); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Mapa con marcador arrastrable (el pin manda).
+  useEffect(() => {
+    const w = window as any;
+    if (!place || !mapRef.current || !w.google) return;
+    const g = w.google; const pos = { lat: place.lat, lng: place.lng };
+    if (!mapObj.current) {
+      mapObj.current = new g.maps.Map(mapRef.current, { center: pos, zoom: 16, disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative' });
+      markerObj.current = new g.maps.Marker({ map: mapObj.current, position: pos, draggable: true });
+      markerObj.current.addListener('dragend', (e: any) => {
+        const lat = e.latLng.lat(), lng = e.latLng.lng();
+        setPlace((pp) => (pp ? { ...pp, lat, lng } : pp));
+      });
+    } else { mapObj.current.setCenter(pos); markerObj.current.setPosition(pos); }
+  }, [place]);
+
   const field = 'mt-1.5 w-full border border-border bg-surface px-4 py-2.5 text-ink-900 outline-none transition-colors focus:border-rosa-500';
   const label = 'text-[12px] font-medium uppercase tracking-[0.12em] text-foreground/55';
+  const darkField = 'mt-1.5 w-full rounded border border-ivory-100/25 bg-ivory-100/10 px-4 py-2.5 text-ivory-50 outline-none transition-colors placeholder:text-ivory-100/40 [color-scheme:dark] focus:border-ivory-100 focus:bg-ivory-100/20';
+  const darkLabel = 'text-[12px] font-medium uppercase tracking-[0.12em] text-ivory-100/70';
 
   const submit = async () => {
     setErr('');
-    if (!f.buyerName.trim() || !f.email.includes('@') || !f.buyerPhone.trim() || !f.recipientName.trim() || !f.recipientPhone.trim() || !f.address.trim()) {
+    const addressText = addressRef.current?.value?.trim() || '';
+    if (!buyer.name.trim() || !buyer.email.includes('@') || !buyer.phone.trim() || !recip.name.trim() || !recip.phone.trim() || !addressText || !district) {
       setErr('Completa los campos obligatorios.'); return;
     }
-    if (!f.tyc) { setErr('Acepta los términos para continuar.'); return; }
-    // Sin Culqi configurado o planes aún no aprovisionados → coordinamos por WhatsApp
-    // (no abrimos el modal de tarjeta para no pedir datos de tarjeta en vano).
+    if (!tyc) { setErr('Acepta los términos para continuar.'); return; }
+
+    // Coordenadas (igual que checkout): lugar elegido → geocodificar el texto →
+    // centroide del distrito. Siempre mandamos lat/lng numéricos.
+    let coords: { lat: number; lng: number } | null = place ? { lat: place.lat, lng: place.lng } : null;
+    if (!coords && addressText) {
+      const geo = await geocodeText(`${addressText}, ${district && district !== 'Otro' ? district + ', ' : ''}Lima, Perú`);
+      if (geo) coords = { lat: geo.lat, lng: geo.lng };
+    }
+    if (!coords) coords = DISTRICT_CENTROIDS[district] || DISTRICT_CENTROIDS['Otro'];
+
+    const payload = {
+      token: '', email: buyer.email, plan_key: planKey, tyc: true,
+      buyer_name: buyer.name, buyer_phone: buyer.phone,
+      recipient_name: recip.name, recipient_phone: recip.phone,
+      recipient_address: place?.formatted || addressText,
+      recipient_district: district || null,
+      recipient_address_ref: recip.ref || null, recipient_apt: recip.apt || null,
+      recipient_lat: coords?.lat ?? null, recipient_lng: coords?.lng ?? null,
+      recipient_has_reception: reception,
+      delivery_time: time || null, delivery_pref: time || null,
+    };
+
+    // Sin Culqi configurado o planes aún no aprovisionados → coordinamos por WhatsApp.
     if (!CULQI_PK || !ready) { setDone('wa'); return; }
 
     setBusy(true);
@@ -198,13 +279,7 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
           try {
             const r = await fetch(`${API_BASE}/api/culqi/subscribe`, {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                token: Culqi.token.id, email: f.email, plan_key: planKey, tyc: true,
-                buyer_name: f.buyerName, buyer_phone: f.buyerPhone,
-                recipient_name: f.recipientName, recipient_phone: f.recipientPhone,
-                recipient_address: f.address, recipient_district: f.district || null,
-                delivery_pref: f.deliveryPref || null,
-              }),
+              body: JSON.stringify({ ...payload, token: Culqi.token.id }),
             });
             const d = await r.json().catch(() => ({}));
             if (r.status === 503) { setDone('wa'); return; } // planes aún no aprovisionados
@@ -223,7 +298,7 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
-      <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto bg-ivory-50 p-7 shadow-2xl sm:rounded-[3px]" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto bg-ivory-50 p-6 shadow-2xl sm:rounded-[3px] md:p-8" onClick={(e) => e.stopPropagation()}>
         {done ? (
           <div className="py-4 text-center">
             <h3 className="font-display text-2xl text-ink-900">{done === 'ok' ? '¡Suscripción creada! 🌸' : 'Casi listo'}</h3>
@@ -248,22 +323,71 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
               <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-foreground/40 hover:text-ink-900">×</button>
             </div>
 
-            <div className="mt-5 space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div><label className={label}>Tu nombre *</label><input className={field} value={f.buyerName} onChange={(e) => set('buyerName', e.target.value)} /></div>
-                <div><label className={label}>Email *</label><input type="email" className={field} value={f.email} onChange={(e) => set('email', e.target.value)} /></div>
-                <div><label className={label}>Tu teléfono *</label><input className={field} value={f.buyerPhone} onChange={(e) => set('buyerPhone', e.target.value)} /></div>
-                <div><label className={label}>Distrito de entrega</label><input className={field} value={f.district} onChange={(e) => set('district', e.target.value)} placeholder="Miraflores" /></div>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div><label className={label}>Quién recibe *</label><input className={field} value={f.recipientName} onChange={(e) => set('recipientName', e.target.value)} /></div>
-                <div><label className={label}>Teléfono de quien recibe *</label><input className={field} value={f.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} /></div>
-              </div>
-              <div><label className={label}>Dirección de entrega *</label><input className={field} value={f.address} onChange={(e) => set('address', e.target.value)} placeholder="Av. ... 123, dpto ..." /></div>
-              <div><label className={label}>Día/horario preferido (opcional)</label><input className={field} value={f.deliveryPref} onChange={(e) => set('deliveryPref', e.target.value)} placeholder="Sábados por la mañana" /></div>
+            <div className="mt-6 space-y-6">
+              {/* 01 · Comprador */}
+              <fieldset className="space-y-4">
+                <div className="flex items-baseline gap-3"><span className="font-display text-xl italic text-rosa-500">01</span><span className="font-display text-lg text-ink-900">Tus datos (quien compra)</span></div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div><label className={label}>Nombre completo *</label><input className={field} value={buyer.name} onChange={(e) => setBuyer({ ...buyer, name: e.target.value })} placeholder="Ej. María Pérez" /></div>
+                  <div><label className={label}>Teléfono / WhatsApp *</label><input type="tel" className={field} value={buyer.phone} onChange={(e) => setBuyer({ ...buyer, phone: e.target.value })} placeholder="999 999 999" /></div>
+                </div>
+                <div><label className={label}>Email *</label><input type="email" className={field} value={buyer.email} onChange={(e) => setBuyer({ ...buyer, email: e.target.value })} placeholder="tu@correo.com" /></div>
+              </fieldset>
+
+              {/* 02 · Quien recibe + entrega (tarjeta verde, como el checkout) */}
+              <fieldset className="space-y-4 rounded-lg border border-ivory-100/10 bg-[#2F3925] p-5 text-ivory-100 md:p-6">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="font-display text-xl italic text-[#E7AFC2]">02</span>
+                  <span className="rounded-sm bg-[#B6855E] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#2F3925]">Para</span>
+                  <span className="font-display text-lg text-ivory-50">Quien recibe las flores</span>
+                </div>
+                <p className="text-[13px] leading-relaxed text-ivory-100/80">Cada entrega de tu suscripción llega a esta persona y dirección.</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div><label className={darkLabel}>Nombre de quien recibe *</label><input className={darkField} value={recip.name} onChange={(e) => setRecip({ ...recip, name: e.target.value })} placeholder="Ej. Ana Torres" /></div>
+                  <div><label className={darkLabel}>Teléfono de quien recibe *</label><input type="tel" className={darkField} value={recip.phone} onChange={(e) => setRecip({ ...recip, phone: e.target.value })} placeholder="999 999 999" /></div>
+                </div>
+                <div>
+                  <label className={darkLabel}>Dirección *{mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
+                  <input ref={addressRef} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
+                </div>
+                {place && (
+                  <div>
+                    <p className="mb-2 flex items-center gap-1.5 text-[13px] text-ivory-100/85">
+                      <svg className="h-4 w-4 shrink-0 text-[#E7AFC2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                      {place.formatted}
+                    </p>
+                    <div ref={mapRef} className="h-48 w-full overflow-hidden rounded-sm border border-ivory-100/20" />
+                    <p className="mt-2 border-l-[3px] border-[#B6855E] bg-ivory-100/10 px-3 py-2.5 text-[12px] leading-relaxed text-ivory-100/90">📍 Las flores se entregan donde está el pin. Si no coincide con la puerta, arrástralo.</p>
+                  </div>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div><label className={darkLabel}>Referencia (opcional)</label><input className={darkField} value={recip.ref} onChange={(e) => setRecip({ ...recip, ref: e.target.value })} placeholder="Casa blanca, reja negra…" /></div>
+                  <div><label className={darkLabel}>Dpto / Interior (opcional)</label><input className={darkField} value={recip.apt} onChange={(e) => setRecip({ ...recip, apt: e.target.value })} placeholder="301" /></div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={darkLabel}>Distrito *</label>
+                    <select className={`${darkField} dark-select`} value={district} onChange={(e) => setDistrict(e.target.value)}>
+                      <option value="" disabled>Selecciona…</option>
+                      {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={darkLabel}>Horario preferido</label>
+                    <select className={`${darkField} dark-select`} value={time} onChange={(e) => setTime(e.target.value)}>
+                      <option value="">Sin preferencia</option>
+                      {timeSlots.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <label className="flex items-center gap-2.5 text-[13px] text-ivory-100/90">
+                  <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
+                  Hay alguien que pueda recibir en esa dirección
+                </label>
+              </fieldset>
 
               <label className="flex cursor-pointer items-start gap-2.5 text-[13px] text-ink-700">
-                <input type="checkbox" checked={f.tyc} onChange={(e) => set('tyc', e.target.checked)} className="mt-0.5 h-4 w-4 accent-rosa-500" />
+                <input type="checkbox" checked={tyc} onChange={(e) => setTyc(e.target.checked)} className="mt-0.5 h-4 w-4 accent-rosa-500" />
                 <span>Acepto los términos. Entiendo que {model === 'A' ? 'se cobrará S/130 cada mes' : `se cobrará S/${totalSoles} por adelantado`} a mi tarjeta y que puedo pausar o cancelar cuando quiera.</span>
               </label>
 

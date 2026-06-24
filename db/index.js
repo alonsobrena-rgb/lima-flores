@@ -233,6 +233,16 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 CREATE INDEX IF NOT EXISTS subscriptions_status_idx     ON subscriptions (status);
 CREATE INDEX IF NOT EXISTS subscriptions_created_at_idx ON subscriptions (created_at DESC);
 
+-- Datos de entrega equivalentes al checkout (la suscripción pide los mismos datos,
+-- excepto el mensaje de la tarjeta y la fecha de envío): referencia, dpto, pin del
+-- mapa, recepción y horario preferido.
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_address_ref   TEXT;
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_apt           TEXT;
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_lat           NUMERIC;
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_lng           NUMERIC;
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_has_reception BOOLEAN;
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS delivery_time           TEXT;
+
 -- Bitácora de eventos de Culqi (webhook): cobros de recurrencia, cancelaciones, etc.
 CREATE TABLE IF NOT EXISTS culqi_events (
   id              TEXT PRIMARY KEY,                    -- id del evento (o uuid local)

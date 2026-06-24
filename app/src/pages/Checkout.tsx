@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SiteHeader } from '@/components/SiteHeader';
 import { useCart, money } from '@/lib/cart';
 import { attachAutocomplete, geocodeText, mapsAvailable, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
+import { districts, timeSlots } from '@/lib/delivery';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
 // Llave pública de Culqi (segura de exponer). Sin ella, "Tarjeta" no aparece y
@@ -25,8 +26,6 @@ function loadCulqi(): Promise<void> {
   });
   return culqiLoading;
 }
-const districts = ['Ancón', 'Ate', 'Barranco', 'Breña', 'Carabayllo', 'Chaclacayo', 'Chorrillos', 'Cieneguilla', 'Comas', 'El Agustino', 'Independencia', 'Jesús María', 'La Molina', 'La Victoria', 'Lima', 'Lince', 'Los Olivos', 'Lurigancho-Chosica', 'Lurín', 'Magdalena del Mar', 'Miraflores', 'Pachacámac', 'Pucusana', 'Pueblo Libre', 'Puente Piedra', 'Punta Hermosa', 'Punta Negra', 'Rímac', 'San Bartolo', 'San Borja', 'San Isidro', 'San Juan de Lurigancho', 'San Juan de Miraflores', 'San Luis', 'San Martín de Porres', 'San Miguel', 'Santa Anita', 'Santa María del Mar', 'Santa Rosa', 'Santiago de Surco', 'Surquillo', 'Villa El Salvador', 'Villa María del Triunfo', 'Otro'];
-const timeSlots = ['09:00 – 13:00', '13:00 – 17:00', '17:00 – 20:00'];
 // Solo 2 métodos, ambos cobran en línea con Culqi (si hay llave pública): Yape y
 // Tarjeta. Sin llave pública caen al flujo manual (coordinar por WhatsApp).
 const payments = ['Yape', 'Tarjeta'];

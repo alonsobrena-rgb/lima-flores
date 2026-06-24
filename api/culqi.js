@@ -248,7 +248,12 @@ async function subscribe(req, res) {
         buyerName: b.buyer_name, buyerEmail: email, buyerPhone: b.buyer_phone,
         recipientName: b.recipient_name, recipientPhone: b.recipient_phone,
         recipientAddress: b.recipient_address, recipientDistrict: b.recipient_district || null,
-        deliveryPref: b.delivery_pref || null, notes: b.notes || null,
+        recipientAddressRef: b.recipient_address_ref || null, recipientApt: b.recipient_apt || null,
+        recipientLat: typeof b.recipient_lat === 'number' ? b.recipient_lat : null,
+        recipientLng: typeof b.recipient_lng === 'number' ? b.recipient_lng : null,
+        recipientHasReception: typeof b.recipient_has_reception === 'boolean' ? b.recipient_has_reception : null,
+        deliveryTime: b.delivery_time || null,
+        deliveryPref: b.delivery_pref || b.delivery_time || null, notes: b.notes || null,
       });
     } catch (e) { console.error('[culqi] subscribe persist error:', e.message); }
 
