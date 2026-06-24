@@ -14,13 +14,17 @@ type Sub = {
   recipient: { name: string; phone: string; address: string; district: string | null; ref?: string | null; apt?: string | null; hasReception?: boolean | null };
   deliveryTime?: string | null;
   deliveryPref: string | null;
+  recurring?: boolean;
+  chargeId?: string | null;
   lastEvent: string | null;
   lastEventAt: string | null;
 };
 
 const soles = (n: any) => 'S/ ' + (Number(n) || 0).toFixed(0);
 const fmtDate = (iso: any) => { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('es-PE', { dateStyle: 'medium' }); } catch { return String(iso); } };
-const billing = (s: Sub) => s.intervalCount === 1 ? `${soles(s.amount)} / mes` : `${soles(s.amount)} cada ${s.intervalCount} meses`;
+const billing = (s: Sub) => s.recurring === false
+  ? `${soles(s.amount)} · pago único`
+  : s.intervalCount === 1 ? `${soles(s.amount)} / mes` : `${soles(s.amount)} cada ${s.intervalCount} meses`;
 
 const STATUS_STYLE: Record<string, string> = {
   active: 'bg-green-100 text-green-800',
@@ -96,7 +100,7 @@ export function AdminSubscriptions({ onAuthError }: { onAuthError: () => void })
                   </td>
                   <td className="px-3 py-3">
                     <p className="capitalize text-ink-900">{s.tier}</p>
-                    <p className="text-[12px] text-foreground/50">Modelo {s.model}</p>
+                    <p className="text-[12px] text-foreground/50">{s.recurring === false ? 'Pago único' : 'Suscripción'}</p>
                   </td>
                   <td className="px-3 py-3 text-ink-800">{billing(s)}</td>
                   <td className="px-3 py-3">

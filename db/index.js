@@ -243,6 +243,11 @@ ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_lng           NUMER
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recipient_has_reception BOOLEAN;
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS delivery_time           TEXT;
 
+-- Solo la mensual es una suscripción recurrente (Culqi sxn_). Trimestral/semestral/
+-- anual son un PAGO ÚNICO (un cargo Culqi chr_): recurring=false + charge_id.
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS recurring               BOOLEAN DEFAULT TRUE;
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS charge_id               TEXT;
+
 -- Bitácora de eventos de Culqi (webhook): cobros de recurrencia, cancelaciones, etc.
 CREATE TABLE IF NOT EXISTS culqi_events (
   id              TEXT PRIMARY KEY,                    -- id del evento (o uuid local)

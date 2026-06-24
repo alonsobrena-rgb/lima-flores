@@ -29,6 +29,8 @@ function rowToSub(r) {
     },
     deliveryTime: r.delivery_time,
     deliveryPref: r.delivery_pref,
+    recurring: r.recurring == null ? true : r.recurring,
+    chargeId: r.charge_id,
     notes: r.notes,
     lastEvent: r.last_event,
     lastEventAt: r.last_event_at,
@@ -44,14 +46,14 @@ async function create(s) {
        buyer_name, buyer_email, buyer_phone,
        recipient_name, recipient_phone, recipient_address, recipient_district,
        recipient_address_ref, recipient_apt, recipient_lat, recipient_lng, recipient_has_reception,
-       delivery_time, delivery_pref, notes
+       delivery_time, delivery_pref, recurring, charge_id, notes
      ) VALUES (
        $1, 'active', $2, $3, $4, $5, $6, $7,
        $8, $9,
        $10, $11, $12,
        $13, $14, $15, $16,
        $17, $18, $19, $20, $21,
-       $22, $23, $24
+       $22, $23, $24, $25, $26
      )`,
     [
       s.id, s.planKey, s.planId, s.model, s.tier, s.amount, s.intervalCount,
@@ -61,7 +63,8 @@ async function create(s) {
       s.recipientAddressRef || null, s.recipientApt || null,
       s.recipientLat ?? null, s.recipientLng ?? null,
       s.recipientHasReception == null ? null : !!s.recipientHasReception,
-      s.deliveryTime || null, s.deliveryPref || null, s.notes || null,
+      s.deliveryTime || null, s.deliveryPref || null,
+      s.recurring === false ? false : true, s.chargeId || null, s.notes || null,
     ]
   );
   return s.id;

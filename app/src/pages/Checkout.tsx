@@ -314,7 +314,7 @@ export default function Checkout() {
               </div>
               <label className="flex items-center gap-2.5 text-sm text-ivory-100/90">
                 <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
-                Hay alguien que pueda recibir en esa dirección
+                Hay recepción
               </label>
 
               {/* Mensaje de la tarjeta — va con quien recibe */}

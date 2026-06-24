@@ -113,9 +113,9 @@ export default function Suscripcion() {
             <span className="text-[12px] uppercase tracking-[0.18em] text-ink-500">¿Cómo prefieres pagar?</span>
             <div className="inline-flex rounded-full border border-border bg-ivory-100 p-1">
               <button onClick={() => setModel('A')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'A' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Mes a mes</button>
-              <button onClick={() => setModel('B')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'B' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Pago adelantado</button>
+              <button onClick={() => setModel('B')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'B' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Pago único</button>
             </div>
-            <span className="text-[12px] text-ink-600">{model === 'A' ? 'Una sola suscripción: S/130 cada mes, sin permanencia.' : 'Pagas el periodo completo por adelantado (S/130/mes): 3, 6 o 12 meses.'}</span>
+            <span className="text-[12px] text-ink-600">{model === 'A' ? 'Suscripción: S/130 cada mes, sin permanencia (pausa o cancela cuando quieras).' : 'Un solo pago por todo el periodo (S/130/mes · 3, 6 o 12 meses). No es suscripción: no se renueva.'}</span>
           </div>
 
           {/* key={model}: al alternar A/B cambian las tarjetas; sin remount, los
@@ -294,18 +294,18 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
     } catch (e: any) { setErr(e?.message || 'No se pudo iniciar el pago.'); setBusy(false); }
   };
 
-  const waText = encodeURIComponent(`Hola Lima Flores, quiero suscribirme al plan ${plan.name} (${model === 'A' ? 'mensual S/130' : `pago adelantado S/${totalSoles}`}).`);
+  const waText = encodeURIComponent(`Hola Lima Flores, quiero el plan ${plan.name} (${model === 'A' ? 'suscripción mensual S/130' : `pago único S/${totalSoles}`}).`);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
       <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto bg-ivory-50 p-6 shadow-2xl sm:rounded-[3px] md:p-8" onClick={(e) => e.stopPropagation()}>
         {done ? (
           <div className="py-4 text-center">
-            <h3 className="font-display text-2xl text-ink-900">{done === 'ok' ? '¡Suscripción creada! 🌸' : 'Casi listo'}</h3>
+            <h3 className="font-display text-2xl text-ink-900">{done === 'ok' ? (model === 'A' ? '¡Suscripción creada! 🌸' : '¡Pago realizado! 🌸') : 'Casi listo'}</h3>
             <p className="mt-3 text-ink-700">
               {done === 'ok'
-                ? `Tu plan ${plan.name} quedó activo. Te contactaremos para coordinar tu primera entrega.`
-                : 'Para activar tu suscripción coordinamos el pago por WhatsApp (toma un momento).'}
+                ? `${model === 'A' ? `Tu suscripción ${plan.name} quedó activa` : `Tu paquete ${plan.name} (pago único) quedó listo`}. Te contactaremos para coordinar tu primera entrega.`
+                : 'Para activar tu plan coordinamos el pago por WhatsApp (toma un momento).'}
             </p>
             {done === 'wa' && (
               <a href={`${WHATSAPP}?text=${waText}`} target="_blank" rel="noopener noreferrer" className="press mt-5 inline-flex items-center justify-center bg-rosa-500 px-6 py-3 text-[13px] font-medium uppercase tracking-[0.16em] text-ivory-50 hover:bg-rosa-600">Coordinar por WhatsApp →</a>
@@ -382,13 +382,13 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
                 </div>
                 <label className="flex items-center gap-2.5 text-[13px] text-ivory-100/90">
                   <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
-                  Hay alguien que pueda recibir en esa dirección
+                  Hay recepción
                 </label>
               </fieldset>
 
               <label className="flex cursor-pointer items-start gap-2.5 text-[13px] text-ink-700">
                 <input type="checkbox" checked={tyc} onChange={(e) => setTyc(e.target.checked)} className="mt-0.5 h-4 w-4 accent-rosa-500" />
-                <span>Acepto los términos. Entiendo que {model === 'A' ? 'se cobrará S/130 cada mes' : `se cobrará S/${totalSoles} por adelantado`} a mi tarjeta y que puedo pausar o cancelar cuando quiera.</span>
+                <span>Acepto los términos. {model === 'A' ? 'Entiendo que se cobrará S/130 cada mes a mi tarjeta y que puedo pausar o cancelar cuando quiera.' : `Entiendo que se cobrará S/${totalSoles} en un solo pago a mi tarjeta (no es una suscripción, no se renueva).`}</span>
               </label>
 
               {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}

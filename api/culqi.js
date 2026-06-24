@@ -190,8 +190,6 @@ async function subscribe(req, res) {
   // Plan resuelto SIEMPRE en el servidor (nunca se confía en montos del cliente).
   const entry = catalog.byKey(planKey);
   if (!entry) return send(res, 400, { error: 'Plan no válido.' });
-  const planId = planIdFor(planKey);
-  if (!planId) return send(res, 503, { error: 'Este plan aún no está disponible (planes no aprovisionados en Culqi).' });
 
   // Datos mínimos del suscriptor / entrega.
   const reqStr = (v) => typeof v === 'string' && v.trim().length > 0;
@@ -205,6 +203,48 @@ async function subscribe(req, res) {
 
   const { first, last } = splitName(b.buyer_name);
   const model = entry.models[0]; // 'A' o 'B' (mensual queda como su primer modelo)
+  // Campos de comprador/entrega comunes a ambos flujos (recurrente y pago único).
+  const baseRecord = {
+    planKey, model, tier: entry.tier, amount: entry.amountSoles, intervalCount: entry.intervalCount,
+    buyerName: b.buyer_name, buyerEmail: email, buyerPhone: b.buyer_phone,
+    recipientName: b.recipient_name, recipientPhone: b.recipient_phone,
+    recipientAddress: b.recipient_address, recipientDistrict: b.recipient_district || null,
+    recipientAddressRef: b.recipient_address_ref || null, recipientApt: b.recipient_apt || null,
+    recipientLat: typeof b.recipient_lat === 'number' ? b.recipient_lat : null,
+    recipientLng: typeof b.recipient_lng === 'number' ? b.recipient_lng : null,
+    recipientHasReception: typeof b.recipient_has_reception === 'boolean' ? b.recipient_has_reception : null,
+    deliveryTime: b.delivery_time || null,
+    deliveryPref: b.delivery_pref || b.delivery_time || null, notes: b.notes || null,
+  };
+
+  // ── Único plan recurrente: la MENSUAL. El resto (trimestral/semestral/anual) es
+  //    un PAGO ÚNICO (un solo cargo, no se renueva). ──────────────────────────────
+  if (entry.tier !== 'mensual') {
+    const amountCents = Math.round(entry.amountSoles * 100);
+    if (amountCents < 100) return send(res, 400, { error: 'Monto inválido.' });
+    try {
+      const ch = await culqiPost('/v2/charges', {
+        amount: amountCents, currency_code: 'PEN', email, source_id: token,
+        description: culqiText(`Lima Flores prepago ${entry.label || entry.tier}`, 80, 'Lima Flores prepago'),
+        metadata: { plan_key: planKey, tier: entry.tier, source: 'web-suscripcion-prepago' },
+      });
+      if (!((ch.status === 200 || ch.status === 201) && ch.json && ch.json.object === 'charge')) {
+        return send(res, 402, { ok: false, error: culqiError(ch.json), code: ch.json && ch.json.code });
+      }
+      const chargeId = ch.json.id;
+      try {
+        await subsStore.create({ id: chargeId, planId: null, customerId: null, cardId: null, recurring: false, chargeId, ...baseRecord });
+      } catch (e) { console.error('[culqi] prepay persist error:', e.message); }
+      return send(res, 200, { ok: true, charge_id: chargeId, plan_key: planKey, amount: entry.amountSoles, prepaid: true });
+    } catch (e) {
+      console.error('[culqi] prepay error:', e.message);
+      return send(res, 502, { ok: false, error: 'No pudimos comunicarnos con el procesador de pagos. Intenta de nuevo.' });
+    }
+  }
+
+  // ── Suscripción mensual recurrente (customer + card + subscription en Culqi). ──
+  const planId = planIdFor(planKey);
+  if (!planId) return send(res, 503, { error: 'Este plan aún no está disponible (planes no aprovisionados en Culqi).' });
 
   try {
     // 1) Customer
@@ -241,20 +281,7 @@ async function subscribe(req, res) {
 
     // Persistimos (no bloquea la respuesta si la BD falla).
     try {
-      await subsStore.create({
-        id: subId, planKey, planId, model, tier: entry.tier,
-        amount: entry.amountSoles, intervalCount: entry.intervalCount,
-        customerId, cardId,
-        buyerName: b.buyer_name, buyerEmail: email, buyerPhone: b.buyer_phone,
-        recipientName: b.recipient_name, recipientPhone: b.recipient_phone,
-        recipientAddress: b.recipient_address, recipientDistrict: b.recipient_district || null,
-        recipientAddressRef: b.recipient_address_ref || null, recipientApt: b.recipient_apt || null,
-        recipientLat: typeof b.recipient_lat === 'number' ? b.recipient_lat : null,
-        recipientLng: typeof b.recipient_lng === 'number' ? b.recipient_lng : null,
-        recipientHasReception: typeof b.recipient_has_reception === 'boolean' ? b.recipient_has_reception : null,
-        deliveryTime: b.delivery_time || null,
-        deliveryPref: b.delivery_pref || b.delivery_time || null, notes: b.notes || null,
-      });
+      await subsStore.create({ id: subId, planId, customerId, cardId, recurring: true, chargeId: null, ...baseRecord });
     } catch (e) { console.error('[culqi] subscribe persist error:', e.message); }
 
     return send(res, 200, { ok: true, subscription_id: subId, plan_key: planKey, amount: entry.amountSoles });

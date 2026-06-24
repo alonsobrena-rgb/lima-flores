@@ -97,6 +97,13 @@ function culqiDeleteSub(id) {
 async function cancelSubscription(req, res, id) {
   if (!process.env.CULQI_SECRET_KEY) return send(res, 503, { error: 'Culqi no configurado en el servidor.' });
   try {
+    // Pago único (prepago): no hay suscripción recurrente en Culqi que cancelar.
+    // Solo marcamos el estado local (un eventual reembolso se hace desde el panel).
+    const existing = await subsStore.getById(id).catch(() => null);
+    if (existing && existing.recurring === false) {
+      try { await subsStore.setStatus(id, 'cancelled'); } catch (e) { console.error('[admin] cancel prepay setStatus:', e.message); }
+      return send(res, 200, { ok: true, prepaid: true });
+    }
     const { status, json } = await culqiDeleteSub(id);
     if (status >= 200 && status < 300) {
       try { await subsStore.setStatus(id, 'cancelled'); } catch (e) { console.error('[admin] cancel setStatus:', e.message); }
