@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminGet, adminSend, AuthError, apiUrl, resolveImg, fileToDataUrl } from '@/lib/admin-api';
-import categories from '@/data/categories.json';
+import categoriesSeed from '@/data/categories.json';
 
 type Product = Record<string, any>;
+type Cat = { slug: string; label: string; count?: number; active?: boolean };
 
 const soles = (n: any) => 'S/ ' + (Number(n) || 0).toFixed(2);
-const CAT_OPTIONS = categories as { slug: string; label: string }[];
+const CAT_FALLBACK = categoriesSeed as Cat[];
 
 export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
   const [list, setList] = useState<Product[]>([]);
@@ -13,6 +14,8 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
   const [q, setQ] = useState('');
   const [editing, setEditing] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [cats, setCats] = useState<Cat[]>(CAT_FALLBACK);
+  const [showCats, setShowCats] = useState(false);
 
   const fail = useCallback((e: any) => {
     if (e instanceof AuthError) { onAuthError(); return true; }
@@ -33,7 +36,12 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
     }
   }, [fail]);
 
-  useEffect(() => { load(); }, [load]);
+  const loadCats = useCallback(async () => {
+    try { const d = await adminGet('/api/admin/categories'); if (Array.isArray(d.categories)) setCats(d.categories); }
+    catch (e) { fail(e); }
+  }, [fail]);
+
+  useEffect(() => { load(); loadCats(); }, [load, loadCats]);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -58,7 +66,7 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
 
   const startNew = () => {
     setIsNew(true);
-    setEditing({ name: '', category: CAT_OPTIONS[0]?.slug || '', categoryLabel: CAT_OPTIONS[0]?.label || '', price: 0, images: [], tags: [], active: true });
+    setEditing({ name: '', category: cats[0]?.slug || '', categoryLabel: cats[0]?.label || '', price: 0, images: [], tags: [], active: true });
   };
 
   return (
@@ -68,6 +76,7 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
         <div className="flex items-center gap-2.5">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar…"
             className="w-48 border border-border bg-background px-3 py-2 text-sm outline-none focus:border-rosa-500" />
+          <button onClick={() => setShowCats(true)} className="border border-border px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-900 hover:border-rosa-500 hover:text-rosa-500">Categorías</button>
           <button onClick={startNew} className="bg-rosa-500 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-600">+ Nuevo</button>
         </div>
       </div>
@@ -81,8 +90,8 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
               {p.active === false && <span className="absolute right-2 top-2 bg-red-700/90 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-ivory-50">Oculto</span>}
             </div>
             <div className="flex flex-1 flex-col p-3">
-              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-foreground/45">{p.categoryLabel || p.category}</p>
-              <h3 className="mt-0.5 line-clamp-2 font-display text-[15px] font-medium leading-tight text-ink-900">{p.name}</h3>
+              <span className="inline-flex w-fit items-center rounded-full bg-ivory-200 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/65">{p.categoryLabel || p.category || 'sin categoría'}</span>
+              <h3 className="mt-1.5 line-clamp-2 font-display text-[15px] font-medium leading-tight text-ink-900">{p.name}</h3>
               <p className="mt-1 font-display text-sm italic text-ink-700">{soles(p.price)}</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <button onClick={() => { setIsNew(false); setEditing(p); }} className="flex-1 border border-ink-900/15 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-900 hover:border-rosa-500 hover:text-rosa-500">Editar</button>
@@ -99,8 +108,18 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
         <ProductEditor
           product={editing}
           isNew={isNew}
+          catOptions={cats}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); load(); }}
+          onAuthError={onAuthError}
+        />
+      )}
+
+      {showCats && (
+        <CategoryManager
+          initial={cats}
+          onClose={() => setShowCats(false)}
+          onChanged={() => { loadCats(); load(); }}
           onAuthError={onAuthError}
         />
       )}
@@ -109,8 +128,8 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
 }
 
 // ─── Editor (modal) ────────────────────────────────────────────────────────────
-function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
-  product: Product; isNew: boolean; onClose: () => void; onSaved: () => void; onAuthError: () => void;
+function ProductEditor({ product, isNew, catOptions, onClose, onSaved, onAuthError }: {
+  product: Product; isNew: boolean; catOptions: Cat[]; onClose: () => void; onSaved: () => void; onAuthError: () => void;
 }) {
   const [f, setF] = useState<Product>(() => ({
     ...product,
@@ -133,7 +152,7 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
   }, [onClose]);
 
   const onCatChange = (slug: string) => {
-    const c = CAT_OPTIONS.find((x) => x.slug === slug);
+    const c = catOptions.find((x) => x.slug === slug);
     setF((p) => ({ ...p, category: slug, categoryLabel: c?.label || p.categoryLabel }));
   };
 
@@ -213,7 +232,7 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
           <div>
             <label className={label}>Categoría</label>
             <select value={f.category || ''} onChange={(e) => onCatChange(e.target.value)} className={field}>
-              {CAT_OPTIONS.map((c) => <option key={c.slug} value={c.slug}>{c.label}</option>)}
+              {catOptions.map((c) => <option key={c.slug} value={c.slug}>{c.label}</option>)}
             </select>
           </div>
           <div>
@@ -289,6 +308,130 @@ function ProductEditor({ product, isNew, onClose, onSaved, onAuthError }: {
             className="absolute right-4 top-4 bg-ink-900/60 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-ink-900">Cerrar ✕</button>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Gestor de categorías (alta, edición de etiqueta, orden, ocultar, borrar) ────
+function CategoryManager({ initial, onClose, onChanged, onAuthError }: {
+  initial: Cat[]; onClose: () => void; onChanged: () => void; onAuthError: () => void;
+}) {
+  const [cats, setCats] = useState<Cat[]>(initial);
+  const [newLabel, setNewLabel] = useState('');
+  const [editingSlug, setEditingSlug] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [onClose]);
+
+  const fail = (e: any) => { if (e instanceof AuthError) { onAuthError(); return true; } setErr(e?.message || 'Error'); return false; };
+
+  const reload = async () => {
+    try { const d = await adminGet('/api/admin/categories'); if (Array.isArray(d.categories)) setCats(d.categories); onChanged(); }
+    catch (e) { fail(e); }
+  };
+
+  const persistOrder = async (next: Cat[]) => {
+    setCats(next); // optimista
+    try { await adminSend('/api/admin/categories/reorder', 'POST', { order: next.map((c) => c.slug) }); onChanged(); }
+    catch (e) { if (!fail(e)) reload(); }
+  };
+
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= cats.length || from === to) return;
+    const next = [...cats];
+    const [m] = next.splice(from, 1);
+    next.splice(to, 0, m);
+    persistOrder(next);
+  };
+
+  const add = async () => {
+    const label = newLabel.trim(); if (!label) return;
+    setBusy(true); setErr('');
+    try { await adminSend('/api/admin/categories', 'POST', { label }); setNewLabel(''); await reload(); }
+    catch (e) { fail(e); } finally { setBusy(false); }
+  };
+
+  const saveRename = async (slug: string) => {
+    const label = editLabel.trim();
+    setEditingSlug(null);
+    if (!label) return;
+    const c = cats.find((x) => x.slug === slug);
+    if (c && c.label === label) return;
+    try { await adminSend(`/api/admin/categories/${encodeURIComponent(slug)}`, 'PUT', { label }); await reload(); }
+    catch (e) { fail(e); }
+  };
+
+  const toggleActive = async (c: Cat) => {
+    try { await adminSend(`/api/admin/categories/${encodeURIComponent(c.slug)}`, 'PUT', { active: c.active === false }); await reload(); }
+    catch (e) { fail(e); }
+  };
+
+  const del = async (c: Cat) => {
+    if (!confirm(`¿Eliminar la categoría "${c.label}"?`)) return;
+    setErr('');
+    try { await adminSend(`/api/admin/categories/${encodeURIComponent(c.slug)}`, 'DELETE'); await reload(); }
+    catch (e) { fail(e); } // 409 si tiene productos → muestra el mensaje del backend
+  };
+
+  return (
+    <div className="fixed inset-0 z-[105] flex items-start justify-center overflow-y-auto bg-ink-900/70 p-4 py-10" onClick={onClose}>
+      <div className="w-full max-w-lg border border-border bg-surface p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-2xl italic text-ink-900">Categorías</h2>
+          <button onClick={onClose} aria-label="Cerrar" className="text-xl text-foreground/50 hover:text-ink-900">✕</button>
+        </div>
+        <p className="mt-1 text-[12px] text-foreground/55">Arrastra (o usa ▲▼) para reordenar — ese es el orden en el catálogo. Clic en el nombre para renombrar. Solo se puede borrar una categoría sin productos.</p>
+
+        <div className="mt-4 divide-y divide-border border border-border">
+          {cats.map((c, i) => (
+            <div key={c.slug}
+              draggable={editingSlug !== c.slug}
+              onDragStart={() => setDragIdx(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => { e.preventDefault(); if (dragIdx !== null) move(dragIdx, i); setDragIdx(null); }}
+              onDragEnd={() => setDragIdx(null)}
+              className={`flex items-center gap-2 bg-surface-card px-3 py-2.5 ${dragIdx === i ? 'opacity-40' : ''} ${c.active === false ? 'opacity-55' : ''}`}>
+              <span className="cursor-move select-none text-foreground/30" title="Arrastra para reordenar">⠿</span>
+              <div className="flex flex-col">
+                <button onClick={() => move(i, i - 1)} disabled={i === 0} className="-mb-1 text-[10px] leading-none text-foreground/40 hover:text-ink-900 disabled:opacity-30">▲</button>
+                <button onClick={() => move(i, i + 1)} disabled={i === cats.length - 1} className="text-[10px] leading-none text-foreground/40 hover:text-ink-900 disabled:opacity-30">▼</button>
+              </div>
+              {editingSlug === c.slug ? (
+                <input autoFocus value={editLabel} onChange={(e) => setEditLabel(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveRename(c.slug); if (e.key === 'Escape') setEditingSlug(null); }}
+                  onBlur={() => saveRename(c.slug)}
+                  className="flex-1 border border-rosa-500 bg-background px-2 py-1 text-sm outline-none" />
+              ) : (
+                <button onClick={() => { setEditingSlug(c.slug); setEditLabel(c.label); }} title="Renombrar" className="flex-1 text-left text-sm font-medium text-ink-900 hover:text-rosa-500">{c.label}</button>
+              )}
+              <span className="font-mono text-[11px] text-foreground/40" title="Productos">{c.count ?? 0}</span>
+              <button onClick={() => toggleActive(c)} title={c.active === false ? 'Mostrar en la tienda' : 'Ocultar de la tienda'} className="font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/55 hover:text-ink-900">{c.active === false ? 'Oculta' : 'Visible'}</button>
+              <button onClick={() => del(c)} title="Eliminar" className="text-foreground/40 hover:text-red-700">✕</button>
+            </div>
+          ))}
+          {cats.length === 0 && <div className="px-3 py-6 text-center text-sm italic text-foreground/50">Sin categorías.</div>}
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
+            placeholder="Nueva categoría…" className="flex-1 border border-border bg-background px-3 py-2 text-sm outline-none focus:border-rosa-500" />
+          <button onClick={add} disabled={busy || !newLabel.trim()} className="bg-rosa-500 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-50">+ Añadir</button>
+        </div>
+
+        {err && <p className="mt-3 bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
+
+        <div className="mt-5 flex justify-end">
+          <button onClick={onClose} className="bg-ink-900 px-6 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500">Listo</button>
+        </div>
+      </div>
     </div>
   );
 }

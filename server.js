@@ -119,6 +119,11 @@ const server = http.createServer(async (req, res) => {
     return productsHandler(req, res, parsed);
   }
 
+  // ─── /api/categories — categorías del catálogo (solo lectura) ───
+  if (parsed.pathname === '/api/categories') {
+    return require('./api/categories')(req, res, parsed);
+  }
+
   // ─── /api/culqi/* — pasarela de pago Culqi (cobro de tarjeta) ───
   if (parsed.pathname.startsWith('/api/culqi/')) {
     return require('./api/culqi')(req, res, parsed);

@@ -3,10 +3,8 @@ import { motion } from 'framer-motion';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 import { AddToCart } from '@/components/AddToCart';
-import categories from '@/data/categories.json';
+import { useCategories } from '@/lib/categories';
 import { money, useProducts } from '@/lib/cart';
-
-const chips = [{ slug: 'all', label: 'Todos' }, ...categories];
 
 // Rangos de precio (filtro). Se combinan con la categoría; ambos viven en la URL.
 const PRICE_RANGES = [
@@ -19,6 +17,8 @@ const PRICE_RANGES = [
 
 export default function Catalogo() {
   const { products } = useProducts();
+  const { categories } = useCategories();
+  const chips = [{ slug: 'all', label: 'Todos' }, ...categories];
   // Filtros en la URL (?cat=ramos&precio=150-250) — compartible/navegable con
   // back/forward; las categorías llegan así desde la sección del home.
   const [params, setParams] = useSearchParams();

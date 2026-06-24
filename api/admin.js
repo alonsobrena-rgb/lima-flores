@@ -26,6 +26,7 @@ const { generateAndStoreCard } = require('../integrations/cards/order-card');
 const { generateCard } = require('../integrations/cards/generate');
 const { STYLE_KEYS } = require('../integrations/cards/folded');
 const products = require('../db/products-store');
+const categoriesStore = require('../db/categories-store');
 const subsStore = require('../db/subscriptions-store');
 const adminStudio = require('./admin-studio');
 
@@ -419,6 +420,38 @@ async function deleteProduct(req, res, id) {
   } catch (e) { return send(res, 500, { error: e.message }); }
 }
 
+// ─── Categorías (alta, edición, orden) ──────────────────────────────────────
+async function listCategoriesAdmin(req, res) {
+  try { return send(res, 200, { categories: await categoriesStore.listAll() }); }
+  catch (e) { return send(res, 500, { error: e.message }); }
+}
+async function createCategory(req, res) {
+  let body;
+  try { body = await readJsonBody(req, 16 * 1024); } catch (e) { return send(res, 400, { error: e.message }); }
+  try { return send(res, 201, await categoriesStore.create(body || {})); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+}
+async function updateCategory(req, res, slug) {
+  let body;
+  try { body = await readJsonBody(req, 16 * 1024); } catch (e) { return send(res, 400, { error: e.message }); }
+  try {
+    const c = await categoriesStore.update(slug, body || {});
+    return c ? send(res, 200, c) : send(res, 404, { error: 'No existe esa categoría' });
+  } catch (e) { return send(res, 400, { error: e.message }); }
+}
+async function deleteCategory(req, res, slug) {
+  try {
+    const ok = await categoriesStore.remove(slug);
+    return ok ? send(res, 200, { slug, deleted: true }) : send(res, 404, { error: 'No existe esa categoría' });
+  } catch (e) { return send(res, e.code === 'HAS_PRODUCTS' ? 409 : 500, { error: e.message }); }
+}
+async function reorderCategories(req, res) {
+  let body;
+  try { body = await readJsonBody(req, 16 * 1024); } catch (e) { return send(res, 400, { error: e.message }); }
+  try { return send(res, 200, { categories: await categoriesStore.reorder((body && body.order) || []) }); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+}
+
 // POST /api/admin/products/upload-image  body: { dataBase64, mime, productId? }
 // Guarda el binario en product_images y devuelve una URL absoluta servible.
 async function uploadProductImage(req, res) {
@@ -474,6 +507,17 @@ module.exports = async (req, res, urlObj) => {
 
   // ── Promociones por WhatsApp ──
   if (p.startsWith('/api/admin/wa/')) return require('./admin-whatsapp')(req, res, urlObj);
+
+  // ── Categorías del catálogo ──
+  if (p === '/api/admin/categories' && req.method === 'GET')  return listCategoriesAdmin(req, res);
+  if (p === '/api/admin/categories' && req.method === 'POST') return createCategory(req, res);
+  if (p === '/api/admin/categories/reorder' && req.method === 'POST') return reorderCategories(req, res);
+  const cm = p.match(/^\/api\/admin\/categories\/([^/]+)$/);
+  if (cm) {
+    const cslug = decodeURIComponent(cm[1]);
+    if (req.method === 'PUT' || req.method === 'PATCH') return updateCategory(req, res, cslug);
+    if (req.method === 'DELETE') return deleteCategory(req, res, cslug);
+  }
 
   // ── Productos ──
   if (p === '/api/admin/products' && req.method === 'GET')  return listProducts(req, res);

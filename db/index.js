@@ -117,6 +117,18 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE INDEX IF NOT EXISTS products_active_idx ON products (active);
 CREATE INDEX IF NOT EXISTS products_sort_idx   ON products (sort_order, created_at);
 
+-- Categorías del catálogo, editables desde el admin (alta, edición, orden). Se
+-- siembran una vez desde db/categories.seed.json; tras eso, esta tabla es la
+-- fuente de verdad del orden de los chips y de la sección de categorías.
+CREATE TABLE IF NOT EXISTS categories (
+  slug        TEXT PRIMARY KEY,
+  label       TEXT NOT NULL,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  active      BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS categories_sort_idx ON categories (sort_order, created_at);
+
 -- Imágenes subidas desde el admin. En Railway el disco es efímero, así que el
 -- binario vive en la BD y se sirve por GET /api/products/img/:id.
 CREATE TABLE IF NOT EXISTS product_images (
