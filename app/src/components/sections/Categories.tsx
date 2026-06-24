@@ -4,10 +4,11 @@ import categories from '@/data/categories.json';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
 
 const cover: Record<string, string> = {
-  plantas: '/products/orquideas-grandes-de-dos-varas-en-maceta.jpg',
+  orquideas: '/products/orquideas-grandes-de-dos-varas-en-maceta.jpg',
   arreglos: '/products/box-de-luxe.jpg',
   floreros: '/products/florero-de-20-tulipanes-2.jpg',
   ramos: '/products/ramo-de-24-rosas.jpg',
+  plantas: '/products/anturios-rojos-en-maceta.jpg',
   funebre: '/products/funebre-corona-eternidad.jpg',
 };
 
@@ -18,7 +19,7 @@ export const Categories = () => (
         <Reveal>
           <span className="text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45">— No. 03 · Categorías</span>
           <h2 className="mt-3 font-display text-[2.5rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[3.75rem]">
-            Cinco maneras<br />de regalar <em className="italic text-rosa-500">belleza.</em>
+            Seis maneras<br />de regalar <em className="italic text-rosa-500">belleza.</em>
           </h2>
         </Reveal>
         <Link to="/catalogo" className="group inline-flex items-center gap-2 whitespace-nowrap text-[13px] font-medium uppercase tracking-[0.18em] text-ink-900">
@@ -26,7 +27,7 @@ export const Categories = () => (
         </Link>
       </header>
 
-      <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
+      <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-6">
         {categories.map((c) => (
           <StaggerItem key={c.slug}>
             <Link to={`/catalogo?cat=${c.slug}`} className="group block">

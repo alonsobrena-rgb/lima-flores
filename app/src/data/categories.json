@@ -1,13 +1,13 @@
 [
   {
-    "slug": "plantas",
-    "label": "Plantas",
-    "count": 8
+    "slug": "orquideas",
+    "label": "Orquídeas",
+    "count": 6
   },
   {
     "slug": "arreglos",
     "label": "Arreglos",
-    "count": 24
+    "count": 23
   },
   {
     "slug": "floreros",
@@ -18,6 +18,11 @@
     "slug": "ramos",
     "label": "Ramos",
     "count": 9
+  },
+  {
+    "slug": "plantas",
+    "label": "Plantas y Cactus",
+    "count": 3
   },
   {
     "slug": "funebre",

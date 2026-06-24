@@ -2,8 +2,8 @@
   {
     "id": "orquidea-sunrise-de-dos-varas",
     "name": "Orquídea Sunrise de dos varas",
-    "category": "plantas",
-    "categoryLabel": "Plantas",
+    "category": "orquideas",
+    "categoryLabel": "Orquídeas",
     "price": 215,
     "image": "/products/orquidea-sunrise-de-dos-varas.jpg",
     "images": [
@@ -266,8 +266,8 @@
   {
     "id": "orquideas-amarillas-con-lineas-fucsias",
     "name": "Orquídeas amarillas con líneas fucsias",
-    "category": "arreglos",
-    "categoryLabel": "Arreglos",
+    "category": "orquideas",
+    "categoryLabel": "Orquídeas",
     "price": 215,
     "image": "/products/orquideas-amarillas-con-lineas-fucsias.jpg",
     "images": [
@@ -326,8 +326,8 @@
   {
     "id": "orquidea-rosado-vintage",
     "name": "Orquídea Rosado Vintage",
-    "category": "plantas",
-    "categoryLabel": "Plantas",
+    "category": "orquideas",
+    "categoryLabel": "Orquídeas",
     "price": 200,
     "image": "/products/orquidea-rosado-vintage.jpg",
     "images": [
@@ -479,7 +479,7 @@
     "id": "anturios-rosados-en-maceta-2",
     "name": "Anturios rosados en maceta",
     "category": "plantas",
-    "categoryLabel": "Plantas",
+    "categoryLabel": "Plantas y Cactus",
     "price": 119,
     "image": "/products/anturios-rosados-en-maceta-2.jpg",
     "images": [
@@ -513,7 +513,7 @@
     "id": "anturios-rosados-en-maceta",
     "name": "Anturios rosados en maceta grande",
     "category": "plantas",
-    "categoryLabel": "Plantas",
+    "categoryLabel": "Plantas y Cactus",
     "price": 145,
     "image": "/products/anturios-rosados-en-maceta.jpg",
     "images": [
@@ -529,7 +529,7 @@
     "id": "anturios-rojos-en-maceta",
     "name": "Anturios rojos en maceta grande",
     "category": "plantas",
-    "categoryLabel": "Plantas",
+    "categoryLabel": "Plantas y Cactus",
     "price": 145,
     "image": "/products/anturios-rojos-en-maceta.jpg",
     "images": [
@@ -543,8 +543,8 @@
   {
     "id": "orquideas-grandes-de-dos-varas-en-maceta",
     "name": "Orquideas grandes de dos varas en maceta",
-    "category": "plantas",
-    "categoryLabel": "Plantas",
+    "category": "orquideas",
+    "categoryLabel": "Orquídeas",
     "price": 250,
     "image": "/products/orquideas-grandes-de-dos-varas-en-maceta.jpg",
     "images": [
@@ -560,8 +560,8 @@
   {
     "id": "orquideas-grandes-en-maceta",
     "name": "Orquideas grandes en maceta",
-    "category": "plantas",
-    "categoryLabel": "Plantas",
+    "category": "orquideas",
+    "categoryLabel": "Orquídeas",
     "price": 200,
     "image": "/products/orquideas-grandes-en-maceta.jpg",
     "images": [
@@ -580,8 +580,8 @@
   {
     "id": "orquideas-enanas-maceta-2",
     "name": "Orquideas enanas maceta",
-    "category": "plantas",
-    "categoryLabel": "Plantas",
+    "category": "orquideas",
+    "categoryLabel": "Orquídeas",
     "price": 210,
     "image": "/products/orquideas-enanas-maceta-2.jpg",
     "images": [

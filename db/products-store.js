@@ -118,10 +118,44 @@ async function ensureExtras() {
   if (extras.length) console.log(`[products] asegurados ${extras.length} productos fúnebres`);
 }
 
+// ─── Recategorización única: Orquídeas como categoría propia + "Plantas y Cactus" ─
+// La BD se sembró antes de separar las orquídeas de Plantas/Arreglos y de renombrar
+// la etiqueta de Plantas. Este paso mueve los 6 productos de orquídea a la categoría
+// 'orquideas' y reetiqueta los de 'plantas' a "Plantas y Cactus". Es idempotente: los
+// UPDATE están acotados por el valor antiguo, así que tras correr una vez no vuelven a
+// tocar nada (y no pisan recategorizaciones posteriores del admin).
+const ORCHID_IDS = [
+  'orquidea-sunrise-de-dos-varas',
+  'orquideas-amarillas-con-lineas-fucsias',
+  'orquidea-rosado-vintage',
+  'orquideas-grandes-de-dos-varas-en-maceta',
+  'orquideas-grandes-en-maceta',
+  'orquideas-enanas-maceta-2',
+];
+let reorgEnsured = false;
+async function ensureCategoryReorg() {
+  if (reorgEnsured || !db.enabled) return;
+  const ph = ORCHID_IDS.map((_, i) => `$${i + 1}`).join(',');
+  const orch = await db.query(
+    `UPDATE products SET category = 'orquideas', category_label = 'Orquídeas', updated_at = NOW()
+       WHERE id IN (${ph}) AND category IN ('plantas','arreglos')`,
+    ORCHID_IDS
+  );
+  const plant = await db.query(
+    `UPDATE products SET category_label = 'Plantas y Cactus', updated_at = NOW()
+       WHERE category = 'plantas' AND (category_label <> 'Plantas y Cactus' OR category_label IS NULL)`
+  );
+  reorgEnsured = true;
+  if (orch.rowCount || plant.rowCount) {
+    console.log(`[products] recategorización: ${orch.rowCount} orquídeas, ${plant.rowCount} plantas reetiquetadas`);
+  }
+}
+
 // ─── Lecturas ──────────────────────────────────────────────────────────────────
 async function listPublic() {
   await ensureSeeded();
   await ensureExtras();
+  await ensureCategoryReorg();
   const { rows } = await db.query(
     `SELECT * FROM products WHERE active = TRUE ORDER BY sort_order ASC, created_at ASC`
   );
@@ -131,6 +165,7 @@ async function listPublic() {
 async function listAll() {
   await ensureSeeded();
   await ensureExtras();
+  await ensureCategoryReorg();
   const { rows } = await db.query(
     `SELECT * FROM products ORDER BY sort_order ASC, created_at ASC`
   );
