@@ -54,6 +54,11 @@ export default function Suscripcion() {
       ? { big: money(p.monthly), small: '/ mes' }
       : { big: money(p.monthly * p.months), small: `S/${p.monthly}/mes · ${p.months} meses` };
 
+  // Mes a mes (A) = una sola suscripción (Mensual). Pago adelantado (B) = los
+  // planes por periodo (trimestral / semestral / anual).
+  const visiblePlans = model === 'A' ? plans.filter((p) => p.tier === 'mensual') : plans.filter((p) => p.tier !== 'mensual');
+  const single = visiblePlans.length === 1;
+
   return (
     <div className="relative min-h-screen">
       {/* Fondo: carretilla de flores en Milán (Higgsfield) con velo ivory. */}
@@ -80,7 +85,7 @@ export default function Suscripcion() {
 
         {/* ── Flores de estación: galería de entregas reales ── */}
         <section className="mx-auto max-w-7xl px-6 pb-4 md:px-12">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-7 shadow-[0_24px_60px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-9 md:py-8">
             <span className="text-[12px] font-medium uppercase tracking-[0.24em] text-rosa-500">Flores de estación</span>
             <h2 className="mt-2 font-display text-[2rem] font-light leading-[1.05] tracking-tight text-ink-900 md:text-[2.75rem]">Siempre distintas, siempre de temporada.</h2>
             <p className="mt-4 leading-relaxed text-ink-700">
@@ -96,23 +101,23 @@ export default function Suscripcion() {
               </StaggerItem>
             ))}
           </Stagger>
-          <p className="mt-3 text-[12px] italic text-ink-600">Entregas reales · flores de estación armadas a mano.</p>
+          <p className="mt-3 text-[12px] italic text-ivory-50 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">Entregas reales · flores de estación armadas a mano.</p>
         </section>
 
         {/* ── Planes ── */}
         <section className="mx-auto max-w-7xl px-6 pb-24 pt-12 md:px-12 md:pb-32">
-          {/* Toggle de forma de pago A/B */}
-          <div className="mb-9 flex flex-col items-center gap-3">
-            <span className="text-[12px] uppercase tracking-[0.18em] text-foreground/50">¿Cómo prefieres pagar?</span>
-            <div className="inline-flex rounded-full border border-border bg-ivory-50/90 p-1 backdrop-blur">
-              <button onClick={() => setModel('A')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'A' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Mensual · S/130/mes</button>
+          {/* Toggle de forma de pago A/B (en panel esmerilado para legibilidad) */}
+          <div className="mx-auto mb-10 flex max-w-md flex-col items-center gap-3 rounded-2xl border border-white/55 bg-ivory-50/[0.93] px-6 py-5 text-center shadow-[0_24px_60px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg">
+            <span className="text-[12px] uppercase tracking-[0.18em] text-ink-500">¿Cómo prefieres pagar?</span>
+            <div className="inline-flex rounded-full border border-border bg-ivory-100 p-1">
+              <button onClick={() => setModel('A')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'A' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Mes a mes</button>
               <button onClick={() => setModel('B')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'B' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Pago adelantado</button>
             </div>
-            <span className="text-[12px] text-foreground/55">{model === 'A' ? 'Se cobra S/130 cada mes automáticamente.' : 'Pagas el periodo completo por adelantado (S/130/mes).'}</span>
+            <span className="text-[12px] text-ink-600">{model === 'A' ? 'Una sola suscripción: S/130 cada mes, sin permanencia.' : 'Pagas el periodo completo por adelantado (S/130/mes): 3, 6 o 12 meses.'}</span>
           </div>
 
-          <Stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {plans.map((p) => {
+          <Stagger className={single ? 'mx-auto max-w-sm' : 'mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3'}>
+            {visiblePlans.map((p) => {
               const pr = priceFor(p);
               return (
                 <StaggerItem key={p.tier} className="h-full">
