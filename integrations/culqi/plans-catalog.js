@@ -29,14 +29,11 @@ const cents = (soles) => Math.round(Number(soles) * 100);
 // Precio único: S/130 al mes para todos los planes. El modelo B cobra el total
 // del periodo por adelantado (130 × meses): trimestral 390, semestral 780, anual 1560.
 const MONTHLY = 130;
+// Modelo A = una sola suscripción mensual (Mensual). Modelo B = pago adelantado
+// del periodo (130 × meses). No hay planes A por tier (trimestral/semestral/anual).
 const PLANS = [
-  // Compartido por A y B (mensual es mensual en ambos).
+  // Mensual: A (cobro mensual) y también la base de B con periodo 1.
   { key: 'mensual',     models: ['A', 'B'], tier: 'mensual',    label: 'Mensual',    amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
-
-  // Modelo A — cobro mensual de S/130.
-  { key: 'a_trimestral', models: ['A'], tier: 'trimestral', label: 'Trimestral',  amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
-  { key: 'a_semestral',  models: ['A'], tier: 'semestral',  label: 'Semestral',   amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
-  { key: 'a_anual',      models: ['A'], tier: 'anual',      label: 'Anual',       amountSoles: MONTHLY,      intervalCount: 1,  monthlyHint: MONTHLY },
 
   // Modelo B — cobro del total del periodo (130 × meses) cada N meses.
   { key: 'b_trimestral', models: ['B'], tier: 'trimestral', label: 'Trimestral',  amountSoles: MONTHLY * 3,  intervalCount: 3,  monthlyHint: MONTHLY },

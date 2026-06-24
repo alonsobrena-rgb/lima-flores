@@ -84,6 +84,31 @@ async function listSubscriptions(req, res) {
   }
 }
 
+// ─── Cancelar una suscripción (Culqi DELETE + estado local) ─────────────────
+function culqiDeleteSub(id) {
+  const https = require('https');
+  return new Promise((resolve, reject) => {
+    const r = https.request({ hostname: 'api.culqi.com', path: `/v2/recurrent/subscriptions/${id}`, method: 'DELETE',
+      headers: { Authorization: `Bearer ${process.env.CULQI_SECRET_KEY || ''}`, Accept: 'application/json' } },
+      (rr) => { let d = ''; rr.on('data', (c) => (d += c)); rr.on('end', () => { let j; try { j = JSON.parse(d); } catch { j = d; } resolve({ status: rr.statusCode, json: j }); }); });
+    r.on('error', reject); r.end();
+  });
+}
+async function cancelSubscription(req, res, id) {
+  if (!process.env.CULQI_SECRET_KEY) return send(res, 503, { error: 'Culqi no configurado en el servidor.' });
+  try {
+    const { status, json } = await culqiDeleteSub(id);
+    if (status >= 200 && status < 300) {
+      try { await subsStore.setStatus(id, 'cancelled'); } catch (e) { console.error('[admin] cancel setStatus:', e.message); }
+      return send(res, 200, { ok: true });
+    }
+    return send(res, 400, { ok: false, error: (json && (json.user_message || json.merchant_message || json.message)) || 'No se pudo cancelar en Culqi.' });
+  } catch (e) {
+    console.error('[admin] cancelSubscription error:', e.message);
+    return send(res, 502, { ok: false, error: 'No pudimos comunicarnos con Culqi.' });
+  }
+}
+
 // ─── Detalle de un pedido ───────────────────────────────
 async function getOrder(req, res, id) {
   try {
@@ -434,6 +459,8 @@ module.exports = async (req, res, urlObj) => {
 
   // ── Suscripciones (recurrencia Culqi) ──
   if (p === '/api/admin/subscriptions' && req.method === 'GET') return listSubscriptions(req, res);
+  const subCancel = p.match(/^\/api\/admin\/subscriptions\/([A-Za-z0-9_\-]+)\/cancel$/);
+  if (subCancel && req.method === 'POST') return cancelSubscription(req, res, subCancel[1]);
 
   // ── Marketing Studio ──
   if (p.startsWith('/api/admin/studio/')) return adminStudio(req, res, urlObj);
