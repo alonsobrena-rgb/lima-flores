@@ -308,10 +308,15 @@ const FIT_SCRIPT = `
 })();</script>`;
 
 /**
- * Documento HTML de 2 páginas (exterior + interior).
+ * Documento HTML de la tarjeta plegada.
+ * El DISEÑO COMPLETO (exterior + interior) siempre está definido aquí; `faces`
+ * solo decide qué se rasteriza:
+ *   'both'  → 2 páginas: exterior (portada+contraportada) + interior (mensaje+cara interna).
+ *   'inner' → 1 página: solo la CARA INTERNA (la "segunda hoja").
  * @param {object} o
  * @param {string} o.style     clave de estilo (atelier|minimal|jardin|botanica|blush)
  * @param {'print'|'view'} o.mode
+ * @param {'both'|'inner'} [o.faces] qué caras renderizar (por defecto 'both')
  * @param {string} [o.recipient] "Para …"
  * @param {string} [o.note]      mensaje
  * @param {string} [o.buyer]     firma
@@ -320,6 +325,7 @@ function renderFoldedDoc(o = {}) {
   const style = STYLES[o.style] ? o.style : randomStyle();
   const s = STYLES[style];
   const mode = o.mode === 'view' ? 'view' : 'print';
+  const faces = o.faces === 'inner' ? 'inner' : 'both';
   const msg = messagePanel(style, o);
   let p1, p2;
   if (mode === 'print') {
@@ -330,8 +336,11 @@ function renderFoldedDoc(o = {}) {
     p1 = pageHtml(s.ground, s.front, false, s.back, false, false);
     p2 = pageHtml(s.ground, msg, false, s.inside, false, false);
   }
+  // De momento se imprime/genera solo la cara interna (p2); el exterior (p1) sigue
+  // guardado en el diseño por si se quiere volver a la tarjeta completa.
+  const body = faces === 'inner' ? p2 : (p1 + p2);
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><style>${CSS}</style></head>
-  <body>${p1}${p2}${FIT_SCRIPT}</body></html>`;
+  <body>${body}${FIT_SCRIPT}</body></html>`;
 }
 
 module.exports = { renderFoldedDoc, STYLE_KEYS, randomStyle, NOTE_MAX };

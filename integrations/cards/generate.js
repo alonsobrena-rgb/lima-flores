@@ -8,8 +8,10 @@
 //   const { pdf, png, template } = await generateCard({ recipientName, buyerName, note });
 //
 // CLI (previsualizar):
-//   node integrations/cards/generate.js --all                 → genera los 5 estilos
-//   node integrations/cards/generate.js "Mensaje" "Para" "De" → uno al azar
+//   node integrations/cards/generate.js --all                 → los 5 estilos (cara interna)
+//   node integrations/cards/generate.js --all --full          → los 5 estilos completos (ext+int)
+//   node integrations/cards/generate.js "Mensaje" "Para" "De" → uno al azar (cara interna)
+// Añade --full a cualquier invocación para generar la tarjeta COMPLETA.
 'use strict';
 
 const fs = require('fs');
@@ -118,25 +120,30 @@ async function closeBrowser() {
 async function generateCard(opts = {}) {
   const template = TEMPLATE_KEYS.includes(opts.template) ? opts.template : randomStyle();
   const note = String(opts.note || '').slice(0, CARD_NOTE_MAX);
-  const common = { style: template, recipient: opts.recipientName, buyer: opts.buyerName, note };
+  // DE MOMENTO se genera solo la cara interna (la "segunda hoja"); el diseño
+  // completo (exterior + interior) sigue guardado en folded.js. Pasa
+  // faces:'both' para volver a la tarjeta completa.
+  const faces = opts.faces === 'both' ? 'both' : 'inner';
+  const common = { style: template, recipient: opts.recipientName, buyer: opts.buyerName, note, faces };
+  const pages = faces === 'inner' ? 1 : 2;
 
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
-    // 1) PDF imprenta (impuesto para doblar) — 2 páginas de 96×136 mm.
+    // 1) PDF imprenta (impuesto para doblar) — 96×136 mm por página.
     await page.setContent(renderFoldedDoc({ ...common, mode: 'print' }), { waitUntil: 'load', timeout: 20000 });
     await page.evaluate(async () => { if (document.fonts) await document.fonts.ready; });
     await page.waitForFunction('window.__cardReady === true', { timeout: 5000 }).catch(() => {});
-    const pdf = await page.pdf({ width: '96mm', height: '136mm', printBackground: true, pageRanges: '1-2' });
+    const pdf = await page.pdf({ width: '96mm', height: '136mm', printBackground: true, pageRanges: `1-${pages}` });
 
     // 2) PNG de previsualización (orientación de lectura) — caras apiladas.
     await page.setContent(renderFoldedDoc({ ...common, mode: 'view' }), { waitUntil: 'load', timeout: 20000 });
     await page.evaluate(async () => { if (document.fonts) await document.fonts.ready; });
     await page.waitForFunction('window.__cardReady === true', { timeout: 5000 }).catch(() => {});
-    await page.setViewport({ width: 363, height: 1028, deviceScaleFactor: SCALE });
+    await page.setViewport({ width: 363, height: 514 * pages, deviceScaleFactor: SCALE });
     const png = await page.screenshot({ type: 'png', fullPage: true });
 
-    return { pdf: Buffer.from(pdf), png: Buffer.from(png), template };
+    return { pdf: Buffer.from(pdf), png: Buffer.from(png), template, faces };
   } finally {
     await page.close().catch(() => {});
   }
@@ -171,26 +178,30 @@ if (require.main === module) {
   (async () => {
     const outDir = path.join(__dirname, 'out');
     fs.mkdirSync(outDir, { recursive: true });
-    const args = process.argv.slice(2);
+    const argv = process.argv.slice(2);
+    const full = argv.includes('--full');
+    const faces = full ? 'both' : 'inner';
+    const args = argv.filter((a) => a !== '--full' && a !== '--all');
+    const tag = full ? 'full' : 'inner';
 
-    if (args[0] === '--all') {
+    if (argv.includes('--all')) {
       const sample = 'Que cada pétalo te recuerde lo mucho que te quiero. Feliz cumpleaños, mi vida.';
       for (const key of TEMPLATE_KEYS) {
         const { pdf, png } = await generateCard({
-          template: key, note: sample, recipientName: 'Valentina', buyerName: 'Alonso',
+          template: key, note: sample, recipientName: 'Valentina', buyerName: 'Alonso', faces,
         });
-        fs.writeFileSync(path.join(outDir, `card-${key}.pdf`), pdf);
-        fs.writeFileSync(path.join(outDir, `card-${key}.png`), png);
-        console.log('✓', `card-${key}.pdf / .png`);
+        fs.writeFileSync(path.join(outDir, `card-${key}-${tag}.pdf`), pdf);
+        fs.writeFileSync(path.join(outDir, `card-${key}-${tag}.png`), png);
+        console.log('✓', `card-${key}-${tag}.pdf / .png`);
       }
     } else {
       const note = args[0] || 'Con todo mi cariño en este día tan especial.';
       const recipientName = args[1] || 'Valentina';
       const buyerName = args[2] || 'Alonso';
-      const { pdf, png, template } = await generateCard({ note, recipientName, buyerName });
-      fs.writeFileSync(path.join(outDir, `card-${template}.pdf`), pdf);
-      fs.writeFileSync(path.join(outDir, `card-${template}.png`), png);
-      console.log('✓', `card-${template}.pdf / .png`, `(estilo: ${template})`);
+      const { pdf, png, template } = await generateCard({ note, recipientName, buyerName, faces });
+      fs.writeFileSync(path.join(outDir, `card-${template}-${tag}.pdf`), pdf);
+      fs.writeFileSync(path.join(outDir, `card-${template}-${tag}.png`), png);
+      console.log('✓', `card-${template}-${tag}.pdf / .png`, `(estilo: ${template})`);
     }
 
     await closeBrowser();

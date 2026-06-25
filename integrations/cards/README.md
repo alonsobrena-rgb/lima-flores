@@ -9,6 +9,12 @@ La tarjeta es un **díptico** que se dobla por la mitad (doblez superior, se abr
 una mitad sobre la otra). La **portada** lleva la marca; el **mensaje del
 cliente** va impreso **adentro**.
 
+> **De momento solo se genera la CARA INTERNA (la "segunda hoja").** El diseño
+> completo (exterior + interior) sigue definido en [`folded.js`](folded.js) y queda
+> archivado en [`designs/`](designs/) (PNG + PDF de los 5 estilos completos). Para
+> volver a generar la tarjeta entera, pasa `faces: 'both'` a `generateCard` (o usa
+> `--full` en el CLI). El control del default vive en [`generate.js`](generate.js).
+
 ## Flujo
 
 1. `POST /api/order` guarda el pedido y responde al cliente de inmediato.
@@ -52,11 +58,13 @@ el largo (un "Te amo" se ve grande; 220 caracteres encajan sin desbordar).
 ## Previsualizar localmente
 
 ```bash
-node integrations/cards/generate.js --all                  # los 5 estilos
-node integrations/cards/generate.js "Mensaje" "Para" "De"  # uno al azar
+node integrations/cards/generate.js --all                  # los 5 estilos (cara interna)
+node integrations/cards/generate.js --all --full           # los 5 estilos COMPLETOS (ext+int)
+node integrations/cards/generate.js "Mensaje" "Para" "De"  # uno al azar (cara interna)
 ```
 
-Salen en `integrations/cards/out/` (`.pdf` + `.png`, ignorado por git).
+Salen en `integrations/cards/out/` (`.pdf` + `.png`, ignorado por git). Los diseños
+completos archivados están en `integrations/cards/designs/` (versionados).
 
 ## Despliegue (Railway)
 
