@@ -48,7 +48,7 @@ export const FeaturedProducts = () => (
                   <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">{p.category}</p>
                   <h3 className="mt-1 font-display text-xl font-medium text-ink-900">{p.name}</h3>
                 </div>
-                <span className="shrink-0 font-display text-xl italic text-ink-700">{money(p.price)}</span>
+                <span className="shrink-0 font-display text-2xl italic text-ink-900">{money(p.price)}</span>
               </div>
             </Link>
           </motion.div>
