@@ -39,6 +39,10 @@ const PLANS = [
   { key: 'b_trimestral', models: ['B'], tier: 'trimestral', label: 'Trimestral',  amountSoles: MONTHLY * 3,  intervalCount: 3,  monthlyHint: MONTHLY },
   { key: 'b_semestral',  models: ['B'], tier: 'semestral',  label: 'Semestral',   amountSoles: MONTHLY * 6,  intervalCount: 6,  monthlyHint: MONTHLY },
   { key: 'b_anual',      models: ['B'], tier: 'anual',      label: 'Anual',       amountSoles: MONTHLY * 12, intervalCount: 12, monthlyHint: MONTHLY },
+
+  // ⚠️ TEMPORAL — plan de PRUEBA de pago (S/2, cargo único). Borrar tras verificar
+  // que Culqi cobra bien. tier ≠ 'mensual' → /subscribe hace un solo cargo de S/2.
+  { key: 'b_prueba',     models: ['B'], tier: 'prueba',     label: 'Prueba',      amountSoles: 2,            intervalCount: 1,  monthlyHint: 2 },
 ];
 
 const byKey = (key) => PLANS.find((p) => p.key === key) || null;

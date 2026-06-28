@@ -33,8 +33,8 @@ export default function Home() {
         navLinks={navLinks}
         socials={socials}
         locationText="Miraflores · Lima"
-        videoSrc="/hero/mujer-tulipanes.mp4"
-        poster="/hero/mujer-tulipanes-poster.webp"
+        videoSrc="/hero/mujer-florero-tulipanes.mp4"
+        poster="/hero/mujer-florero-tulipanes-poster.webp"
       />
       {/* Velo ivory translúcido sobre el fondo floral: deja ver las flores pero
           mantiene legible el contenido de las secciones (más blanco = más legible). */}

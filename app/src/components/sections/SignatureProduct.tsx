@@ -54,8 +54,8 @@ export const SignatureProduct = () => {
               >
                 Agregar al carrito
               </button>
-              <Link to={`/producto/${ID}`} className="group inline-flex items-center gap-2 border border-ivory-100/25 px-7 py-3.5 text-[13px] font-medium uppercase tracking-[0.16em] text-ivory-100 transition-colors hover:border-ivory-100/60">
-                Ver detalle <span className="transition-transform group-hover:translate-x-1">→</span>
+              <Link to="/catalogo?cat=orquideas" className="group inline-flex items-center gap-2 border border-ivory-100/25 px-7 py-3.5 text-[13px] font-medium uppercase tracking-[0.16em] text-ivory-100 transition-colors hover:border-ivory-100/60">
+                Ver orquídeas <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
             </div>
           </Reveal>

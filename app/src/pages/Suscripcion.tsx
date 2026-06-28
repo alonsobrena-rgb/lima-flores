@@ -137,6 +137,11 @@ export default function Suscripcion() {
                     <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-foreground/45">{p.period}</p>
                     <p className="mt-5 font-display text-4xl text-ink-900">{pr.big}</p>
                     <p className="mt-1 text-[12px] text-foreground/55">{pr.small}</p>
+                    {model === 'B' && (
+                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-rosa-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-rosa-600">
+                        Pago único · no se renueva
+                      </span>
+                    )}
                     <p className="mt-4 font-display italic text-ink-600">{p.tagline}</p>
                     <ul className="mt-5 flex-1 space-y-2.5 text-sm text-ink-700">
                       {p.features.map((f) => (
@@ -316,9 +321,9 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
           <>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-rosa-500">Suscripción · {plan.name}</span>
-                <h3 className="mt-1 font-display text-2xl text-ink-900">{money(totalSoles)} <span className="text-base text-foreground/55">{model === 'A' || plan.months === 1 ? '/ mes' : `· ${plan.months} meses`}</span></h3>
-                <p className="text-[12px] text-foreground/55">{plan.period} · flores de estación</p>
+                <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-rosa-500">{model === 'A' || plan.months === 1 ? 'Suscripción' : 'Pago único'} · {plan.name}</span>
+                <h3 className="mt-1 font-display text-2xl text-ink-900">{money(totalSoles)} <span className="text-base text-foreground/55">{model === 'A' || plan.months === 1 ? '/ mes' : 'pago único'}</span></h3>
+                <p className="text-[12px] text-foreground/55">{model === 'A' || plan.months === 1 ? `${plan.period} · flores de estación` : `${plan.period} · un solo pago, no se renueva`}</p>
               </div>
               <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-foreground/40 hover:text-ink-900">×</button>
             </div>

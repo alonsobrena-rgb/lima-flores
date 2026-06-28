@@ -23,8 +23,8 @@ export const SubscriptionTeaser = () => (
         </Reveal>
       </header>
 
-      <Stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {plans.map((p) => (
+      <Stagger className="grid max-w-sm gap-5">
+        {plans.filter((p) => p.tier === 'mensual').map((p) => (
           <StaggerItem key={p.name} className="h-full">
             <Link to="/suscripcion" className={`group relative flex h-full flex-col border bg-surface p-6 transition-colors hover:border-rosa-500 ${p.featured ? 'border-rosa-500' : 'border-border'}`}>
               {(p.featured || p.value) && (

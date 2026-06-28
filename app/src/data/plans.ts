@@ -5,7 +5,7 @@
 export const MONTHLY_PRICE = 130;
 
 export type Plan = {
-  tier: 'mensual' | 'trimestral' | 'semestral' | 'anual';
+  tier: 'mensual' | 'trimestral' | 'semestral' | 'anual' | 'prueba';
   name: string;
   months: number;
   deliveries: number;
@@ -50,5 +50,14 @@ export const plans: Plan[] = [
     period: '12 meses · 24 entregas', price: MONTHLY_PRICE, note: 'S/130 al mes · 12 meses', value: true,
     tagline: 'Un año entero de estación.',
     features: ['Todo lo del plan Semestral', '24 entregas · flores de estación', 'Prioridad en San Valentín y Día de la Madre'],
+  },
+  // ⚠️ TEMPORAL — plan de PRUEBA de pago (S/2, cargo único). Aparece en el toggle
+  // "Pago único". Borrar tras verificar Culqi (junto con b_prueba en plans-catalog.js).
+  {
+    tier: 'prueba', name: 'Prueba', months: 2, deliveries: 1, monthly: 1,
+    keyA: 'b_prueba', keyB: 'b_prueba',
+    period: 'Prueba de pago · 1 entrega', price: 2, note: 'Cargo único de prueba — S/2',
+    tagline: 'Plan de prueba del pago.',
+    features: ['Cargo único de S/2', 'Solo para verificar el procesador de pago', 'Se elimina después de la prueba'],
   },
 ];
