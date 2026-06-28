@@ -51,7 +51,7 @@ function loadCheckout(): SavedCheckout {
 }
 
 export default function Checkout() {
-  const { items, productById, subtotal, clear } = useCart();
+  const { items, productById, subtotal, clear, remove } = useCart();
   const navigate = useNavigate();
 
   // form state — algunos campos se precargan con lo guardado de una compra previa
@@ -432,6 +432,14 @@ export default function Checkout() {
                       <div>
                         <p className="font-display text-sm font-medium leading-tight text-ink-900">{p.name}</p>
                         <p className="text-[12px] text-foreground/50">Cantidad: {it.qty}</p>
+                        <button
+                          type="button"
+                          onClick={() => remove(it.id)}
+                          className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/45 transition-colors hover:text-rosa-500"
+                        >
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>
+                          Quitar
+                        </button>
                       </div>
                       <span className="shrink-0 text-sm italic text-ink-700">{money(p.price * it.qty)}</span>
                     </div>
