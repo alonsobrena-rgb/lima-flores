@@ -217,9 +217,9 @@ async function subscribe(req, res) {
     deliveryPref: b.delivery_pref || b.delivery_time || null, notes: b.notes || null,
   };
 
-  // ── Único plan recurrente: la MENSUAL. El resto (trimestral/semestral/anual) es
-  //    un PAGO ÚNICO (un solo cargo, no se renueva). ──────────────────────────────
-  if (entry.tier !== 'mensual') {
+  // ── Planes recurrentes (mensual, a_prueba) crean suscripción en Culqi; el resto
+  //    (trimestral/semestral/anual, b_prueba) es PAGO ÚNICO (un solo cargo). ────────
+  if (!entry.recurring) {
     const amountCents = Math.round(entry.amountSoles * 100);
     if (amountCents < 100) return send(res, 400, { error: 'Monto inválido.' });
     try {

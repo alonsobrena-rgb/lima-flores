@@ -61,10 +61,13 @@ function writeMap(map) {
 }
 
 (async () => {
-  console.log(`Catálogo: ${PLANS.length} planes${DRY ? '  (DRY-RUN)' : ''}\n`);
+  // Solo los planes RECURRENTES necesitan un pln_ en Culqi. Los de pago único
+  // (trimestral/semestral/anual, b_prueba) se cobran con /v2/charges, sin plan.
+  const RECURRING = PLANS.filter((p) => p.recurring);
+  console.log(`Catálogo: ${RECURRING.length} planes recurrentes${DRY ? '  (DRY-RUN)' : ''}\n`);
 
   if (DRY) {
-    for (const entry of PLANS) {
+    for (const entry of RECURRING) {
       console.log(`▸ ${entry.key}  ·  modelo ${entry.models.join('/')}  ·  S/ ${entry.amountSoles}  ·  cada ${entry.intervalCount} mes(es)`);
       console.log(JSON.stringify(planBody(entry), null, 2));
       console.log('');
@@ -76,7 +79,7 @@ function writeMap(map) {
   if (!SECRET) { console.error('Falta CULQI_SECRET_KEY (env o integrations/culqi/.env).'); process.exit(1); }
 
   const map = readMap();
-  for (const entry of PLANS) {
+  for (const entry of RECURRING) {
     if (map[entry.key]) { console.log(`= ${entry.key} ya existe (${map[entry.key]}) — salto.`); continue; }
     process.stdout.write(`▸ creando ${entry.key} … `);
     const { status, json } = await culqiPost('/v2/recurrent/plans/create', planBody(entry));

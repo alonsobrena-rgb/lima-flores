@@ -51,14 +51,24 @@ export default function Suscripcion() {
     fetch(`${API_BASE}/api/culqi/plans-status`).then((r) => r.json()).then((d) => setReady(!!d.ready)).catch(() => setReady(false));
   }, []);
 
-  const priceFor = (p: Plan) =>
-    model === 'A' || p.months === 1
+  // Plan de prueba: monto distinto por modelo (A = recurrente `monthly`, B = pago
+  // único `price`). El resto: modelo A = mensual; modelo B = total del periodo.
+  const priceFor = (p: Plan) => {
+    if (p.tier === 'prueba') {
+      return model === 'A'
+        ? { big: money(p.monthly), small: '/ mes' }
+        : { big: money(p.price), small: 'pago único' };
+    }
+    return model === 'A'
       ? { big: money(p.monthly), small: '/ mes' }
       : { big: money(p.monthly * p.months), small: `S/${p.monthly}/mes · ${p.months} meses` };
+  };
 
-  // Mes a mes (A) = una sola suscripción (Mensual). Pago adelantado (B) = los
-  // planes por periodo (trimestral / semestral / anual).
-  const visiblePlans = model === 'A' ? plans.filter((p) => p.tier === 'mensual') : plans.filter((p) => p.tier !== 'mensual');
+  // Mes a mes (A) = suscripción recurrente (Mensual + Prueba). Pago único (B) = los
+  // planes por periodo (trimestral / semestral / anual) + Prueba.
+  const visiblePlans = model === 'A'
+    ? plans.filter((p) => p.tier === 'mensual' || p.tier === 'prueba')
+    : plans.filter((p) => p.tier !== 'mensual');
   const single = visiblePlans.length === 1;
 
   return (
@@ -142,6 +152,11 @@ export default function Suscripcion() {
                         Pago único · no se renueva
                       </span>
                     )}
+                    {model === 'A' && p.tier === 'prueba' && (
+                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-rosa-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-rosa-600">
+                        Mes a mes · se renueva
+                      </span>
+                    )}
                     <p className="mt-4 font-display italic text-ink-600">{p.tagline}</p>
                     <ul className="mt-5 flex-1 space-y-2.5 text-sm text-ink-700">
                       {p.features.map((f) => (
@@ -193,7 +208,10 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
   const markerObj = useRef<any>(null);
 
   const planKey = model === 'A' ? plan.keyA : plan.keyB;
-  const totalSoles = model === 'A' || plan.months === 1 ? plan.monthly : plan.monthly * plan.months;
+  // Plan de prueba: monto por modelo (A recurrente = monthly, B único = price).
+  const totalSoles = plan.tier === 'prueba'
+    ? (model === 'A' ? plan.monthly : plan.price)
+    : (model === 'A' ? plan.monthly : plan.monthly * plan.months);
 
   const matchDistrict = (candidates: string[]) => {
     for (const cand of candidates) {
@@ -299,7 +317,7 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
     } catch (e: any) { setErr(e?.message || 'No se pudo iniciar el pago.'); setBusy(false); }
   };
 
-  const waText = encodeURIComponent(`Hola Lima Flores, quiero el plan ${plan.name} (${model === 'A' ? 'suscripción mensual S/130' : `pago único S/${totalSoles}`}).`);
+  const waText = encodeURIComponent(`Hola Lima Flores, quiero el plan ${plan.name} (${model === 'A' ? `suscripción ${money(totalSoles)}/mes` : `pago único ${money(totalSoles)}`}).`);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}>
@@ -321,9 +339,9 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
           <>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-rosa-500">{model === 'A' || plan.months === 1 ? 'Suscripción' : 'Pago único'} · {plan.name}</span>
-                <h3 className="mt-1 font-display text-2xl text-ink-900">{money(totalSoles)} <span className="text-base text-foreground/55">{model === 'A' || plan.months === 1 ? '/ mes' : 'pago único'}</span></h3>
-                <p className="text-[12px] text-foreground/55">{model === 'A' || plan.months === 1 ? `${plan.period} · flores de estación` : `${plan.period} · un solo pago, no se renueva`}</p>
+                <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-rosa-500">{model === 'A' ? 'Suscripción' : 'Pago único'} · {plan.name}</span>
+                <h3 className="mt-1 font-display text-2xl text-ink-900">{money(totalSoles)} <span className="text-base text-foreground/55">{model === 'A' ? '/ mes' : 'pago único'}</span></h3>
+                <p className="text-[12px] text-foreground/55">{model === 'A' ? `${plan.period} · flores de estación` : `${plan.period} · un solo pago, no se renueva`}</p>
               </div>
               <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-foreground/40 hover:text-ink-900">×</button>
             </div>
@@ -393,7 +411,7 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
 
               <label className="flex cursor-pointer items-start gap-2.5 text-[13px] text-ink-700">
                 <input type="checkbox" checked={tyc} onChange={(e) => setTyc(e.target.checked)} className="mt-0.5 h-4 w-4 accent-rosa-500" />
-                <span>Acepto los términos. {model === 'A' ? 'Entiendo que se cobrará S/130 cada mes a mi tarjeta y que puedo pausar o cancelar cuando quiera.' : `Entiendo que se cobrará S/${totalSoles} en un solo pago a mi tarjeta (no es una suscripción, no se renueva).`}</span>
+                <span>Acepto los términos. {model === 'A' ? `Entiendo que se cobrará ${money(totalSoles)} cada mes a mi tarjeta y que puedo pausar o cancelar cuando quiera.` : `Entiendo que se cobrará ${money(totalSoles)} en un solo pago a mi tarjeta (no es una suscripción, no se renueva).`}</span>
               </label>
 
               {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
