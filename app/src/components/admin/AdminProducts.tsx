@@ -237,7 +237,7 @@ function ProductEditor({ product, isNew, catOptions, onClose, onSaved, onAuthErr
           </div>
           <div>
             <label className={label}>Precio (S/)</label>
-            <input type="number" inputMode="decimal" value={f.price ?? ''} onChange={(e) => set('price', e.target.value)} className={`${field} [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none`} />
+            <input type="number" inputMode="decimal" value={f.price ?? ''} onChange={(e) => set('price', e.target.value)} onWheel={(e) => e.currentTarget.blur()} className={`${field} [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none`} />
           </div>
           <div className="sm:col-span-2">
             <label className={label}>Descripción corta</label>
