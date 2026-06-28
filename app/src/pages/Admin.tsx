@@ -73,7 +73,7 @@ export default function Admin() {
 
         <div className="mt-7">
           {section === 'orders' && <AdminOrders onAuthError={onAuthError} />}
-          {section === 'subscriptions' && <AdminSubscriptions onAuthError={onAuthError} />}
+          {section === 'subscriptions' && <AdminSubscriptions />}
           {section === 'cards' && <AdminCreateCard onAuthError={onAuthError} />}
           {section === 'products' && <AdminProducts onAuthError={onAuthError} />}
           {section === 'studio' && <AdminStudio onAuthError={onAuthError} />}

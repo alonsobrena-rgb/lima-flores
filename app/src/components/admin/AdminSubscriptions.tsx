@@ -1,130 +1,30 @@
-import { useEffect, useState } from 'react';
-import { adminGet, adminSend, AuthError } from '@/lib/admin-api';
+// Las suscripciones ya NO se editan desde este panel: se gestionan por completo
+// en el panel de Culqi (listar, pausar, cancelar, ver cobros). Esta sección solo
+// muestra un aviso con el enlace al panel.
+const CULQI_PANEL = 'https://panel.culqi.com';
 
-type Sub = {
-  id: string;
-  createdAt: string;
-  status: string;
-  planKey: string;
-  model: string;
-  tier: string;
-  amount: number;
-  intervalCount: number;
-  buyer: { name: string; email: string; phone: string };
-  recipient: { name: string; phone: string; address: string; district: string | null; ref?: string | null; apt?: string | null; hasReception?: boolean | null };
-  deliveryTime?: string | null;
-  deliveryPref: string | null;
-  recurring?: boolean;
-  chargeId?: string | null;
-  lastEvent: string | null;
-  lastEventAt: string | null;
-};
-
-const soles = (n: any) => 'S/ ' + (Number(n) || 0).toFixed(0);
-const fmtDate = (iso: any) => { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('es-PE', { dateStyle: 'medium' }); } catch { return String(iso); } };
-const billing = (s: Sub) => s.recurring === false
-  ? `${soles(s.amount)} · pago único`
-  : s.intervalCount === 1 ? `${soles(s.amount)} / mes` : `${soles(s.amount)} cada ${s.intervalCount} meses`;
-
-const STATUS_STYLE: Record<string, string> = {
-  active: 'bg-green-100 text-green-800',
-  paused: 'bg-amber-100 text-amber-800',
-  cancelled: 'bg-red-100 text-red-700',
-};
-
-export function AdminSubscriptions({ onAuthError }: { onAuthError: () => void }) {
-  const [subs, setSubs] = useState<Sub[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const d = await adminGet('/api/admin/subscriptions');
-        setSubs((d as any).subscriptions || []);
-      } catch (e) {
-        if (e instanceof AuthError) onAuthError();
-        else setErr((e as any)?.message || 'No se pudieron cargar las suscripciones.');
-      } finally { setLoading(false); }
-    })();
-  }, [onAuthError]);
-
-  const [canceling, setCanceling] = useState<string | null>(null);
-  const cancel = async (id: string) => {
-    if (!window.confirm('¿Cancelar esta suscripción? Dejará de cobrarse el próximo periodo (no reembolsa cobros ya hechos).')) return;
-    setCanceling(id);
-    try {
-      await adminSend(`/api/admin/subscriptions/${id}/cancel`, 'POST');
-      setSubs((list) => list.map((s) => (s.id === id ? { ...s, status: 'cancelled' } : s)));
-    } catch (e) {
-      if (e instanceof AuthError) onAuthError();
-      else window.alert((e as any)?.message || 'No se pudo cancelar.');
-    } finally { setCanceling(null); }
-  };
-
-  const active = subs.filter((s) => s.status === 'active').length;
-
+export function AdminSubscriptions() {
   return (
-    <div>
-      <div className="mb-4 flex items-baseline justify-between">
-        <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{subs.length} suscripción(es) · {active} activa(s)</p>
-        <p className="text-[12px] text-foreground/45">Las respuestas de los suscriptores las atiendes tú — aquí solo se listan.</p>
+    <div className="mx-auto max-w-xl border border-border bg-surface p-8 text-center md:p-12">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rosa-50 text-rosa-500">
+        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12a9 9 0 1 1-3.46-7.1" /><path d="M21 4v5h-5" />
+        </svg>
       </div>
-
-      {loading && <p className="py-10 text-center italic text-foreground/40">Cargando…</p>}
-      {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
-
-      {!loading && !err && (
-        <div className="overflow-x-auto border border-border">
-          <table className="w-full min-w-[820px] text-left text-[13px]">
-            <thead>
-              <tr className="border-b border-border bg-surface font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/50">
-                <th className="px-3 py-2.5">Suscriptor</th>
-                <th className="px-3 py-2.5">Plan</th>
-                <th className="px-3 py-2.5">Cobro</th>
-                <th className="px-3 py-2.5">Entrega</th>
-                <th className="px-3 py-2.5">Estado</th>
-                <th className="px-3 py-2.5">Alta</th>
-                <th className="px-3 py-2.5">Último evento</th>
-                <th className="px-3 py-2.5">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!subs.length && <tr><td colSpan={8} className="px-3 py-12 text-center italic text-foreground/40">Aún no hay suscripciones.</td></tr>}
-              {subs.map((s) => (
-                <tr key={s.id} className="border-b border-border/60 align-top">
-                  <td className="px-3 py-3">
-                    <p className="font-medium text-ink-900">{s.buyer.name || '—'}</p>
-                    <p className="text-[12px] text-foreground/55">{s.buyer.email}</p>
-                    <p className="text-[12px] text-foreground/55">{s.buyer.phone}</p>
-                  </td>
-                  <td className="px-3 py-3">
-                    <p className="capitalize text-ink-900">{s.tier}</p>
-                    <p className="text-[12px] text-foreground/50">{s.recurring === false ? 'Pago único' : 'Suscripción'}</p>
-                  </td>
-                  <td className="px-3 py-3 text-ink-800">{billing(s)}</td>
-                  <td className="px-3 py-3">
-                    <p className="text-ink-900">{s.recipient.name || '—'}</p>
-                    {s.recipient.address && <p className="text-[12px] text-foreground/55">{s.recipient.address}{s.recipient.apt ? `, ${s.recipient.apt}` : ''}</p>}
-                    <p className="text-[12px] text-foreground/55">{[s.recipient.district, s.recipient.ref].filter(Boolean).join(' · ')}</p>
-                    {(s.deliveryTime || s.deliveryPref) && <p className="text-[12px] text-foreground/45">Horario: {s.deliveryTime || s.deliveryPref}</p>}
-                  </td>
-                  <td className="px-3 py-3">
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLE[s.status] || 'bg-ivory-200 text-foreground/60'}`}>{s.status}</span>
-                  </td>
-                  <td className="px-3 py-3 text-[12px] text-foreground/60">{fmtDate(s.createdAt)}</td>
-                  <td className="px-3 py-3 text-[12px] text-foreground/60">{s.lastEvent ? <>{s.lastEvent}<br /><span className="text-foreground/40">{fmtDate(s.lastEventAt)}</span></> : '—'}</td>
-                  <td className="px-3 py-3">
-                    {s.status === 'active'
-                      ? <button disabled={canceling === s.id} onClick={() => cancel(s.id)} className="rounded border border-red-300 px-2.5 py-1 text-[12px] font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50">{canceling === s.id ? 'Cancelando…' : 'Cancelar'}</button>
-                      : <span className="text-[12px] text-foreground/40">—</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <h2 className="mt-5 font-display text-2xl font-medium text-ink-900">Las suscripciones se gestionan en Culqi</h2>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-foreground/65">
+        El listado, los cobros recurrentes, las pausas y las cancelaciones se administran
+        directamente desde el panel de Culqi. Aquí ya no hay editor de suscripciones.
+      </p>
+      <a
+        href={CULQI_PANEL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-7 inline-flex items-center gap-2 bg-rosa-500 px-6 py-3 text-[13px] font-medium uppercase tracking-[0.14em] text-ivory-50 transition-colors hover:bg-rosa-600"
+      >
+        Abrir panel de Culqi
+        <span aria-hidden>→</span>
+      </a>
     </div>
   );
 }
