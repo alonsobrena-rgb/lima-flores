@@ -67,6 +67,14 @@ const puppeteer = require('puppeteer');
         if (!a0[k - 1] || !a0[k + 1] || !a0[k - w] || !a0[k + w]) d[i + 3] = 0;
       }
     }
+    // Protege la tarjeta "Lima Flores" (cartulina blanca clavada en la maceta):
+    // su fondo blanco cae en el mismo rango que el del flood-fill y se borraba.
+    // Restauramos alpha pleno en su rectángulo (coords normalizadas del original).
+    const PR = [0.503, 0.430, 0.620, 0.520]; // x0,y0,x1,y1
+    const px0 = Math.max(0, (PR[0] * w) | 0), py0 = Math.max(0, (PR[1] * h) | 0);
+    const px1 = Math.min(w - 1, (PR[2] * w) | 0), py1 = Math.min(h - 1, (PR[3] * h) | 0);
+    for (let y = py0; y <= py1; y++) for (let x = px0; x <= px1; x++) d[(y * w + x) * 4 + 3] = 255;
+
     // bounding box de lo opaco para recortar márgenes
     let minX = w, minY = h, maxX = 0, maxY = 0;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
