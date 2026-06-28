@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -15,6 +16,65 @@ const PRICE_RANGES = [
   { key: 'o350', label: 'Más de S/350', test: (n: number) => n > 350 },
 ];
 
+// Filtro de precio como dropdown: las opciones predefinidas + un campo para
+// escribir un precio máximo personalizado (se guarda en la URL como `maxNNN`).
+function PriceDropdown({ value, label, onSelect }: { value: string; label: string; onSelect: (key: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [custom, setCustom] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const m = /^max(\d+)$/.exec(value);
+    if (m) setCustom(m[1]);
+  }, [value]);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+  const applyCustom = () => {
+    const n = parseInt(custom, 10);
+    if (Number.isFinite(n) && n > 0) { onSelect(`max${n}`); setOpen(false); }
+  };
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 rounded-full border border-ink-900/15 bg-ivory-50/80 px-4 py-1.5 text-[12px] font-medium tracking-[0.03em] text-ink-900 transition-colors hover:border-ink-900/40"
+      >
+        {label}
+        <svg className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-30 mt-2 w-64 rounded-md border border-ink-900/10 bg-ivory-50 p-1.5 shadow-[0_24px_60px_-28px_rgba(42,38,35,0.6)]">
+          {PRICE_RANGES.map((r) => (
+            <button
+              key={r.key} onClick={() => { onSelect(r.key); setOpen(false); }}
+              className={`block w-full rounded px-3 py-2 text-left text-[13px] transition-colors ${value === r.key ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:bg-ink-900/5'}`}
+            >
+              {r.label}
+            </button>
+          ))}
+          <div className="mt-1.5 border-t border-ink-900/10 px-2 pb-1 pt-2.5">
+            <label className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-500">Precio máximo</label>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <span className="text-[13px] text-ink-500">S/</span>
+              <input
+                type="number" min="1" inputMode="numeric" value={custom}
+                onChange={(e) => setCustom(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') applyCustom(); }}
+                placeholder="Ej. 300"
+                className="w-full rounded border border-ink-900/15 bg-white px-2 py-1.5 text-[13px] text-ink-900 outline-none focus:border-rosa-500"
+              />
+              <button onClick={applyCustom} className="shrink-0 rounded bg-ink-900 px-3 py-1.5 text-[12px] font-medium text-ivory-50 transition-colors hover:bg-rosa-500">Aplicar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Catalogo() {
   const { products } = useProducts();
   const { categories } = useCategories();
@@ -25,8 +85,12 @@ export default function Catalogo() {
   const raw = params.get('cat') || 'all';
   const cat = chips.some((c) => c.slug === raw) ? raw : 'all';
   const rawPrice = params.get('precio') || 'all';
-  const priceKey = PRICE_RANGES.some((r) => r.key === rawPrice) ? rawPrice : 'all';
-  const priceRange = PRICE_RANGES.find((r) => r.key === priceKey)!;
+  const isPreset = PRICE_RANGES.some((r) => r.key === rawPrice);
+  const customMax = !isPreset ? /^max(\d+)$/.exec(rawPrice) : null;
+  const activePrice = isPreset ? rawPrice : customMax ? rawPrice : 'all';
+  const priceTest = (n: number) =>
+    customMax ? n <= Number(customMax[1]) : (PRICE_RANGES.find((r) => r.key === activePrice) ?? PRICE_RANGES[0]).test(n);
+  const priceLabel = customMax ? `Hasta S/${customMax[1]}` : (PRICE_RANGES.find((r) => r.key === activePrice) ?? PRICE_RANGES[0]).label;
   const setParam = (key: string, val: string) => {
     const next = new URLSearchParams(params);
     if (!val || val === 'all') next.delete(key); else next.set(key, val);
@@ -35,7 +99,7 @@ export default function Catalogo() {
   const setCat = (slug: string) => setParam('cat', slug);
   const setPrice = (key: string) => setParam('precio', key);
   const list = products.filter(
-    (p) => (cat === 'all' || p.category === cat) && priceRange.test(Number(p.price) || 0)
+    (p) => (cat === 'all' || p.category === cat) && priceTest(Number(p.price) || 0)
   );
 
   return (
@@ -51,7 +115,7 @@ export default function Catalogo() {
 
       <div className="relative z-10">
       <SiteHeader />
-      <header className="mx-auto max-w-7xl px-6 pb-10 pt-16 md:px-12 md:pt-20">
+      <header className="relative z-30 mx-auto max-w-7xl px-6 pb-10 pt-16 md:px-12 md:pt-20">
         {/* Plinth esmerilado: fondo ivory propio para que el título y los filtros
             se lean sobre la carretilla. */}
         <div className="relative inline-block max-w-2xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-8 shadow-[0_28px_70px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-11 md:py-10">
@@ -60,7 +124,7 @@ export default function Catalogo() {
             Flores de estación, <em className="italic text-rosa-500">hechas a mano.</em>
           </h1>
           <p className="mt-5 max-w-md text-ink-700">
-            {cat === 'all' && priceKey === 'all'
+            {cat === 'all' && activePrice === 'all'
               ? `${products.length} creaciones, armadas tallo por tallo y entregadas en Lima.`
               : `${list.length} ${list.length === 1 ? 'creación' : 'creaciones'} con estos filtros.`}
           </p>
@@ -77,18 +141,10 @@ export default function Catalogo() {
             ))}
           </div>
 
-          {/* Filtro de precio */}
+          {/* Filtro de precio (dropdown con opciones + precio máximo personalizado) */}
           <div className="mt-4 flex flex-wrap items-center gap-2.5">
             <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
-            {PRICE_RANGES.map((r) => (
-              <button
-                key={r.key} onClick={() => setPrice(r.key)}
-                className={`rounded-full border px-4 py-1.5 text-[12px] font-medium tracking-[0.03em] transition-colors ${
-                  priceKey === r.key ? 'border-rosa-500 bg-rosa-500 text-ivory-50' : 'border-ink-900/15 text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
-              >
-                {r.label}
-              </button>
-            ))}
+            <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
           </div>
         </div>
       </header>

@@ -19,9 +19,7 @@ export const SiteFooter = () => (
     <div className="relative mx-auto max-w-7xl">
       <div className="grid gap-12 md:grid-cols-[2fr_1fr_1.4fr_1fr]">
         <div>
-          <p className="font-display text-3xl font-light leading-none">
-            Lima <em className="italic text-rosa-300">Flores.</em>
-          </p>
+          <img src="/assets/logo.png" alt="Lima Flores" className="h-20 w-auto" />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-ivory-100/70">
             Atelier botánico de Miraflores. Arte hecho a mano con flores de estación desde 2017.
           </p>
@@ -34,7 +32,7 @@ export const SiteFooter = () => (
         ])}
         {col('Contacto', [
           { label: 'WhatsApp · 999 479 855', href: 'https://wa.me/51999479855' },
-          { label: 'hola@limaflores.pe', href: 'mailto:hola@limaflores.pe' },
+          { label: 'ventas@limaflores.pe', href: 'mailto:ventas@limaflores.pe' },
           { label: 'Miraflores · Lima', href: '#' },
         ])}
         {col('Síguenos', [
