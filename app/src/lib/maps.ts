@@ -58,90 +58,141 @@ export type PlaceResult = {
   placeId?: string;
 };
 
-// ── Fix móvil (portado de site/js/geocoder.js, probado en producción) ──
-// En Android Chrome el dropdown .pac-container queda detrás del teclado y el
-// tap en una sugerencia hace blur antes del mousedown → la selección se pierde
-// ("se bloquea la línea"). Reposicionamos con visualViewport y convertimos el
-// touchstart en el mousedown que Google escucha.
-let _mobileFixDone = false;
-function setupMobileDropdownFix(inputEl: HTMLInputElement) {
-  if (_mobileFixDone) return;
-  _mobileFixDone = true;
+// ── Fix móvil del autocomplete ──
+// En táctil el .pac-container queda tras el teclado y, peor, la API legacy de
+// Google ya NO selecciona con eventos sintéticos (ignora isTrusted=false): el
+// viejo truco del mousedown sintético dejó de funcionar. Reposicionamos con
+// visualViewport y, al tocar una sugerencia, la resolvemos nosotros vía Places
+// API (ver selectTappedSuggestion / resolveByPlacesQuery).
+// Resuelve una sugerencia TOCADA (táctil) sin depender de la selección interna de
+// Google: la API legacy ya ignora los eventos sintéticos (no confiables), así que
+// leemos el texto del .pac-item, lo geocodificamos y lo entregamos por el callback
+// (mismo camino que el fallback de texto libre del checkout).
+async function selectTappedSuggestion(inputEl: HTMLInputElement, item: HTMLElement) {
+  const query = (item.querySelector('.pac-item-query')?.textContent || '').replace(/\s+/g, ' ').trim();
+  const full = (item.textContent || '').replace(/\s+/g, ' ').trim();
+  const secondary = query && full.startsWith(query) ? full.slice(query.length).trim() : '';
+  const text = secondary ? `${query}, ${secondary}` : (query || full);
+  if (!text) return;
+  inputEl.value = text;
+  // Cierra el dropdown ya (Google lo recrea al seguir escribiendo).
+  document.querySelectorAll<HTMLElement>('.pac-container').forEach((c) => c.style.setProperty('display', 'none', 'important'));
+  // Resolvemos coordenadas con la Places API (siempre activa si el autocomplete
+  // carga); si fallara, caemos a Geocoding (texto libre).
+  const place = (await resolveByPlacesQuery(text)) || (await geocodeText(text));
+  const cb = (inputEl as any)._lfOnPlace as ((p: PlaceResult) => void) | undefined;
+  if (place && cb) { inputEl.value = place.formatted; cb(place); }
+}
 
-  const isMobile =
-    window.matchMedia('(max-width: 768px)').matches ||
+// Resuelve un texto a un lugar con la Places API (AutocompleteService → getDetails),
+// sin depender de la Geocoding API. Devuelve coords + distrito + dirección formateada.
+async function resolveByPlacesQuery(text: string): Promise<PlaceResult | null> {
+  let g: any;
+  try { g = await loadMaps(); } catch { return null; }
+  try {
+    const svc = new g.maps.places.AutocompleteService();
+    const predictions: any[] = await new Promise((resolve) => {
+      svc.getPlacePredictions(
+        { input: text, componentRestrictions: { country: 'pe' }, bounds: new g.maps.LatLngBounds(LIMA_BOUNDS.sw, LIMA_BOUNDS.ne) },
+        (res: any[], status: string) => resolve(status === 'OK' && Array.isArray(res) ? res : []),
+      );
+    });
+    const placeId = predictions[0]?.place_id;
+    if (!placeId) return null;
+    const places = new g.maps.places.PlacesService(document.createElement('div'));
+    return await new Promise<PlaceResult | null>((resolve) => {
+      places.getDetails(
+        { placeId, fields: ['geometry', 'formatted_address', 'address_components', 'name', 'place_id'] },
+        (place: any, status: string) => {
+          if (status !== 'OK' || !place?.geometry?.location) return resolve(null);
+          const candidates = extractDistrictCandidates(place.address_components);
+          const name = place.name as string | undefined;
+          const addr = place.formatted_address || '';
+          const formatted = name && addr && !addr.toLowerCase().startsWith(name.toLowerCase())
+            ? `${name}, ${addr}` : (addr || name || text);
+          resolve({
+            lat: place.geometry.location.lat(), lng: place.geometry.location.lng(),
+            district: candidates[0] || null, districtCandidates: candidates,
+            formatted, placeId: place.place_id,
+          });
+        },
+      );
+    });
+  } catch { return null; }
+}
+
+// Rastreamos el input de dirección ACTIVO (por foco): en una SPA hay varios
+// (checkout y modal de suscripción) y el .pac-container es compartido. Sin esto,
+// un singleton capturaría el primer input para siempre y escribiría en el equivocado.
+let activeInput: HTMLInputElement | null = null;
+let _globalDropdownObs = false;
+let touchingPac = false;
+
+function isMobileEnv(): boolean {
+  return window.matchMedia('(max-width: 768px)').matches ||
     (window.matchMedia('(pointer: coarse)').matches && window.innerWidth <= 900);
+}
 
-  // En desktop, Google maneja el click sobre .pac-item de forma nativa y bien.
-  // El observer + `mousedown preventDefault` de abajo existen SOLO para el bug
-  // del teclado virtual en móvil; en desktop ese preventDefault interfería con
-  // la selección de la sugerencia ("no puedo clickear las sugerencias").
-  // Igual que el geocoder.js del sitio vanilla (probado en prod), salimos aquí.
-  if (!isMobile) return;
+function lastPac(): HTMLElement | null {
+  const list = document.querySelectorAll<HTMLElement>('.pac-container');
+  return list[list.length - 1] || null;
+}
 
-  function getPac(): HTMLElement | null {
-    const list = document.querySelectorAll<HTMLElement>('.pac-container');
-    return list[list.length - 1] || null;
+// Reposiciona el dropdown respecto al input activo, esquivando el teclado virtual.
+function positionPac() {
+  if (touchingPac) return;
+  const input = activeInput;
+  const pac = lastPac();
+  if (!input || !pac) return;
+  const vv = window.visualViewport;
+  const vvTop = vv ? vv.offsetTop : 0;
+  const vvHeight = vv ? vv.height : window.innerHeight;
+  const vvWidth = vv ? vv.width : document.documentElement.clientWidth;
+  const inputRect = input.getBoundingClientRect();
+  const margin = 8;
+  const minHeight = 160;
+  const spaceBelow = (vvTop + vvHeight) - inputRect.bottom - margin;
+  const spaceAbove = inputRect.top - vvTop - margin;
+  pac.style.setProperty('position', 'fixed', 'important');
+  pac.style.setProperty('left', margin + 'px', 'important');
+  pac.style.setProperty('width', (vvWidth - margin * 2) + 'px', 'important');
+  pac.style.setProperty('max-width', 'none', 'important');
+  pac.style.setProperty('z-index', '999999', 'important');
+  pac.style.setProperty('overflow-y', 'auto', 'important');
+  if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
+    pac.style.setProperty('top', (inputRect.bottom + 4) + 'px', 'important');
+    pac.style.setProperty('bottom', 'auto', 'important');
+    pac.style.setProperty('max-height', Math.max(spaceBelow, minHeight) + 'px', 'important');
+  } else {
+    pac.style.setProperty('top', 'auto', 'important');
+    pac.style.setProperty('bottom', (window.innerHeight - inputRect.top + 4) + 'px', 'important');
+    pac.style.setProperty('max-height', Math.max(spaceAbove, minHeight) + 'px', 'important');
   }
+}
 
-  let touchingPac = false;
+// El .pac-container se crea diferido al escribir; lo perseguimos un rato.
+let _chaseTimer: ReturnType<typeof setInterval> | null = null;
+function chasePac() {
+  if (_chaseTimer) clearInterval(_chaseTimer);
+  let n = 0;
+  _chaseTimer = setInterval(() => {
+    positionPac();
+    if (++n > 12 && _chaseTimer) { clearInterval(_chaseTimer); _chaseTimer = null; }
+  }, 80);
+}
 
-  function position() {
-    if (!isMobile || touchingPac) return;
-    const pac = getPac();
-    if (!pac) return;
-    const vv = window.visualViewport;
-    const vvTop = vv ? vv.offsetTop : 0;
-    const vvHeight = vv ? vv.height : window.innerHeight;
-    const vvWidth = vv ? vv.width : document.documentElement.clientWidth;
-    const inputRect = inputEl.getBoundingClientRect();
-    const margin = 8;
-    const minHeight = 160;
-
-    const spaceBelow = (vvTop + vvHeight) - inputRect.bottom - margin;
-    const spaceAbove = inputRect.top - vvTop - margin;
-
-    pac.style.setProperty('position', 'fixed', 'important');
-    pac.style.setProperty('left', margin + 'px', 'important');
-    pac.style.setProperty('width', (vvWidth - margin * 2) + 'px', 'important');
-    pac.style.setProperty('max-width', 'none', 'important');
-    pac.style.setProperty('z-index', '999999', 'important');
-    pac.style.setProperty('overflow-y', 'auto', 'important');
-
-    if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
-      pac.style.setProperty('top', (inputRect.bottom + 4) + 'px', 'important');
-      pac.style.setProperty('bottom', 'auto', 'important');
-      pac.style.setProperty('max-height', Math.max(spaceBelow, minHeight) + 'px', 'important');
-    } else {
-      pac.style.setProperty('top', 'auto', 'important');
-      pac.style.setProperty('bottom', (window.innerHeight - inputRect.top + 4) + 'px', 'important');
-      pac.style.setProperty('max-height', Math.max(spaceAbove, minHeight) + 'px', 'important');
-    }
-  }
-
-  // El .pac-container se crea diferido la primera vez que el usuario escribe.
-  let retry: ReturnType<typeof setInterval> | null = null;
-  function chase() {
-    if (!isMobile) return;
-    if (retry) clearInterval(retry);
-    let n = 0;
-    retry = setInterval(() => {
-      position();
-      if (++n > 12 && retry) { clearInterval(retry); retry = null; }
-    }, 80);
-  }
-  inputEl.addEventListener('focus', chase);
-  inputEl.addEventListener('input', () => requestAnimationFrame(position));
+// Listeners GLOBALES (una sola vez): observa la aparición del .pac-container y, en
+// táctil, resuelve la sugerencia tocada nosotros mismos (Google ya ignora los
+// eventos sintéticos, así que el viejo mousedown sintético no sirve).
+function setupGlobalDropdown() {
+  if (_globalDropdownObs) return;
+  _globalDropdownObs = true;
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', position);
-    window.visualViewport.addEventListener('scroll', position);
+    window.visualViewport.addEventListener('resize', positionPac);
+    window.visualViewport.addEventListener('scroll', positionPac);
   }
-  window.addEventListener('resize', position);
-  window.addEventListener('scroll', position, { passive: true });
-
-  // touchstart sobre .pac-item → preventDefault (evita el blur) + mousedown
-  // sintético para que Google registre la selección. En desktop basta con
-  // preventDefault del mousedown para no perder el foco del input.
+  window.addEventListener('resize', positionPac);
+  window.addEventListener('scroll', positionPac, { passive: true });
   const obs = new MutationObserver((muts) => {
     for (const m of muts) {
       for (const n of m.addedNodes) {
@@ -149,21 +200,29 @@ function setupMobileDropdownFix(inputEl: HTMLInputElement) {
           const pac = n as HTMLElement;
           pac.addEventListener('mousedown', (e) => e.preventDefault());
           pac.addEventListener('touchstart', (e) => {
-            const item = (e.target as HTMLElement).closest('.pac-item');
-            if (!item) return;
+            const item = (e.target as HTMLElement).closest('.pac-item') as HTMLElement | null;
+            if (!item || !activeInput) return;
             touchingPac = true;
-            e.preventDefault();
-            item.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-            item.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+            e.preventDefault(); // evita el blur del input y el ghost-click sobre lo de atrás
+            void selectTappedSuggestion(activeInput, item);
           }, { passive: false });
           pac.addEventListener('touchend', () => { setTimeout(() => { touchingPac = false; }, 50); }, { passive: true });
           pac.addEventListener('touchcancel', () => { touchingPac = false; }, { passive: true });
-          position();
+          positionPac();
         }
       }
     }
   });
   obs.observe(document.body, { childList: true });
+}
+
+// Por input (una vez por campo): marca cuál autocomplete está activo y reposiciona.
+// Solo en móvil — en desktop Google maneja el click nativo (confiable), no tocamos.
+function setupMobileDropdownFix(inputEl: HTMLInputElement) {
+  if (!isMobileEnv()) return;
+  inputEl.addEventListener('focus', () => { activeInput = inputEl; chasePac(); });
+  inputEl.addEventListener('input', () => { activeInput = inputEl; requestAnimationFrame(positionPac); });
+  setupGlobalDropdown();
 }
 
 // attachAutocomplete(inputEl, onPlace) — Autocomplete + fixes móvil/tap.
