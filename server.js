@@ -124,6 +124,11 @@ const server = http.createServer(async (req, res) => {
     return require('./api/categories')(req, res, parsed);
   }
 
+  // ─── /api/instagram — feed de posts de @lima_flores (galería de la landing) ───
+  if (parsed.pathname === '/api/instagram') {
+    return require('./api/instagram')(req, res, parsed);
+  }
+
   // ─── /api/culqi/* — pasarela de pago Culqi (cobro de tarjeta) ───
   if (parsed.pathname.startsWith('/api/culqi/')) {
     return require('./api/culqi')(req, res, parsed);

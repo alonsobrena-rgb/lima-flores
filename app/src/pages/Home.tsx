@@ -6,7 +6,7 @@ import { SignatureProduct } from '@/components/sections/SignatureProduct';
 import { FeaturedProducts } from '@/components/sections/FeaturedProducts';
 import { Categories } from '@/components/sections/Categories';
 import { AtelierStory } from '@/components/sections/AtelierStory';
-import { Testimonials } from '@/components/sections/Testimonials';
+import { InstagramGallery } from '@/components/sections/InstagramGallery';
 import { SubscriptionTeaser } from '@/components/sections/SubscriptionTeaser';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 
@@ -45,7 +45,7 @@ export default function Home() {
         <Categories />
         <SignatureProduct />
         <AtelierStory />
-        <Testimonials />
+        <InstagramGallery />
         <SubscriptionTeaser />
         <SiteFooter />
       </div>
