@@ -33,21 +33,40 @@ const payments = ['Yape', 'Tarjeta'];
 type Place = { lat: number; lng: number; district: string | null; formatted: string };
 type Shipping = { fee: number | null; provider: string | null; label: string };
 
+// Recordamos los datos del checkout en localStorage para precargarlos en la
+// próxima compra. NO guardamos fecha, hora, el mensaje de la tarjeta ni "enviar
+// como anónimo" — son específicos de cada pedido.
+const CHECKOUT_KEY = 'lf_checkout';
+type SavedCheckout = {
+  buyer?: { name: string; email: string; phone: string };
+  recip?: { name: string; phone: string; ref: string; apt: string };
+  district?: string;
+  payment?: string;
+  reception?: boolean;
+  place?: Place | null;
+  addressText?: string;
+};
+function loadCheckout(): SavedCheckout {
+  try { return JSON.parse(localStorage.getItem(CHECKOUT_KEY) || '{}') || {}; } catch { return {}; }
+}
+
 export default function Checkout() {
   const { items, productById, subtotal, clear } = useCart();
   const navigate = useNavigate();
 
-  // form state
-  const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
-  const [recip, setRecip] = useState({ name: '', phone: '', ref: '', apt: '' });
-  const [district, setDistrict] = useState('');
+  // form state — algunos campos se precargan con lo guardado de una compra previa
+  // (CHECKOUT_KEY). Fecha, hora, mensaje de tarjeta y "anónimo" NO se recuerdan.
+  const [saved] = useState(loadCheckout);
+  const [buyer, setBuyer] = useState(saved.buyer ?? { name: '', email: '', phone: '' });
+  const [recip, setRecip] = useState(saved.recip ?? { name: '', phone: '', ref: '', apt: '' });
+  const [district, setDistrict] = useState(saved.district ?? '');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [payment, setPayment] = useState('');
-  const [reception, setReception] = useState(true);
+  const [payment, setPayment] = useState(saved.payment ?? '');
+  const [reception, setReception] = useState(saved.reception ?? true);
   const [cardNote, setCardNote] = useState('');
   const [cardAnon, setCardAnon] = useState(false);
-  const [place, setPlace] = useState<Place | null>(null);
+  const [place, setPlace] = useState<Place | null>(saved.place ?? null);
   const [shipping, setShipping] = useState<Shipping>({ fee: null, provider: null, label: 'Por calcular' });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
@@ -56,6 +75,20 @@ export default function Checkout() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapObj = useRef<any>(null);
   const markerObj = useRef<any>(null);
+
+  // Guarda los datos reutilizables del checkout (todo menos fecha/hora/mensaje de
+  // tarjeta/anónimo) para precargarlos la próxima compra.
+  const persistCheckout = () => {
+    const data: SavedCheckout = {
+      buyer, recip, district, payment, reception, place,
+      addressText: place?.formatted || addressRef.current?.value || '',
+    };
+    try { localStorage.setItem(CHECKOUT_KEY, JSON.stringify(data)); } catch { /* storage no disponible */ }
+  };
+  useEffect(() => {
+    persistCheckout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buyer, recip, district, payment, reception, place]);
 
   // cotización real de envío por coordenadas (Cabify/Urbaner). Sin coords no hay
   // monto: el envío queda "por calcular" hasta que el usuario ponga su ubicación.
@@ -91,6 +124,8 @@ export default function Checkout() {
   useEffect(() => {
     let ac: any; let cancelled = false;
     if (!addressRef.current) return;
+    // Restaura la dirección escrita de una compra previa (input no controlado).
+    if (saved.addressText && !addressRef.current.value) addressRef.current.value = saved.addressText;
     attachAutocomplete(addressRef.current, (loc) => { if (!cancelled) applyPlace(loc); })
       .then((widget) => { ac = widget; })
       .catch(() => { /* sin key/referrer → input de texto normal */ });
@@ -127,6 +162,8 @@ export default function Checkout() {
   }
 
   const total = shipping.fee !== null ? subtotal + shipping.fee : null;
+  // Fecha mínima seleccionable = hoy (hora local), para no permitir fechas pasadas.
+  const minDate = new Date().toLocaleDateString('en-CA');
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -275,7 +312,7 @@ export default function Checkout() {
 
               <div>
                 <label className={darkLabel}>Dirección {mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
-                <input ref={addressRef} required className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
+                <input ref={addressRef} required onBlur={persistCheckout} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
               </div>
               {place && (
                 <div>
@@ -303,7 +340,7 @@ export default function Checkout() {
                     {districts.map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
-                <div><label className={darkLabel}>Fecha</label><input required type="date" value={date} onChange={(e) => setDate(e.target.value)} className={darkField} /></div>
+                <div><label className={darkLabel}>Fecha</label><input required type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className={darkField} /></div>
                 <div>
                   <label className={darkLabel}>Horario</label>
                   <select required className={`${darkField} dark-select`} value={time} onChange={(e) => setTime(e.target.value)}>
