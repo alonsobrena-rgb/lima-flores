@@ -138,8 +138,8 @@ export default function Suscripcion() {
                 <StaggerItem key={p.tier} className="h-full">
                   <div className={`group relative flex h-full flex-col p-7 transition-all duration-500 hover:-translate-y-1.5 ${
                     p.featured
-                      ? 'frost border border-rosa-500 shadow-[0_30px_70px_-30px_rgba(158,43,94,0.45)] md:scale-[1.03]'
-                      : 'frost border border-border hover:border-rosa-300'}`}>
+                      ? 'bg-card border border-rosa-500 shadow-[0_30px_70px_-30px_rgba(158,43,94,0.45)] md:scale-[1.03]'
+                      : 'bg-card border border-border shadow-[0_18px_50px_-28px_rgba(42,38,35,0.28)] hover:border-rosa-300'}`}>
                     {(p.featured || p.value) && (
                       <span className="absolute -top-3 right-6 bg-rosa-500 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ivory-50">{p.featured ? 'Más popular' : 'Mejor valor'}</span>
                     )}
