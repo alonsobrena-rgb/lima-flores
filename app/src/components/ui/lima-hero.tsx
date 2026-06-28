@@ -52,7 +52,11 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
     <section ref={sectionRef} className="relative h-screen min-h-[620px] w-full overflow-hidden bg-ivory-100">
       {/* ── Video de fondo del hero (loop, confinado a esta sección) ── */}
       <video
-        className="absolute inset-0 h-full w-full object-cover"
+        // En móvil (vertical) el video 16:9 se recorta a los lados; centrado
+        // dejaba a la mujer (que va en el tercio izquierdo del cuadro) fuera de
+        // vista. Corremos el encuadre a la izquierda en móvil; en desktop (md+)
+        // se ve casi todo el cuadro, así que volvemos al centro.
+        className="absolute inset-0 h-full w-full object-cover object-[32%_center] md:object-center"
         poster={poster}
         autoPlay
         muted
