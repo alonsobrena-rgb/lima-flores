@@ -239,6 +239,9 @@ export default function Checkout() {
 
     w.culqi = async () => {
       if (Culqi.token && Culqi.token.id) {
+        // El modal de Culqi v4 no se cierra solo tras generar el token —
+        // lo cerramos nosotros y procesamos el cobro de fondo.
+        try { Culqi.close(); } catch { /* noop */ }
         try {
           const r = await fetch(`${API_BASE}/api/culqi/charge`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },

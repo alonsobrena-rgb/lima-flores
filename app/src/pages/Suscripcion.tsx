@@ -299,6 +299,9 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
       Culqi.options({ lang: 'auto', installments: false, paymentMethods: { tarjeta: true, yape: false, bancaMovil: false, agente: false, billetera: false, cuotealo: false } });
       w.culqi = async () => {
         if (Culqi.token && Culqi.token.id) {
+          // El modal de Culqi v4 no se cierra solo tras generar el token —
+          // lo cerramos nosotros y procesamos la suscripción de fondo.
+          try { Culqi.close(); } catch { /* noop */ }
           try {
             const r = await fetch(`${API_BASE}/api/culqi/subscribe`, {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
