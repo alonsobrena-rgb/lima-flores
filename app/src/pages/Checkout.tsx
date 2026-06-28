@@ -162,8 +162,9 @@ export default function Checkout() {
   }
 
   const total = shipping.fee !== null ? subtotal + shipping.fee : null;
-  // Fecha mínima seleccionable = hoy (hora local), para no permitir fechas pasadas.
-  const minDate = new Date().toLocaleDateString('en-CA');
+  // Fecha mínima seleccionable = mañana (hora local): no se permiten fechas
+  // pasadas ni el mismo día.
+  const minDate = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toLocaleDateString('en-CA'); })();
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
