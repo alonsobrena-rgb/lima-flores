@@ -41,7 +41,7 @@ export const FeaturedProducts = () => (
           >
             <Link to={`/producto/${p.id}`} className="group block">
               <div className="relative overflow-hidden bg-ivory-200">
-                <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+                <img src={p.image} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
               </div>
               <div className="mt-4 flex items-baseline justify-between gap-3">
                 <div>

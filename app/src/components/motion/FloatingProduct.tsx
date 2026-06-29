@@ -40,7 +40,7 @@ export const FloatingProduct = ({ id, className, bob = 10, delay = 0, tilt = 0, 
           className="group block w-[150px] rounded-md bg-surface p-2.5 shadow-[0_22px_50px_-22px_rgba(42,38,35,0.5)] ring-1 ring-black/[0.04] transition-transform duration-500 hover:-translate-y-1.5 sm:w-[168px]"
         >
           <div className="overflow-hidden rounded-sm bg-ivory-200">
-            <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
+            <img src={p.image} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
           </div>
           <div className="px-1 pb-0.5 pt-2.5">
             {label && <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-rosa-500">{label}</p>}

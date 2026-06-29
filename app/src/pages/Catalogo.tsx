@@ -164,7 +164,7 @@ export default function Catalogo() {
             >
               <Link to={`/producto/${p.id}`} className="block">
                 <div className="relative overflow-hidden rounded-sm bg-ivory-200 shadow-[0_10px_30px_-18px_rgba(42,38,35,0.4)] transition-shadow duration-500 group-hover:shadow-[0_28px_55px_-26px_rgba(42,38,35,0.5)]">
-                  <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
+                  <img src={p.image} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink-900/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 </div>
               </Link>

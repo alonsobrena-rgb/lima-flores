@@ -93,7 +93,7 @@ export default function Producto() {
               {related.map((p) => (
                 <Link key={p.id} to={`/producto/${p.id}`} className="group block">
                   <div className="overflow-hidden bg-ivory-200">
-                    <img src={p.image} alt={p.name} className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+                    <img src={p.image} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
                   </div>
                   <h3 className="mt-3 font-display text-base font-medium text-ink-900">{p.name}</h3>
                   <span className="text-[15px] italic text-ink-600">{money(p.price)}</span>
@@ -125,7 +125,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
         aria-label="Ampliar imagen"
         className="group relative block overflow-hidden rounded-sm bg-ivory-200 shadow-[0_30px_70px_-36px_rgba(42,38,35,0.5)] ring-1 ring-black/[0.04]"
       >
-        <img src={images[active]} alt={name} className="aspect-[4/5] w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.03]" />
+        <img src={images[active]} alt={name} className="aspect-square w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.03]" />
         <span className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-ink-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-ivory-50 opacity-0 transition-opacity group-hover:opacity-100">
           {multi ? `Ampliar · ${images.length} fotos` : 'Ampliar'}
         </span>

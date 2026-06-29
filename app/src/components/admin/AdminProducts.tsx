@@ -84,7 +84,7 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {filtered.map((p) => (
           <div key={p.id} className={`group flex flex-col border border-border bg-surface-card ${p.active === false ? 'opacity-55' : ''}`}>
-            <div className="relative aspect-[4/5] overflow-hidden bg-ivory-200">
+            <div className="relative aspect-square overflow-hidden bg-ivory-200">
               {p.image ? <img src={resolveImg(p.image)} alt={p.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs text-foreground/40">sin imagen</div>}
               {p.badge && <span className="absolute left-2 top-2 bg-ink-900/80 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-ivory-50">{p.badge}</span>}
               {p.active === false && <span className="absolute right-2 top-2 bg-red-700/90 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-ivory-50">Oculto</span>}
