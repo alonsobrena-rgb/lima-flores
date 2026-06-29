@@ -8,9 +8,11 @@ export const Manifesto = () => (
       {/* Columna izquierda: eyebrow + flor (recorte Higgsfield) que llena el vacío.
           En móvil va DESPUÉS del texto (la imagen al final); en desktop, igual. */}
       <div className="relative order-2 md:order-1">
+        {/* Eyebrow para DESKTOP: arriba a la izquierda, sobre la flor.
+            En móvil se oculta y se muestra otra encima del título (abajo). */}
         <motion.span
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6, ease }}
-          className="text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45"
+          className="hidden text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45 md:block"
         >
           — No. 01 · Manifiesto
         </motion.span>
@@ -33,6 +35,13 @@ export const Manifesto = () => (
       </div>
 
       <div className="order-1 md:order-2">
+        {/* Eyebrow para MÓVIL: encima del título (en desktop se oculta). */}
+        <motion.span
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6, ease }}
+          className="mb-5 block text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45 md:hidden"
+        >
+          — No. 01 · Manifiesto
+        </motion.span>
         <motion.h2
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, ease }}
           className="font-display text-[2.5rem] font-light leading-[1.04] tracking-tight text-ink-900 md:text-[4rem]"
