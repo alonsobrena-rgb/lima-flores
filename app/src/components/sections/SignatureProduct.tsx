@@ -13,10 +13,15 @@ export const SignatureProduct = () => {
       <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[5fr_6fr] md:gap-20">
         <motion.div
           initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.9, ease }}
-          className="relative"
+          className="relative mx-auto w-full max-w-sm"
         >
-          <img src="/bloom/bloom-orquideas-grandes-maceta.webp" alt="Orquídea Phalaenopsis magenta en maceta de cerámica"
-               className="mx-auto max-h-[520px] w-auto drop-shadow-[0_30px_60px_rgba(0,0,0,0.35)]" />
+          {/* Foto enmarcada (fondo blanco uniforme): la tarjeta de marca es blanca
+              sobre blanco y no se puede recortar, así que en vez de un cutout
+              transparente la mostramos como una impresión sobre la sección oscura. */}
+          <div className="overflow-hidden rounded-lg bg-white shadow-[0_34px_70px_-22px_rgba(0,0,0,0.5)]">
+            <img src="/bloom/orquideas-grandes-maceta-foto.webp" alt="Orquídea Phalaenopsis magenta en maceta de cerámica"
+                 className="block w-full" />
+          </div>
         </motion.div>
         <div>
           <Reveal>
