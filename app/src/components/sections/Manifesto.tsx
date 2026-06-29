@@ -5,8 +5,9 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export const Manifesto = () => (
   <section className="relative overflow-hidden bg-transparent px-6 pt-24 pb-16 md:px-12 md:pt-36 md:pb-20">
     <div className="relative mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[5fr_7fr] md:gap-16">
-      {/* Columna izquierda: eyebrow + flor (recorte Higgsfield) que llena el vacío */}
-      <div className="relative">
+      {/* Columna izquierda: eyebrow + flor (recorte Higgsfield) que llena el vacío.
+          En móvil va DESPUÉS del texto (la imagen al final); en desktop, igual. */}
+      <div className="relative order-2 md:order-1">
         <motion.span
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6, ease }}
           className="text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45"
@@ -31,7 +32,7 @@ export const Manifesto = () => (
         </motion.div>
       </div>
 
-      <div>
+      <div className="order-1 md:order-2">
         <motion.h2
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, ease }}
           className="font-display text-[2.5rem] font-light leading-[1.04] tracking-tight text-ink-900 md:text-[4rem]"
