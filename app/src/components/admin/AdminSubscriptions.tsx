@@ -1,7 +1,7 @@
 // Las suscripciones ya NO se editan desde este panel: se gestionan por completo
 // en el panel de Culqi (listar, pausar, cancelar, ver cobros). Esta sección solo
 // muestra un aviso con el enlace al panel.
-const CULQI_PANEL = 'https://panel.culqi.com';
+const CULQI_PANEL = 'https://culqipanel.culqi.com/login';
 
 export function AdminSubscriptions() {
   return (
