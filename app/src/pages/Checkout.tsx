@@ -241,6 +241,7 @@ export default function Checkout() {
       if (Culqi.token && Culqi.token.id) {
         // El modal de Culqi v4 no se cierra solo tras generar el token —
         // lo cerramos nosotros y procesamos el cobro de fondo.
+        setSending(true); // ahora sí: cobrando contra el backend.
         try { Culqi.close(); } catch { /* noop */ }
         try {
           const r = await fetch(`${API_BASE}/api/culqi/charge`, {
@@ -262,6 +263,12 @@ export default function Checkout() {
     };
 
     Culqi.open();
+    // Culqi v4 NO llama a w.culqi cuando el usuario cierra el modal con la X, así
+    // que dejar el botón en "procesando" lo bloquearía para siempre. El modal tapa
+    // toda la pantalla mientras está abierto, así que reactivamos el botón ya: si el
+    // cliente cierra sin pagar, puede reintentar; si genera token, el callback de
+    // arriba vuelve a poner "procesando" mientras cobra de fondo.
+    setSending(false);
   };
 
   const field = 'mt-1.5 w-full border border-border bg-surface px-4 py-3 text-ink-900 outline-none transition-colors focus:border-rosa-500';

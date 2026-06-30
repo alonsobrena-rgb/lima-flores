@@ -301,6 +301,7 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
         if (Culqi.token && Culqi.token.id) {
           // El modal de Culqi v4 no se cierra solo tras generar el token —
           // lo cerramos nosotros y procesamos la suscripción de fondo.
+          setBusy(true); // ahora sí: creando la suscripción contra el backend.
           try { Culqi.close(); } catch { /* noop */ }
           try {
             const r = await fetch(`${API_BASE}/api/culqi/subscribe`, {
@@ -317,6 +318,11 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
         else { setBusy(false); }
       };
       Culqi.open();
+      // Culqi v4 NO llama a w.culqi al cerrar el modal con la X → si dejamos el
+      // botón en "procesando" queda bloqueado. El modal tapa toda la pantalla, así
+      // que reactivamos el botón ya; el callback de arriba vuelve a poner "busy"
+      // cuando hay token y se está creando la suscripción.
+      setBusy(false);
     } catch (e: any) { setErr(e?.message || 'No se pudo iniciar el pago.'); setBusy(false); }
   };
 
