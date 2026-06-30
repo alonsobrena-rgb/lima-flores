@@ -3,8 +3,20 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
+import { money } from '@/lib/cart';
 
 const ease = [0.22, 1, 0.36, 1] as const;
+
+// Resumen del último pedido (lo guarda el checkout en localStorage antes de limpiar
+// el carrito). Si no hay, simplemente no mostramos el resumen.
+type LastOrder = {
+  items: { name?: string; price?: number; qty: number }[];
+  subtotal: number; shipping_fee: number; shipping_label?: string; total: number;
+  delivery_type?: 'envio' | 'recojo'; address?: string; date?: string; time?: string; payment_method?: string;
+};
+function readLastOrder(): LastOrder | null {
+  try { const raw = localStorage.getItem('lf_last_order'); return raw ? JSON.parse(raw) : null; } catch { return null; }
+}
 const PETAL_COLORS = ['#E7AFC2', '#D584A1', '#F0D9B5', '#E7B8C6', '#B6C2A7'];
 
 // Estallido de pétalos one-shot que cae desde el sello superior.
@@ -40,6 +52,8 @@ function Burst() {
 }
 
 export default function Confirmacion() {
+  const order = useMemo(readLastOrder, []);
+  const recojo = order?.delivery_type === 'recojo';
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -71,9 +85,37 @@ export default function Confirmacion() {
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46, ease }}
           className="mx-auto mt-6 max-w-md leading-relaxed text-ink-700"
         >
-          Te escribimos por WhatsApp en menos de 30 minutos para confirmar el pago y coordinar la entrega.
+          Te escribiremos por WhatsApp para coordinar {recojo ? 'el recojo en el taller' : 'la entrega'}.
           Mientras tanto, alguien del atelier ya elige los tallos que van a entrar en tu pedido.
         </motion.p>
+
+        {order && Array.isArray(order.items) && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, ease }}
+            className="frost mx-auto mt-10 max-w-md p-6 text-left"
+          >
+            <h2 className="font-display text-lg text-ink-900">Resumen del pedido</h2>
+            <ul className="mt-4 space-y-2">
+              {order.items.map((it, i) => (
+                <li key={i} className="flex justify-between gap-3 text-sm text-ink-700">
+                  <span>{it.name} <span className="text-foreground/45">× {it.qty}</span></span>
+                  <span className="shrink-0 italic">{money((it.price || 0) * it.qty)}</span>
+                </li>
+              ))}
+            </ul>
+            <dl className="mt-4 space-y-1.5 border-t border-border pt-3 text-sm">
+              <div className="flex justify-between text-ink-600"><dt>Subtotal</dt><dd>{money(order.subtotal)}</dd></div>
+              <div className="flex justify-between text-ink-600"><dt>{recojo ? 'Recojo en taller' : 'Envío'}</dt><dd>{order.shipping_fee ? money(order.shipping_fee) : 'Gratis'}</dd></div>
+              <div className="flex justify-between border-t border-border pt-2 font-display text-lg text-ink-900"><dt>Total</dt><dd>{money(order.total)}</dd></div>
+            </dl>
+            <div className="mt-4 space-y-1 border-t border-border pt-3 text-[13px] text-ink-600">
+              {order.address && <p><span className="text-foreground/50">{recojo ? 'Recojo en:' : 'Entrega en:'}</span> {order.address}</p>}
+              {(order.date || order.time) && <p><span className="text-foreground/50">Cuándo:</span> {order.date}{order.time ? ` · ${order.time}` : ''}</p>}
+              {order.payment_method && <p><span className="text-foreground/50">Pago:</span> {order.payment_method}</p>}
+            </div>
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.54, ease }}
           className="mt-10 flex flex-wrap justify-center gap-4"

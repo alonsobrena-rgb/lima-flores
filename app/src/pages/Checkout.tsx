@@ -30,6 +30,11 @@ function loadCulqi(): Promise<void> {
 // Tarjeta. Sin llave pública caen al flujo manual (coordinar por WhatsApp).
 const payments = ['Yape', 'Tarjeta'];
 
+// Recojo en el taller (alternativa al envío a domicilio): sin costo de envío.
+// Coords aproximadas del taller para que el pedido lleve lat/lng (la API las exige).
+const WORKSHOP = { address: 'Calle Francia 823, Miraflores', lat: -12.1188, lng: -77.0306 };
+type DeliveryMode = 'envio' | 'recojo';
+
 type Place = { lat: number; lng: number; district: string | null; formatted: string };
 type Shipping = { fee: number | null; provider: string | null; label: string };
 
@@ -60,6 +65,7 @@ export default function Checkout() {
   const [buyer, setBuyer] = useState(saved.buyer ?? { name: '', email: '', phone: '' });
   const [recip, setRecip] = useState(saved.recip ?? { name: '', phone: '', ref: '', apt: '' });
   const [district, setDistrict] = useState(saved.district ?? '');
+  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>('envio');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [payment, setPayment] = useState(saved.payment ?? '');
@@ -99,6 +105,19 @@ export default function Checkout() {
       const d = await r.json();
       if (typeof d.price === 'number') setShipping({ fee: d.price, provider: d.provider || null, label: d.provider ? `vía ${d.provider}` : 'Cotizado' });
     } catch { /* sin CORS/red → se mantiene "por calcular" */ }
+  };
+
+  // Cambia entre envío a domicilio y recojo en el taller. Recojo = sin costo de
+  // envío; al volver a envío recalculamos (o "por calcular" si no hay ubicación).
+  const selectDeliveryMode = (mode: DeliveryMode) => {
+    setDeliveryMode(mode);
+    if (mode === 'recojo') {
+      setShipping({ fee: 0, provider: null, label: 'Recojo en el taller' });
+    } else if (place) {
+      quoteByCoords(place.lat, place.lng);
+    } else {
+      setShipping({ fee: null, provider: null, label: 'Por calcular' });
+    }
   };
 
   // Match tolerante de distrito: cualquier candidato de Google vs nuestra lista
@@ -174,23 +193,33 @@ export default function Checkout() {
     // Coordenadas: lugar elegido → geocodificar el texto libre → centroide del
     // distrito. El pedido SIEMPRE lleva lat/lng numéricos (la API los exige) y
     // escribir a mano nunca bloquea el envío.
+    const recojo = deliveryMode === 'recojo';
     let coords: { lat: number; lng: number } | null = place ? { lat: place.lat, lng: place.lng } : null;
     const addressText = addressRef.current?.value?.trim() || '';
-    if (!coords && addressText) {
-      const geo = await geocodeText(`${addressText}, ${district && district !== 'Otro' ? district + ', ' : ''}Lima, Perú`);
-      if (geo) coords = { lat: geo.lat, lng: geo.lng };
+    if (recojo) {
+      // Recojo en el taller: el destino es nuestra dirección, no la del cliente.
+      coords = { lat: WORKSHOP.lat, lng: WORKSHOP.lng };
+    } else {
+      if (!coords && addressText) {
+        const geo = await geocodeText(`${addressText}, ${district && district !== 'Otro' ? district + ', ' : ''}Lima, Perú`);
+        if (geo) coords = { lat: geo.lat, lng: geo.lng };
+      }
+      if (!coords) coords = DISTRICT_CENTROIDS[district] || DISTRICT_CENTROIDS['Otro'];
     }
-    if (!coords) coords = DISTRICT_CENTROIDS[district] || DISTRICT_CENTROIDS['Otro'];
     const payload = {
       buyer_name: buyer.name, buyer_email: buyer.email, buyer_phone: buyer.phone,
       recipient_name: recip.name, recipient_phone: recip.phone,
-      recipient_address: place?.formatted || addressText,
-      recipient_address_ref: recip.ref || null, recipient_apt: recip.apt || null, recipient_has_reception: reception,
+      recipient_address: recojo ? WORKSHOP.address : (place?.formatted || addressText),
+      recipient_address_ref: recojo ? null : (recip.ref || null), recipient_apt: recojo ? null : (recip.apt || null), recipient_has_reception: recojo ? false : reception,
       recipient_lat: coords.lat, recipient_lng: coords.lng,
-      delivery_date: date, delivery_time: time,
+      delivery_date: date, delivery_time: time, delivery_type: deliveryMode,
       payment_method: payment, card_note: cardNote || null, card_anonymous: cardAnon,
       items: items.map((it) => { const p = productById(it.id); return { id: it.id, name: p?.name, price: p?.price, qty: it.qty }; }),
-      subtotal, shipping_fee: shipping.fee ?? 0, shipping_provider: shipping.provider, shipping_label: shipping.label, total: total ?? subtotal,
+      subtotal,
+      shipping_fee: recojo ? 0 : (shipping.fee ?? 0),
+      shipping_provider: recojo ? null : shipping.provider,
+      shipping_label: recojo ? 'Recojo en el taller' : shipping.label,
+      total: recojo ? subtotal : (total ?? subtotal),
       culqi_charge_id: null as string | null,
     };
 
@@ -209,6 +238,14 @@ export default function Checkout() {
   // Registra el pedido en el backend. Comparte el manejo de errores entre el
   // flujo manual (Yape/Plin/…) y el de tarjeta (tras el cobro aprobado).
   const placeOrder = async (payload: Record<string, unknown>) => {
+    // Guardamos un resumen del pedido para la página de confirmación (el carrito
+    // se limpia al terminar, así que /confirmacion lo lee de aquí).
+    try { localStorage.setItem('lf_last_order', JSON.stringify({
+      items: payload.items, subtotal: payload.subtotal, shipping_fee: payload.shipping_fee,
+      shipping_label: payload.shipping_label, total: payload.total, delivery_type: payload.delivery_type,
+      address: payload.recipient_address, date: payload.delivery_date, time: payload.delivery_time,
+      payment_method: payload.payment_method,
+    })); } catch { /* storage no disponible */ }
     try {
       const r = await fetch(`${API_BASE}/api/order`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (r.ok) { clear(); navigate('/confirmacion'); return; }
@@ -305,65 +342,103 @@ export default function Checkout() {
             <fieldset className="space-y-5 rounded-lg border border-ivory-100/10 bg-[#2F3925] p-6 text-ivory-100 shadow-[0_24px_56px_-16px_rgba(47,57,37,0.45)] md:p-8">
               <div className="mb-1 flex flex-wrap items-center gap-3 px-1">
                 <span className="font-display text-2xl italic text-[#E7AFC2]">02</span>
-                <span className="rounded-sm bg-[#B6855E] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#2F3925]">Para</span>
-                <span className="font-display text-xl text-ivory-50">Quien recibe las flores</span>
+                <span className="rounded-sm bg-[#B6855E] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#2F3925]">{deliveryMode === 'recojo' ? 'Recojo' : 'Para'}</span>
+                <span className="font-display text-xl text-ivory-50">{deliveryMode === 'recojo' ? 'Quien recoge el pedido' : 'Quien recibe las flores'}</span>
               </div>
-              <p className="px-1 text-sm leading-relaxed text-ivory-100/80">Estos son los datos de la persona que abrirá la puerta — su ubicación exacta, su nombre y su teléfono.</p>
+
+              {/* Toggle: envío a domicilio vs recojo en el taller */}
+              <div className="grid gap-3 px-1 sm:grid-cols-2">
+                {([['envio', 'Envío a domicilio', 'Lo llevamos a la dirección que indiques'], ['recojo', 'Recoger en el taller', 'Calle Francia 823, Miraflores · sin costo de envío']] as const).map(([mode, title, sub]) => {
+                  const active = deliveryMode === mode;
+                  return (
+                    <button key={mode} type="button" onClick={() => selectDeliveryMode(mode)} aria-pressed={active}
+                      className={`flex items-start gap-3 rounded border px-4 py-3 text-left transition-colors ${active ? 'border-[#E7AFC2] bg-ivory-100/15' : 'border-ivory-100/25 bg-ivory-100/5 hover:border-ivory-100/50'}`}>
+                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${active ? 'border-[#E7AFC2]' : 'border-ivory-100/40'}`}>
+                        {active && <span className="h-2.5 w-2.5 rounded-full bg-[#E7AFC2]" />}
+                      </span>
+                      <span>
+                        <span className="block text-sm font-medium text-ivory-50">{title}</span>
+                        <span className="block text-[12px] text-ivory-100/65">{sub}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="px-1 text-sm leading-relaxed text-ivory-100/80">
+                {deliveryMode === 'recojo'
+                  ? 'Déjanos un contacto para avisarte apenas tu pedido esté listo para recoger en el taller.'
+                  : 'Estos son los datos de la persona que abrirá la puerta — su ubicación exacta, su nombre y su teléfono.'}
+              </p>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                <div><label className={darkLabel}>Nombre de quien recibe</label><input required value={recip.name} onChange={(e) => setRecip({ ...recip, name: e.target.value })} className={darkField} placeholder="Ej. Ana Torres" /></div>
-                <div><label className={darkLabel}>Teléfono de quien recibe</label><input required type="tel" value={recip.phone} onChange={(e) => setRecip({ ...recip, phone: e.target.value })} className={darkField} placeholder="999 999 999" /></div>
+                <div><label className={darkLabel}>{deliveryMode === 'recojo' ? 'Nombre de quien recoge' : 'Nombre de quien recibe'}</label><input required value={recip.name} onChange={(e) => setRecip({ ...recip, name: e.target.value })} className={darkField} placeholder="Ej. Ana Torres" /></div>
+                <div><label className={darkLabel}>{deliveryMode === 'recojo' ? 'Teléfono de quien recoge' : 'Teléfono de quien recibe'}</label><input required type="tel" value={recip.phone} onChange={(e) => setRecip({ ...recip, phone: e.target.value })} className={darkField} placeholder="999 999 999" /></div>
               </div>
 
-              {/* Aclaración · el teléfono es del destinatario */}
-              <div className={`${note} border-ivory-50/80`}>
-                <strong className="block font-display italic text-ivory-50">Importante · este teléfono es de quien recibe las flores</strong>
-                Usamos el número de quien recibirá el pedido (no el tuyo) solo al momento de la entrega, para coordinar si no podemos dejar el paquete en la puerta. No es para confirmaciones previas ni spam.
-              </div>
-
-              <div>
-                <label className={darkLabel}>Dirección {mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
-                <input ref={addressRef} required onBlur={persistCheckout} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
-              </div>
-              {place && (
-                <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-sm text-ivory-100/85">
-                    <svg className="h-4 w-4 shrink-0 text-[#E7AFC2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" /><circle cx="12" cy="10" r="3" /></svg>
-                    {place.formatted}
-                  </p>
-                  <div ref={mapRef} className="h-52 w-full overflow-hidden rounded-sm border border-ivory-100/20" />
-                  {/* Aclaración · el pin manda */}
-                  <div className={`mt-2 flex gap-3 rounded-r-sm ${note} border-[#B6855E]`}>
-                    <span className="shrink-0 text-base leading-none">📍</span>
-                    <span><strong className="block font-display italic text-ivory-50">Las flores se entregan exactamente donde está el pin.</strong>Si no coincide con la puerta del edificio o casa, arrástralo. La dirección escrita es solo referencia — lo que cuenta es la posición del mapa.</span>
+              {deliveryMode === 'recojo' ? (
+                /* Dirección del taller para recoger */
+                <div className={`flex gap-3 rounded-r-sm ${note} border-[#B6855E]`}>
+                  <span className="shrink-0 text-base leading-none">📍</span>
+                  <span><strong className="block font-display italic text-ivory-50">Recoges en nuestro taller</strong>Calle Francia 823, Miraflores. Te escribimos por WhatsApp apenas tu pedido esté listo para coordinar el horario de recojo.</span>
+                </div>
+              ) : (
+                <>
+                  {/* Aclaración · el teléfono es del destinatario */}
+                  <div className={`${note} border-ivory-50/80`}>
+                    <strong className="block font-display italic text-ivory-50">Importante · este teléfono es de quien recibe las flores</strong>
+                    Usamos el número de quien recibirá el pedido (no el tuyo) solo al momento de la entrega, para coordinar si no podemos dejar el paquete en la puerta. No es para confirmaciones previas ni spam.
                   </div>
-                </div>
+
+                  <div>
+                    <label className={darkLabel}>Dirección {mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
+                    <input ref={addressRef} required onBlur={persistCheckout} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
+                  </div>
+                  {place && (
+                    <div>
+                      <p className="mb-2 flex items-center gap-1.5 text-sm text-ivory-100/85">
+                        <svg className="h-4 w-4 shrink-0 text-[#E7AFC2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                        {place.formatted}
+                      </p>
+                      <div ref={mapRef} className="h-52 w-full overflow-hidden rounded-sm border border-ivory-100/20" />
+                      {/* Aclaración · el pin manda */}
+                      <div className={`mt-2 flex gap-3 rounded-r-sm ${note} border-[#B6855E]`}>
+                        <span className="shrink-0 text-base leading-none">📍</span>
+                        <span><strong className="block font-display italic text-ivory-50">Las flores se entregan exactamente donde está el pin.</strong>Si no coincide con la puerta del edificio o casa, arrástralo. La dirección escrita es solo referencia — lo que cuenta es la posición del mapa.</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div><label className={darkLabel}>Referencia (opcional)</label><input value={recip.ref} onChange={(e) => setRecip({ ...recip, ref: e.target.value })} className={darkField} placeholder="Casa blanca, reja negra…" /></div>
+                    <div><label className={darkLabel}>Dpto / Interior (opcional)</label><input value={recip.apt} onChange={(e) => setRecip({ ...recip, apt: e.target.value })} className={darkField} placeholder="301" /></div>
+                  </div>
+                  <div>
+                    <label className={darkLabel}>Distrito</label>
+                    <select required className={`${darkField} dark-select`} value={district} onChange={(e) => setDistrict(e.target.value)}>
+                      <option value="" disabled>Selecciona…</option>
+                      {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                </>
               )}
+
+              {/* Fecha + horario — ambos modos (entrega o recojo) */}
               <div className="grid gap-5 sm:grid-cols-2">
-                <div><label className={darkLabel}>Referencia (opcional)</label><input value={recip.ref} onChange={(e) => setRecip({ ...recip, ref: e.target.value })} className={darkField} placeholder="Casa blanca, reja negra…" /></div>
-                <div><label className={darkLabel}>Dpto / Interior (opcional)</label><input value={recip.apt} onChange={(e) => setRecip({ ...recip, apt: e.target.value })} className={darkField} placeholder="301" /></div>
-              </div>
-              <div className="grid gap-5 sm:grid-cols-3">
+                <div><label className={darkLabel}>{deliveryMode === 'recojo' ? 'Fecha de recojo' : 'Fecha'}</label><input required type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className={darkField} /></div>
                 <div>
-                  <label className={darkLabel}>Distrito</label>
-                  <select required className={`${darkField} dark-select`} value={district} onChange={(e) => setDistrict(e.target.value)}>
-                    <option value="" disabled>Selecciona…</option>
-                    {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                </div>
-                <div><label className={darkLabel}>Fecha</label><input required type="date" min={minDate} value={date} onChange={(e) => setDate(e.target.value)} className={darkField} /></div>
-                <div>
-                  <label className={darkLabel}>Horario</label>
+                  <label className={darkLabel}>{deliveryMode === 'recojo' ? 'Horario de recojo' : 'Horario'}</label>
                   <select required className={`${darkField} dark-select`} value={time} onChange={(e) => setTime(e.target.value)}>
                     <option value="" disabled>Selecciona…</option>
                     {timeSlots.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
               </div>
-              <label className="flex items-center gap-2.5 text-sm text-ivory-100/90">
-                <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
-                Hay recepción
-              </label>
+              {deliveryMode === 'envio' && (
+                <label className="flex items-center gap-2.5 text-sm text-ivory-100/90">
+                  <input type="checkbox" checked={reception} onChange={(e) => setReception(e.target.checked)} className="h-4 w-4 accent-[#B6855E]" />
+                  Hay recepción
+                </label>
+              )}
 
               {/* Mensaje de la tarjeta — va con quien recibe */}
               <div className="border-t border-dashed border-ivory-100/20 pt-5">
@@ -426,7 +501,7 @@ export default function Checkout() {
             <button disabled={sending} className="press w-full bg-rosa-500 py-4 text-sm font-medium uppercase tracking-[0.18em] text-ivory-50 transition-colors hover:bg-rosa-600 disabled:opacity-60">
               {sending ? 'Procesando…' : CULQI_PK && (payment === 'Tarjeta' || payment === 'Yape') && total !== null ? `Pagar con ${payment} · ${money(total)}` : total !== null ? `Confirmar pedido · ${money(total)}` : 'Confirmar pedido'}
             </button>
-            <p className="text-center text-[12px] text-foreground/50">Al confirmar, te contactamos por WhatsApp en menos de 30 min para coordinar el pago y la entrega.</p>
+            <p className="text-center text-[12px] text-foreground/50">Al confirmar, te escribimos por WhatsApp para coordinar {deliveryMode === 'recojo' ? 'el recojo' : 'la entrega'}.</p>
           </form>
 
           {/* Resumen */}
@@ -459,9 +534,19 @@ export default function Checkout() {
             </div>
             <dl className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
               <div className="flex justify-between text-ink-600"><dt>Subtotal</dt><dd>{money(subtotal)}</dd></div>
-              <div className="flex justify-between text-ink-600"><dt>Envío {shipping.provider && <span className="text-[11px] text-foreground/45">({shipping.label})</span>}</dt><dd>{shipping.fee !== null ? money(shipping.fee) : <span className="text-foreground/45">— por calcular</span>}</dd></div>
+              {deliveryMode === 'recojo' ? (
+                <div className="flex justify-between text-ink-600"><dt>Recojo en taller</dt><dd>Gratis</dd></div>
+              ) : (
+                <div className="flex justify-between text-ink-600"><dt>Envío {shipping.provider && <span className="text-[11px] text-foreground/45">({shipping.label})</span>}</dt><dd>{shipping.fee !== null ? money(shipping.fee) : <span className="text-foreground/45">— por calcular</span>}</dd></div>
+              )}
               <div className="flex justify-between border-t border-border pt-3 font-display text-xl text-ink-900"><dt>Total</dt><dd>{total !== null ? money(total) : <span className="text-base font-normal text-foreground/45">— por calcular</span>}</dd></div>
             </dl>
+            {deliveryMode === 'recojo' && (
+              <p className="mt-4 flex items-start gap-2 rounded-sm bg-rosa-50 px-3 py-2.5 text-[12px] leading-relaxed text-ink-700">
+                <span className="shrink-0 text-sm leading-none">📍</span>
+                <span><strong className="font-display italic">Recoge en el taller</strong><br />Calle Francia 823, Miraflores</span>
+              </p>
+            )}
             <a
               href={`https://wa.me/51999479855?text=${encodeURIComponent('Hola, necesito ayuda con mi pedido en Lima Flores')}`}
               target="_blank"
