@@ -6,7 +6,7 @@ import { MobileNav } from '@/components/MobileNav';
 const nav = [
   { label: 'Inicio', to: '/' },
   { label: 'Catálogo', to: '/catalogo' },
-  { label: 'Fúnebre', to: '/funebre' },
+  { label: 'Condolencias', to: '/funebre' },
   { label: 'Suscripción', to: '/suscripcion' },
 ];
 

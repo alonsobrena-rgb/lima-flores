@@ -9,7 +9,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 const nav = [
   { label: 'Inicio', to: '/' },
   { label: 'Catálogo', to: '/catalogo' },
-  { label: 'Fúnebre', to: '/funebre' },
+  { label: 'Condolencias', to: '/funebre' },
   { label: 'Suscripción', to: '/suscripcion' },
 ];
 

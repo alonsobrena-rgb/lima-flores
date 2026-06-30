@@ -792,7 +792,7 @@
     "id": "funebre-corona-eternidad",
     "name": "Corona Eternidad",
     "category": "funebre",
-    "categoryLabel": "Fúnebre",
+    "categoryLabel": "Condolencias",
     "price": 420,
     "image": "/products/funebre-corona-eternidad.jpg",
     "images": [
@@ -810,7 +810,7 @@
     "id": "funebre-lagrima-esperanza",
     "name": "Lágrima Esperanza",
     "category": "funebre",
-    "categoryLabel": "Fúnebre",
+    "categoryLabel": "Condolencias",
     "price": 220,
     "image": "/products/funebre-lagrima-esperanza.jpg",
     "images": [
@@ -828,7 +828,7 @@
     "id": "funebre-corona-perpetua",
     "name": "Corona Perpetua",
     "category": "funebre",
-    "categoryLabel": "Fúnebre",
+    "categoryLabel": "Condolencias",
     "price": 415,
     "image": "/products/funebre-corona-perpetua.jpg",
     "images": [
@@ -846,7 +846,7 @@
     "id": "funebre-corona-buen-viaje",
     "name": "Corona Buen Viaje",
     "category": "funebre",
-    "categoryLabel": "Fúnebre",
+    "categoryLabel": "Condolencias",
     "price": 455,
     "image": "/products/funebre-corona-buen-viaje.jpg",
     "images": [
@@ -864,7 +864,7 @@
     "id": "funebre-box-rayo-de-luz",
     "name": "Box Rayo de Luz",
     "category": "funebre",
-    "categoryLabel": "Fúnebre",
+    "categoryLabel": "Condolencias",
     "price": 225,
     "image": "/products/funebre-box-rayo-de-luz.jpg",
     "images": [
