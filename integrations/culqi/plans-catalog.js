@@ -40,12 +40,6 @@ const PLANS = [
   { key: 'b_trimestral', models: ['B'], tier: 'trimestral', label: 'Trimestral',  amountSoles: MONTHLY * 3,  intervalCount: 3,  monthlyHint: MONTHLY },
   { key: 'b_semestral',  models: ['B'], tier: 'semestral',  label: 'Semestral',   amountSoles: MONTHLY * 6,  intervalCount: 6,  monthlyHint: MONTHLY },
   { key: 'b_anual',      models: ['B'], tier: 'anual',      label: 'Anual',       amountSoles: MONTHLY * 12, intervalCount: 12, monthlyHint: MONTHLY },
-
-  // ⚠️ TEMPORAL — planes de PRUEBA de pago S/2 (uno por cada modelo). Borrar tras
-  // verificar Culqi. b_prueba = cargo único (full); a_prueba = suscripción mensual
-  // recurrente (mes a mes) — requiere su pln_ en plans.json (provisión en Culqi).
-  { key: 'b_prueba',     models: ['B'], tier: 'prueba',     label: 'Prueba',      amountSoles: 2,            intervalCount: 1,  monthlyHint: 2 },
-  { key: 'a_prueba',     models: ['A'], tier: 'prueba',     label: 'Prueba',      amountSoles: 3,            intervalCount: 1,  monthlyHint: 3, recurring: true },
 ];
 
 const byKey = (key) => PLANS.find((p) => p.key === key) || null;

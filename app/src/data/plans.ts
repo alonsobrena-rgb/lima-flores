@@ -5,7 +5,7 @@
 export const MONTHLY_PRICE = 130;
 
 export type Plan = {
-  tier: 'mensual' | 'trimestral' | 'semestral' | 'anual' | 'prueba';
+  tier: 'mensual' | 'trimestral' | 'semestral' | 'anual';
   name: string;
   months: number;
   deliveries: number;
@@ -50,17 +50,5 @@ export const plans: Plan[] = [
     period: '12 meses · 24 entregas', price: MONTHLY_PRICE, note: 'S/130 al mes · 12 meses', value: true,
     tagline: 'Un año entero de estación.',
     features: ['Todo lo del plan Semestral', '24 entregas · flores de estación', 'Prioridad en San Valentín y Día de la Madre'],
-  },
-  // ⚠️ TEMPORAL — plan de PRUEBA de pago. Aparece en AMBOS toggles: "Mes a mes"
-  // (recurrente S/3/mes, keyA=a_prueba) y "Pago único" (S/2, keyB=b_prueba). Culqi
-  // no permite suscripciones < S/3, por eso el recurrente es S/3 y el único S/2.
-  // `monthly` = monto recurrente (modelo A); `price` = monto pago único (modelo B).
-  // Borrar tras verificar Culqi (junto con a_prueba/b_prueba en plans-catalog.js).
-  {
-    tier: 'prueba', name: 'Prueba', months: 1, deliveries: 1, monthly: 3,
-    keyA: 'a_prueba', keyB: 'b_prueba',
-    period: 'Prueba de pago · 1 entrega', price: 2, note: 'Cargo de prueba',
-    tagline: 'Plan de prueba del pago.',
-    features: ['Mes a mes: S/3/mes (recurrente)', 'Pago único: S/2 (un solo cargo)', 'Solo para verificar el pago — se elimina luego'],
   },
 ];

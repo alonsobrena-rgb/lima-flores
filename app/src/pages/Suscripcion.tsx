@@ -51,23 +51,17 @@ export default function Suscripcion() {
     fetch(`${API_BASE}/api/culqi/plans-status`).then((r) => r.json()).then((d) => setReady(!!d.ready)).catch(() => setReady(false));
   }, []);
 
-  // Plan de prueba: monto distinto por modelo (A = recurrente `monthly`, B = pago
-  // único `price`). El resto: modelo A = mensual; modelo B = total del periodo.
-  const priceFor = (p: Plan) => {
-    if (p.tier === 'prueba') {
-      return model === 'A'
-        ? { big: money(p.monthly), small: '/ mes' }
-        : { big: money(p.price), small: 'pago único' };
-    }
-    return model === 'A'
+  // Modelo A = mensual (S/130/mes); modelo B = total del periodo por adelantado.
+  const priceFor = (p: Plan) => (
+    model === 'A'
       ? { big: money(p.monthly), small: '/ mes' }
-      : { big: money(p.monthly * p.months), small: `S/${p.monthly}/mes · ${p.months} meses` };
-  };
+      : { big: money(p.monthly * p.months), small: `S/${p.monthly}/mes · ${p.months} meses` }
+  );
 
-  // Mes a mes (A) = suscripción recurrente (Mensual + Prueba). Pago único (B) = los
-  // planes por periodo (trimestral / semestral / anual) + Prueba.
+  // Mes a mes (A) = suscripción recurrente (solo Mensual). Pago único (B) = los
+  // planes por periodo (trimestral / semestral / anual).
   const visiblePlans = model === 'A'
-    ? plans.filter((p) => p.tier === 'mensual' || p.tier === 'prueba')
+    ? plans.filter((p) => p.tier === 'mensual')
     : plans.filter((p) => p.tier !== 'mensual');
   const single = visiblePlans.length === 1;
 
@@ -152,11 +146,6 @@ export default function Suscripcion() {
                         Pago único · no se renueva
                       </span>
                     )}
-                    {model === 'A' && p.tier === 'prueba' && (
-                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-rosa-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-rosa-600">
-                        Mes a mes · se renueva
-                      </span>
-                    )}
                     <p className="mt-4 font-display italic text-ink-600">{p.tagline}</p>
                     <ul className="mt-5 flex-1 space-y-2.5 text-sm text-ink-700">
                       {p.features.map((f) => (
@@ -208,10 +197,7 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
   const markerObj = useRef<any>(null);
 
   const planKey = model === 'A' ? plan.keyA : plan.keyB;
-  // Plan de prueba: monto por modelo (A recurrente = monthly, B único = price).
-  const totalSoles = plan.tier === 'prueba'
-    ? (model === 'A' ? plan.monthly : plan.price)
-    : (model === 'A' ? plan.monthly : plan.monthly * plan.months);
+  const totalSoles = model === 'A' ? plan.monthly : plan.monthly * plan.months;
 
   const matchDistrict = (candidates: string[]) => {
     for (const cand of candidates) {

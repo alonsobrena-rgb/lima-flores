@@ -153,7 +153,7 @@ export default function Catalogo() {
           que las etiquetas se lean nítidas; la carretilla asoma arriba y queda
           como presencia cálida y suave detrás de los productos. */}
       <div className="relative">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: 'linear-gradient(to bottom, rgba(246,243,236,0) 0px, rgba(246,243,236,0.82) 400px)' }} />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -top-40 -z-10" style={{ background: 'linear-gradient(to bottom, rgba(246,243,236,0) 0px, rgba(246,243,236,0.92) 150px)' }} />
         <section className="relative mx-auto max-w-7xl px-6 pb-24 md:px-12 md:pb-32">
         <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 md:gap-x-7 lg:grid-cols-4">
           {list.map((p, i) => (
