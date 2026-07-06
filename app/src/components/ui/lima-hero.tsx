@@ -129,7 +129,7 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
               lea bien sobre el video; en desktop no lleva panel (queda igual). */}
           <span className="flex flex-col items-center rounded-[1.75rem] bg-white/25 px-6 py-4 backdrop-blur-[3px] md:items-end md:rounded-none md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
             <span className="text-[15vw] md:text-[13vw] lg:text-[160px]">Flores</span>
-            <span className="-mt-[1vw] text-[10vw] italic text-rosa-500 md:text-[8vw] lg:text-[96px]">dan</span>
+            <span className="-mt-[1vw] text-[10vw] italic text-rosa-500 md:text-[8vw] lg:text-[96px]">que dan</span>
             <span className="-mt-[1vw] text-[15vw] md:text-[13vw] lg:text-[160px]">Amor</span>
           </span>
         </motion.h1>
