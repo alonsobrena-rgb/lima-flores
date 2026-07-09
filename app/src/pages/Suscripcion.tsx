@@ -4,7 +4,6 @@ import { SiteFooter } from '@/components/sections/SiteFooter';
 import { money } from '@/lib/cart';
 import { plans, type Plan } from '@/data/plans';
 import { Stagger, StaggerItem } from '@/components/motion/Reveal';
-import { FloatingFlowers } from '@/components/motion/FloatingFlowers';
 import { attachAutocomplete, geocodeText, mapsAvailable, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
@@ -73,8 +72,6 @@ export default function Suscripcion() {
         <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/88 via-ivory-100/68 to-ivory-100/80" />
         <div className="absolute inset-0 backdrop-blur-[1.5px]" />
       </div>
-
-      <FloatingFlowers />
 
       <div className="relative z-10">
         <SiteHeader />

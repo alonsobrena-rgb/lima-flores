@@ -2,11 +2,10 @@
 import { Link } from 'react-router-dom';
 import { money } from '@/lib/cart';
 import { plans } from '@/data/plans';
-import { Reveal, Stagger, StaggerItem, ParallaxBloom } from '@/components/motion/Reveal';
+import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
 
 export const SubscriptionTeaser = () => (
   <section className="relative overflow-hidden bg-transparent px-6 py-24 md:px-12 md:py-32">
-    <ParallaxBloom src="/bloom/bloom-florero-de-20-tulipanes.png" side="right" drift={60} />
     <div className="mx-auto max-w-7xl">
       <header className="mb-14 max-w-2xl">
         <Reveal>

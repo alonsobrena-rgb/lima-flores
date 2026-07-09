@@ -1,7 +1,7 @@
 // "Nosotros" — cada ramo es una obra de arte (foto de la florista + manifiesto).
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Reveal, ParallaxBloom } from '@/components/motion/Reveal';
+import { Reveal } from '@/components/motion/Reveal';
 
 export const AtelierStory = () => {
   const mediaRef = useRef<HTMLDivElement>(null);
@@ -10,7 +10,6 @@ export const AtelierStory = () => {
 
   return (
     <section className="relative overflow-hidden bg-transparent px-6 py-24 md:px-12 md:py-32">
-      <ParallaxBloom src="/bloom/bloom-ramo-de-24-rosas.png" side="left" drift={70} />
       <div className="mx-auto max-w-6xl">
         <header className="mb-14">
           <Reveal>
