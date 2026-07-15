@@ -5,6 +5,7 @@
 const db = require('../db');
 const { generateAndStoreCard } = require('../integrations/cards/order-card');
 const gchat = require('../integrations/notify/gchat');
+const { computeAmountCents, getCharge } = require('../integrations/culqi/charges');
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -75,6 +76,53 @@ module.exports = async (req, res) => {
   const id = newOrderId();
   const b = v.value;
 
+  // ── Verificación de pago (anti-fraude) ──────────────────────────────────────
+  // Si el pedido dice estar pagado con tarjeta (culqi_charge_id), NO confiamos en
+  // el total del cliente: confirmamos contra Culqi que el cargo existe, cubre el
+  // monto recalculado en el servidor (precios reales de la BD) y no se usó ya en
+  // otro pedido. Sin esto, un atacante cobraría S/1 y registraría un pedido de S/500.
+  let paymentWarning = null;
+  const chargeId = typeof b.culqi_charge_id === 'string' ? b.culqi_charge_id.trim() : '';
+  if (chargeId) {
+    // 1) Anti-replay: un mismo cargo no puede pagar dos pedidos.
+    try {
+      const dup = await db.query(`SELECT id FROM orders WHERE culqi_charge_id = $1 LIMIT 1`, [chargeId]);
+      if (dup.rows.length) return send(res, 409, { error: 'Este pago ya está asociado a otro pedido.' });
+    } catch (e) { console.error('[order] dup charge check:', e.message); }
+
+    // 2) Monto esperado recalculado en el servidor (precios reales, no del cliente).
+    let expectedCents;
+    try { expectedCents = await computeAmountCents({ items: b.items, shipping_fee: b.shipping_fee }); }
+    catch (e) { return send(res, 400, { error: 'No pudimos validar el pedido: ' + e.message }); }
+
+    // 3) Verificar el cargo contra Culqi.
+    if (!process.env.CULQI_SECRET_KEY) {
+      // Sin llave no se puede verificar; no perdemos el pedido pero lo marcamos.
+      paymentWarning = 'PAGO NO VERIFICADO (Culqi no configurado) — confirmar antes de despachar.';
+    } else {
+      try {
+        const ch = await getCharge(chargeId);
+        const j = ch.json;
+        if (!(ch.status === 200 && j && j.object === 'charge')) {
+          return send(res, 402, { error: 'No pudimos verificar el pago. Contáctanos por WhatsApp.' });
+        }
+        const paidCents = Number(j.amount) || 0;
+        const currency = String(j.currency_code || j.currency || '').toUpperCase();
+        if (currency !== 'PEN') return send(res, 402, { error: 'Moneda de pago inválida.' });
+        // El cargo debe cubrir el total del pedido (2 céntimos de tolerancia por redondeo).
+        if (paidCents + 2 < expectedCents) {
+          console.warn(`[order] cargo insuficiente rechazado: charge=${chargeId} pago=${paidCents} esperado=${expectedCents}`);
+          return send(res, 402, { error: 'El pago no cubre el total del pedido.' });
+        }
+      } catch (e) {
+        // Culqi no respondió: el cargo probablemente ocurrió (el front trae un
+        // charge_id de un cobro exitoso). No perdemos el pedido, pero lo marcamos.
+        console.error('[order] getCharge error:', e.message);
+        paymentWarning = 'PAGO NO VERIFICADO (Culqi no respondió) — confirmar antes de despachar.';
+      }
+    }
+  }
+
   try {
     await db.query(
       `INSERT INTO orders (
@@ -111,6 +159,12 @@ module.exports = async (req, res) => {
         b.culqi_charge_id || null, !!b.card_anonymous,
       ]
     );
+    // Si el pago no se pudo verificar (Culqi caído / no configurado), dejamos un
+    // aviso visible en el panel para que se confirme antes de despachar.
+    if (paymentWarning) {
+      try { await db.query(`UPDATE orders SET dispatch_error = $1 WHERE id = $2`, [paymentWarning, id]); }
+      catch (e) { console.error('[order] set payment warning:', e.message); }
+    }
     // Respondemos al cliente de inmediato; la tarjeta se rasteriza en segundo
     // plano (Puppeteer tarda ~1-2s) y se guarda en orders.card_png cuando está
     // lista. Si falla, no afecta al pedido — queda registrado en card_error.

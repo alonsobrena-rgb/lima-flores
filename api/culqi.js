@@ -20,10 +20,10 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const store = require('../db/products-store');
 const catalog = require('../integrations/culqi/plans-catalog');
 const subsStore = require('../db/subscriptions-store');
 const { safeEqStr } = require('../lib/security');
+const { computeAmountCents } = require('../integrations/culqi/charges');
 
 const CULQI_HOST = 'api.culqi.com';
 const SECRET = () => process.env.CULQI_SECRET_KEY || '';
@@ -73,25 +73,8 @@ function culqiPost(pathname, bodyObj) {
   });
 }
 
-// Recalcula el monto a cobrar desde la BD (no se confía en el cliente).
-// Devuelve céntimos (entero) = (Σ precio·cantidad + envío) · 100.
-async function computeAmountCents({ items, shipping_fee }) {
-  if (!Array.isArray(items) || !items.length) throw new Error('Carrito vacío.');
-  // Garantiza que el catálogo esté en la BD antes de consultar precios (BD fresca
-  // o productos curados aún no insertados).
-  await store.ensureSeeded();
-  await store.ensureExtras();
-  let soles = 0;
-  for (const it of items) {
-    const qty = Math.max(1, Math.floor(Number(it.qty) || 1));
-    const p = await store.getById(String(it.id));
-    if (!p || p.price == null) throw new Error(`Producto no disponible: ${it.id}`);
-    soles += Number(p.price) * qty;
-  }
-  const ship = Math.max(0, Number(shipping_fee) || 0);
-  soles += ship;
-  return Math.round(soles * 100);
-}
+// computeAmountCents ahora vive en integrations/culqi/charges.js (compartido con
+// api/order.js para que la verificación del pedido use el mismo cálculo).
 
 // Mensaje legible a partir del error de Culqi.
 function culqiError(json) {
