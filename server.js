@@ -20,6 +20,7 @@ const orderHandler = require('./api/order');
 const adminHandler = require('./api/admin');
 const productsHandler = require('./api/products');
 const cardGen = require('./integrations/cards/generate');
+const { applySecurityHeaders, clientIp, rateLimit } = require('./lib/security');
 
 // Resultado cacheado del probe de Chromium (evita relanzar el navegador en cada hit).
 let _chromiumProbe = null;
@@ -81,10 +82,26 @@ const server = http.createServer(async (req, res) => {
   try { parsed = new URL(req.url, `http://${req.headers.host || 'localhost'}`); }
   catch { return send(res, 400, 'bad url'); }
 
+  // Cabeceras de seguridad en TODAS las respuestas (se fijan con setHeader, así
+  // que sobreviven a los writeHead posteriores de los handlers y de serveFile).
+  applySecurityHeaders(req, res);
+
   // ─── CORS + preflight para /api/* ───
   if (parsed.pathname.startsWith('/api/')) {
     applyCors(req, res);
     if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+  }
+
+  // ─── Rate limiting de endpoints sensibles (anti fuerza-bruta / spam) ───
+  // Login del admin: pocos intentos por IP. Creación de pedidos: evita que se
+  // inunde la BD y se disparen renders de Puppeteer sin control.
+  if (parsed.pathname === '/api/admin/login' && req.method === 'POST') {
+    const rl = rateLimit(`login:${clientIp(req)}`, 8, 15 * 60 * 1000);
+    if (!rl.ok) { res.writeHead(429, { 'Content-Type': 'application/json; charset=utf-8', 'Retry-After': String(rl.retryAfterSec) }); return res.end(JSON.stringify({ error: 'Demasiados intentos. Espera unos minutos.' })); }
+  }
+  if (parsed.pathname === '/api/order' && req.method === 'POST') {
+    const rl = rateLimit(`order:${clientIp(req)}`, 20, 10 * 60 * 1000);
+    if (!rl.ok) { res.writeHead(429, { 'Content-Type': 'application/json; charset=utf-8', 'Retry-After': String(rl.retryAfterSec) }); return res.end(JSON.stringify({ error: 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.' })); }
   }
 
   // ─── /api/* → función serverless adaptada ───

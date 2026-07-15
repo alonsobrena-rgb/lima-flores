@@ -11,6 +11,24 @@ const HANDLE = '@lima_flores';
 
 type IgPost = { id: string; image: string; permalink: string; caption?: string; type?: string };
 
+// Defensa: aunque el feed viene de nuestro backend (Graph API con nuestro token),
+// no confiamos ciegamente en el permalink/imagen. Solo aceptamos URLs https:// (o
+// rutas /internas para el respaldo); cualquier otra cosa (javascript:, data:) cae
+// a un valor seguro para no habilitar XSS por href.
+const safeHttps = (url: unknown, fallback: string): string => {
+  if (typeof url !== 'string') return fallback;
+  if (url.startsWith('/')) return url; // ruta interna del respaldo curado
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' ? url : fallback;
+  } catch { return fallback; }
+};
+const sanitizePost = (p: IgPost): IgPost => ({
+  ...p,
+  permalink: safeHttps(p.permalink, PROFILE),
+  image: safeHttps(p.image, PROFILE),
+});
+
 // Respaldo curado (fotos del catálogo) cuando el feed en vivo no está disponible.
 // Todas enlazan al perfil de Instagram.
 const FALLBACK: IgPost[] = [
@@ -41,7 +59,7 @@ export const InstagramGallery = () => {
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
       .then((d) => {
         if (!alive) return;
-        if (d && Array.isArray(d.posts) && d.posts.length) setPosts(d.posts.slice(0, 8));
+        if (d && Array.isArray(d.posts) && d.posts.length) setPosts(d.posts.slice(0, 8).map(sanitizePost));
       })
       .catch(() => { /* se mantiene el respaldo curado */ });
     return () => { alive = false; };

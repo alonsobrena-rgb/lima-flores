@@ -463,13 +463,20 @@ async function uploadProductImage(req, res) {
   // Acepta data URLs (data:image/png;base64,....).
   const m = /^data:([^;]+);base64,(.*)$/s.exec(dataBase64);
   if (m) { mime = mime || m[1]; dataBase64 = m[2]; }
+  // Solo imágenes rasterizadas. SVG NO: puede llevar JavaScript y, servido como
+  // image/svg+xml desde nuestro dominio, sería XSS persistente al abrir la URL.
+  const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+  mime = String(mime || 'image/jpeg').toLowerCase().trim();
+  if (!ALLOWED_IMAGE_MIME.has(mime)) {
+    return send(res, 415, { error: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF.' });
+  }
   let buf;
   try { buf = Buffer.from(dataBase64, 'base64'); }
   catch { return send(res, 400, { error: 'base64 inválido.' }); }
   if (!buf.length) return send(res, 400, { error: 'Imagen vacía.' });
   if (buf.length > 10 * 1024 * 1024) return send(res, 413, { error: 'Imagen demasiado grande (máx 10MB).' });
   try {
-    const id = await products.saveImage({ productId: productId || null, data: buf, mime: mime || 'image/jpeg' });
+    const id = await products.saveImage({ productId: productId || null, data: buf, mime });
     const rel = `/api/products/img/${id}`;
     return send(res, 201, { id, url: PUBLIC_BASE_URL ? PUBLIC_BASE_URL + rel : rel, path: rel });
   } catch (e) { return send(res, 500, { error: e.message }); }

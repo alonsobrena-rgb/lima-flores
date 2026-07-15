@@ -23,6 +23,7 @@ const path = require('path');
 const store = require('../db/products-store');
 const catalog = require('../integrations/culqi/plans-catalog');
 const subsStore = require('../db/subscriptions-store');
+const { safeEqStr } = require('../lib/security');
 
 const CULQI_HOST = 'api.culqi.com';
 const SECRET = () => process.env.CULQI_SECRET_KEY || '';
@@ -295,7 +296,17 @@ async function subscribe(req, res) {
 // Guard opcional: si CULQI_WEBHOOK_SECRET está definido, exige ?secret= que coincida.
 async function webhook(req, res, parsed) {
   const need = process.env.CULQI_WEBHOOK_SECRET || '';
-  if (need && (!parsed.searchParams || parsed.searchParams.get('secret') !== need)) return send(res, 401, { error: 'unauthorized' });
+  // Fail-safe: sin secreto configurado NO procesamos el evento. Un webhook abierto
+  // permitiría a cualquiera cancelar suscripciones ajenas (setStatus más abajo) o
+  // inundar la tabla de eventos. Respondemos 200 para que Culqi no reintente en
+  // bucle, pero ignoramos el contenido hasta que se configure CULQI_WEBHOOK_SECRET.
+  if (!need) {
+    console.warn('[culqi] webhook recibido sin CULQI_WEBHOOK_SECRET configurado — evento ignorado por seguridad.');
+    return send(res, 200, { ok: true, ignored: true });
+  }
+  // Secreto por cabecera (preferido) o query (compat), en tiempo constante.
+  const provided = String(req.headers['x-culqi-secret'] || (parsed.searchParams && parsed.searchParams.get('secret')) || '');
+  if (!safeEqStr(provided, need)) return send(res, 401, { error: 'unauthorized' });
 
   let ev;
   try { ev = await readJsonBody(req); } catch { ev = {}; }

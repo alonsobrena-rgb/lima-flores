@@ -33,8 +33,15 @@ module.exports = async (req, res, parsed) => {
     try {
       const row = await store.getImage(imgMatch[1]);
       if (!row) return send(res, 404, { error: 'imagen no encontrada' });
+      // Nunca servimos el mime crudo si no es una imagen rasterizada conocida:
+      // un SVG/HTML almacenado (legacy) se ejecutaría en nuestro dominio. Fuera
+      // de la whitelist → octet-stream + nosniff (inerte en el navegador).
+      const SAFE_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+      const mime = String(row.mime || '').toLowerCase();
+      const safeType = SAFE_IMAGE_MIME.has(mime) ? mime : 'application/octet-stream';
       res.writeHead(200, {
-        'Content-Type': row.mime || 'image/jpeg',
+        'Content-Type': safeType,
+        'X-Content-Type-Options': 'nosniff',
         'Content-Length': row.data.length,
         'Cache-Control': 'public, max-age=31536000, immutable',
       });

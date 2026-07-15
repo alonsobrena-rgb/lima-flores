@@ -178,6 +178,8 @@ module.exports = async (req, res) => {
       }
     }
   } catch (e) {
-    return send(500, { error: e.message });
+    // No filtrar detalles internos/de terceros al cliente; el detalle va al log.
+    console.error('[quote] error:', e.message);
+    return send(500, { error: 'No pudimos cotizar el envío. Intenta de nuevo.' });
   }
 };
