@@ -127,8 +127,17 @@ async function charge(req, res) {
 let _planMap = null;
 function planMap() {
   if (_planMap == null) {
-    try { _planMap = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'integrations', 'culqi', 'plans.json'), 'utf8')); }
-    catch { _planMap = {}; }
+    // Los pln_ de test y live son distintos (viven en entornos separados de Culqi).
+    // En modo test (sk_test) cargamos plans.test.json; en live, plans.json. Así no
+    // hay swaps manuales y cambiar de modo no rompe el otro.
+    const dir = path.join(__dirname, '..', 'integrations', 'culqi');
+    const file = SECRET().startsWith('sk_test') ? 'plans.test.json' : 'plans.json';
+    try { _planMap = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8')); }
+    catch {
+      // Sin archivo del modo actual → intentamos el live como último recurso.
+      try { _planMap = JSON.parse(fs.readFileSync(path.join(dir, 'plans.json'), 'utf8')); }
+      catch { _planMap = {}; }
+    }
   }
   return _planMap;
 }

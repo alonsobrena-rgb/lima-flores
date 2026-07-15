@@ -31,7 +31,10 @@ const { PLANS, planBody } = require('./plans-catalog');
 
 const DRY = process.argv.includes('--dry-run');
 const SECRET = process.env.CULQI_SECRET_KEY || '';
-const PLANS_FILE = path.join(__dirname, 'plans.json');
+// Los planes de TEST y LIVE viven en Culqi por separado (pln_test_ vs pln_live_).
+// Guardamos cada mapa en su archivo según el modo de la llave, para que cambiar de
+// modo NO requiera swaps manuales (y no rompa producción al volver a live).
+const PLANS_FILE = path.join(__dirname, SECRET.startsWith('sk_test') ? 'plans.test.json' : 'plans.json');
 
 function culqiPost(pathname, bodyObj) {
   return new Promise((resolve, reject) => {
