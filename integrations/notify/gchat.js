@@ -69,6 +69,25 @@ function notifyNewOrder(o) {
   return sendText(lines.join('\n'));
 }
 
+// Notifica una suscripción nueva (mensual recurrente o pago único "full").
+// `s` = { id, recurring, planKey, planLabel, model, amount(soles), buyerName,
+//         buyerEmail, buyerPhone, recipientName, recipientPhone,
+//         recipientAddress, recipientDistrict }.
+function notifyNewSubscription(s) {
+  if (!isConfigured()) return Promise.resolve(false);
+  const tipo = s.recurring ? 'recurrente' : 'pago único (full)';
+  const cobro = s.recurring ? `${money(s.amount)} / mes` : `${money(s.amount)} (un solo pago)`;
+  const lines = [
+    `💐 *Nueva suscripción* — ${s.id || 's/id'}`,
+    `📦 ${s.planLabel || s.planKey || 's/plan'} · ${tipo}`,
+    `👤 Suscriptor: ${s.buyerName || 's/n'}${s.buyerPhone ? ` · ${s.buyerPhone}` : ''}${s.buyerEmail ? ` · ${s.buyerEmail}` : ''}`,
+    `🎁 Recibe: ${s.recipientName || 's/n'}${s.recipientPhone ? ` · ${s.recipientPhone}` : ''}`,
+    `📍 ${s.recipientAddress || 's/dirección'}${s.recipientDistrict ? ` · ${s.recipientDistrict}` : ''}`,
+    `💳 ${cobro}`,
+  ];
+  return sendText(lines.join('\n'));
+}
+
 // Notifica el inicio de una franja horaria con sus pedidos de hoy.
 // `orders` = filas { id, recipient_name, recipient_address, recipient_apt }.
 function notifySlotStart(slot, orders, dateStr) {
@@ -85,4 +104,4 @@ function notifySlotStart(slot, orders, dateStr) {
   return sendText(text);
 }
 
-module.exports = { isConfigured, post, sendText, notifyNewOrder, notifySlotStart };
+module.exports = { isConfigured, post, sendText, notifyNewOrder, notifyNewSubscription, notifySlotStart };

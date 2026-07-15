@@ -24,6 +24,7 @@ const catalog = require('../integrations/culqi/plans-catalog');
 const subsStore = require('../db/subscriptions-store');
 const { safeEqStr } = require('../lib/security');
 const { computeAmountCents } = require('../integrations/culqi/charges');
+const gchat = require('../integrations/notify/gchat');
 
 const CULQI_HOST = 'api.culqi.com';
 const SECRET = () => process.env.CULQI_SECRET_KEY || '';
@@ -228,6 +229,8 @@ async function subscribe(req, res) {
       try {
         await subsStore.create({ id: chargeId, planId: null, customerId: null, cardId: null, recurring: false, chargeId, ...baseRecord });
       } catch (e) { console.error('[culqi] prepay persist error:', e.message); }
+      // Aviso a Google Chat (fire-and-forget; no bloquea ni rompe la suscripción).
+      setImmediate(() => gchat.notifyNewSubscription({ id: chargeId, recurring: false, planLabel: entry.label || entry.tier, ...baseRecord }).catch((e) => console.error('[culqi] gchat sub error:', e.message)));
       return send(res, 200, { ok: true, charge_id: chargeId, plan_key: planKey, amount: entry.amountSoles, prepaid: true });
     } catch (e) {
       console.error('[culqi] prepay error:', e.message);
@@ -276,6 +279,9 @@ async function subscribe(req, res) {
     try {
       await subsStore.create({ id: subId, planId, customerId, cardId, recurring: true, chargeId: null, ...baseRecord });
     } catch (e) { console.error('[culqi] subscribe persist error:', e.message); }
+
+    // Aviso a Google Chat (fire-and-forget; no bloquea ni rompe la suscripción).
+    setImmediate(() => gchat.notifyNewSubscription({ id: subId, recurring: true, planLabel: entry.label || entry.tier, ...baseRecord }).catch((e) => console.error('[culqi] gchat sub error:', e.message)));
 
     return send(res, 200, { ok: true, subscription_id: subId, plan_key: planKey, amount: entry.amountSoles });
   } catch (e) {
