@@ -13,7 +13,7 @@ const VIBES: Vibe[] = [
   { key: 'mothers', label: 'Día de la Madre', lead: "Tender Mother's Day", surface: 'soft pastel linen with warm morning light', extra: 'gentle, heartfelt, fresh' },
   { key: 'luxury', label: 'Minimal lujo', lead: 'Minimal luxury', surface: 'clean beige stucco and white marble', extra: 'negative space, sophisticated, understated' },
   { key: 'birthday', label: 'Cumpleaños festivo', lead: 'Festive birthday', surface: 'bright cheerful backdrop with soft confetti bokeh', extra: 'joyful, vibrant, celebratory' },
-  { key: 'sympathy', label: 'Condolencias sobrio', lead: 'Sober respectful sympathy', surface: 'muted greys and whites with soft diffused light', extra: 'calm, dignified, serene' },
+  { key: 'sympathy', label: 'Condolencias sobrio', lead: 'Sober respectful sympathy', surface: 'soft light grey marble surface with subtle veining, muted whites', extra: 'calm, dignified, serene, diffused overhead light' },
 ];
 
 function buildPrompt(p: Product, vibeKey: string, size: AdSize, template: Template = 'simple'): string {
