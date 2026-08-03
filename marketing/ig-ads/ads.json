@@ -6,7 +6,7 @@
     "currency": "S/",
     "whatsapp": "999 479 855",
     "generated": "2026-08",
-    "note": "3 productos elegidos al azar del catálogo (db/products.seed.json), 3 anuncios por producto. Copy y creativos hechos íntegramente con Claude."
+    "note": "6 productos elegidos al azar del catálogo (db/products.seed.json), 3 anuncios por producto en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude."
   },
   "products": [
     {
@@ -38,6 +38,36 @@
       "landing": "/producto.html?id=ramo-de-flores-sofia",
       "audience": "22–40, Lima Metropolitana. Público de entrada de precio y gusto estético: diseño, arquitectura, café de especialidad, decoración. Primer contacto con la marca.",
       "angle": "Anti–rosas rojas: criterio estético a precio de entrada, hecho a mano el mismo día."
+    },
+    {
+      "id": "arreglo-rossie",
+      "name": "Arreglo Rossie",
+      "categoryLabel": "Arreglos",
+      "price": 245,
+      "num": "04",
+      "landing": "/producto.html?id=arreglo-rossie",
+      "audience": "28–50, Lima Metropolitana. Momentos de ticket alto: aniversario, San Valentín, reconciliaciones, pedidas de mano. Excluir compradores de los últimos 30 días.",
+      "angle": "Es el producto caro del set: se vende presencia y tamaño (30×50 cm), no cantidad de tallos."
+    },
+    {
+      "id": "tulipanes-de-amor",
+      "name": "Tulipanes de amor",
+      "categoryLabel": "Floreros",
+      "price": 195,
+      "num": "05",
+      "landing": "/producto.html?id=tulipanes-de-amor",
+      "audience": "25–45, Lima Metropolitana. Regalo de cumpleaños y de pareja. Buen público para públicos similares al 1% de compradores de Floreros.",
+      "angle": "Personalización: es el único del set donde el cliente elige el color."
+    },
+    {
+      "id": "ramo-luana",
+      "name": "Ramo Luana",
+      "categoryLabel": "Ramos",
+      "price": 180,
+      "num": "06",
+      "landing": "/producto.html?id=ramo-luana",
+      "audience": "22–40, Lima Metropolitana. Primera compra, regalo casual entre amigas, mudanzas y agradecimientos. Público frío amplio.",
+      "angle": "La foto es de casa, no de estudio: se vende autenticidad frente al catálogo pulido."
     }
   ],
   "ads": [
@@ -321,6 +351,289 @@
         "position": "50% 45%"
       },
       "why": "El texto hace el trabajo de segmentación solo: cada línea es una intención de compra distinta y el clic revela cuál."
+    },
+    {
+      "code": "IG-10",
+      "product": "arreglo-rossie",
+      "title": "Rojo de verdad",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "puro",
+      "photo": "arreglo-rossie-3.jpg",
+      "primaryText": "Hay un rojo de supermercado y hay este.\n\nRosas, gerberas, claveles importados y pepitas rojas apretadas hasta que no entra una flor más, en florero de vidrio.\n\nMide 50 cm de alto y ocupa la mesa entera. S/245, entregado hoy en Lima.",
+      "headline": "Rojo de verdad",
+      "description": "Arreglo Rossie · 30×50 cm · S/245",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#floreslima",
+        "#rosasrojas",
+        "#aniversario",
+        "#deliverylima"
+      ],
+      "creative": {
+        "headline": "Rojo <em>de verdad</em>",
+        "sub": "Rosas, gerberas, claveles importados y pepitas rojas. En florero de vidrio.",
+        "price": "S/ 245",
+        "footer": "Arreglo Rossie · 30×50 cm",
+        "tone": "light",
+        "fit": "cover",
+        "position": "50% 46%",
+        "hlSize": 112
+      },
+      "why": "Foto a sangre y una sola frase: en el feed compite con imagen, no con texto. El macro del arreglo es lo más fuerte que tiene el catálogo."
+    },
+    {
+      "code": "IG-11",
+      "product": "arreglo-rossie",
+      "title": "Ocupa la mesa entera",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 14 días",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "sello",
+      "photo": "arreglo-rossie-3.jpg",
+      "primaryText": "30 cm de ancho por 50 de alto.\n\nNo es el detalle que se pone al costado del plato: es lo primero que ve cuando entra a la casa.\n\nRosas, gerberas y claveles importados en florero de vidrio, armado a mano el mismo día. S/245.",
+      "headline": "Mide 50 cm. Se nota.",
+      "description": "Florero de vidrio incluido · S/245",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#arreglosflorales",
+        "#floreslima",
+        "#regalosperu"
+      ],
+      "creative": {
+        "headline": "Ocupa la <em>mesa entera</em>",
+        "price": "S/ 245",
+        "seal": "30 × 50 cm",
+        "footer": "Arreglo Rossie · florero de vidrio",
+        "fit": "cover",
+        "position": "50% 62%",
+        "hlSize": 92
+      },
+      "why": "El sello de precio hace el trabajo del texto: quien ya vio el producto necesita el número, no otro párrafo. La medida en el sello responde la pregunta real, que es el tamaño."
+    },
+    {
+      "code": "IG-12",
+      "product": "arreglo-rossie",
+      "title": "Cuando bonito no alcanza",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "titular",
+      "photo": "arreglo-rossie-3.jpg",
+      "primaryText": "Aniversarios, disculpas grandes, sí definitivos.\n\nHay momentos en los que un ramo correcto no dice lo suficiente. Para eso está el Rossie: rojo cerrado, 50 cm, florero de vidrio incluido.\n\nS/245, hoy en Lima.",
+      "headline": "Cuando «bonito» no alcanza",
+      "description": "Arreglo Rossie · S/245",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#aniversario",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 04 · Arreglos",
+        "headline": "Cuando «bonito» <em>no alcanza</em>",
+        "price": "S/ 245",
+        "footer": "Arreglo Rossie",
+        "fit": "cover",
+        "position": "50% 40%",
+        "hlSize": 124
+      },
+      "why": "Invierte la jerarquía: el texto es el creativo y la foto entra como franja. Rompe el patrón visual de las otras historias en el mismo feed."
+    },
+    {
+      "code": "IG-13",
+      "product": "tulipanes-de-amor",
+      "title": "Tú eliges el color",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "puro",
+      "photo": "tulipanes-de-amor.jpg",
+      "primaryText": "Diez tulipanes en florero de vidrio. Tú eliges: amarillo, rojo, morado, naranja, blanco, o el mix de todos como en la foto.\n\nViene con papel decorativo y tarjeta de dedicatoria. S/195, entregado hoy en Lima.",
+      "headline": "Tú eliges el color",
+      "description": "10 tulipanes · florero incluido · S/195",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#tulipanes",
+        "#floreslima",
+        "#regalosperu",
+        "#deliverylima"
+      ],
+      "creative": {
+        "headline": "Elige el <em>color</em>",
+        "sub": "Diez tulipanes en florero de vidrio. Amarillo, rojo, morado, naranja, blanco. O todos.",
+        "price": "S/ 195",
+        "footer": "Tulipanes de amor",
+        "tone": "dark",
+        "fit": "cover",
+        "position": "50% 52%",
+        "hlSize": 108
+      },
+      "why": "La foto ya tiene el aire arriba: el texto se apoya en el fondo crema sin recuadros ni velos. Es el formato más limpio del set y el que mejor pasa por publicación orgánica."
+    },
+    {
+      "code": "IG-14",
+      "product": "tulipanes-de-amor",
+      "title": "Las flores que siguen creciendo",
+      "objective": "Tráfico / Interacción",
+      "funnel": "Frío — marca",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "postal",
+      "photo": "tulipanes-de-amor.jpg",
+      "primaryText": "Los tulipanes son de las pocas flores que siguen creciendo después de cortadas. Se estiran, se acomodan y cambian de posición cada día dentro del florero.\n\nEs un regalo que se mueve durante toda la semana. Diez tallos, florero de vidrio y tarjeta de dedicatoria, S/195.",
+      "headline": "Las flores que siguen creciendo",
+      "description": "Tulipanes de amor · S/195",
+      "cta": "Más información",
+      "hashtags": [
+        "#limaflores",
+        "#tulipanes",
+        "#datofloral",
+        "#floreslima"
+      ],
+      "creative": {
+        "headline": "Siguen creciendo <em>dentro del florero</em>",
+        "sub": "Diez tallos, florero de vidrio y tarjeta escrita a mano.",
+        "price": "S/ 195",
+        "footer": "Tulipanes de amor",
+        "fit": "cover",
+        "hlSize": 64,
+        "position": "50% 40%"
+      },
+      "why": "Un dato verdadero que casi nadie sabe da motivo para guardar y comentar el anuncio. Baja el CPM del conjunto entero por interacción."
+    },
+    {
+      "code": "IG-15",
+      "product": "tulipanes-de-amor",
+      "title": "Elige el color, llega hoy",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "puro",
+      "photo": "tulipanes-de-amor.jpg",
+      "primaryText": "Amarillo, rojo, morado, naranja o blanco.\n\nDiez tulipanes en florero de vidrio, entregados hoy en Lima. Desliza y elige el tuyo.",
+      "headline": "Elige el color, lo llevamos hoy",
+      "description": "S/195 · entrega el mismo día",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#tulipanes",
+        "#deliverylima"
+      ],
+      "creative": {
+        "headline": "Tú eliges el <em>color</em>",
+        "sub": "Diez tulipanes en florero de vidrio. Hoy en Lima.",
+        "price": "S/ 195",
+        "footer": "Tulipanes de amor",
+        "tone": "dark",
+        "fit": "cover",
+        "position": "50% 50%",
+        "hlSize": 84,
+        "anchor": "top"
+      },
+      "why": "Mismo formato limpio que IG-13 en vertical, para medir si el gancho del color rinde igual en historias que en feed sin cambiar nada más."
+    },
+    {
+      "code": "IG-16",
+      "product": "ramo-luana",
+      "title": "Sin estudio, sin retoque",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "format": "1:1",
+      "placement": "Feed de Instagram · 1:1 (1080×1080)",
+      "template": "cuadro",
+      "photo": "ramo-luana.jpg",
+      "primaryText": "Esta foto no es de estudio. Es el Ramo Luana sobre el sofá de la casa a la que llegó, tomada con un celular y sin retoque.\n\nMini rosas naranjas, siemprevivas moradas y pompones verdes. Así se va a ver en tu sala. S/180, entregado hoy en Lima.",
+      "headline": "Sin estudio, sin retoque",
+      "description": "Ramo Luana · S/180",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#ramosdeflores",
+        "#floreslima",
+        "#sinfiltro",
+        "#miraflores"
+      ],
+      "creative": {
+        "eyebrow": "",
+        "headline": "Así se ve <em>en tu sala</em>",
+        "sub": "Foto real, sin estudio ni retoque. Mini rosas naranjas, siemprevivas y pompones verdes.",
+        "price": "S/ 180",
+        "fit": "cover",
+        "position": "50% 50%",
+        "hlSize": 70
+      },
+      "why": "El formato cuadrado y la foto de celular hacen que no parezca anuncio. Es el creativo con más chance de ganar en público frío amplio."
+    },
+    {
+      "code": "IG-17",
+      "product": "ramo-luana",
+      "title": "Para la amiga que se mudó",
+      "objective": "Tráfico",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "titular",
+      "photo": "ramo-luana.jpg",
+      "primaryText": "No todo regalo tiene que ser un acontecimiento.\n\nEste es para la amiga que se mudó, para la casa de tu mamá, para el jueves en que alguien la pasó mal.\n\nMini rosas naranjas, siemprevivas moradas y pompones verdes, armado a mano. S/180.",
+      "headline": "Para la amiga que se mudó",
+      "description": "Ramo Luana · hecho a mano · S/180",
+      "cta": "Más información",
+      "hashtags": [
+        "#limaflores",
+        "#ramosdeflores",
+        "#regalosconsentido",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 06 · Ramos",
+        "headline": "Para la amiga <em>que se mudó</em>",
+        "price": "S/ 180",
+        "footer": "Ramo Luana · hecho a mano",
+        "fit": "cover",
+        "position": "40% 46%",
+        "hlSize": 118
+      },
+      "why": "Nombra una ocasión chica y concreta en vez de una fecha del calendario: vende en los diez meses del año en que no hay campaña."
+    },
+    {
+      "code": "IG-18",
+      "product": "ramo-luana",
+      "title": "Los colores que nadie pide",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "postal",
+      "photo": "ramo-luana.jpg",
+      "primaryText": "Naranjas, morados y verdes en el mismo ramo: los colores que nadie pide y todos miran.\n\nHecho a mano en el atelier de Miraflores, entregado hoy en Lima. S/180.",
+      "headline": "Los colores que nadie pide",
+      "description": "Ramo Luana · S/180",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#floreslima",
+        "#deliverylima"
+      ],
+      "creative": {
+        "headline": "Los colores <em>que nadie pide</em>",
+        "sub": "Naranja, morado y verde. Hecho a mano en Miraflores.",
+        "price": "S/ 180",
+        "footer": "Ramo Luana",
+        "fit": "cover",
+        "position": "50% 50%",
+        "hlSize": 66
+      },
+      "why": "El marco de postal separa el producto del fondo del feed y da aire: funciona bien cuando la foto es de celular y no aguanta ir a sangre en vertical."
     }
   ]
 }

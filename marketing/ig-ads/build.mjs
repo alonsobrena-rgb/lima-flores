@@ -113,7 +113,7 @@ html,body{width:${w}px;height:${h}px;overflow:hidden}
 body{position:relative;background:${C.bone};font-family:'Jost',-apple-system,'Helvetica Neue',sans-serif;color:${C.ink};
   -webkit-font-smoothing:antialiased}
 .d{font-family:'Cormorant Garamond','EB Garamond',Georgia,serif;font-weight:300;letter-spacing:-.022em;line-height:.94}
-.d em{font-style:italic;font-weight:400;color:${C.rosa}}
+.d em{font-style:italic;font-weight:400;color:var(--em,${C.rosa})}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.24em}
 .rule{height:1px;background:${C.line}}
 .mark{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;letter-spacing:.34em;text-transform:uppercase}
@@ -227,7 +227,125 @@ const story = (a, photo) => `
   </div>
 </div>`;
 
-const TEMPLATES = { editorial, split, quote, story };
+/* ── formatos sin caja: la foto es el anuncio y el texto vive encima ────── */
+
+// P · Puro: foto a sangre, un titular y nada más. `tone:'light'` para fotos
+// oscuras (texto blanco sobre un degradado suave, no sobre un recuadro).
+const puro = (a, photo, w, h) => {
+  const light = a.creative.tone === 'light';
+  const fg = light ? '#fff' : C.ink;
+  const mut = light ? 'rgba(255,255,255,.8)' : '#4A473F';
+  const safe = h === 1920 ? 372 : 76;
+  // `anchor:'top'` para fotos cuyo aire está arriba: el texto se apoya en el
+  // vacío de la propia toma en vez de caer sobre el producto.
+  const top = a.creative.anchor === 'top';
+  const textPos = top ? `top:${h === 1920 ? 296 : 76}px` : `bottom:${safe}px`;
+  const markPos = top ? `bottom:${safe}px` : `top:${h === 1920 ? 272 : 66}px`;
+  return `
+<div style="position:absolute;inset:0;background:${a.creative.bg || '#fff'};overflow:hidden;
+            --em:${light ? '#F0BFCB' : C.rosa}">
+  ${img(a, photo)}
+  ${light
+    ? `<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.68)}px;
+         background:linear-gradient(to top,rgba(10,7,6,.84),rgba(10,7,6,.3) 46%,rgba(10,7,6,0))"></div>`
+    : ''}
+  <span class="mark" style="position:absolute;${markPos};left:76px;font-size:21px;color:${fg}">Lima Flores</span>
+  <div style="position:absolute;left:76px;right:76px;${textPos}">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 104}px;color:${fg}">${a.creative.headline}</h1>
+    ${a.creative.sub
+      ? `<p style="font-size:29px;font-weight:300;line-height:1.4;color:${mut};margin-top:24px;max-width:790px">${a.creative.sub}</p>`
+      : ''}
+    <div style="margin-top:32px;display:flex;align-items:baseline;gap:22px">
+      <span class="d" style="font-size:44px;font-weight:400;color:${fg}">${a.creative.price}</span>
+      <span class="mono" style="font-size:15px;color:${mut}">${a.creative.footer}</span>
+    </div>
+  </div>
+</div>`;
+};
+
+// S2 · Sello: foto a sangre y un sello de precio, como la etiqueta de una tienda.
+const sello = (a, photo, w, h) => `
+<div style="position:absolute;inset:0;background:#fff;overflow:hidden;--em:#F0BFCB">
+  ${img(a, photo)}
+  <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.5)}px;
+       background:linear-gradient(to top,rgba(10,7,6,.78),rgba(10,7,6,0))"></div>
+  <div style="position:absolute;top:${h === 1920 ? 300 : 74}px;right:74px;width:244px;height:244px;
+              background:${C.bone};border-radius:50%;color:${C.ink};
+              display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <span class="d" style="font-size:64px;font-weight:400;line-height:1">${a.creative.price}</span>
+    <span class="mono" style="font-size:12px;color:${C.moss};margin-top:12px">${a.creative.seal}</span>
+  </div>
+  <div style="position:absolute;left:76px;right:76px;bottom:${h === 1920 ? 372 : 76}px;color:#fff">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 96}px">${a.creative.headline}</h1>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:28px">
+      <span class="mono" style="font-size:15px;color:rgba(255,255,255,.8)">${a.creative.footer}</span>
+      <span class="mark" style="font-size:20px">Lima Flores</span>
+    </div>
+  </div>
+</div>`;
+
+// C2 · Cuadro 1:1: la foto ocupa el lienzo y el texto se apoya en el vacío que
+// la propia foto deja a un costado.
+const cuadro = (a, photo) => `
+<div style="position:absolute;inset:0;background:#fff;overflow:hidden">
+  ${img(a, photo)}
+  <div style="position:absolute;top:74px;right:66px;width:428px;text-align:right">
+    <span class="mono" style="font-size:15px;color:${C.moss}">${a.creative.eyebrow}</span>
+    <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:20px">${a.creative.headline}</h1>
+    <div style="height:1px;background:${C.line};margin:24px 0 0;margin-left:auto;width:180px"></div>
+    <div style="margin-top:22px;display:flex;justify-content:flex-end;align-items:baseline;gap:20px">
+      <span class="mark" style="font-size:17px;color:#4A473F">Lima Flores</span>
+      <span class="d" style="font-size:40px;font-weight:400">${a.creative.price}</span>
+    </div>
+  </div>
+</div>`;
+
+// T · Titular: aquí manda la tipografía y la foto entra como una franja al pie.
+const titular = (a, photo, w, h) => {
+  const tall = h === 1920;
+  const bandTop = tall ? 1010 : 762;
+  const bandH = tall ? 538 : 588;
+  return `
+<div style="position:absolute;inset:0;background:${C.bone}">
+  <span class="mark" style="position:absolute;top:${tall ? 272 : 66}px;left:76px;font-size:21px">Lima Flores</span>
+  <span class="mono" style="position:absolute;top:${tall ? 356 : 132}px;left:76px;font-size:18px;color:${C.gold}">${a.creative.eyebrow}</span>
+  <h1 class="d" style="position:absolute;top:${tall ? 402 : 178}px;left:76px;right:76px;
+      font-size:${a.creative.hlSize || (tall ? 128 : 122)}px">${a.creative.headline}</h1>
+  <div style="position:absolute;left:76px;right:76px;top:${bandTop - 74}px;display:flex;
+              justify-content:space-between;align-items:baseline">
+    <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
+    <span class="mono" style="font-size:16px;color:${C.moss}">${a.creative.footer}</span>
+  </div>
+  <div style="position:absolute;left:0;right:0;top:${bandTop}px;height:${bandH}px;background:#fff;overflow:hidden">
+    ${img(a, photo)}
+  </div>
+</div>`;
+};
+
+// PC · Postal: margen amplio y la foto montada como una lámina. Simétrica.
+const postal = (a, photo, w, h) => {
+  const tall = h === 1920;
+  const side = tall ? 140 : 130;
+  const box = w - side * 2;
+  const top = tall ? 424 : 158;
+  return `
+<div style="position:absolute;inset:0;background:${C.paper};text-align:center">
+  <span class="mark" style="position:absolute;top:${tall ? 286 : 76}px;left:0;right:0;font-size:22px">Lima Flores</span>
+  <div style="position:absolute;left:${side}px;top:${top}px;width:${box}px;height:${box}px;
+              background:#fff;border:1px solid ${C.line};overflow:hidden">${img(a, photo)}</div>
+  <div style="position:absolute;left:${side}px;right:${side}px;top:${top + box + 46}px">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 70}px">${a.creative.headline}</h1>
+    <p style="font-size:25px;font-weight:300;line-height:1.4;color:#4A473F;margin-top:20px">${a.creative.sub}</p>
+    <div style="margin-top:22px;display:flex;justify-content:center;align-items:baseline;gap:20px">
+      <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
+      <span class="mono" style="font-size:15px;color:${C.moss}">${a.creative.footer}</span>
+    </div>
+  </div>
+</div>`;
+};
+
+const TEMPLATES = { editorial, split, quote, story, puro, sello, cuadro, titular, postal };
+const FORMATS = { '4:5': [1080, 1350], '1:1': [1080, 1080], '9:16': [1080, 1920] };
 
 /* ──────────────────────────────  render  ─────────────────────────────── */
 
@@ -277,7 +395,7 @@ function writeDeck({ campaign, products, ads }) {
   L.push('| --- | --- | --- | --- | --- |');
   for (const a of ads) {
     const p = products.find((x) => x.id === a.product);
-    L.push(`| \`${a.code}\` | ${p.name} | ${a.funnel} | ${a.template === 'story' ? '9:16' : '4:5'} | ${a.headline} |`);
+    L.push(`| \`${a.code}\` | ${p.name} | ${a.funnel} | ${a.format || (a.template === 'story' ? '9:16' : '4:5')} | ${a.headline} |`);
   }
   L.push('');
 
@@ -335,6 +453,24 @@ function writeDeck({ campaign, products, ads }) {
   L.push('Además: la reseña de Diego V. que se cita en IG-05 aparece como verificada en la landing.');
   L.push('Meta pide poder respaldar los testimonios, así que hay que tener a mano de dónde salió.');
   L.push('');
+  L.push('## Los nueve formatos');
+  L.push('');
+  L.push('| Plantilla | Qué hace | Cuándo conviene |');
+  L.push('| --- | --- | --- |');
+  L.push('| `puro` | Foto a sangre y un titular encima. Sin cajas. | Público frío: compite con imagen, no con texto. |');
+  L.push('| `sello` | Foto a sangre con un sello de precio, como etiqueta de tienda. | Retargeting: quien ya vio el producto solo necesita el número. |');
+  L.push('| `cuadro` | 1:1, la foto entera y el texto apoyado en su zona vacía. | Fotos de celular o de casa, que no parecen anuncio. |');
+  L.push('| `titular` | Manda la tipografía; la foto entra como franja al pie. | Rompe el patrón visual cuando el resto del conjunto es todo foto. |');
+  L.push('| `postal` | Margen amplio y la foto montada como lámina. Simétrica. | Fotos que no aguantan ir a sangre por resolución o encuadre. |');
+  L.push('| `editorial` | Foto grande arriba, titular abajo, filetes finos. | Presentación de producto en público frío. |');
+  L.push('| `split` | Panel oscuro con la lista de entregables + foto a sangre. | Desarmar objeciones de precio: convierte el ticket en una lista. |');
+  L.push('| `quote` | Cita grande arriba, foto abajo. | Prueba social o manifiesto de marca. |');
+  L.push('| `story` | Banda de foto arriba, texto y botón en zona segura. | Historias de retargeting con llamada a la acción. |');
+  L.push('');
+  L.push('Para agregar un anuncio basta con otra entrada en `ads.json`: la plantilla, la foto del');
+  L.push('catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` —');
+  L.push('`4:5`, `1:1` o `9:16`.');
+  L.push('');
   L.push('## Notas de producción');
   L.push('');
   L.push('- Fotos: las del catálogo (`site/assets/products/`). No se generó ninguna imagen con IA.');
@@ -361,13 +497,12 @@ const main = async () => {
   fs.mkdirSync(OUT, { recursive: true });
 
   for (const ad of ads) {
-    const isStory = ad.template === 'story';
-    const [w, h] = isStory ? [1080, 1920] : [1080, 1350];
+    const [w, h] = FORMATS[ad.format || (ad.template === 'story' ? '9:16' : '4:5')];
     const html = path.join(tmp, `${ad.code}.html`);
     const png = path.join(tmp, `${ad.code}.png`);
     const jpg = path.join(OUT, `${ad.code}.jpg`);
 
-    fs.writeFileSync(html, base(fonts, w, h, TEMPLATES[ad.template](ad, dataUri(ad.photo))));
+    fs.writeFileSync(html, base(fonts, w, h, TEMPLATES[ad.template](ad, dataUri(ad.photo), w, h)));
     execFileSync(chrome, [
       '--headless=new', '--no-sandbox', '--disable-gpu', '--hide-scrollbars',
       '--force-device-scale-factor=1', '--virtual-time-budget=8000',
