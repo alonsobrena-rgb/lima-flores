@@ -1,0 +1,326 @@
+{
+  "campaign": {
+    "brand": "Lima Flores",
+    "handle": "@lima_flores",
+    "market": "Lima Metropolitana",
+    "currency": "S/",
+    "whatsapp": "999 479 855",
+    "generated": "2026-08",
+    "note": "3 productos elegidos al azar del catálogo (db/products.seed.json), 3 anuncios por producto. Copy y creativos hechos íntegramente con Claude."
+  },
+  "products": [
+    {
+      "id": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
+      "name": "Florero con tulipanes lilas",
+      "categoryLabel": "Floreros",
+      "price": 195,
+      "num": "01",
+      "landing": "/producto.html?id=sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
+      "audience": "Mujeres y hombres 25–45, Lima Metropolitana (Miraflores, San Isidro, Surco, Barranco, La Molina, San Borja). Intereses: regalos, decoración, gastronomía, viajes. Lookalike 1% de compradores.",
+      "angle": "Regalo sin ocasión + el florero de vidrio como valor tangible."
+    },
+    {
+      "id": "orquideas-grandes-en-maceta",
+      "name": "Orquídeas grandes en maceta",
+      "categoryLabel": "Orquídeas",
+      "price": 200,
+      "num": "02",
+      "landing": "/producto.html?id=orquideas-grandes-en-maceta",
+      "audience": "30–55, Lima Metropolitana. Momentos: agradecimiento, casa nueva, jefas/suegras, cumpleaños de mamá. Retargeting 30 días de visitantes de /catalogo.html categoría Orquídeas.",
+      "angle": "Durabilidad (8–12 semanas) frente al ramo que se marchita en 8 días."
+    },
+    {
+      "id": "ramo-de-flores-sofia",
+      "name": "Ramo de flores Sofía",
+      "categoryLabel": "Ramos",
+      "price": 160,
+      "num": "03",
+      "landing": "/producto.html?id=ramo-de-flores-sofia",
+      "audience": "22–40, Lima Metropolitana. Público de entrada de precio y gusto estético: diseño, arquitectura, café de especialidad, decoración. Primer contacto con la marca.",
+      "angle": "Anti–rosas rojas: criterio estético a precio de entrada, hecho a mano el mismo día."
+    }
+  ],
+  "ads": [
+    {
+      "code": "IG-01",
+      "product": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
+      "title": "Un martes cualquiera",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "editorial",
+      "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
+      "primaryText": "Los cumpleaños ya están tomados. El aniversario también.\n\nLo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta escrita a mano.\n\nEso es lo que la gente cuenta después.\n\nFlorero de vidrio incluido. Entregamos hoy en Lima.",
+      "headline": "Regálale un martes cualquiera",
+      "description": "10 tulipanes · florero de vidrio · S/195",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#floreslima",
+        "#tulipanes",
+        "#regalosperu",
+        "#deliverylima",
+        "#miraflores"
+      ],
+      "creative": {
+        "eyebrow": "No. 01 · Floreros",
+        "headline": "Un martes <em>cualquiera</em>",
+        "sub": "Diez tulipanes lilas, florero de vidrio y una tarjeta escrita a mano.",
+        "price": "S/ 195",
+        "footer": "Entrega hoy en Lima",
+        "fit": "cover",
+        "position": "50% 36%"
+      },
+      "why": "El gancho compite con el motivo, no con el precio: saca al producto de la temporada de campañas (Día de la Madre, San Valentín) donde el CPM se dispara."
+    },
+    {
+      "code": "IG-02",
+      "product": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
+      "title": "Lo que otros cobran aparte",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 14 días",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "split",
+      "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
+      "primaryText": "S/195 no es el precio de diez tulipanes.\n\nEs el florero de vidrio, que no cobramos aparte. El papel armado a mano esa misma mañana. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta hoy.\n\nLos tulipanes duran una semana. El florero se queda para siempre.",
+      "headline": "Lo que otros te cobran aparte",
+      "description": "Florero, tarjeta y entrega incluidos",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#floreslima",
+        "#tulipaneslima",
+        "#regalosconsentido",
+        "#deliveryflores"
+      ],
+      "creative": {
+        "eyebrow": "S/ 195 · Todo incluido",
+        "headline": "Lo que otros cobran <em>aparte</em>",
+        "items": [
+          "Florero de vidrio",
+          "Papel armado a mano",
+          "Tarjeta de dedicatoria",
+          "Entrega el mismo día"
+        ],
+        "price": "S/ 195",
+        "footer": "Florero con tulipanes lilas",
+        "fit": "cover",
+        "position": "50% 50%"
+      },
+      "why": "Desarma la objeción de precio convirtiendo el ticket en una lista de entregables. Va a quien ya vio el producto y no compró."
+    },
+    {
+      "code": "IG-03",
+      "product": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
+      "title": "Todavía llegas",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente · carrito abandonado 1–3 días",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "story",
+      "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
+      "primaryText": "Te olvidaste. Está bien: todavía estás a tiempo.\n\nTulipanes lilas con florero incluido, entregados hoy en Lima. Desliza hacia arriba y elige la hora.",
+      "headline": "Todavía llegas",
+      "description": "S/195 · entrega el mismo día",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#deliverylima",
+        "#floreshoy"
+      ],
+      "creative": {
+        "eyebrow": "Entrega el mismo día",
+        "headline": "Todavía <em>llegas</em>",
+        "sub": "Lo pides hoy. Llega hoy.",
+        "pill": "S/ 195 · Ver el florero",
+        "fit": "cover",
+        "position": "50% 30%"
+      },
+      "why": "Urgencia sin descuento. El descuento entrena a esperar ofertas; la hora de entrega no toca el margen."
+    },
+    {
+      "code": "IG-04",
+      "product": "orquideas-grandes-en-maceta",
+      "title": "Ocho días vs. tres meses",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "split",
+      "photo": "orquideas-grandes-en-maceta-4.jpg",
+      "primaryText": "Un ramo dura ocho días. Una Phalaenopsis dura entre ocho y doce semanas con un vaso de agua a la semana.\n\nMisma inversión, diez veces más tiempo recordándote.\n\nViene en maceta decorativa, con tarjeta de dedicatoria e instrucciones de cuidado para que no se muera en la oficina.",
+      "headline": "Ocho días o tres meses",
+      "description": "Phalaenopsis en maceta · S/200",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#orquideas",
+        "#phalaenopsis",
+        "#regalosperu",
+        "#plantaslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 02 · Orquídeas",
+        "headline": "Ocho días <em>o</em> tres meses",
+        "items": [
+          "Un ramo — 8 días",
+          "Una Phalaenopsis — 8 a 12 semanas",
+          "Maceta decorativa incluida",
+          "Tarjeta e instrucciones de cuidado"
+        ],
+        "price": "S/ 200",
+        "footer": "Orquídeas grandes en maceta",
+        "fit": "cover",
+        "position": "50% 50%"
+      },
+      "why": "Compara contra la categoría entera, no contra otra floristería. Reencuadra el precio como costo por semana."
+    },
+    {
+      "code": "IG-05",
+      "product": "orquideas-grandes-en-maceta",
+      "title": "Dos meses después",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 30 días",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "quote",
+      "photo": "orquideas-grandes-en-maceta-3.jpg",
+      "primaryText": "«Pedí a las 11 am, llegaron a las 5:30 pm con el arreglo perfecto. Las orquídeas siguen vivas dos meses después. Recomiendo cerrado los ojos.»\n— Diego V., San Isidro · reseña verificada\n\nEso es exactamente lo que vendemos: algo que sigue vivo cuando ya nadie se acuerda del regalo.\n\nPhalaenopsis en maceta decorativa, con tarjeta e instrucciones.",
+      "headline": "«Siguen vivas dos meses después»",
+      "description": "Orquídeas en maceta · S/200",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#orquideas",
+        "#reseñasreales",
+        "#deliverylima"
+      ],
+      "creative": {
+        "quote": "Pedí a las 11 am, llegaron a las 5:30 pm. Las orquídeas siguen vivas <em>dos meses después</em>.",
+        "author": "Diego V. · San Isidro",
+        "meta": "Reseña verificada · 2025",
+        "price": "S/ 200",
+        "footer": "Orquídeas grandes en maceta",
+        "fit": "cover",
+        "position": "50% 16%"
+      },
+      "why": "Prueba social textual del propio sitio. Cubre las dos objeciones a la vez: llega a tiempo y dura."
+    },
+    {
+      "code": "IG-06",
+      "product": "orquideas-grandes-en-maceta",
+      "title": "Cuando el ramo no alcanza",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "story",
+      "photo": "orquideas-grandes-en-maceta-4.jpg",
+      "primaryText": "Para la suegra. Para la jefa. Para la casa nueva. Para el gracias que se te quedó pendiente hace tres semanas.\n\nOrquídea Phalaenopsis en maceta, entregada hoy en Lima.",
+      "headline": "Cuando el ramo no alcanza",
+      "description": "S/200 · entrega el mismo día",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#orquideas",
+        "#regalosperu"
+      ],
+      "creative": {
+        "eyebrow": "No. 02 · Orquídeas",
+        "headline": "Cuando el ramo <em>no alcanza</em>",
+        "sub": "La suegra. La jefa. La casa nueva. El gracias pendiente.",
+        "pill": "S/ 200 · Ver orquídeas",
+        "fit": "cover",
+        "position": "50% 15%"
+      },
+      "why": "Lista de ocasiones: deja que la persona se reconozca en una de las cuatro en menos de dos segundos."
+    },
+    {
+      "code": "IG-07",
+      "product": "ramo-de-flores-sofia",
+      "title": "No mandes rosas rojas",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "editorial",
+      "photo": "ramo-de-flores-sofia.jpg",
+      "primaryText": "Doce rosas rojas dicen «pasé por el mercado camino a tu casa».\n\nRosas blancas, pompones verde limón, una flor exótica amarilla y eucalipto dicen «me senté a pensar en ti».\n\nEl mismo gesto, cuesta menos, se nota más.\n\nRamo Sofía, armado a mano en el atelier de Miraflores.",
+      "headline": "No mandes rosas rojas",
+      "description": "Ramo Sofía · hecho a mano · S/160",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#ramosdeflores",
+        "#floreslima",
+        "#eucalipto",
+        "#miraflores",
+        "#regalosperu"
+      ],
+      "creative": {
+        "eyebrow": "No. 03 · Ramos",
+        "headline": "No mandes <em>rosas rojas</em>",
+        "sub": "Rosas blancas, pompones verde limón, flor exótica y eucalipto.",
+        "price": "S/ 160",
+        "footer": "Armado a mano en Miraflores",
+        "fit": "cover",
+        "position": "50% 45%"
+      },
+      "why": "Gancho negativo contra el default de la categoría. Alto CTR en frío porque contradice lo que la gente iba a hacer igual."
+    },
+    {
+      "code": "IG-08",
+      "product": "ramo-de-flores-sofia",
+      "title": "Nadie arma dos iguales",
+      "objective": "Tráfico / Interacción",
+      "funnel": "Frío — marca",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "quote",
+      "photo": "ramo-de-flores-sofia.jpg",
+      "primaryText": "No tenemos stock. Recibimos flores frescas lunes, miércoles y viernes, y cuando pides un ramo alguien se sienta, mira lo que llegó esa mañana y te lo arma.\n\nPor eso ningún Sofía sale idéntico al de la foto. Y por eso ninguno se parece a los de la tienda de la esquina.\n\nAtelier en Miraflores desde 2017.",
+      "headline": "Nadie arma dos iguales",
+      "description": "Desde S/160 · hecho a mano",
+      "cta": "Más información",
+      "hashtags": [
+        "#limaflores",
+        "#hechoamano",
+        "#atelierfloral",
+        "#miraflores",
+        "#floreslima"
+      ],
+      "creative": {
+        "quote": "No vendemos flores. Vendemos <em>pequeños momentos de calma</em>.",
+        "author": "Estudio Lima Flores",
+        "meta": "Miraflores · desde 2017",
+        "price": "S/ 160",
+        "footer": "Ramo Sofía · hecho a mano",
+        "fit": "cover",
+        "position": "50% 40%"
+      },
+      "why": "Anuncio de marca para alimentar los públicos de retargeting de IG-07 e IG-09 a CPM bajo. Es el manifiesto del propio sitio, sin cambiarle una palabra."
+    },
+    {
+      "code": "IG-09",
+      "product": "ramo-de-flores-sofia",
+      "title": "Cuatro cosas difíciles de decir",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "story",
+      "photo": "ramo-de-flores-sofia.jpg",
+      "primaryText": "Gracias. Perdón. Felicitaciones. Te extraño.\n\nCuatro cosas difíciles de decir y una sola manera de decirlas bien. Ramo Sofía, hecho a mano, entregado hoy en Lima.",
+      "headline": "Difícil de decir. Fácil de mandar.",
+      "description": "Desde S/160 · entrega hoy",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#floreslima",
+        "#deliverylima"
+      ],
+      "creative": {
+        "eyebrow": "No. 03 · Ramos",
+        "headline": "Difícil de decir. <em>Fácil de mandar.</em>",
+        "sub": "Gracias. Perdón. Felicitaciones. Te extraño. Cuatro cosas difíciles y una sola manera de decirlas bien.",
+        "pill": "Desde S/ 160 · Ver el ramo",
+        "fit": "cover",
+        "position": "50% 45%"
+      },
+      "why": "El texto hace el trabajo de segmentación solo: cada línea es una intención de compra distinta y el clic revela cuál."
+    }
+  ]
+}
