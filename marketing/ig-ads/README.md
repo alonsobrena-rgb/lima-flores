@@ -26,6 +26,16 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 | `IG-16` | Ramo Luana | Frío | 1:1 | Para una sala de verdad |
 | `IG-17` | Ramo Luana | Frío | 4:5 | Para la amiga que se mudó |
 | `IG-18` | Ramo Luana | Retargeting caliente | 9:16 | Los colores que nadie pide |
+| `IG-19` | Box Chococafé | Frío | 4:5 | Flores, café y chocolate |
+| `IG-20` | Orquídea Sunrise de dos varas | Frío | 4:5 | Dos varas, no una |
+| `IG-21` | BOX Sensación | Consideración / Retargeting 30 días | 4:5 | «Como para una portada de revista» |
+| `IG-22` | Arreglo Andrea | Frío | 1:1 | Mini rosas naranjas en loza blanca |
+| `IG-23` | Orquídeas amarillas con líneas fucsias | Consideración / Retargeting 30 días | 4:5 | No es la orquídea blanca de siempre |
+| `IG-24` | Ramo de rosas con papel de estrellas | Frío | 4:5 | Veinticuatro, no doce |
+| `IG-25` | Orquídea Rosado Vintage | Frío — marca | 4:5 | Se queda en la casa |
+| `IG-26` | BOX SIMONA | Retargeting caliente | 9:16 | 24 rosas por S/176 |
+| `IG-27` | Florero de 10 tulipanes | Frío | 9:16 | Mix, o un solo color |
+| `IG-28` | Box Yani | Frío · +18 | 4:5 | Flores y espumante en la misma caja |
 
 ---
 
@@ -513,6 +523,344 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ---
 
+## 07 · Box Chococafé — S/220
+
+**Categoría** Arreglos · **Ángulo** No compite con otras flores: compite con el regalo que la persona iba a comprar en vez de flores.
+
+**Público** 28–50, Lima Metropolitana. Regalo corporativo, cumpleaños y Día de la Madre. Intereses: café de especialidad, repostería, regalos.
+
+**Destino** `/producto.html?id=box-chococafe`
+
+### IG-19 · Flores y café en la misma caja
+
+![Flores y café en la misma caja](creativos/IG-19.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Flores para el momento. Café para las mañanas siguientes.
+>
+> El Box Chococafé trae mini rosas con follaje verde, café de especialidad de 250 g, chocolate al 70% con arándanos y una tacita de expreso, en caja de madera.
+>
+> S/220. Eliges el día y la hora de entrega.
+
+**Titular** Flores, café y chocolate
+
+**Descripción** Box Chococafé · caja de madera · S/220
+
+**Hashtags** #limaflores #regalosperu #cafedeespecialidad #floreslima #miraflores
+
+**Por qué funciona** No compite con otras flores: compite con el regalo que la persona iba a comprar en vez de flores.
+
+---
+
+## 08 · Orquídea Sunrise de dos varas — S/215
+
+**Categoría** Orquídeas · **Ángulo** Dos varas en vez de una: es el detalle que justifica el precio frente a la orquídea del supermercado.
+
+**Público** 30–55, Lima Metropolitana. Día de la Madre, agradecimientos y casa nueva. Retargeting de la categoría Orquídeas.
+
+**Destino** `/producto.html?id=orquidea-sunrise-de-dos-varas`
+
+### IG-20 · Dos varas, no una
+
+![Dos varas, no una](creativos/IG-20.jpg)
+
+- **Objetivo** Reconocimiento / Tráfico · **Etapa** Frío
+- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Dos varas, no una.
+>
+> Phalaenopsis anaranjada en maceta, con tarjeta de dedicatoria. Armada a mano en el atelier de Miraflores.
+>
+> S/215, el día y la hora que elijas.
+
+**Titular** Dos varas, no una
+
+**Descripción** Phalaenopsis anaranjada · S/215
+
+**Hashtags** #limaflores #orquideas #phalaenopsis #regalosperu #plantaslima
+
+**Por qué funciona** Dos varas en vez de una: es el detalle que justifica el precio frente a la orquídea del supermercado.
+
+---
+
+## 09 · BOX Sensación — S/225
+
+**Categoría** Arreglos · **Ángulo** Prueba social: la reseña hace el trabajo que el copy de producto no puede hacer solo.
+
+**Público** 25–45, Lima Metropolitana. Cumpleaños y celebraciones. Público similar al 1% de compradores de Arreglos.
+
+**Destino** `/producto.html?id=box-sensacion`
+
+### IG-21 · Como para una portada
+
+![Como para una portada](creativos/IG-21.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Consideración / Retargeting 30 días
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> «El ramo llegó armado como si fuera para una portada de revista. Mi mamá lloró cuando lo vio. No se les escapa un solo detalle.»
+>
+> — Camila R., Surco · reseña verificada
+>
+> Box Sensación: 12 rosas amarillas con mini rosas naranjas, claveles morados grandes y follaje verde. Incluye tarjeta de dedicatoria.
+>
+> S/225, el día y la hora que elijas.
+
+**Titular** «Como para una portada de revista»
+
+**Descripción** Box Sensación · 12 rosas amarillas · S/225
+
+**Hashtags** #limaflores #arreglosflorales #floreslima #rosasamarillas
+
+**Por qué funciona** Prueba social: la reseña hace el trabajo que el copy de producto no puede hacer solo.
+
+---
+
+## 10 · Arreglo Andrea — S/165
+
+**Categoría** Arreglos · **Ángulo** Es el ticket más bajo del set: entra por precio y por tamaño de mesa, no por ocasión.
+
+**Público** 22–40, Lima Metropolitana. Precio de entrada, primera compra y regalo de oficina. Público frío amplio.
+
+**Destino** `/producto.html?id=arreglo-andrea`
+
+### IG-22 · Naranja sobre loza blanca
+
+![Naranja sobre loza blanca](creativos/IG-22.jpg)
+
+- **Objetivo** Tráfico · **Etapa** Frío
+- **Ubicación** Feed de Instagram · 1:1 (1080×1080)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Mini rosas anaranjadas, claveles, toques morados y follaje verde, en contenedor de loza blanca.
+>
+> Del tamaño que cabe en una mesa sin tapar a nadie. S/165, armado a mano en el atelier de Miraflores.
+
+**Titular** Mini rosas naranjas en loza blanca
+
+**Descripción** Arreglo Andrea · S/165
+
+**Hashtags** #limaflores #arreglosflorales #floreslima #regalosconsentido
+
+**Por qué funciona** Es el ticket más bajo del set: entra por precio y por tamaño de mesa, no por ocasión.
+
+---
+
+## 11 · Orquídeas amarillas con líneas fucsias — S/215
+
+**Categoría** Orquídeas · **Ángulo** Ataca el default de la categoría, que es la Phalaenopsis blanca. El color es todo el argumento.
+
+**Público** 30–55, Lima Metropolitana. Regalo de diseño y decoración. Retargeting de visitantes de Orquídeas.
+
+**Destino** `/producto.html?id=orquideas-amarillas-con-lineas-fucsias`
+
+### IG-23 · No es la orquídea blanca
+
+![No es la orquídea blanca](creativos/IG-23.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Consideración / Retargeting 30 días
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Amarillo de fondo, líneas y centro fucsia, dos varas, maceta de cobre.
+>
+> No es la Phalaenopsis blanca de siempre. Incluye tarjeta de dedicatoria.
+>
+> S/215, el día y la hora que elijas.
+
+**Titular** No es la orquídea blanca de siempre
+
+**Descripción** Phalaenopsis de dos varas · S/215
+
+**Hashtags** #limaflores #orquideas #phalaenopsis #decoracion #regalosperu
+
+**Por qué funciona** Ataca el default de la categoría, que es la Phalaenopsis blanca. El color es todo el argumento.
+
+---
+
+## 12 · Ramo de rosas con papel de estrellas — S/190
+
+**Categoría** Ramos · **Ángulo** La cantidad es el gancho: veinticuatro contra las doce de todo el mercado, y a S/190.
+
+**Público** 25–45, Lima Metropolitana. Aniversario, San Valentín y pedidas. Excluir compradores de 30 días.
+
+**Destino** `/producto.html?id=ramo-de-24-rosas-con-papel-de-estrellas`
+
+### IG-24 · Veinticuatro, no doce
+
+![Veinticuatro, no doce](creativos/IG-24.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Veinticuatro rosas importadas, no doce.
+>
+> Envueltas en papel de estrellas, con tarjeta de dedicatoria.
+>
+> S/190, el día y la hora que elijas.
+
+**Titular** Veinticuatro, no doce
+
+**Descripción** 24 rosas importadas · S/190
+
+**Hashtags** #limaflores #rosas #ramosdeflores #aniversario #floreslima
+
+**Por qué funciona** La cantidad es el gancho: veinticuatro contra las doce de todo el mercado, y a S/190.
+
+---
+
+## 13 · Orquídea Rosado Vintage — S/200
+
+**Categoría** Orquídeas · **Ángulo** Formato postal: la orquídea se vende como objeto de decoración, no como ramo.
+
+**Público** 28–50, Lima Metropolitana. Regalo de decoración y agradecimiento. Intereses: interiorismo, plantas.
+
+**Destino** `/producto.html?id=orquidea-rosado-vintage`
+
+### IG-25 · Rosado vintage
+
+![Rosado vintage](creativos/IG-25.jpg)
+
+- **Objetivo** Tráfico / Interacción · **Etapa** Frío — marca
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Más información
+
+**Texto principal**
+
+> Una Phalaenopsis rosado vintage en maceta blanca.
+>
+> No se pone en la mesa del comedor un domingo: se queda en la casa.
+>
+> S/200, armada a mano en el atelier de Miraflores.
+
+**Titular** Se queda en la casa
+
+**Descripción** Orquídea Rosado Vintage · S/200
+
+**Hashtags** #limaflores #orquideas #interiorismo #plantaslima
+
+**Por qué funciona** Formato postal: la orquídea se vende como objeto de decoración, no como ramo.
+
+---
+
+## 14 · BOX SIMONA — S/176
+
+**Categoría** Arreglos · **Ángulo** Ticket bajo en historia: el formato vertical con botón es el que mejor cierra en retargeting.
+
+**Público** 22–45, Lima Metropolitana. Retargeting caliente de visitantes de Arreglos y carritos abandonados.
+
+**Destino** `/producto.html?id=box-simona`
+
+### IG-26 · Amarillas y lilas
+
+![Amarillas y lilas](creativos/IG-26.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Retargeting caliente
+- **Ubicación** Historias y Reels · 9:16 (1080×1920)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Doce rosas amarillas y doce lilas, con follaje verde.
+>
+> El arreglo más completo por debajo de S/180. Eliges el día y la hora de entrega.
+
+**Titular** 24 rosas por S/176
+
+**Descripción** Box Simona · amarillas y lilas
+
+**Hashtags** #limaflores #arreglosflorales #floreslima
+
+**Por qué funciona** Ticket bajo en historia: el formato vertical con botón es el que mejor cierra en retargeting.
+
+---
+
+## 15 · Florero de 10 tulipanes — S/195
+
+**Categoría** Floreros · **Ángulo** Los tulipanes son el producto con más color del catálogo: en historia, el creativo se ve desde lejos.
+
+**Público** 25–45, Lima Metropolitana. Regalo de pareja y cumpleaños. Público similar al 1% de compradores de Floreros.
+
+**Destino** `/producto.html?id=florero-de-10-tulipanes-2`
+
+### IG-27 · Mix o un solo color
+
+![Mix o un solo color](creativos/IG-27.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Historias y Reels · 9:16 (1080×1920)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Mix de colores, o uno solo: blanco, morado, anaranjado, rojo, fucsia o amarillo.
+>
+> Diez tulipanes en florero. Tú eliges el color, el día y la hora.
+>
+> S/195.
+
+**Titular** Mix, o un solo color
+
+**Descripción** 10 tulipanes en florero · S/195
+
+**Hashtags** #limaflores #tulipanes #floreslima #deliverylima
+
+**Por qué funciona** Los tulipanes son el producto con más color del catálogo: en historia, el creativo se ve desde lejos.
+
+---
+
+## 16 · Box Yani — S/180
+
+**Categoría** Arreglos · **Ángulo** Flores más espumante: sube el ticket y sale de la categoría floral pura. Exige cumplimiento +18.
+
+**Público** SOLO 25–50 y con segmentación +18 obligatoria. Lima Metropolitana. Aniversario y celebraciones.
+
+**Destino** `/producto.html?id=box-yani`
+
+### IG-28 · Flores y espumante
+
+![Flores y espumante](creativos/IG-28.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío · +18
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350) · segmentación +18 obligatoria
+- **Botón** Comprar
+
+**Texto principal**
+
+> Mini rosas, claveles y toques morados en caja de madera, con una copa flauta de vidrio y una botella de Riccadona de 200 ml.
+>
+> S/180, el día y la hora que elijas.
+>
+> Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.
+
+**Titular** Flores y espumante en la misma caja
+
+**Descripción** Box Yani · copa incluida · S/180
+
+**Hashtags** #limaflores #regalosperu #aniversario #floreslima
+
+**Por qué funciona** Flores más espumante: sube el ticket y sale de la categoría floral pura. Exige cumplimiento +18.
+
+---
+
 ## De dónde sale cada dato
 
 Todo lo que afirma el copy sale de una de estas tres fuentes. Nada es de conocimiento
@@ -529,6 +877,8 @@ general ni supuesto.
 | Reseña de Diego V. (IG-05) | landing · reseñas verificadas 2025 | textual, recortada — ver abajo |
 | Florero de vidrio, tarjeta, colores, 30×50 cm, composición floral | `db/products.seed.json` | descripción de cada producto |
 | «8 a 12 semanas» (IG-04) | landing, **pero de otro producto** | «Duran entre ocho y doce semanas con riego mínimo», dicho de las Orquídeas Multicolor |
+| Reseña de Camila R. (IG-21) | landing · reseñas verificadas 2025 | textual |
+| «Prohibida la venta a menores. Tomar bebidas alcohólicas en exceso es dañino» (IG-28) | `db/products.seed.json` | textual, de la ficha del Box Yani |
 
 ### Lo único que queda por decidir
 
@@ -536,6 +886,27 @@ El **«8 a 12 semanas»** de IG-04. La cifra está publicada en la landing, pero
 Orquídeas Multicolor, no a las Orquídeas grandes en maceta que anuncia esa pieza. Es la misma
 especie (Phalaenopsis) y por eso se dejó, pero es una extrapolación, no un dato del producto.
 Si el taller no la respalda, la comparación funciona igual diciendo «semanas, no días».
+
+### Cumplimiento: IG-28 lleva alcohol
+
+El Box Yani incluye una botella de Riccadona de 200 ml, así que ese anuncio cae en la categoría
+de alcohol de Meta: necesita segmentación de edad **+18** en el conjunto de anuncios y lleva la
+advertencia legal en el texto. Sin la restricción de edad, Meta lo rechaza.
+
+### Hallazgos del catálogo
+
+Tres cosas que aparecieron al elegir los productos y conviene arreglar en `db/products.seed.json`:
+
+- **`box-lupita`** — la descripción dice «Box blanco con 12 rosas amarillas y 12 rosas lilas»,
+  pero la foto muestra un balde de zinc con rosas amarillas e hortensias blancas y verdes. La
+  descripción parece copiada de `box-simona`. Quedó fuera del set por eso.
+- **`14536` (Arreglo Florencia)** — su única imagen no es una foto de producto: es una pieza
+  gráfica con el nombre, la descripción y el precio ya impresos. No sirve para un creativo.
+- **`box-chococafe`** — la descripción menciona «toques azules» que no se ven en la foto. El copy
+  del anuncio los omite.
+
+Los cinco productos de la categoría Fúnebre siguen sin foto en el repositorio, así que ninguno
+puede entrar a la campaña.
 
 ### Qué se quitó y por qué
 
