@@ -6,7 +6,7 @@
     "currency": "S/",
     "whatsapp": "999 479 855",
     "generated": "2026-08",
-    "note": "15 productos del catálogo (db/products.seed.json) en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude. Los códigos no se renumeran: IG-01 a IG-04 quedaron retiradas."
+    "note": "23 productos del catálogo (db/products.seed.json) en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude. Los códigos no se renumeran: IG-01 a IG-04 quedaron retiradas."
   },
   "products": [
     {
@@ -158,6 +158,86 @@
       "landing": "/producto.html?id=box-yani",
       "audience": "SOLO 25–50 y con segmentación +18 obligatoria. Lima Metropolitana. Aniversario y celebraciones.",
       "angle": "Flores más espumante: sube el ticket y sale de la categoría floral pura. Exige cumplimiento +18."
+    },
+    {
+      "id": "box-rogelia",
+      "name": "Box Rogelia",
+      "categoryLabel": "Arreglos",
+      "price": 210,
+      "num": "17",
+      "landing": "/producto.html?id=box-rogelia",
+      "audience": "28–50, Lima Metropolitana. Aniversario y San Valentín. Excluir compradores de 30 días.",
+      "angle": "Veinticinco rosas contra la docena de todo el mercado, y el color se elige."
+    },
+    {
+      "id": "boxsito-ramon",
+      "name": "Boxsito Crespito",
+      "categoryLabel": "Arreglos",
+      "price": 180,
+      "num": "18",
+      "landing": "/producto.html?id=boxsito-ramon",
+      "audience": "22–45, Lima Metropolitana. Nacimientos, cumpleaños infantiles y regalos entre amigas.",
+      "angle": "Único del catálogo con peluche y globo: sale de la categoría floral y entra en la de regalo."
+    },
+    {
+      "id": "box-gaby-cafe",
+      "name": "Box Gaby Café",
+      "categoryLabel": "Arreglos",
+      "price": 210,
+      "num": "19",
+      "landing": "/producto.html?id=box-gaby-cafe",
+      "audience": "28–50, Lima Metropolitana. Aniversario y regalo de pareja. Intereses: café de especialidad.",
+      "angle": "Las dos tacitas cambian el destinatario: no es para una persona, es para una pareja."
+    },
+    {
+      "id": "florero-forti",
+      "name": "Florero Forti",
+      "categoryLabel": "Arreglos",
+      "price": 210,
+      "num": "20",
+      "landing": "/producto.html?id=florero-forti",
+      "audience": "25–45, Lima Metropolitana. Cumpleaños y agradecimientos. Público frío amplio.",
+      "angle": "Los girasoles son lo más visible del catálogo: en el feed frenan el pulgar solos."
+    },
+    {
+      "id": "minis-sandra",
+      "name": "Minis Sandra",
+      "categoryLabel": "Arreglos",
+      "price": 210,
+      "num": "21",
+      "landing": "/producto.html?id=minis-sandra",
+      "audience": "22–45, Lima Metropolitana. Cumpleaños. Retargeting de visitantes de Arreglos.",
+      "angle": "El color a elegir es el gancho, igual que en los tulipanes, pero en arreglo con globo."
+    },
+    {
+      "id": "box-lila",
+      "name": "Box Lila",
+      "categoryLabel": "Arreglos",
+      "price": 180,
+      "num": "22",
+      "landing": "/producto.html?id=box-lila",
+      "audience": "25–45, Lima Metropolitana. Aniversario y celebraciones. Público similar al 1% de compradores.",
+      "angle": "Veinticuatro rosas importadas por S/180: es la mejor relación cantidad-precio del catálogo."
+    },
+    {
+      "id": "box-lucy",
+      "name": "Box Lucy",
+      "categoryLabel": "Arreglos",
+      "price": 210,
+      "num": "23",
+      "landing": "/producto.html?id=box-lucy",
+      "audience": "25–50, Lima Metropolitana. Cumpleaños y regalo de oficina. Retargeting de Arreglos.",
+      "angle": "Mismo girasol que el Forti pero en caja: se vende la comodidad, no la flor."
+    },
+    {
+      "id": "arreglo-victoria",
+      "name": "Arreglo Victoria",
+      "categoryLabel": "Arreglos",
+      "price": 200,
+      "num": "24",
+      "landing": "/producto.html?id=arreglo-victoria",
+      "audience": "28–50, Lima Metropolitana. Aniversario y reconciliaciones. Excluir compradores de 30 días.",
+      "angle": "Rosas rojas sin la caja de siempre: el latón es lo que lo diferencia del resto."
     }
   ],
   "ads": [
@@ -497,7 +577,8 @@
         "fit": "cover",
         "position": "50% 50%",
         "hlSize": 84,
-        "anchor": "top"
+        "anchor": "top",
+        "franja": true
       },
       "why": "Mismo formato limpio que IG-13 en vertical, para medir si el gancho del color rinde igual en historias que en feed sin cambiar nada más."
     },
@@ -529,7 +610,7 @@
         "price": "S/ 180",
         "fit": "cover",
         "position": "50% 50%",
-        "hlSize": 54
+        "hlSize": 50
       },
       "why": "La foto está tomada en una sala y no en un fondo blanco: en el feed no parece anuncio, que es justo lo que conviene en público frío amplio."
     },
@@ -655,9 +736,7 @@
         "footer": "Orquídea Sunrise",
         "anchor": "bottom",
         "hlSize": 94,
-        "fit": "contain",
-        "position": "50% 6%",
-        "bg": "#FFFFFF"
+        "franja": true
       },
       "why": "Dos varas en vez de una: es el detalle que justifica el precio frente a la orquídea del supermercado."
     },
@@ -914,9 +993,254 @@
         "anchor": "bottom",
         "hlSize": 96,
         "fit": "cover",
-        "position": "50% 50%"
+        "position": "50% 50%",
+        "franja": true
       },
       "why": "Flores más espumante: sube el ticket y sale de la categoría floral pura. Exige cumplimiento +18."
+    },
+    {
+      "code": "IG-29",
+      "product": "box-rogelia",
+      "title": "Veinticinco en caja negra",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "puro",
+      "photo": "box-rogelia-3.jpg",
+      "primaryText": "Veinticinco rosas, no una docena.\n\nEn caja negra con follaje verde. Y si el rojo no va, salen también en fucsia, amarillo o lila.\n\nS/210, el día y la hora que elijas.",
+      "headline": "Veinticinco rosas en caja negra",
+      "description": "Box Rogelia · 25 rosas · S/210",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#rosasrojas",
+        "#arreglosflorales",
+        "#aniversario",
+        "#floreslima"
+      ],
+      "creative": {
+        "headline": "Veinticinco. <em>En caja negra.</em>",
+        "sub": "Rosas con follaje verde. También en fucsia, amarillo o lila.",
+        "price": "S/ 210",
+        "footer": "Box Rogelia",
+        "franja": true,
+        "hlSize": 92
+      },
+      "why": "Veinticinco rosas contra la docena de todo el mercado, y el color se elige."
+    },
+    {
+      "code": "IG-30",
+      "product": "boxsito-ramon",
+      "title": "Con osito",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "format": "1:1",
+      "placement": "Feed de Instagram · 1:1 (1080×1080)",
+      "template": "cuadro",
+      "photo": "boxsito-ramon.jpg",
+      "primaryText": "Mini rosas amarillas y naranjas con follaje verde, un globo de estrella morado y un osito de peluche.\n\nPara nacimientos, cumpleaños de niños y para quien se ríe de los regalos serios.\n\nS/180, el día y la hora que elijas.",
+      "headline": "Flores con osito y globo",
+      "description": "Boxsito Crespito · S/180",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#regalosperu",
+        "#nacimiento",
+        "#cumpleaños",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 18 · Arreglos",
+        "headline": "Con <em>osito</em>",
+        "price": "S/ 180",
+        "hlSize": 62,
+        "position": "38% 50%"
+      },
+      "why": "Único del catálogo con peluche y globo: sale de la categoría floral y entra en la de regalo."
+    },
+    {
+      "code": "IG-31",
+      "product": "box-gaby-cafe",
+      "title": "Café para dos",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 14 días",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "split",
+      "photo": "box-gaby-cafe.jpg",
+      "primaryText": "Dos tacitas, no una.\n\nMini rosas con follaje verde, café de especialidad de 250 gramos y dos tacitas de expreso, en caja de madera.\n\nS/210, el día y la hora que elijas.",
+      "headline": "Café para dos, flores para la mesa",
+      "description": "Box Gaby Café · dos tacitas · S/210",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#cafedeespecialidad",
+        "#regalosperu",
+        "#aniversario"
+      ],
+      "creative": {
+        "eyebrow": "S/ 210 · Box Gaby Café",
+        "headline": "Para <em>los dos</em>",
+        "items": [
+          "Mini rosas y follaje verde",
+          "Café de especialidad · 250 g",
+          "Dos tacitas de expreso",
+          "Caja de madera"
+        ],
+        "price": "S/ 210",
+        "footer": "Box Gaby Café",
+        "hlSize": 84
+      },
+      "why": "Las dos tacitas cambian el destinatario: no es para una persona, es para una pareja."
+    },
+    {
+      "code": "IG-32",
+      "product": "florero-forti",
+      "title": "Seis girasoles",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "editorial",
+      "photo": "florero-forti.jpg",
+      "primaryText": "Seis girasoles en el mismo ramo, con mini rosas amarillas y blancas, pompones amarillos y margaritas.\n\nS/210, el día y la hora que elijas.",
+      "headline": "Seis girasoles, no uno",
+      "description": "Florero Forti · 6 girasoles · S/210",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#girasoles",
+        "#ramosdeflores",
+        "#floreslima",
+        "#miraflores"
+      ],
+      "creative": {
+        "eyebrow": "No. 20 · Arreglos",
+        "headline": "Seis <em>girasoles</em>",
+        "sub": "Con mini rosas amarillas y blancas, pompones y margaritas.",
+        "price": "S/ 210",
+        "footer": "Florero Forti",
+        "hlSize": 98
+      },
+      "why": "Los girasoles son lo más visible del catálogo: en el feed frenan el pulgar solos."
+    },
+    {
+      "code": "IG-33",
+      "product": "minis-sandra",
+      "title": "Cuatro colores a elegir",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "story",
+      "photo": "minis-sandra.jpg",
+      "primaryText": "Minirosas con follaje verde y un globo de estrella morado.\n\nEscoges el color: fucsia, amarillas, naranjas o blancas.\n\nS/210, el día y la hora que elijas.",
+      "headline": "Elige el color de tus minirosas",
+      "description": "Minis Sandra · globo incluido · S/210",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#minirosas",
+        "#cumpleaños",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 21 · Arreglos",
+        "headline": "Cuatro colores <em>a elegir</em>",
+        "sub": "Fucsia, amarillas, naranjas o blancas. Con globo incluido.",
+        "pill": "S/ 210 · Ver el arreglo",
+        "hlSize": 92
+      },
+      "why": "El color a elegir es el gancho, igual que en los tulipanes, pero en arreglo con globo."
+    },
+    {
+      "code": "IG-34",
+      "product": "box-lila",
+      "title": "Veinticuatro importadas",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "sello",
+      "photo": "box-lila.jpg",
+      "primaryText": "Veinticuatro rosas importadas, lilas y rojas, con follaje verde.\n\nIncluye tarjeta de dedicatoria. S/180, el día y la hora que elijas.",
+      "headline": "24 rosas importadas por S/180",
+      "description": "Box Lila · 24 rosas · S/180",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#rosas",
+        "#arreglosflorales",
+        "#aniversario",
+        "#floreslima"
+      ],
+      "creative": {
+        "headline": "Veinticuatro <em>importadas</em>",
+        "seal": "24 rosas",
+        "price": "S/ 180",
+        "footer": "Box Lila · lilas y rojas",
+        "hlSize": 84
+      },
+      "why": "Veinticuatro rosas importadas por S/180: es la mejor relación cantidad-precio del catálogo."
+    },
+    {
+      "code": "IG-35",
+      "product": "box-lucy",
+      "title": "Girasoles en caja",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 30 días",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "titular",
+      "photo": "box-lucy.jpg",
+      "primaryText": "Seis girasoles con mini rosas naranjas y claveles morados grandes.\n\nVienen armados en caja, listos para poner sobre la mesa.\n\nS/210, el día y la hora que elijas.",
+      "headline": "Seis girasoles, en caja",
+      "description": "Box Lucy · S/210",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#girasoles",
+        "#arreglosflorales",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 23 · Arreglos",
+        "headline": "Girasoles <em>en caja</em>",
+        "price": "S/ 210",
+        "footer": "Box Lucy",
+        "hlSize": 122
+      },
+      "why": "Mismo girasol que el Forti pero en caja: se vende la comodidad, no la flor."
+    },
+    {
+      "code": "IG-36",
+      "product": "arreglo-victoria",
+      "title": "Doce rojas en latón",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "postal",
+      "photo": "arreglo-victoria.jpg",
+      "primaryText": "Doce rosas rojas con toques blancos y morados, en latón con follaje verde.\n\nIncluye tarjeta de dedicatoria. S/200, el día y la hora que elijas.",
+      "headline": "Doce rosas rojas en latón",
+      "description": "Arreglo Victoria · S/200",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#rosasrojas",
+        "#aniversario",
+        "#arreglosflorales"
+      ],
+      "creative": {
+        "headline": "Doce rojas <em>en latón</em>",
+        "sub": "Con toques blancos y morados, y tarjeta de dedicatoria.",
+        "price": "S/ 200",
+        "footer": "Arreglo Victoria",
+        "hlSize": 66
+      },
+      "why": "Rosas rojas sin la caja de siempre: el latón es lo que lo diferencia del resto."
     }
   ]
 }

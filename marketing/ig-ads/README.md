@@ -32,6 +32,14 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 | `IG-26` | BOX SIMONA | Retargeting caliente | 9:16 | 24 rosas por S/176 |
 | `IG-27` | Florero de 10 tulipanes | Frío | 9:16 | Mix, o un solo color |
 | `IG-28` | Box Yani | Frío · +18 | 4:5 | Flores y espumante en la misma caja |
+| `IG-29` | Box Rogelia | Frío | 4:5 | Veinticinco rosas en caja negra |
+| `IG-30` | Boxsito Crespito | Frío | 1:1 | Flores con osito y globo |
+| `IG-31` | Box Gaby Café | Consideración / Retargeting 14 días | 4:5 | Café para dos, flores para la mesa |
+| `IG-32` | Florero Forti | Frío | 4:5 | Seis girasoles, no uno |
+| `IG-33` | Minis Sandra | Retargeting caliente | 9:16 | Elige el color de tus minirosas |
+| `IG-34` | Box Lila | Frío | 4:5 | 24 rosas importadas por S/180 |
+| `IG-35` | Box Lucy | Consideración / Retargeting 30 días | 9:16 | Seis girasoles, en caja |
+| `IG-36` | Arreglo Victoria | Frío | 4:5 | Doce rosas rojas en latón |
 
 ---
 
@@ -751,6 +759,272 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ---
 
+## 17 · Box Rogelia — S/210
+
+**Categoría** Arreglos · **Ángulo** Veinticinco rosas contra la docena de todo el mercado, y el color se elige.
+
+**Público** 28–50, Lima Metropolitana. Aniversario y San Valentín. Excluir compradores de 30 días.
+
+**Destino** `/producto.html?id=box-rogelia`
+
+### IG-29 · Veinticinco en caja negra
+
+![Veinticinco en caja negra](creativos/IG-29.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Veinticinco rosas, no una docena.
+>
+> En caja negra con follaje verde. Y si el rojo no va, salen también en fucsia, amarillo o lila.
+>
+> S/210, el día y la hora que elijas.
+
+**Titular** Veinticinco rosas en caja negra
+
+**Descripción** Box Rogelia · 25 rosas · S/210
+
+**Hashtags** #limaflores #rosasrojas #arreglosflorales #aniversario #floreslima
+
+**Por qué funciona** Veinticinco rosas contra la docena de todo el mercado, y el color se elige.
+
+---
+
+## 18 · Boxsito Crespito — S/180
+
+**Categoría** Arreglos · **Ángulo** Único del catálogo con peluche y globo: sale de la categoría floral y entra en la de regalo.
+
+**Público** 22–45, Lima Metropolitana. Nacimientos, cumpleaños infantiles y regalos entre amigas.
+
+**Destino** `/producto.html?id=boxsito-ramon`
+
+### IG-30 · Con osito
+
+![Con osito](creativos/IG-30.jpg)
+
+- **Objetivo** Reconocimiento / Tráfico · **Etapa** Frío
+- **Ubicación** Feed de Instagram · 1:1 (1080×1080)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Mini rosas amarillas y naranjas con follaje verde, un globo de estrella morado y un osito de peluche.
+>
+> Para nacimientos, cumpleaños de niños y para quien se ríe de los regalos serios.
+>
+> S/180, el día y la hora que elijas.
+
+**Titular** Flores con osito y globo
+
+**Descripción** Boxsito Crespito · S/180
+
+**Hashtags** #limaflores #regalosperu #nacimiento #cumpleaños #floreslima
+
+**Por qué funciona** Único del catálogo con peluche y globo: sale de la categoría floral y entra en la de regalo.
+
+---
+
+## 19 · Box Gaby Café — S/210
+
+**Categoría** Arreglos · **Ángulo** Las dos tacitas cambian el destinatario: no es para una persona, es para una pareja.
+
+**Público** 28–50, Lima Metropolitana. Aniversario y regalo de pareja. Intereses: café de especialidad.
+
+**Destino** `/producto.html?id=box-gaby-cafe`
+
+### IG-31 · Café para dos
+
+![Café para dos](creativos/IG-31.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Consideración / Retargeting 14 días
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Dos tacitas, no una.
+>
+> Mini rosas con follaje verde, café de especialidad de 250 gramos y dos tacitas de expreso, en caja de madera.
+>
+> S/210, el día y la hora que elijas.
+
+**Titular** Café para dos, flores para la mesa
+
+**Descripción** Box Gaby Café · dos tacitas · S/210
+
+**Hashtags** #limaflores #cafedeespecialidad #regalosperu #aniversario
+
+**Por qué funciona** Las dos tacitas cambian el destinatario: no es para una persona, es para una pareja.
+
+---
+
+## 20 · Florero Forti — S/210
+
+**Categoría** Arreglos · **Ángulo** Los girasoles son lo más visible del catálogo: en el feed frenan el pulgar solos.
+
+**Público** 25–45, Lima Metropolitana. Cumpleaños y agradecimientos. Público frío amplio.
+
+**Destino** `/producto.html?id=florero-forti`
+
+### IG-32 · Seis girasoles
+
+![Seis girasoles](creativos/IG-32.jpg)
+
+- **Objetivo** Reconocimiento / Tráfico · **Etapa** Frío
+- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Seis girasoles en el mismo ramo, con mini rosas amarillas y blancas, pompones amarillos y margaritas.
+>
+> S/210, el día y la hora que elijas.
+
+**Titular** Seis girasoles, no uno
+
+**Descripción** Florero Forti · 6 girasoles · S/210
+
+**Hashtags** #limaflores #girasoles #ramosdeflores #floreslima #miraflores
+
+**Por qué funciona** Los girasoles son lo más visible del catálogo: en el feed frenan el pulgar solos.
+
+---
+
+## 21 · Minis Sandra — S/210
+
+**Categoría** Arreglos · **Ángulo** El color a elegir es el gancho, igual que en los tulipanes, pero en arreglo con globo.
+
+**Público** 22–45, Lima Metropolitana. Cumpleaños. Retargeting de visitantes de Arreglos.
+
+**Destino** `/producto.html?id=minis-sandra`
+
+### IG-33 · Cuatro colores a elegir
+
+![Cuatro colores a elegir](creativos/IG-33.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Retargeting caliente
+- **Ubicación** Historias y Reels · 9:16 (1080×1920)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Minirosas con follaje verde y un globo de estrella morado.
+>
+> Escoges el color: fucsia, amarillas, naranjas o blancas.
+>
+> S/210, el día y la hora que elijas.
+
+**Titular** Elige el color de tus minirosas
+
+**Descripción** Minis Sandra · globo incluido · S/210
+
+**Hashtags** #limaflores #minirosas #cumpleaños #floreslima
+
+**Por qué funciona** El color a elegir es el gancho, igual que en los tulipanes, pero en arreglo con globo.
+
+---
+
+## 22 · Box Lila — S/180
+
+**Categoría** Arreglos · **Ángulo** Veinticuatro rosas importadas por S/180: es la mejor relación cantidad-precio del catálogo.
+
+**Público** 25–45, Lima Metropolitana. Aniversario y celebraciones. Público similar al 1% de compradores.
+
+**Destino** `/producto.html?id=box-lila`
+
+### IG-34 · Veinticuatro importadas
+
+![Veinticuatro importadas](creativos/IG-34.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Veinticuatro rosas importadas, lilas y rojas, con follaje verde.
+>
+> Incluye tarjeta de dedicatoria. S/180, el día y la hora que elijas.
+
+**Titular** 24 rosas importadas por S/180
+
+**Descripción** Box Lila · 24 rosas · S/180
+
+**Hashtags** #limaflores #rosas #arreglosflorales #aniversario #floreslima
+
+**Por qué funciona** Veinticuatro rosas importadas por S/180: es la mejor relación cantidad-precio del catálogo.
+
+---
+
+## 23 · Box Lucy — S/210
+
+**Categoría** Arreglos · **Ángulo** Mismo girasol que el Forti pero en caja: se vende la comodidad, no la flor.
+
+**Público** 25–50, Lima Metropolitana. Cumpleaños y regalo de oficina. Retargeting de Arreglos.
+
+**Destino** `/producto.html?id=box-lucy`
+
+### IG-35 · Girasoles en caja
+
+![Girasoles en caja](creativos/IG-35.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Consideración / Retargeting 30 días
+- **Ubicación** Historias y Reels · 9:16 (1080×1920)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Seis girasoles con mini rosas naranjas y claveles morados grandes.
+>
+> Vienen armados en caja, listos para poner sobre la mesa.
+>
+> S/210, el día y la hora que elijas.
+
+**Titular** Seis girasoles, en caja
+
+**Descripción** Box Lucy · S/210
+
+**Hashtags** #limaflores #girasoles #arreglosflorales #floreslima
+
+**Por qué funciona** Mismo girasol que el Forti pero en caja: se vende la comodidad, no la flor.
+
+---
+
+## 24 · Arreglo Victoria — S/200
+
+**Categoría** Arreglos · **Ángulo** Rosas rojas sin la caja de siempre: el latón es lo que lo diferencia del resto.
+
+**Público** 28–50, Lima Metropolitana. Aniversario y reconciliaciones. Excluir compradores de 30 días.
+
+**Destino** `/producto.html?id=arreglo-victoria`
+
+### IG-36 · Doce rojas en latón
+
+![Doce rojas en latón](creativos/IG-36.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Doce rosas rojas con toques blancos y morados, en latón con follaje verde.
+>
+> Incluye tarjeta de dedicatoria. S/200, el día y la hora que elijas.
+
+**Titular** Doce rosas rojas en latón
+
+**Descripción** Arreglo Victoria · S/200
+
+**Hashtags** #limaflores #rosasrojas #aniversario #arreglosflorales
+
+**Por qué funciona** Rosas rojas sin la caja de siempre: el latón es lo que lo diferencia del resto.
+
+---
+
 ## De dónde sale cada dato
 
 Todo lo que afirma el copy sale de una de estas tres fuentes. Nada es de conocimiento
@@ -797,6 +1071,10 @@ Tres cosas que aparecieron al elegir los productos y conviene arreglar en `db/pr
 - **`box-chococafe`** — la descripción menciona «toques azules» que no se ven en la foto. El copy
   del anuncio los omite.
 
+- **Catálogo agotado a esta resolución.** Con estos 23 productos se acabaron los que tienen
+  foto de 1000 px o más. Los que quedan son de 500×500: en un lienzo de 1080 se ven blandos,
+  así que no entraron. Si el taller sube fotos más grandes, la campaña puede seguir creciendo.
+
 Los cinco productos de la categoría Fúnebre siguen sin foto en el repositorio, así que ninguno
 puede entrar a la campaña.
 
@@ -840,6 +1118,13 @@ catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` 
 ## Notas de producción
 
 - Fotos: las del catálogo (`site/assets/products/`). No se generó ninguna imagen con IA.
+- Encuadre: `fotos/prep-fotos.py` detecta el fondo de cada toma y el recuadro que ocupa el
+  producto, y guarda una versión recortada a ese recuadro. El generador la mete con `contain`
+  sobre un contenedor pintado del mismo color de fondo, así el producto entra completo, ocupa
+  lo más posible y no se ve ninguna costura. Un recorte que conserva más del 85% del área se
+  descarta: no daba aire y sí cambiaba el encuadre. Las franjas mucho más anchas que altas
+  (`titular`, `quote`) usan la toma original a sangre, porque ahí un recorte vertical entraría
+  contenido y se vería diminuto.
 - Tipografías y paleta: las del sitio (`site/css/lima.css`) — Cormorant Garamond, Jost,
   JetBrains Mono sobre hueso `#F4EFE5` y tinta `#1B1A17`.
 - Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.

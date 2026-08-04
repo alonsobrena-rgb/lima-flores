@@ -1,0 +1,98 @@
+{
+  "arreglo-andrea-2.jpg": {
+    "fondo": "#FFFFFF",
+    "recortada": false
+  },
+  "arreglo-rossie-3.jpg": {
+    "fondo": "#E4E9E8",
+    "recortada": false
+  },
+  "arreglo-victoria.jpg": {
+    "fondo": "#FBF9F7",
+    "recortada": true
+  },
+  "box-chococafe.jpg": {
+    "fondo": "#DEE2E4",
+    "recortada": false
+  },
+  "box-gaby-cafe.jpg": {
+    "fondo": "#EBEEF0",
+    "recortada": false
+  },
+  "box-lila.jpg": {
+    "fondo": "#FEFEFE",
+    "recortada": true
+  },
+  "box-lucy.jpg": {
+    "fondo": "#FDFDFD",
+    "recortada": true
+  },
+  "box-rogelia-3.jpg": {
+    "fondo": "#E2E6E8",
+    "recortada": false
+  },
+  "box-sensacion.jpg": {
+    "fondo": "#FDFDFD",
+    "recortada": true
+  },
+  "box-simona.jpg": {
+    "fondo": "#FDFDFD",
+    "recortada": true
+  },
+  "box-yani.jpg": {
+    "fondo": "#E9ECF1",
+    "recortada": false
+  },
+  "boxsito-ramon.jpg": {
+    "fondo": "#DCE0E3",
+    "recortada": false
+  },
+  "florero-de-10-tulipanes-2-3.jpg": {
+    "fondo": "#EEF0EF",
+    "recortada": false
+  },
+  "florero-forti.jpg": {
+    "fondo": "#EDF1F4",
+    "recortada": false
+  },
+  "minis-sandra.jpg": {
+    "fondo": "#C7C8CA",
+    "recortada": false
+  },
+  "orquidea-rosado-vintage-2.jpg": {
+    "fondo": "#F3F3F1",
+    "recortada": false
+  },
+  "orquidea-sunrise-de-dos-varas.jpg": {
+    "fondo": "#D8DDE0",
+    "recortada": false
+  },
+  "orquideas-amarillas-con-lineas-fucsias-3.jpg": {
+    "fondo": "#E4E4E3",
+    "recortada": true
+  },
+  "orquideas-grandes-en-maceta-3.jpg": {
+    "fondo": "#FDFDFB",
+    "recortada": true
+  },
+  "orquideas-grandes-en-maceta-4.jpg": {
+    "fondo": "#E8E8E6",
+    "recortada": true
+  },
+  "ramo-de-24-rosas-con-papel-de-estrellas.jpg": {
+    "fondo": "#FFFFFF",
+    "recortada": true
+  },
+  "ramo-de-flores-sofia.jpg": {
+    "fondo": "#FFFFFF",
+    "recortada": false
+  },
+  "ramo-luana.jpg": {
+    "fondo": "#A0744F",
+    "recortada": false
+  },
+  "tulipanes-de-amor.jpg": {
+    "fondo": "#E7E9E3",
+    "recortada": false
+  }
+}
