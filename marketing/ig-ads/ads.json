@@ -37,7 +37,7 @@
       "num": "03",
       "landing": "/producto.html?id=ramo-de-flores-sofia",
       "audience": "22–40, Lima Metropolitana. Público de entrada de precio y gusto estético: diseño, arquitectura, café de especialidad, decoración. Primer contacto con la marca.",
-      "angle": "Anti–rosas rojas: criterio estético a precio de entrada, hecho a mano el mismo día."
+      "angle": "Anti–rosas rojas: criterio estético a precio de entrada, armado a mano."
     },
     {
       "id": "arreglo-rossie",
@@ -67,7 +67,7 @@
       "num": "06",
       "landing": "/producto.html?id=ramo-luana",
       "audience": "22–40, Lima Metropolitana. Primera compra, regalo casual entre amigas, mudanzas y agradecimientos. Público frío amplio.",
-      "angle": "La foto es de casa, no de estudio: se vende autenticidad frente al catálogo pulido."
+      "angle": "La foto está tomada en una sala y no en un fondo blanco: se vende cercanía."
     }
   ],
   "ads": [
@@ -80,7 +80,7 @@
       "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
       "template": "editorial",
       "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
-      "primaryText": "Los cumpleaños ya están tomados. El aniversario también.\n\nLo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta escrita a mano.\n\nEso es lo que la gente cuenta después.\n\nFlorero de vidrio incluido. Entregamos hoy en Lima.",
+      "primaryText": "Los cumpleaños ya están tomados. El aniversario también.\n\nLo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta de dedicatoria.\n\nEso es lo que la gente cuenta después.\n\nFlorero de vidrio incluido. Tú eliges el día y la hora de entrega.",
       "headline": "Regálale un martes cualquiera",
       "description": "10 tulipanes · florero de vidrio · S/195",
       "cta": "Comprar",
@@ -95,9 +95,9 @@
       "creative": {
         "eyebrow": "No. 01 · Floreros",
         "headline": "Un martes <em>cualquiera</em>",
-        "sub": "Diez tulipanes lilas, florero de vidrio y una tarjeta escrita a mano.",
+        "sub": "Diez tulipanes lilas, florero de vidrio y tarjeta de dedicatoria.",
         "price": "S/ 195",
-        "footer": "Entrega hoy en Lima",
+        "footer": "Entrega en Lima Metropolitana",
         "fit": "cover",
         "position": "50% 36%"
       },
@@ -112,7 +112,7 @@
       "placement": "Feed de Instagram · 4:5 (1080×1350)",
       "template": "split",
       "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
-      "primaryText": "S/195 no es el precio de diez tulipanes.\n\nEs el florero de vidrio, que no cobramos aparte. El papel armado a mano esa misma mañana. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta hoy.\n\nLos tulipanes duran una semana. El florero se queda para siempre.",
+      "primaryText": "S/195 no es el precio de diez tulipanes.\n\nEs el florero de vidrio, que no cobramos aparte. El papel armado a mano. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta el día y la hora que elijas.\n\nLas flores se van. El florero se queda.",
       "headline": "Lo que otros te cobran aparte",
       "description": "Florero, tarjeta y entrega incluidos",
       "cta": "Comprar",
@@ -130,7 +130,7 @@
           "Florero de vidrio",
           "Papel armado a mano",
           "Tarjeta de dedicatoria",
-          "Entrega el mismo día"
+          "Entrega el día y la hora que elijas"
         ],
         "price": "S/ 195",
         "footer": "Florero con tulipanes lilas",
@@ -148,24 +148,24 @@
       "placement": "Historias y Reels · 9:16 (1080×1920)",
       "template": "story",
       "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
-      "primaryText": "Te olvidaste. Está bien: todavía estás a tiempo.\n\nTulipanes lilas con florero incluido, entregados hoy en Lima. Desliza hacia arriba y elige la hora.",
+      "primaryText": "Te olvidaste. Está bien: si lo pides hoy, llega mañana.\n\nTulipanes lilas con florero de vidrio incluido. Eliges el día y la hora de entrega en Lima Metropolitana.",
       "headline": "Todavía llegas",
-      "description": "S/195 · entrega el mismo día",
+      "description": "S/195 · pídelo hoy, llega mañana",
       "cta": "Comprar",
       "hashtags": [
         "#limaflores",
         "#deliverylima",
-        "#floreshoy"
+        "#floresadomicilio"
       ],
       "creative": {
-        "eyebrow": "Entrega el mismo día",
+        "eyebrow": "Pídelo hoy, llega mañana",
         "headline": "Todavía <em>llegas</em>",
-        "sub": "Lo pides hoy. Llega hoy.",
+        "sub": "Eliges el día y la hora.",
         "pill": "S/ 195 · Ver el florero",
         "fit": "cover",
         "position": "50% 30%"
       },
-      "why": "Urgencia sin descuento. El descuento entrena a esperar ofertas; la hora de entrega no toca el margen."
+      "why": "Urgencia sin descuento. El descuento entrena a esperar ofertas; recordar que el pedido de hoy llega mañana no toca el margen."
     },
     {
       "code": "IG-04",
@@ -176,8 +176,8 @@
       "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
       "template": "split",
       "photo": "orquideas-grandes-en-maceta-4.jpg",
-      "primaryText": "Un ramo dura ocho días. Una Phalaenopsis dura entre ocho y doce semanas con un vaso de agua a la semana.\n\nMisma inversión, diez veces más tiempo recordándote.\n\nViene en maceta decorativa, con tarjeta de dedicatoria e instrucciones de cuidado para que no se muera en la oficina.",
-      "headline": "Ocho días o tres meses",
+      "primaryText": "Un ramo se marchita en días. Una Phalaenopsis aguanta entre ocho y doce semanas con riego mínimo.\n\nMisma inversión, mucho más tiempo recordándote.\n\nViene en maceta decorativa, con tarjeta de dedicatoria e instrucciones de cuidado para que no se muera en la oficina.",
+      "headline": "Días, o tres meses",
       "description": "Phalaenopsis en maceta · S/200",
       "cta": "Comprar",
       "hashtags": [
@@ -189,9 +189,9 @@
       ],
       "creative": {
         "eyebrow": "No. 02 · Orquídeas",
-        "headline": "Ocho días <em>o</em> tres meses",
+        "headline": "Días <em>o</em> meses",
         "items": [
-          "Un ramo — 8 días",
+          "Un ramo — se marchita en días",
           "Una Phalaenopsis — 8 a 12 semanas",
           "Maceta decorativa incluida",
           "Tarjeta e instrucciones de cuidado"
@@ -212,7 +212,7 @@
       "placement": "Feed de Instagram · 4:5 (1080×1350)",
       "template": "quote",
       "photo": "orquideas-grandes-en-maceta-3.jpg",
-      "primaryText": "«Pedí a las 11 am, llegaron a las 5:30 pm con el arreglo perfecto. Las orquídeas siguen vivas dos meses después. Recomiendo cerrado los ojos.»\n— Diego V., San Isidro · reseña verificada\n\nEso es exactamente lo que vendemos: algo que sigue vivo cuando ya nadie se acuerda del regalo.\n\nPhalaenopsis en maceta decorativa, con tarjeta e instrucciones.",
+      "primaryText": "«Las orquídeas siguen vivas dos meses después. Recomiendo cerrado los ojos.»\n— Diego V., San Isidro · reseña verificada\n\nEso es exactamente lo que vendemos: algo que sigue vivo cuando ya nadie se acuerda del regalo.\n\nPhalaenopsis en maceta decorativa, con tarjeta e instrucciones de cuidado.",
       "headline": "«Siguen vivas dos meses después»",
       "description": "Orquídeas en maceta · S/200",
       "cta": "Comprar",
@@ -223,15 +223,16 @@
         "#deliverylima"
       ],
       "creative": {
-        "quote": "Pedí a las 11 am, llegaron a las 5:30 pm. Las orquídeas siguen vivas <em>dos meses después</em>.",
+        "quote": "Las orquídeas siguen vivas <em>dos meses después</em>. Recomiendo cerrado los ojos.",
         "author": "Diego V. · San Isidro",
         "meta": "Reseña verificada · 2025",
         "price": "S/ 200",
         "footer": "Orquídeas grandes en maceta",
         "fit": "cover",
-        "position": "50% 16%"
+        "position": "50% 16%",
+        "hlSize": 78
       },
-      "why": "Prueba social textual del propio sitio. Cubre las dos objeciones a la vez: llega a tiempo y dura."
+      "why": "Prueba social textual del propio sitio. Cubre la objeción que de verdad frena la compra de una planta como regalo: que se muera a la semana."
     },
     {
       "code": "IG-06",
@@ -242,9 +243,9 @@
       "placement": "Historias y Reels · 9:16 (1080×1920)",
       "template": "story",
       "photo": "orquideas-grandes-en-maceta-4.jpg",
-      "primaryText": "Para la suegra. Para la jefa. Para la casa nueva. Para el gracias que se te quedó pendiente hace tres semanas.\n\nOrquídea Phalaenopsis en maceta, entregada hoy en Lima.",
+      "primaryText": "Para la suegra. Para la jefa. Para la casa nueva. Para el gracias que se te quedó pendiente hace tres semanas.\n\nOrquídea Phalaenopsis en maceta, entregada el día y la hora que elijas.",
       "headline": "Cuando el ramo no alcanza",
-      "description": "S/200 · entrega el mismo día",
+      "description": "S/200 · eliges día y hora",
       "cta": "Comprar",
       "hashtags": [
         "#limaflores",
@@ -333,9 +334,9 @@
       "placement": "Historias y Reels · 9:16 (1080×1920)",
       "template": "story",
       "photo": "ramo-de-flores-sofia.jpg",
-      "primaryText": "Gracias. Perdón. Felicitaciones. Te extraño.\n\nCuatro cosas difíciles de decir y una sola manera de decirlas bien. Ramo Sofía, hecho a mano, entregado hoy en Lima.",
+      "primaryText": "Gracias. Perdón. Felicitaciones. Te extraño.\n\nCuatro cosas difíciles de decir y una sola manera de decirlas bien. Ramo Sofía, hecho a mano, entregado el día que elijas.",
       "headline": "Difícil de decir. Fácil de mandar.",
-      "description": "Desde S/160 · entrega hoy",
+      "description": "Desde S/160 · eliges día y hora",
       "cta": "Comprar",
       "hashtags": [
         "#limaflores",
@@ -362,7 +363,7 @@
       "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
       "template": "puro",
       "photo": "arreglo-rossie-3.jpg",
-      "primaryText": "Hay un rojo de supermercado y hay este.\n\nRosas, gerberas, claveles importados y pepitas rojas apretadas hasta que no entra una flor más, en florero de vidrio.\n\nMide 50 cm de alto y ocupa la mesa entera. S/245, entregado hoy en Lima.",
+      "primaryText": "Hay un rojo de supermercado y hay este.\n\nRosas, gerberas, claveles importados y pepitas rojas apretadas hasta que no entra una flor más, en florero de vidrio.\n\nMide 50 cm de alto y ocupa la mesa entera. S/245, el día y la hora que elijas.",
       "headline": "Rojo de verdad",
       "description": "Arreglo Rossie · 30×50 cm · S/245",
       "cta": "Comprar",
@@ -395,7 +396,7 @@
       "placement": "Feed de Instagram · 4:5 (1080×1350)",
       "template": "sello",
       "photo": "arreglo-rossie-3.jpg",
-      "primaryText": "30 cm de ancho por 50 de alto.\n\nNo es el detalle que se pone al costado del plato: es lo primero que ve cuando entra a la casa.\n\nRosas, gerberas y claveles importados en florero de vidrio, armado a mano el mismo día. S/245.",
+      "primaryText": "30 cm de ancho por 50 de alto.\n\nNo es el detalle que se pone al costado del plato: es lo primero que ve cuando entra a la casa.\n\nRosas, gerberas y claveles importados en florero de vidrio, armado a mano. S/245.",
       "headline": "Mide 50 cm. Se nota.",
       "description": "Florero de vidrio incluido · S/245",
       "cta": "Comprar",
@@ -426,7 +427,7 @@
       "placement": "Historias y Reels · 9:16 (1080×1920)",
       "template": "titular",
       "photo": "arreglo-rossie-3.jpg",
-      "primaryText": "Aniversarios, disculpas grandes, sí definitivos.\n\nHay momentos en los que un ramo correcto no dice lo suficiente. Para eso está el Rossie: rojo cerrado, 50 cm, florero de vidrio incluido.\n\nS/245, hoy en Lima.",
+      "primaryText": "Aniversarios, disculpas grandes, sí definitivos.\n\nHay momentos en los que un ramo correcto no dice lo suficiente. Para eso está el Rossie: rojo cerrado, 50 cm, florero de vidrio incluido.\n\nS/245, en Lima Metropolitana.",
       "headline": "Cuando «bonito» no alcanza",
       "description": "Arreglo Rossie · S/245",
       "cta": "Comprar",
@@ -456,7 +457,7 @@
       "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
       "template": "puro",
       "photo": "tulipanes-de-amor.jpg",
-      "primaryText": "Diez tulipanes en florero de vidrio. Tú eliges: amarillo, rojo, morado, naranja, blanco, o el mix de todos como en la foto.\n\nViene con papel decorativo y tarjeta de dedicatoria. S/195, entregado hoy en Lima.",
+      "primaryText": "Diez tulipanes en florero de vidrio. Tú eliges: amarillo, rojo, morado, naranja, blanco, o el mix de todos como en la foto.\n\nViene con papel decorativo y tarjeta de dedicatoria. S/195, el día y la hora que elijas.",
       "headline": "Tú eliges el color",
       "description": "10 tulipanes · florero incluido · S/195",
       "cta": "Comprar",
@@ -482,33 +483,33 @@
     {
       "code": "IG-14",
       "product": "tulipanes-de-amor",
-      "title": "Las flores que siguen creciendo",
+      "title": "Nada de stock",
       "objective": "Tráfico / Interacción",
       "funnel": "Frío — marca",
       "format": "4:5",
       "placement": "Feed de Instagram · 4:5 (1080×1350)",
       "template": "postal",
       "photo": "tulipanes-de-amor.jpg",
-      "primaryText": "Los tulipanes son de las pocas flores que siguen creciendo después de cortadas. Se estiran, se acomodan y cambian de posición cada día dentro del florero.\n\nEs un regalo que se mueve durante toda la semana. Diez tallos, florero de vidrio y tarjeta de dedicatoria, S/195.",
-      "headline": "Las flores que siguen creciendo",
-      "description": "Tulipanes de amor · S/195",
+      "primaryText": "No tenemos stock. Recibimos flores frescas los lunes, miércoles y viernes, y lo que está disponible es lo que llegó esa semana.\n\nSi algo se acaba, te avisamos en menos de una hora.\n\nDiez tulipanes en florero de vidrio, con papel decorativo y tarjeta de dedicatoria. S/195.",
+      "headline": "Nada de stock",
+      "description": "Tulipanes de amor · florero incluido · S/195",
       "cta": "Más información",
       "hashtags": [
         "#limaflores",
         "#tulipanes",
-        "#datofloral",
+        "#atelierfloral",
         "#floreslima"
       ],
       "creative": {
-        "headline": "Siguen creciendo <em>dentro del florero</em>",
-        "sub": "Diez tallos, florero de vidrio y tarjeta escrita a mano.",
+        "headline": "Nada de <em>stock</em>",
+        "sub": "Flores frescas los lunes, miércoles y viernes. Lo disponible es lo de esta semana.",
         "price": "S/ 195",
         "footer": "Tulipanes de amor",
         "fit": "cover",
         "hlSize": 64,
         "position": "50% 40%"
       },
-      "why": "Un dato verdadero que casi nadie sabe da motivo para guardar y comentar el anuncio. Baja el CPM del conjunto entero por interacción."
+      "why": "Es el manifiesto de la propia landing, sin cambiarle una palabra. Explica por qué el catálogo cambia y convierte esa limitación en argumento."
     },
     {
       "code": "IG-15",
@@ -520,9 +521,9 @@
       "placement": "Historias y Reels · 9:16 (1080×1920)",
       "template": "puro",
       "photo": "tulipanes-de-amor.jpg",
-      "primaryText": "Amarillo, rojo, morado, naranja o blanco.\n\nDiez tulipanes en florero de vidrio, entregados hoy en Lima. Desliza y elige el tuyo.",
-      "headline": "Elige el color, lo llevamos hoy",
-      "description": "S/195 · entrega el mismo día",
+      "primaryText": "Amarillo, rojo, morado, naranja o blanco.\n\nDiez tulipanes en florero de vidrio. Eliges el color, el día y la hora. Desliza y arma el tuyo.",
+      "headline": "Elige el color y el día",
+      "description": "S/195 · eliges día y hora",
       "cta": "Comprar",
       "hashtags": [
         "#limaflores",
@@ -531,7 +532,7 @@
       ],
       "creative": {
         "headline": "Tú eliges el <em>color</em>",
-        "sub": "Diez tulipanes en florero de vidrio. Hoy en Lima.",
+        "sub": "Diez tulipanes en florero de vidrio. Tú eliges el día.",
         "price": "S/ 195",
         "footer": "Tulipanes de amor",
         "tone": "dark",
@@ -545,22 +546,22 @@
     {
       "code": "IG-16",
       "product": "ramo-luana",
-      "title": "Sin estudio, sin retoque",
+      "title": "Para una sala de verdad",
       "objective": "Reconocimiento / Tráfico",
       "funnel": "Frío",
       "format": "1:1",
       "placement": "Feed de Instagram · 1:1 (1080×1080)",
       "template": "cuadro",
       "photo": "ramo-luana.jpg",
-      "primaryText": "Esta foto no es de estudio. Es el Ramo Luana sobre el sofá de la casa a la que llegó, tomada con un celular y sin retoque.\n\nMini rosas naranjas, siemprevivas moradas y pompones verdes. Así se va a ver en tu sala. S/180, entregado hoy en Lima.",
-      "headline": "Sin estudio, sin retoque",
+      "primaryText": "Mini rosas naranjas, siemprevivas moradas, pompones verdes y toques amarillos, con follaje verde.\n\nUn ramo para una sala de verdad, no para una vitrina. S/180, armado a mano en el atelier de Miraflores.",
+      "headline": "Para una sala de verdad",
       "description": "Ramo Luana · S/180",
       "cta": "Comprar",
       "hashtags": [
         "#limaflores",
         "#ramosdeflores",
         "#floreslima",
-        "#sinfiltro",
+        "#hechoamano",
         "#miraflores"
       ],
       "creative": {
@@ -572,7 +573,7 @@
         "position": "50% 50%",
         "hlSize": 54
       },
-      "why": "El formato cuadrado y la foto de celular hacen que no parezca anuncio. Es el creativo con más chance de ganar en público frío amplio."
+      "why": "La foto está tomada en una sala y no en un fondo blanco: en el feed no parece anuncio, que es justo lo que conviene en público frío amplio."
     },
     {
       "code": "IG-17",
@@ -615,7 +616,7 @@
       "placement": "Historias y Reels · 9:16 (1080×1920)",
       "template": "postal",
       "photo": "ramo-luana.jpg",
-      "primaryText": "Naranjas, morados y verdes en el mismo ramo: los colores que nadie pide y todos miran.\n\nHecho a mano en el atelier de Miraflores, entregado hoy en Lima. S/180.",
+      "primaryText": "Naranjas, morados y verdes en el mismo ramo: los colores que nadie pide y todos miran.\n\nHecho a mano en el atelier de Miraflores, entregado el día que elijas. S/180.",
       "headline": "Los colores que nadie pide",
       "description": "Ramo Luana · S/180",
       "cta": "Comprar",

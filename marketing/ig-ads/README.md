@@ -11,7 +11,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 | `IG-01` | Florero con tulipanes lilas | Frío | 4:5 | Regálale un martes cualquiera |
 | `IG-02` | Florero con tulipanes lilas | Consideración / Retargeting 14 días | 4:5 | Lo que otros te cobran aparte |
 | `IG-03` | Florero con tulipanes lilas | Retargeting caliente · carrito abandonado 1–3 días | 9:16 | Todavía llegas |
-| `IG-04` | Orquídeas grandes en maceta | Frío | 4:5 | Ocho días o tres meses |
+| `IG-04` | Orquídeas grandes en maceta | Frío | 4:5 | Días, o tres meses |
 | `IG-05` | Orquídeas grandes en maceta | Consideración / Retargeting 30 días | 4:5 | «Siguen vivas dos meses después» |
 | `IG-06` | Orquídeas grandes en maceta | Retargeting caliente | 9:16 | Cuando el ramo no alcanza |
 | `IG-07` | Ramo de flores Sofía | Frío | 4:5 | No mandes rosas rojas |
@@ -21,9 +21,9 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 | `IG-11` | Arreglo Rossie | Consideración / Retargeting 14 días | 4:5 | Mide 50 cm. Se nota. |
 | `IG-12` | Arreglo Rossie | Retargeting caliente | 9:16 | Cuando «bonito» no alcanza |
 | `IG-13` | Tulipanes de amor | Frío | 4:5 | Tú eliges el color |
-| `IG-14` | Tulipanes de amor | Frío — marca | 4:5 | Las flores que siguen creciendo |
-| `IG-15` | Tulipanes de amor | Retargeting caliente | 9:16 | Elige el color, lo llevamos hoy |
-| `IG-16` | Ramo Luana | Frío | 1:1 | Sin estudio, sin retoque |
+| `IG-14` | Tulipanes de amor | Frío — marca | 4:5 | Nada de stock |
+| `IG-15` | Tulipanes de amor | Retargeting caliente | 9:16 | Elige el color y el día |
+| `IG-16` | Ramo Luana | Frío | 1:1 | Para una sala de verdad |
 | `IG-17` | Ramo Luana | Frío | 4:5 | Para la amiga que se mudó |
 | `IG-18` | Ramo Luana | Retargeting caliente | 9:16 | Los colores que nadie pide |
 
@@ -49,11 +49,11 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > Los cumpleaños ya están tomados. El aniversario también.
 >
-> Lo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta escrita a mano.
+> Lo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta de dedicatoria.
 >
 > Eso es lo que la gente cuenta después.
 >
-> Florero de vidrio incluido. Entregamos hoy en Lima.
+> Florero de vidrio incluido. Tú eliges el día y la hora de entrega.
 
 **Titular** Regálale un martes cualquiera
 
@@ -75,9 +75,9 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > S/195 no es el precio de diez tulipanes.
 >
-> Es el florero de vidrio, que no cobramos aparte. El papel armado a mano esa misma mañana. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta hoy.
+> Es el florero de vidrio, que no cobramos aparte. El papel armado a mano. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta el día y la hora que elijas.
 >
-> Los tulipanes duran una semana. El florero se queda para siempre.
+> Las flores se van. El florero se queda.
 
 **Titular** Lo que otros te cobran aparte
 
@@ -97,17 +97,17 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Texto principal**
 
-> Te olvidaste. Está bien: todavía estás a tiempo.
+> Te olvidaste. Está bien: si lo pides hoy, llega mañana.
 >
-> Tulipanes lilas con florero incluido, entregados hoy en Lima. Desliza hacia arriba y elige la hora.
+> Tulipanes lilas con florero de vidrio incluido. Eliges el día y la hora de entrega en Lima Metropolitana.
 
 **Titular** Todavía llegas
 
-**Descripción** S/195 · entrega el mismo día
+**Descripción** S/195 · pídelo hoy, llega mañana
 
-**Hashtags** #limaflores #deliverylima #floreshoy
+**Hashtags** #limaflores #deliverylima #floresadomicilio
 
-**Por qué funciona** Urgencia sin descuento. El descuento entrena a esperar ofertas; la hora de entrega no toca el margen.
+**Por qué funciona** Urgencia sin descuento. El descuento entrena a esperar ofertas; recordar que el pedido de hoy llega mañana no toca el margen.
 
 ---
 
@@ -129,13 +129,13 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Texto principal**
 
-> Un ramo dura ocho días. Una Phalaenopsis dura entre ocho y doce semanas con un vaso de agua a la semana.
+> Un ramo se marchita en días. Una Phalaenopsis aguanta entre ocho y doce semanas con riego mínimo.
 >
-> Misma inversión, diez veces más tiempo recordándote.
+> Misma inversión, mucho más tiempo recordándote.
 >
 > Viene en maceta decorativa, con tarjeta de dedicatoria e instrucciones de cuidado para que no se muera en la oficina.
 
-**Titular** Ocho días o tres meses
+**Titular** Días, o tres meses
 
 **Descripción** Phalaenopsis en maceta · S/200
 
@@ -153,13 +153,13 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Texto principal**
 
-> «Pedí a las 11 am, llegaron a las 5:30 pm con el arreglo perfecto. Las orquídeas siguen vivas dos meses después. Recomiendo cerrado los ojos.»
+> «Las orquídeas siguen vivas dos meses después. Recomiendo cerrado los ojos.»
 >
 > — Diego V., San Isidro · reseña verificada
 >
 > Eso es exactamente lo que vendemos: algo que sigue vivo cuando ya nadie se acuerda del regalo.
 >
-> Phalaenopsis en maceta decorativa, con tarjeta e instrucciones.
+> Phalaenopsis en maceta decorativa, con tarjeta e instrucciones de cuidado.
 
 **Titular** «Siguen vivas dos meses después»
 
@@ -167,7 +167,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Hashtags** #limaflores #orquideas #reseñasreales #deliverylima
 
-**Por qué funciona** Prueba social textual del propio sitio. Cubre las dos objeciones a la vez: llega a tiempo y dura.
+**Por qué funciona** Prueba social textual del propio sitio. Cubre la objeción que de verdad frena la compra de una planta como regalo: que se muera a la semana.
 
 ### IG-06 · Cuando el ramo no alcanza
 
@@ -181,11 +181,11 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > Para la suegra. Para la jefa. Para la casa nueva. Para el gracias que se te quedó pendiente hace tres semanas.
 >
-> Orquídea Phalaenopsis en maceta, entregada hoy en Lima.
+> Orquídea Phalaenopsis en maceta, entregada el día y la hora que elijas.
 
 **Titular** Cuando el ramo no alcanza
 
-**Descripción** S/200 · entrega el mismo día
+**Descripción** S/200 · eliges día y hora
 
 **Hashtags** #limaflores #orquideas #regalosperu
 
@@ -195,7 +195,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ## 03 · Ramo de flores Sofía — S/160
 
-**Categoría** Ramos · **Ángulo** Anti–rosas rojas: criterio estético a precio de entrada, hecho a mano el mismo día.
+**Categoría** Ramos · **Ángulo** Anti–rosas rojas: criterio estético a precio de entrada, armado a mano.
 
 **Público** 22–40, Lima Metropolitana. Público de entrada de precio y gusto estético: diseño, arquitectura, café de especialidad, decoración. Primer contacto con la marca.
 
@@ -263,11 +263,11 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > Gracias. Perdón. Felicitaciones. Te extraño.
 >
-> Cuatro cosas difíciles de decir y una sola manera de decirlas bien. Ramo Sofía, hecho a mano, entregado hoy en Lima.
+> Cuatro cosas difíciles de decir y una sola manera de decirlas bien. Ramo Sofía, hecho a mano, entregado el día que elijas.
 
 **Titular** Difícil de decir. Fácil de mandar.
 
-**Descripción** Desde S/160 · entrega hoy
+**Descripción** Desde S/160 · eliges día y hora
 
 **Hashtags** #limaflores #floreslima #deliverylima
 
@@ -297,7 +297,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 >
 > Rosas, gerberas, claveles importados y pepitas rojas apretadas hasta que no entra una flor más, en florero de vidrio.
 >
-> Mide 50 cm de alto y ocupa la mesa entera. S/245, entregado hoy en Lima.
+> Mide 50 cm de alto y ocupa la mesa entera. S/245, el día y la hora que elijas.
 
 **Titular** Rojo de verdad
 
@@ -321,7 +321,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 >
 > No es el detalle que se pone al costado del plato: es lo primero que ve cuando entra a la casa.
 >
-> Rosas, gerberas y claveles importados en florero de vidrio, armado a mano el mismo día. S/245.
+> Rosas, gerberas y claveles importados en florero de vidrio, armado a mano. S/245.
 
 **Titular** Mide 50 cm. Se nota.
 
@@ -345,7 +345,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 >
 > Hay momentos en los que un ramo correcto no dice lo suficiente. Para eso está el Rossie: rojo cerrado, 50 cm, florero de vidrio incluido.
 >
-> S/245, hoy en Lima.
+> S/245, en Lima Metropolitana.
 
 **Titular** Cuando «bonito» no alcanza
 
@@ -377,7 +377,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > Diez tulipanes en florero de vidrio. Tú eliges: amarillo, rojo, morado, naranja, blanco, o el mix de todos como en la foto.
 >
-> Viene con papel decorativo y tarjeta de dedicatoria. S/195, entregado hoy en Lima.
+> Viene con papel decorativo y tarjeta de dedicatoria. S/195, el día y la hora que elijas.
 
 **Titular** Tú eliges el color
 
@@ -387,9 +387,9 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Por qué funciona** La foto ya tiene el aire arriba: el texto se apoya en el fondo crema sin recuadros ni velos. Es el formato más limpio del set y el que mejor pasa por publicación orgánica.
 
-### IG-14 · Las flores que siguen creciendo
+### IG-14 · Nada de stock
 
-![Las flores que siguen creciendo](creativos/IG-14.jpg)
+![Nada de stock](creativos/IG-14.jpg)
 
 - **Objetivo** Tráfico / Interacción · **Etapa** Frío — marca
 - **Ubicación** Feed de Instagram · 4:5 (1080×1350)
@@ -397,17 +397,19 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Texto principal**
 
-> Los tulipanes son de las pocas flores que siguen creciendo después de cortadas. Se estiran, se acomodan y cambian de posición cada día dentro del florero.
+> No tenemos stock. Recibimos flores frescas los lunes, miércoles y viernes, y lo que está disponible es lo que llegó esa semana.
 >
-> Es un regalo que se mueve durante toda la semana. Diez tallos, florero de vidrio y tarjeta de dedicatoria, S/195.
+> Si algo se acaba, te avisamos en menos de una hora.
+>
+> Diez tulipanes en florero de vidrio, con papel decorativo y tarjeta de dedicatoria. S/195.
 
-**Titular** Las flores que siguen creciendo
+**Titular** Nada de stock
 
-**Descripción** Tulipanes de amor · S/195
+**Descripción** Tulipanes de amor · florero incluido · S/195
 
-**Hashtags** #limaflores #tulipanes #datofloral #floreslima
+**Hashtags** #limaflores #tulipanes #atelierfloral #floreslima
 
-**Por qué funciona** Un dato verdadero que casi nadie sabe da motivo para guardar y comentar el anuncio. Baja el CPM del conjunto entero por interacción.
+**Por qué funciona** Es el manifiesto de la propia landing, sin cambiarle una palabra. Explica por qué el catálogo cambia y convierte esa limitación en argumento.
 
 ### IG-15 · Elige el color, llega hoy
 
@@ -421,11 +423,11 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > Amarillo, rojo, morado, naranja o blanco.
 >
-> Diez tulipanes en florero de vidrio, entregados hoy en Lima. Desliza y elige el tuyo.
+> Diez tulipanes en florero de vidrio. Eliges el color, el día y la hora. Desliza y arma el tuyo.
 
-**Titular** Elige el color, lo llevamos hoy
+**Titular** Elige el color y el día
 
-**Descripción** S/195 · entrega el mismo día
+**Descripción** S/195 · eliges día y hora
 
 **Hashtags** #limaflores #tulipanes #deliverylima
 
@@ -435,15 +437,15 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ## 06 · Ramo Luana — S/180
 
-**Categoría** Ramos · **Ángulo** La foto es de casa, no de estudio: se vende autenticidad frente al catálogo pulido.
+**Categoría** Ramos · **Ángulo** La foto está tomada en una sala y no en un fondo blanco: se vende cercanía.
 
 **Público** 22–40, Lima Metropolitana. Primera compra, regalo casual entre amigas, mudanzas y agradecimientos. Público frío amplio.
 
 **Destino** `/producto.html?id=ramo-luana`
 
-### IG-16 · Sin estudio, sin retoque
+### IG-16 · Para una sala de verdad
 
-![Sin estudio, sin retoque](creativos/IG-16.jpg)
+![Para una sala de verdad](creativos/IG-16.jpg)
 
 - **Objetivo** Reconocimiento / Tráfico · **Etapa** Frío
 - **Ubicación** Feed de Instagram · 1:1 (1080×1080)
@@ -451,17 +453,17 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 **Texto principal**
 
-> Esta foto no es de estudio. Es el Ramo Luana sobre el sofá de la casa a la que llegó, tomada con un celular y sin retoque.
+> Mini rosas naranjas, siemprevivas moradas, pompones verdes y toques amarillos, con follaje verde.
 >
-> Mini rosas naranjas, siemprevivas moradas y pompones verdes. Así se va a ver en tu sala. S/180, entregado hoy en Lima.
+> Un ramo para una sala de verdad, no para una vitrina. S/180, armado a mano en el atelier de Miraflores.
 
-**Titular** Sin estudio, sin retoque
+**Titular** Para una sala de verdad
 
 **Descripción** Ramo Luana · S/180
 
-**Hashtags** #limaflores #ramosdeflores #floreslima #sinfiltro #miraflores
+**Hashtags** #limaflores #ramosdeflores #floreslima #hechoamano #miraflores
 
-**Por qué funciona** El formato cuadrado y la foto de celular hacen que no parezca anuncio. Es el creativo con más chance de ganar en público frío amplio.
+**Por qué funciona** La foto está tomada en una sala y no en un fondo blanco: en el feed no parece anuncio, que es justo lo que conviene en público frío amplio.
 
 ### IG-17 · Para la amiga que se mudó
 
@@ -499,7 +501,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 > Naranjas, morados y verdes en el mismo ramo: los colores que nadie pide y todos miran.
 >
-> Hecho a mano en el atelier de Miraflores, entregado hoy en Lima. S/180.
+> Hecho a mano en el atelier de Miraflores, entregado el día que elijas. S/180.
 
 **Titular** Los colores que nadie pide
 
@@ -511,22 +513,48 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ---
 
-## Antes de publicar
+## De dónde sale cada dato
 
-Tres datos del copy salen de la landing y conviene confirmarlos con el taller:
+Todo lo que afirma el copy sale de una de estas tres fuentes. Nada es de conocimiento
+general ni supuesto.
 
-1. **«Entrega hoy»** (IG-01, IG-03, IG-06, IG-09). La landing dice «Te las llevamos hoy» y una
-   reseña habla de un pedido a las 11 am entregado a las 5:30 pm, pero no hay hora de corte
-   publicada. Si existe (por ejemplo, pedidos antes de las 2 pm), conviene decirla: sube la
-   conversión y evita reclamos.
-2. **«8 a 12 semanas»** (IG-04). El dato está en la landing referido a las Orquídeas Multicolor.
-   Se está aplicando a las Phalaenopsis en maceta, que es la misma especie, pero vale confirmarlo.
-3. **Color de la orquídea** (IG-04, IG-05, IG-06). Las fotos del catálogo muestran ejemplares
-   ámbar y magenta. Si el color no se puede elegir, la ficha debería decir «color según
-   disponibilidad» para que el creativo no prometa uno en particular.
+| Afirmación | Fuente | Texto de origen |
+| --- | --- | --- |
+| «Eliges el día y la hora» · «Pídelo hoy, llega mañana» | `site/js/checkout.js` | `LEAD_MS = 24h`; el cliente elige fecha y slot de 30 min entre 8:00 y 20:30, con ventana de ±30 min |
+| «Entrega en Lima Metropolitana» | landing | «entrega a domicilio dentro de Lima Metropolitana» |
+| «Flores frescas los lunes, miércoles y viernes» | landing | «recibe flores frescas los lunes, miércoles y viernes» |
+| «Si algo se acaba, te avisamos en menos de una hora» | landing | textual |
+| «No vendemos flores. Vendemos pequeños momentos de calma» | landing | textual (manifiesto) |
+| «Armado a mano» · «Atelier de Miraflores desde 2017» | landing | «Cada arreglo lo armamos nosotros, a mano» · «Atelier desde 2017» |
+| Reseña de Diego V. (IG-05) | landing · reseñas verificadas 2025 | textual, recortada — ver abajo |
+| Florero de vidrio, tarjeta, colores, 30×50 cm, composición floral | `db/products.seed.json` | descripción de cada producto |
+| «8 a 12 semanas» (IG-04) | landing, **pero de otro producto** | «Duran entre ocho y doce semanas con riego mínimo», dicho de las Orquídeas Multicolor |
 
-Además: la reseña de Diego V. que se cita en IG-05 aparece como verificada en la landing.
-Meta pide poder respaldar los testimonios, así que hay que tener a mano de dónde salió.
+### Lo único que queda por decidir
+
+El **«8 a 12 semanas»** de IG-04. La cifra está publicada en la landing, pero referida a las
+Orquídeas Multicolor, no a las Orquídeas grandes en maceta que anuncia esa pieza. Es la misma
+especie (Phalaenopsis) y por eso se dejó, pero es una extrapolación, no un dato del producto.
+Si el taller no la respalda, la comparación funciona igual diciendo «semanas, no días».
+
+### Qué se quitó y por qué
+
+- **Entrega el mismo día.** Estaba en seis piezas. La landing dice «Te las llevamos hoy», pero
+  el checkout exige 24 horas de anticipación: manda el código, no la landing. Reemplazado por
+  «eliges el día y la hora», que además es un argumento más fuerte y es verdad.
+- **«Tarjeta escrita a mano».** El catálogo dice «tarjeta de dedicatoria». Lo de escrita a mano
+  lo había agregado yo.
+- **«Los tulipanes siguen creciendo dentro del florero».** Era el gancho de IG-14 y no salía de
+  ninguna fuente del proyecto: es cierto en botánica, pero no es un dato del negocio. La pieza
+  ahora usa el manifiesto de la landing.
+- **«Foto tomada con un celular, sin retoque, en la casa a la que llegó»** (IG-16). Yo no sé
+  cómo se tomó esa foto. El copy ahora solo describe lo que se ve: un ramo en una sala.
+- **«Un ramo dura 8 días»** (IG-04) y **«los tulipanes duran una semana»** (IG-02). Cifras mías.
+- **La mitad de la reseña de Diego V.** («Pedí a las 11 am, llegaron a las 5:30 pm»). Es textual
+  del sitio, pero promete entrega el mismo día. Se cita solo la parte de la duración.
+
+Meta pide poder respaldar los testimonios: conviene tener a mano de dónde salió la reseña de
+Diego V. antes de publicar IG-05.
 
 ## Los nueve formatos
 
