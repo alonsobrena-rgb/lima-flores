@@ -104,6 +104,21 @@ async function fontCss() {
 const dataUri = (file) =>
   `data:image/jpeg;base64,${fs.readFileSync(path.join(PHOTOS, file)).toString('base64')}`;
 
+// El logo de la página (site/assets/logo.png), en sus dos versiones —
+// ver marca/prep-logo.py.
+const MARCA = Object.fromEntries(
+  ['logo', 'logo-claro'].map((n) => [
+    n,
+    `data:image/png;base64,${fs.readFileSync(path.join(HERE, 'marca', `${n}.png`)).toString('base64')}`,
+  ]),
+);
+
+// `onDark` cambia la caligrafía gris por la versión en hueso, que es la única
+// que se lee sobre foto oscura o sobre el panel de tinta.
+const logo = (h, onDark) =>
+  `<img src="${MARCA[onDark ? 'logo-claro' : 'logo']}" alt="Lima Flores"
+        style="height:${h}px;width:auto;display:block">`;
+
 /* ─────────────────────────────  plantillas  ───────────────────────────── */
 
 const base = (fonts, w, h, body) => `<!doctype html><meta charset="utf-8"><style>
@@ -116,7 +131,6 @@ body{position:relative;background:${C.bone};font-family:'Jost',-apple-system,'He
 .d em{font-style:italic;font-weight:400;color:var(--em,${C.rosa})}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.24em}
 .rule{height:1px;background:${C.line}}
-.mark{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;letter-spacing:.34em;text-transform:uppercase}
 .shot{width:100%;height:100%;object-fit:cover;display:block}
 </style>${body}`;
 
@@ -129,9 +143,9 @@ const img = (a, photo) =>
 // A · Editorial: foto grande, titular abajo. Para público frío.
 const editorial = (a, photo) => `
 <div style="position:absolute;inset:0;background:${C.bone}">
-  <div style="position:absolute;top:60px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:baseline">
+  <div style="position:absolute;top:60px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center">
     <span class="mono" style="font-size:19px;color:${C.gold}">${a.creative.eyebrow}</span>
-    <span class="mark" style="font-size:22px">Lima Flores</span>
+    ${logo(74)}
   </div>
   <div class="rule" style="position:absolute;top:126px;left:72px;right:72px"></div>
   <div style="position:absolute;top:162px;left:72px;width:936px;height:700px;background:#fff;overflow:hidden">
@@ -171,16 +185,16 @@ const split = (a, photo) => `
   </div>
   <div style="position:absolute;top:0;bottom:0;left:486px;right:0;background:#fff;overflow:hidden">
     ${img(a, photo)}
-    <span class="mark" style="position:absolute;top:44px;right:44px;font-size:20px">Lima Flores</span>
+    <div style="position:absolute;top:40px;right:40px">${logo(72)}</div>
   </div>
 </div>`;
 
 // C · Cita: prueba social o manifiesto arriba, foto abajo. Para consideración.
 const quote = (a, photo) => `
 <div style="position:absolute;inset:0;background:${C.paper}">
-  <div style="position:absolute;top:70px;left:76px;right:76px;display:flex;justify-content:space-between;align-items:baseline">
+  <div style="position:absolute;top:70px;left:76px;right:76px;display:flex;justify-content:space-between;align-items:center">
     <span style="font-size:23px;letter-spacing:.42em;color:${C.gold}">★★★★★</span>
-    <span class="mark" style="font-size:21px">Lima Flores</span>
+    ${logo(72)}
   </div>
   <blockquote class="d" style="position:absolute;top:148px;left:76px;right:76px;
               font-size:${a.creative.hlSize || 74}px;line-height:1.04">«${a.creative.quote}»</blockquote>
@@ -223,7 +237,7 @@ const story = (a, photo) => `
       <span style="font-size:26px;font-weight:400">${a.creative.pill}</span>
       <span style="font-size:24px;color:${C.terra}">→</span>
     </span>
-    <span class="mark" style="font-size:21px">Lima Flores</span>
+    ${logo(72)}
   </div>
 </div>`;
 
@@ -249,7 +263,7 @@ const puro = (a, photo, w, h) => {
     ? `<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.68)}px;
          background:linear-gradient(to top,rgba(10,7,6,.84),rgba(10,7,6,.3) 46%,rgba(10,7,6,0))"></div>`
     : ''}
-  <span class="mark" style="position:absolute;${markPos};left:76px;font-size:21px;color:${fg}">Lima Flores</span>
+  <div style="position:absolute;${markPos};left:76px">${logo(74, light)}</div>
   <div style="position:absolute;left:76px;right:76px;${textPos}">
     <h1 class="d" style="font-size:${a.creative.hlSize || 104}px;color:${fg}">${a.creative.headline}</h1>
     ${a.creative.sub
@@ -277,9 +291,9 @@ const sello = (a, photo, w, h) => `
   </div>
   <div style="position:absolute;left:76px;right:76px;bottom:${h === 1920 ? 372 : 76}px;color:#fff">
     <h1 class="d" style="font-size:${a.creative.hlSize || 96}px">${a.creative.headline}</h1>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:28px">
       <span class="mono" style="font-size:15px;color:rgba(255,255,255,.8)">${a.creative.footer}</span>
-      <span class="mark" style="font-size:20px">Lima Flores</span>
+      ${logo(72, true)}
     </div>
   </div>
 </div>`;
@@ -289,12 +303,12 @@ const sello = (a, photo, w, h) => `
 const cuadro = (a, photo) => `
 <div style="position:absolute;inset:0;background:#fff;overflow:hidden">
   ${img(a, photo)}
-  <div style="position:absolute;top:74px;right:66px;width:428px;text-align:right">
+  <div style="position:absolute;top:62px;right:58px;width:476px;text-align:right">
     <span class="mono" style="font-size:15px;color:${C.moss}">${a.creative.eyebrow}</span>
     <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:20px">${a.creative.headline}</h1>
     <div style="height:1px;background:${C.line};margin:24px 0 0;margin-left:auto;width:180px"></div>
-    <div style="margin-top:22px;display:flex;justify-content:flex-end;align-items:baseline;gap:20px">
-      <span class="mark" style="font-size:17px;color:#4A473F">Lima Flores</span>
+    <div style="margin-top:22px;display:flex;justify-content:flex-end;align-items:center;gap:20px">
+      ${logo(52)}
       <span class="d" style="font-size:40px;font-weight:400">${a.creative.price}</span>
     </div>
   </div>
@@ -307,9 +321,9 @@ const titular = (a, photo, w, h) => {
   const bandH = tall ? 538 : 588;
   return `
 <div style="position:absolute;inset:0;background:${C.bone}">
-  <span class="mark" style="position:absolute;top:${tall ? 272 : 66}px;left:76px;font-size:21px">Lima Flores</span>
-  <span class="mono" style="position:absolute;top:${tall ? 356 : 132}px;left:76px;font-size:18px;color:${C.gold}">${a.creative.eyebrow}</span>
-  <h1 class="d" style="position:absolute;top:${tall ? 402 : 178}px;left:76px;right:76px;
+  <div style="position:absolute;top:${tall ? 262 : 60}px;left:76px">${logo(80)}</div>
+  <span class="mono" style="position:absolute;top:${tall ? 372 : 170}px;left:76px;font-size:18px;color:${C.gold}">${a.creative.eyebrow}</span>
+  <h1 class="d" style="position:absolute;top:${tall ? 418 : 214}px;left:76px;right:76px;
       font-size:${a.creative.hlSize || (tall ? 128 : 122)}px">${a.creative.headline}</h1>
   <div style="position:absolute;left:76px;right:76px;top:${bandTop - 74}px;display:flex;
               justify-content:space-between;align-items:baseline">
@@ -330,7 +344,7 @@ const postal = (a, photo, w, h) => {
   const top = tall ? 424 : 158;
   return `
 <div style="position:absolute;inset:0;background:${C.paper};text-align:center">
-  <span class="mark" style="position:absolute;top:${tall ? 286 : 76}px;left:0;right:0;font-size:22px">Lima Flores</span>
+  <div style="position:absolute;top:${tall ? 276 : 66}px;left:0;right:0;display:flex;justify-content:center">${logo(86)}</div>
   <div style="position:absolute;left:${side}px;top:${top}px;width:${box}px;height:${box}px;
               background:#fff;border:1px solid ${C.line};overflow:hidden">${img(a, photo)}</div>
   <div style="position:absolute;left:${side}px;right:${side}px;top:${top + box + 46}px">
@@ -476,8 +490,11 @@ function writeDeck({ campaign, products, ads }) {
   L.push('- Fotos: las del catálogo (`site/assets/products/`). No se generó ninguna imagen con IA.');
   L.push('- Tipografías y paleta: las del sitio (`site/css/lima.css`) — Cormorant Garamond, Jost,');
   L.push('  JetBrains Mono sobre hueso `#F4EFE5` y tinta `#1B1A17`.');
-  L.push('- Los creativos usan el logotipo tipográfico del sitio nuevo, no el logo de acuarela de');
-  L.push('  `site/assets/logo.png`, que pertenece a la identidad anterior.');
+  L.push('- Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.');
+  L.push('  En `marca/` hay dos versiones, generadas con `marca/prep-logo.py`: `logo.png` para');
+  L.push('  fondos claros y `logo-claro.png` para fondos oscuros, donde la caligrafía gris del');
+  L.push('  original desaparecería. La versión clara solo cambia el color de la caligrafía; la');
+  L.push('  acuarela queda intacta.');
   L.push('- En las historias, los 250px de arriba y los 372px de abajo quedan libres: ahí Instagram');
   L.push('  monta el header del perfil y la barra de respuesta.');
   L.push('- El rubro fúnebre quedó fuera del sorteo: ninguno de sus 5 productos tiene foto en el repo.');

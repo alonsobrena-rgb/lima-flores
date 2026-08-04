@@ -551,8 +551,11 @@ catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` 
 - Fotos: las del catálogo (`site/assets/products/`). No se generó ninguna imagen con IA.
 - Tipografías y paleta: las del sitio (`site/css/lima.css`) — Cormorant Garamond, Jost,
   JetBrains Mono sobre hueso `#F4EFE5` y tinta `#1B1A17`.
-- Los creativos usan el logotipo tipográfico del sitio nuevo, no el logo de acuarela de
-  `site/assets/logo.png`, que pertenece a la identidad anterior.
+- Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.
+  En `marca/` hay dos versiones, generadas con `marca/prep-logo.py`: `logo.png` para
+  fondos claros y `logo-claro.png` para fondos oscuros, donde la caligrafía gris del
+  original desaparecería. La versión clara solo cambia el color de la caligrafía; la
+  acuarela queda intacta.
 - En las historias, los 250px de arriba y los 372px de abajo quedan libres: ahí Instagram
   monta el header del perfil y la barra de respuesta.
 - El rubro fúnebre quedó fuera del sorteo: ninguno de sus 5 productos tiene foto en el repo.
