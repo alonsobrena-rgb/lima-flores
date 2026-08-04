@@ -138,7 +138,10 @@ body{position:relative;background:${C.bone};font-family:'Jost',-apple-system,'He
 // el encuadre y el precio se salía del lienzo sin que el render avisara.
 const img = (a, photo) =>
   `<img src="${photo}" class="shot" style="object-fit:${a.creative.fit};` +
-  `object-position:${a.creative.position || '50% 50%'}">`;
+  `object-position:${a.creative.position || '50% 50%'};` +
+  // `zoom` para las tomas de catálogo donde el producto sale chico en un fondo
+  // enorme: acerca sin tener que recortar el archivo original.
+  `${a.creative.zoom ? `transform:scale(${a.creative.zoom})` : ''}">`;
 
 // A · Editorial: foto grande, titular abajo. Para público frío.
 const editorial = (a, photo) => `
@@ -278,25 +281,33 @@ const puro = (a, photo, w, h) => {
 };
 
 // S2 · Sello: foto a sangre y un sello de precio, como la etiqueta de una tienda.
-const sello = (a, photo, w, h) => `
-<div style="position:absolute;inset:0;background:#fff;overflow:hidden;--em:#F0BFCB">
+const sello = (a, photo, w, h) => {
+  // Con `tone:'light'` el degradado es oscuro y el texto blanco; sobre fotos de
+  // fondo claro se invierte, porque un velo negro ahí se ve como un parche.
+  const onDark = a.creative.tone === 'light';
+  const fg = onDark ? '#fff' : C.ink;
+  const mut = onDark ? 'rgba(255,255,255,.8)' : '#4A473F';
+  const velo = onDark ? '10,7,6' : '244,239,229';
+  return `
+<div style="position:absolute;inset:0;background:#fff;overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
   ${img(a, photo)}
   <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.5)}px;
-       background:linear-gradient(to top,rgba(10,7,6,.78),rgba(10,7,6,0))"></div>
+       background:linear-gradient(to top,rgba(${velo},${onDark ? '.78' : '.96'}),rgba(${velo},0))"></div>
   <div style="position:absolute;top:${h === 1920 ? 300 : 74}px;right:74px;width:244px;height:244px;
-              background:${C.bone};border-radius:50%;color:${C.ink};
+              background:${onDark ? C.bone : C.ink};border-radius:50%;color:${onDark ? C.ink : C.bone};
               display:flex;flex-direction:column;align-items:center;justify-content:center">
     <span class="d" style="font-size:64px;font-weight:400;line-height:1">${a.creative.price}</span>
-    <span class="mono" style="font-size:12px;color:${C.moss};margin-top:12px">${a.creative.seal}</span>
+    <span class="mono" style="font-size:12px;color:${onDark ? C.moss : C.terra};margin-top:12px">${a.creative.seal}</span>
   </div>
-  <div style="position:absolute;left:76px;right:76px;bottom:${h === 1920 ? 372 : 76}px;color:#fff">
+  <div style="position:absolute;left:76px;right:76px;bottom:${h === 1920 ? 372 : 76}px;color:${fg}">
     <h1 class="d" style="font-size:${a.creative.hlSize || 96}px">${a.creative.headline}</h1>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:28px">
-      <span class="mono" style="font-size:15px;color:rgba(255,255,255,.8)">${a.creative.footer}</span>
-      ${logo(72, true)}
+      <span class="mono" style="font-size:15px;color:${mut}">${a.creative.footer}</span>
+      ${logo(72, onDark)}
     </div>
   </div>
 </div>`;
+};
 
 // C2 · Cuadro 1:1: la foto ocupa el lienzo y el texto se apoya en el vacío que
 // la propia foto deja a un costado.
@@ -466,6 +477,8 @@ function writeDeck({ campaign, products, ads }) {
   L.push('| Reseña de Diego V. (IG-05) | landing · reseñas verificadas 2025 | textual, recortada — ver abajo |');
   L.push('| Florero de vidrio, tarjeta, colores, 30×50 cm, composición floral | `db/products.seed.json` | descripción de cada producto |');
   L.push('| «8 a 12 semanas» (IG-04) | landing, **pero de otro producto** | «Duran entre ocho y doce semanas con riego mínimo», dicho de las Orquídeas Multicolor |');
+  L.push('| Reseña de Camila R. (IG-21) | landing · reseñas verificadas 2025 | textual |');
+  L.push('| «Prohibida la venta a menores. Tomar bebidas alcohólicas en exceso es dañino» (IG-28) | `db/products.seed.json` | textual, de la ficha del Box Yani |');
   L.push('');
   L.push('### Lo único que queda por decidir');
   L.push('');
@@ -473,6 +486,27 @@ function writeDeck({ campaign, products, ads }) {
   L.push('Orquídeas Multicolor, no a las Orquídeas grandes en maceta que anuncia esa pieza. Es la misma');
   L.push('especie (Phalaenopsis) y por eso se dejó, pero es una extrapolación, no un dato del producto.');
   L.push('Si el taller no la respalda, la comparación funciona igual diciendo «semanas, no días».');
+  L.push('');
+  L.push('### Cumplimiento: IG-28 lleva alcohol');
+  L.push('');
+  L.push('El Box Yani incluye una botella de Riccadona de 200 ml, así que ese anuncio cae en la categoría');
+  L.push('de alcohol de Meta: necesita segmentación de edad **+18** en el conjunto de anuncios y lleva la');
+  L.push('advertencia legal en el texto. Sin la restricción de edad, Meta lo rechaza.');
+  L.push('');
+  L.push('### Hallazgos del catálogo');
+  L.push('');
+  L.push('Tres cosas que aparecieron al elegir los productos y conviene arreglar en `db/products.seed.json`:');
+  L.push('');
+  L.push('- **`box-lupita`** — la descripción dice «Box blanco con 12 rosas amarillas y 12 rosas lilas»,');
+  L.push('  pero la foto muestra un balde de zinc con rosas amarillas e hortensias blancas y verdes. La');
+  L.push('  descripción parece copiada de `box-simona`. Quedó fuera del set por eso.');
+  L.push('- **`14536` (Arreglo Florencia)** — su única imagen no es una foto de producto: es una pieza');
+  L.push('  gráfica con el nombre, la descripción y el precio ya impresos. No sirve para un creativo.');
+  L.push('- **`box-chococafe`** — la descripción menciona «toques azules» que no se ven en la foto. El copy');
+  L.push('  del anuncio los omite.');
+  L.push('');
+  L.push('Los cinco productos de la categoría Fúnebre siguen sin foto en el repositorio, así que ninguno');
+  L.push('puede entrar a la campaña.');
   L.push('');
   L.push('### Qué se quitó y por qué');
   L.push('');

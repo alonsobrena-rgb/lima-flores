@@ -6,7 +6,7 @@
     "currency": "S/",
     "whatsapp": "999 479 855",
     "generated": "2026-08",
-    "note": "6 productos elegidos al azar del catálogo (db/products.seed.json), 3 anuncios por producto en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude."
+    "note": "16 productos elegidos al azar del catálogo (db/products.seed.json), en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude."
   },
   "products": [
     {
@@ -68,6 +68,106 @@
       "landing": "/producto.html?id=ramo-luana",
       "audience": "22–40, Lima Metropolitana. Primera compra, regalo casual entre amigas, mudanzas y agradecimientos. Público frío amplio.",
       "angle": "La foto está tomada en una sala y no en un fondo blanco: se vende cercanía."
+    },
+    {
+      "id": "box-chococafe",
+      "name": "Box Chococafé",
+      "categoryLabel": "Arreglos",
+      "price": 220,
+      "num": "07",
+      "landing": "/producto.html?id=box-chococafe",
+      "audience": "28–50, Lima Metropolitana. Regalo corporativo, cumpleaños y Día de la Madre. Intereses: café de especialidad, repostería, regalos.",
+      "angle": "No compite con otras flores: compite con el regalo que la persona iba a comprar en vez de flores."
+    },
+    {
+      "id": "orquidea-sunrise-de-dos-varas",
+      "name": "Orquídea Sunrise de dos varas",
+      "categoryLabel": "Orquídeas",
+      "price": 215,
+      "num": "08",
+      "landing": "/producto.html?id=orquidea-sunrise-de-dos-varas",
+      "audience": "30–55, Lima Metropolitana. Día de la Madre, agradecimientos y casa nueva. Retargeting de la categoría Orquídeas.",
+      "angle": "Dos varas en vez de una: es el detalle que justifica el precio frente a la orquídea del supermercado."
+    },
+    {
+      "id": "box-sensacion",
+      "name": "BOX Sensación",
+      "categoryLabel": "Arreglos",
+      "price": 225,
+      "num": "09",
+      "landing": "/producto.html?id=box-sensacion",
+      "audience": "25–45, Lima Metropolitana. Cumpleaños y celebraciones. Público similar al 1% de compradores de Arreglos.",
+      "angle": "Prueba social: la reseña hace el trabajo que el copy de producto no puede hacer solo."
+    },
+    {
+      "id": "arreglo-andrea",
+      "name": "Arreglo Andrea",
+      "categoryLabel": "Arreglos",
+      "price": 165,
+      "num": "10",
+      "landing": "/producto.html?id=arreglo-andrea",
+      "audience": "22–40, Lima Metropolitana. Precio de entrada, primera compra y regalo de oficina. Público frío amplio.",
+      "angle": "Es el ticket más bajo del set: entra por precio y por tamaño de mesa, no por ocasión."
+    },
+    {
+      "id": "orquideas-amarillas-con-lineas-fucsias",
+      "name": "Orquídeas amarillas con líneas fucsias",
+      "categoryLabel": "Orquídeas",
+      "price": 215,
+      "num": "11",
+      "landing": "/producto.html?id=orquideas-amarillas-con-lineas-fucsias",
+      "audience": "30–55, Lima Metropolitana. Regalo de diseño y decoración. Retargeting de visitantes de Orquídeas.",
+      "angle": "Ataca el default de la categoría, que es la Phalaenopsis blanca. El color es todo el argumento."
+    },
+    {
+      "id": "ramo-de-24-rosas-con-papel-de-estrellas",
+      "name": "Ramo de rosas con papel de estrellas",
+      "categoryLabel": "Ramos",
+      "price": 190,
+      "num": "12",
+      "landing": "/producto.html?id=ramo-de-24-rosas-con-papel-de-estrellas",
+      "audience": "25–45, Lima Metropolitana. Aniversario, San Valentín y pedidas. Excluir compradores de 30 días.",
+      "angle": "La cantidad es el gancho: veinticuatro contra las doce de todo el mercado, y a S/190."
+    },
+    {
+      "id": "orquidea-rosado-vintage",
+      "name": "Orquídea Rosado Vintage",
+      "categoryLabel": "Orquídeas",
+      "price": 200,
+      "num": "13",
+      "landing": "/producto.html?id=orquidea-rosado-vintage",
+      "audience": "28–50, Lima Metropolitana. Regalo de decoración y agradecimiento. Intereses: interiorismo, plantas.",
+      "angle": "Formato postal: la orquídea se vende como objeto de decoración, no como ramo."
+    },
+    {
+      "id": "box-simona",
+      "name": "BOX SIMONA",
+      "categoryLabel": "Arreglos",
+      "price": 176,
+      "num": "14",
+      "landing": "/producto.html?id=box-simona",
+      "audience": "22–45, Lima Metropolitana. Retargeting caliente de visitantes de Arreglos y carritos abandonados.",
+      "angle": "Ticket bajo en historia: el formato vertical con botón es el que mejor cierra en retargeting."
+    },
+    {
+      "id": "florero-de-10-tulipanes-2",
+      "name": "Florero de 10 tulipanes",
+      "categoryLabel": "Floreros",
+      "price": 195,
+      "num": "15",
+      "landing": "/producto.html?id=florero-de-10-tulipanes-2",
+      "audience": "25–45, Lima Metropolitana. Regalo de pareja y cumpleaños. Público similar al 1% de compradores de Floreros.",
+      "angle": "Los tulipanes son el producto con más color del catálogo: en historia, el creativo se ve desde lejos."
+    },
+    {
+      "id": "box-yani",
+      "name": "Box Yani",
+      "categoryLabel": "Arreglos",
+      "price": 180,
+      "num": "16",
+      "landing": "/producto.html?id=box-yani",
+      "audience": "SOLO 25–50 y con segmentación +18 obligatoria. Lima Metropolitana. Aniversario y celebraciones.",
+      "angle": "Flores más espumante: sube el ticket y sale de la categoría floral pura. Exige cumplimiento +18."
     }
   ],
   "ads": [
@@ -635,6 +735,330 @@
         "hlSize": 66
       },
       "why": "El marco de postal separa el producto del fondo del feed y da aire: funciona bien cuando la foto es de celular y no aguanta ir a sangre en vertical."
+    },
+    {
+      "code": "IG-19",
+      "product": "box-chococafe",
+      "title": "Flores y café en la misma caja",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "quote",
+      "photo": "box-chococafe.jpg",
+      "primaryText": "Flores para el momento. Café para las mañanas siguientes.\n\nEl Box Chococafé trae mini rosas con follaje verde, café de especialidad de 250 g, chocolate al 70% con arándanos y una tacita de expreso, en caja de madera.\n\nS/220. Eliges el día y la hora de entrega.",
+      "headline": "Flores, café y chocolate",
+      "description": "Box Chococafé · caja de madera · S/220",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#regalosperu",
+        "#cafedeespecialidad",
+        "#floreslima",
+        "#miraflores"
+      ],
+      "creative": {
+        "quote": "Flores para el momento. Café para <em>las mañanas siguientes</em>.",
+        "author": "Box Chococafé",
+        "meta": "Café 250 g · chocolate 70% · tacita de expreso",
+        "price": "S/ 220",
+        "footer": "Caja de madera",
+        "hlSize": 70,
+        "fit": "cover",
+        "position": "50% 46%"
+      },
+      "why": "No compite con otras flores: compite con el regalo que la persona iba a comprar en vez de flores."
+    },
+    {
+      "code": "IG-20",
+      "product": "orquidea-sunrise-de-dos-varas",
+      "title": "Dos varas, no una",
+      "objective": "Reconocimiento / Tráfico",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "puro",
+      "photo": "orquidea-sunrise-de-dos-varas.jpg",
+      "primaryText": "Dos varas, no una.\n\nPhalaenopsis anaranjada en maceta, con tarjeta de dedicatoria. Armada a mano en el atelier de Miraflores.\n\nS/215, el día y la hora que elijas.",
+      "headline": "Dos varas, no una",
+      "description": "Phalaenopsis anaranjada · S/215",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#orquideas",
+        "#phalaenopsis",
+        "#regalosperu",
+        "#plantaslima"
+      ],
+      "creative": {
+        "headline": "Dos varas, <em>no una</em>",
+        "sub": "Phalaenopsis anaranjada en maceta, con tarjeta de dedicatoria.",
+        "price": "S/ 215",
+        "footer": "Orquídea Sunrise",
+        "anchor": "bottom",
+        "hlSize": 94,
+        "fit": "contain",
+        "position": "50% 6%",
+        "bg": "#FFFFFF"
+      },
+      "why": "Dos varas en vez de una: es el detalle que justifica el precio frente a la orquídea del supermercado."
+    },
+    {
+      "code": "IG-21",
+      "product": "box-sensacion",
+      "title": "Como para una portada",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 30 días",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "split",
+      "photo": "box-sensacion.jpg",
+      "primaryText": "«El ramo llegó armado como si fuera para una portada de revista. Mi mamá lloró cuando lo vio. No se les escapa un solo detalle.»\n— Camila R., Surco · reseña verificada\n\nBox Sensación: 12 rosas amarillas con mini rosas naranjas, claveles morados grandes y follaje verde. Incluye tarjeta de dedicatoria.\n\nS/225, el día y la hora que elijas.",
+      "headline": "«Como para una portada de revista»",
+      "description": "Box Sensación · 12 rosas amarillas · S/225",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#arreglosflorales",
+        "#floreslima",
+        "#rosasamarillas"
+      ],
+      "creative": {
+        "eyebrow": "Reseña verificada · 2025",
+        "headline": "«Como para <em>una portada</em>»",
+        "items": [
+          "12 rosas amarillas",
+          "Mini rosas naranjas",
+          "Claveles morados grandes",
+          "Tarjeta de dedicatoria"
+        ],
+        "price": "S/ 225",
+        "footer": "Box Sensación",
+        "hlSize": 76,
+        "fit": "cover",
+        "position": "50% 46%"
+      },
+      "why": "Prueba social: la reseña hace el trabajo que el copy de producto no puede hacer solo."
+    },
+    {
+      "code": "IG-22",
+      "product": "arreglo-andrea",
+      "title": "Naranja sobre loza blanca",
+      "objective": "Tráfico",
+      "funnel": "Frío",
+      "format": "1:1",
+      "placement": "Feed de Instagram · 1:1 (1080×1080)",
+      "template": "cuadro",
+      "photo": "arreglo-andrea-2.jpg",
+      "primaryText": "Mini rosas anaranjadas, claveles, toques morados y follaje verde, en contenedor de loza blanca.\n\nDel tamaño que cabe en una mesa sin tapar a nadie. S/165, armado a mano en el atelier de Miraflores.",
+      "headline": "Mini rosas naranjas en loza blanca",
+      "description": "Arreglo Andrea · S/165",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#arreglosflorales",
+        "#floreslima",
+        "#regalosconsentido"
+      ],
+      "creative": {
+        "eyebrow": "No. 10 · Arreglos",
+        "headline": "Naranja sobre <em>loza blanca</em>",
+        "price": "S/ 165",
+        "hlSize": 56,
+        "fit": "cover",
+        "position": "50% 50%"
+      },
+      "why": "Es el ticket más bajo del set: entra por precio y por tamaño de mesa, no por ocasión."
+    },
+    {
+      "code": "IG-23",
+      "product": "orquideas-amarillas-con-lineas-fucsias",
+      "title": "No es la orquídea blanca",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 30 días",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "sello",
+      "photo": "orquideas-amarillas-con-lineas-fucsias-3.jpg",
+      "primaryText": "Amarillo de fondo, líneas y centro fucsia, dos varas, maceta de cobre.\n\nNo es la Phalaenopsis blanca de siempre. Incluye tarjeta de dedicatoria.\n\nS/215, el día y la hora que elijas.",
+      "headline": "No es la orquídea blanca de siempre",
+      "description": "Phalaenopsis de dos varas · S/215",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#orquideas",
+        "#phalaenopsis",
+        "#decoracion",
+        "#regalosperu"
+      ],
+      "creative": {
+        "headline": "Amarillo con <em>líneas fucsias</em>",
+        "seal": "Dos varas",
+        "price": "S/ 215",
+        "footer": "Maceta de cobre · tarjeta incluida",
+        "hlSize": 86,
+        "fit": "cover",
+        "position": "50% 40%"
+      },
+      "why": "Ataca el default de la categoría, que es la Phalaenopsis blanca. El color es todo el argumento."
+    },
+    {
+      "code": "IG-24",
+      "product": "ramo-de-24-rosas-con-papel-de-estrellas",
+      "title": "Veinticuatro, no doce",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "template": "editorial",
+      "photo": "ramo-de-24-rosas-con-papel-de-estrellas.jpg",
+      "primaryText": "Veinticuatro rosas importadas, no doce.\n\nEnvueltas en papel de estrellas, con tarjeta de dedicatoria.\n\nS/190, el día y la hora que elijas.",
+      "headline": "Veinticuatro, no doce",
+      "description": "24 rosas importadas · S/190",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#rosas",
+        "#ramosdeflores",
+        "#aniversario",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 12 · Ramos",
+        "headline": "Veinticuatro. <em>No doce.</em>",
+        "sub": "Rosas importadas en papel de estrellas, con tarjeta de dedicatoria.",
+        "price": "S/ 190",
+        "footer": "Ramo con papel de estrellas",
+        "hlSize": 96,
+        "fit": "cover",
+        "position": "50% 48%",
+        "zoom": 1.5
+      },
+      "why": "La cantidad es el gancho: veinticuatro contra las doce de todo el mercado, y a S/190."
+    },
+    {
+      "code": "IG-25",
+      "product": "orquidea-rosado-vintage",
+      "title": "Rosado vintage",
+      "objective": "Tráfico / Interacción",
+      "funnel": "Frío — marca",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "postal",
+      "photo": "orquidea-rosado-vintage-2.jpg",
+      "primaryText": "Una Phalaenopsis rosado vintage en maceta blanca.\n\nNo se pone en la mesa del comedor un domingo: se queda en la casa.\n\nS/200, armada a mano en el atelier de Miraflores.",
+      "headline": "Se queda en la casa",
+      "description": "Orquídea Rosado Vintage · S/200",
+      "cta": "Más información",
+      "hashtags": [
+        "#limaflores",
+        "#orquideas",
+        "#interiorismo",
+        "#plantaslima"
+      ],
+      "creative": {
+        "headline": "Rosado <em>vintage</em>",
+        "sub": "Phalaenopsis en maceta blanca, armada a mano en Miraflores.",
+        "price": "S/ 200",
+        "footer": "Orquídea Rosado Vintage",
+        "hlSize": 68,
+        "fit": "cover",
+        "position": "50% 46%"
+      },
+      "why": "Formato postal: la orquídea se vende como objeto de decoración, no como ramo."
+    },
+    {
+      "code": "IG-26",
+      "product": "box-simona",
+      "title": "Amarillas y lilas",
+      "objective": "Ventas (conversión)",
+      "funnel": "Retargeting caliente",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "story",
+      "photo": "box-simona.jpg",
+      "primaryText": "Doce rosas amarillas y doce lilas, con follaje verde.\n\nEl arreglo más completo por debajo de S/180. Eliges el día y la hora de entrega.",
+      "headline": "24 rosas por S/176",
+      "description": "Box Simona · amarillas y lilas",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#arreglosflorales",
+        "#floreslima"
+      ],
+      "creative": {
+        "eyebrow": "No. 14 · Arreglos",
+        "headline": "Amarillas <em>y lilas</em>",
+        "sub": "Doce de cada una, con follaje verde.",
+        "pill": "S/ 176 · Ver el box",
+        "hlSize": 96,
+        "fit": "cover",
+        "position": "50% 44%"
+      },
+      "why": "Ticket bajo en historia: el formato vertical con botón es el que mejor cierra en retargeting."
+    },
+    {
+      "code": "IG-27",
+      "product": "florero-de-10-tulipanes-2",
+      "title": "Mix o un solo color",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "9:16",
+      "placement": "Historias y Reels · 9:16 (1080×1920)",
+      "template": "titular",
+      "photo": "florero-de-10-tulipanes-2-3.jpg",
+      "primaryText": "Mix de colores, o uno solo: blanco, morado, anaranjado, rojo, fucsia o amarillo.\n\nDiez tulipanes en florero. Tú eliges el color, el día y la hora.\n\nS/195.",
+      "headline": "Mix, o un solo color",
+      "description": "10 tulipanes en florero · S/195",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#tulipanes",
+        "#floreslima",
+        "#deliverylima"
+      ],
+      "creative": {
+        "eyebrow": "No. 15 · Floreros",
+        "headline": "Mix, <em>o un solo color</em>",
+        "price": "S/ 195",
+        "footer": "Florero de 10 tulipanes",
+        "hlSize": 118,
+        "fit": "cover",
+        "position": "50% 44%"
+      },
+      "why": "Los tulipanes son el producto con más color del catálogo: en historia, el creativo se ve desde lejos."
+    },
+    {
+      "code": "IG-28",
+      "product": "box-yani",
+      "title": "Flores y espumante",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío · +18",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350) · segmentación +18 obligatoria",
+      "template": "puro",
+      "photo": "box-yani.jpg",
+      "primaryText": "Mini rosas, claveles y toques morados en caja de madera, con una copa flauta de vidrio y una botella de Riccadona de 200 ml.\n\nS/180, el día y la hora que elijas.\n\nProhibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.",
+      "headline": "Flores y espumante en la misma caja",
+      "description": "Box Yani · copa incluida · S/180",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#regalosperu",
+        "#aniversario",
+        "#floreslima"
+      ],
+      "creative": {
+        "headline": "Flores <em>y espumante</em>",
+        "sub": "Caja de madera con copa flauta y Riccadona de 200 ml.",
+        "price": "S/ 180",
+        "footer": "Venta prohibida a menores de edad",
+        "anchor": "bottom",
+        "hlSize": 96,
+        "fit": "cover",
+        "position": "50% 50%"
+      },
+      "why": "Flores más espumante: sube el ticket y sale de la categoría floral pura. Exige cumplimiento +18."
     }
   ]
 }
