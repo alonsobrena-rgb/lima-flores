@@ -6,19 +6,9 @@
     "currency": "S/",
     "whatsapp": "999 479 855",
     "generated": "2026-08",
-    "note": "16 productos elegidos al azar del catálogo (db/products.seed.json), en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude."
+    "note": "15 productos del catálogo (db/products.seed.json) en nueve formatos distintos. Copy y creativos hechos íntegramente con Claude. Los códigos no se renumeran: IG-01 a IG-04 quedaron retiradas."
   },
   "products": [
-    {
-      "id": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
-      "name": "Florero con tulipanes lilas",
-      "categoryLabel": "Floreros",
-      "price": 195,
-      "num": "01",
-      "landing": "/producto.html?id=sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
-      "audience": "Mujeres y hombres 25–45, Lima Metropolitana (Miraflores, San Isidro, Surco, Barranco, La Molina, San Borja). Intereses: regalos, decoración, gastronomía, viajes. Lookalike 1% de compradores.",
-      "angle": "Regalo sin ocasión + el florero de vidrio como valor tangible."
-    },
     {
       "id": "orquideas-grandes-en-maceta",
       "name": "Orquídeas grandes en maceta",
@@ -171,138 +161,6 @@
     }
   ],
   "ads": [
-    {
-      "code": "IG-01",
-      "product": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
-      "title": "Un martes cualquiera",
-      "objective": "Reconocimiento / Tráfico",
-      "funnel": "Frío",
-      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
-      "template": "editorial",
-      "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
-      "primaryText": "Los cumpleaños ya están tomados. El aniversario también.\n\nLo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta de dedicatoria.\n\nEso es lo que la gente cuenta después.\n\nFlorero de vidrio incluido. Tú eliges el día y la hora de entrega.",
-      "headline": "Regálale un martes cualquiera",
-      "description": "10 tulipanes · florero de vidrio · S/195",
-      "cta": "Comprar",
-      "hashtags": [
-        "#limaflores",
-        "#floreslima",
-        "#tulipanes",
-        "#regalosperu",
-        "#deliverylima",
-        "#miraflores"
-      ],
-      "creative": {
-        "eyebrow": "No. 01 · Floreros",
-        "headline": "Un martes <em>cualquiera</em>",
-        "sub": "Diez tulipanes lilas, florero de vidrio y tarjeta de dedicatoria.",
-        "price": "S/ 195",
-        "footer": "Entrega en Lima Metropolitana",
-        "fit": "cover",
-        "position": "50% 36%"
-      },
-      "why": "El gancho compite con el motivo, no con el precio: saca al producto de la temporada de campañas (Día de la Madre, San Valentín) donde el CPM se dispara."
-    },
-    {
-      "code": "IG-02",
-      "product": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
-      "title": "Lo que otros cobran aparte",
-      "objective": "Ventas (conversión)",
-      "funnel": "Consideración / Retargeting 14 días",
-      "placement": "Feed de Instagram · 4:5 (1080×1350)",
-      "template": "split",
-      "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
-      "primaryText": "S/195 no es el precio de diez tulipanes.\n\nEs el florero de vidrio, que no cobramos aparte. El papel armado a mano. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta el día y la hora que elijas.\n\nLas flores se van. El florero se queda.",
-      "headline": "Lo que otros te cobran aparte",
-      "description": "Florero, tarjeta y entrega incluidos",
-      "cta": "Comprar",
-      "hashtags": [
-        "#limaflores",
-        "#floreslima",
-        "#tulipaneslima",
-        "#regalosconsentido",
-        "#deliveryflores"
-      ],
-      "creative": {
-        "eyebrow": "S/ 195 · Todo incluido",
-        "headline": "Lo que otros cobran <em>aparte</em>",
-        "items": [
-          "Florero de vidrio",
-          "Papel armado a mano",
-          "Tarjeta de dedicatoria",
-          "Entrega el día y la hora que elijas"
-        ],
-        "price": "S/ 195",
-        "footer": "Florero con tulipanes lilas",
-        "fit": "cover",
-        "position": "50% 50%"
-      },
-      "why": "Desarma la objeción de precio convirtiendo el ticket en una lista de entregables. Va a quien ya vio el producto y no compró."
-    },
-    {
-      "code": "IG-03",
-      "product": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion",
-      "title": "Todavía llegas",
-      "objective": "Ventas (conversión)",
-      "funnel": "Retargeting caliente · carrito abandonado 1–3 días",
-      "placement": "Historias y Reels · 9:16 (1080×1920)",
-      "template": "story",
-      "photo": "sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg",
-      "primaryText": "Te olvidaste. Está bien: si lo pides hoy, llega mañana.\n\nTulipanes lilas con florero de vidrio incluido. Eliges el día y la hora de entrega en Lima Metropolitana.",
-      "headline": "Todavía llegas",
-      "description": "S/195 · pídelo hoy, llega mañana",
-      "cta": "Comprar",
-      "hashtags": [
-        "#limaflores",
-        "#deliverylima",
-        "#floresadomicilio"
-      ],
-      "creative": {
-        "eyebrow": "Pídelo hoy, llega mañana",
-        "headline": "Todavía <em>llegas</em>",
-        "sub": "Eliges el día y la hora.",
-        "pill": "S/ 195 · Ver el florero",
-        "fit": "cover",
-        "position": "50% 30%"
-      },
-      "why": "Urgencia sin descuento. El descuento entrena a esperar ofertas; recordar que el pedido de hoy llega mañana no toca el margen."
-    },
-    {
-      "code": "IG-04",
-      "product": "orquideas-grandes-en-maceta",
-      "title": "Ocho días vs. tres meses",
-      "objective": "Ventas (conversión)",
-      "funnel": "Frío",
-      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
-      "template": "split",
-      "photo": "orquideas-grandes-en-maceta-4.jpg",
-      "primaryText": "Un ramo se marchita en días. Una Phalaenopsis aguanta entre ocho y doce semanas con riego mínimo.\n\nMisma inversión, mucho más tiempo recordándote.\n\nViene en maceta decorativa, con tarjeta de dedicatoria e instrucciones de cuidado para que no se muera en la oficina.",
-      "headline": "Días, o tres meses",
-      "description": "Phalaenopsis en maceta · S/200",
-      "cta": "Comprar",
-      "hashtags": [
-        "#limaflores",
-        "#orquideas",
-        "#phalaenopsis",
-        "#regalosperu",
-        "#plantaslima"
-      ],
-      "creative": {
-        "eyebrow": "No. 02 · Orquídeas",
-        "headline": "Días <em>o</em> meses",
-        "items": [
-          "Un ramo — se marchita en días",
-          "Una Phalaenopsis — 8 a 12 semanas",
-          "Maceta decorativa incluida",
-          "Tarjeta e instrucciones de cuidado"
-        ],
-        "price": "S/ 200",
-        "footer": "Orquídeas grandes en maceta",
-        "fit": "cover",
-        "position": "50% 50%"
-      },
-      "why": "Compara contra la categoría entera, no contra otra floristería. Reencuadra el precio como costo por semana."
-    },
     {
       "code": "IG-05",
       "product": "orquideas-grandes-en-maceta",

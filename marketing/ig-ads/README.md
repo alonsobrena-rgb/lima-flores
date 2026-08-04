@@ -8,10 +8,6 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 | Anuncio | Producto | Etapa | Formato | Titular |
 | --- | --- | --- | --- | --- |
-| `IG-01` | Florero con tulipanes lilas | Frío | 4:5 | Regálale un martes cualquiera |
-| `IG-02` | Florero con tulipanes lilas | Consideración / Retargeting 14 días | 4:5 | Lo que otros te cobran aparte |
-| `IG-03` | Florero con tulipanes lilas | Retargeting caliente · carrito abandonado 1–3 días | 9:16 | Todavía llegas |
-| `IG-04` | Orquídeas grandes en maceta | Frío | 4:5 | Días, o tres meses |
 | `IG-05` | Orquídeas grandes en maceta | Consideración / Retargeting 30 días | 4:5 | «Siguen vivas dos meses después» |
 | `IG-06` | Orquídeas grandes en maceta | Retargeting caliente | 9:16 | Cuando el ramo no alcanza |
 | `IG-07` | Ramo de flores Sofía | Frío | 4:5 | No mandes rosas rojas |
@@ -39,88 +35,6 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ---
 
-## 01 · Florero con tulipanes lilas — S/195
-
-**Categoría** Floreros · **Ángulo** Regalo sin ocasión + el florero de vidrio como valor tangible.
-
-**Público** Mujeres y hombres 25–45, Lima Metropolitana (Miraflores, San Isidro, Surco, Barranco, La Molina, San Borja). Intereses: regalos, decoración, gastronomía, viajes. Lookalike 1% de compradores.
-
-**Destino** `/producto.html?id=sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion`
-
-### IG-01 · Un martes cualquiera
-
-![Un martes cualquiera](creativos/IG-01.jpg)
-
-- **Objetivo** Reconocimiento / Tráfico · **Etapa** Frío
-- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
-- **Botón** Comprar
-
-**Texto principal**
-
-> Los cumpleaños ya están tomados. El aniversario también.
->
-> Lo que nadie ve venir es un martes a las 4 de la tarde, sin motivo, con diez tulipanes lilas y una tarjeta de dedicatoria.
->
-> Eso es lo que la gente cuenta después.
->
-> Florero de vidrio incluido. Tú eliges el día y la hora de entrega.
-
-**Titular** Regálale un martes cualquiera
-
-**Descripción** 10 tulipanes · florero de vidrio · S/195
-
-**Hashtags** #limaflores #floreslima #tulipanes #regalosperu #deliverylima #miraflores
-
-**Por qué funciona** El gancho compite con el motivo, no con el precio: saca al producto de la temporada de campañas (Día de la Madre, San Valentín) donde el CPM se dispara.
-
-### IG-02 · Lo que otros cobran aparte
-
-![Lo que otros cobran aparte](creativos/IG-02.jpg)
-
-- **Objetivo** Ventas (conversión) · **Etapa** Consideración / Retargeting 14 días
-- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
-- **Botón** Comprar
-
-**Texto principal**
-
-> S/195 no es el precio de diez tulipanes.
->
-> Es el florero de vidrio, que no cobramos aparte. El papel armado a mano. La tarjeta con lo que no te animas a decir en voz alta. Y alguien manejando hasta su puerta el día y la hora que elijas.
->
-> Las flores se van. El florero se queda.
-
-**Titular** Lo que otros te cobran aparte
-
-**Descripción** Florero, tarjeta y entrega incluidos
-
-**Hashtags** #limaflores #floreslima #tulipaneslima #regalosconsentido #deliveryflores
-
-**Por qué funciona** Desarma la objeción de precio convirtiendo el ticket en una lista de entregables. Va a quien ya vio el producto y no compró.
-
-### IG-03 · Todavía llegas
-
-![Todavía llegas](creativos/IG-03.jpg)
-
-- **Objetivo** Ventas (conversión) · **Etapa** Retargeting caliente · carrito abandonado 1–3 días
-- **Ubicación** Historias y Reels · 9:16 (1080×1920)
-- **Botón** Comprar
-
-**Texto principal**
-
-> Te olvidaste. Está bien: si lo pides hoy, llega mañana.
->
-> Tulipanes lilas con florero de vidrio incluido. Eliges el día y la hora de entrega en Lima Metropolitana.
-
-**Titular** Todavía llegas
-
-**Descripción** S/195 · pídelo hoy, llega mañana
-
-**Hashtags** #limaflores #deliverylima #floresadomicilio
-
-**Por qué funciona** Urgencia sin descuento. El descuento entrena a esperar ofertas; recordar que el pedido de hoy llega mañana no toca el margen.
-
----
-
 ## 02 · Orquídeas grandes en maceta — S/200
 
 **Categoría** Orquídeas · **Ángulo** Durabilidad (8–12 semanas) frente al ramo que se marchita en 8 días.
@@ -128,30 +42,6 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 **Público** 30–55, Lima Metropolitana. Momentos: agradecimiento, casa nueva, jefas/suegras, cumpleaños de mamá. Retargeting 30 días de visitantes de /catalogo.html categoría Orquídeas.
 
 **Destino** `/producto.html?id=orquideas-grandes-en-maceta`
-
-### IG-04 · Ocho días vs. tres meses
-
-![Ocho días vs. tres meses](creativos/IG-04.jpg)
-
-- **Objetivo** Ventas (conversión) · **Etapa** Frío
-- **Ubicación** Feed y Explorar de Instagram · 4:5 (1080×1350)
-- **Botón** Comprar
-
-**Texto principal**
-
-> Un ramo se marchita en días. Una Phalaenopsis aguanta entre ocho y doce semanas con riego mínimo.
->
-> Misma inversión, mucho más tiempo recordándote.
->
-> Viene en maceta decorativa, con tarjeta de dedicatoria e instrucciones de cuidado para que no se muera en la oficina.
-
-**Titular** Días, o tres meses
-
-**Descripción** Phalaenopsis en maceta · S/200
-
-**Hashtags** #limaflores #orquideas #phalaenopsis #regalosperu #plantaslima
-
-**Por qué funciona** Compara contra la categoría entera, no contra otra floristería. Reencuadra el precio como costo por semana.
 
 ### IG-05 · Dos meses después
 
@@ -868,7 +758,7 @@ general ni supuesto.
 
 | Afirmación | Fuente | Texto de origen |
 | --- | --- | --- |
-| «Eliges el día y la hora» · «Pídelo hoy, llega mañana» | `site/js/checkout.js` | `LEAD_MS = 24h`; el cliente elige fecha y slot de 30 min entre 8:00 y 20:30, con ventana de ±30 min |
+| «Eliges el día y la hora» | `site/js/checkout.js` | `LEAD_MS = 24h`; el cliente elige fecha y slot de 30 min entre 8:00 y 20:30, con ventana de ±30 min |
 | «Entrega en Lima Metropolitana» | landing | «entrega a domicilio dentro de Lima Metropolitana» |
 | «Flores frescas los lunes, miércoles y viernes» | landing | «recibe flores frescas los lunes, miércoles y viernes» |
 | «Si algo se acaba, te avisamos en menos de una hora» | landing | textual |
@@ -876,16 +766,18 @@ general ni supuesto.
 | «Armado a mano» · «Atelier de Miraflores desde 2017» | landing | «Cada arreglo lo armamos nosotros, a mano» · «Atelier desde 2017» |
 | Reseña de Diego V. (IG-05) | landing · reseñas verificadas 2025 | textual, recortada — ver abajo |
 | Florero de vidrio, tarjeta, colores, 30×50 cm, composición floral | `db/products.seed.json` | descripción de cada producto |
-| «8 a 12 semanas» (IG-04) | landing, **pero de otro producto** | «Duran entre ocho y doce semanas con riego mínimo», dicho de las Orquídeas Multicolor |
 | Reseña de Camila R. (IG-21) | landing · reseñas verificadas 2025 | textual |
 | «Prohibida la venta a menores. Tomar bebidas alcohólicas en exceso es dañino» (IG-28) | `db/products.seed.json` | textual, de la ficha del Box Yani |
 
-### Lo único que queda por decidir
+### Piezas retiradas
 
-El **«8 a 12 semanas»** de IG-04. La cifra está publicada en la landing, pero referida a las
-Orquídeas Multicolor, no a las Orquídeas grandes en maceta que anuncia esa pieza. Es la misma
-especie (Phalaenopsis) y por eso se dejó, pero es una extrapolación, no un dato del producto.
-Si el taller no la respalda, la comparación funciona igual diciendo «semanas, no días».
+IG-01 a IG-04 se retiraron a pedido. Los códigos **no se renumeraron**, para que las
+referencias ya usadas sigan valiendo: la numeración empieza en IG-05. Con IG-04 se fue la
+única afirmación que quedaba pendiente de confirmar («8 a 12 semanas»), así que hoy todo el
+copy sale de una fuente del proyecto, sin extrapolaciones.
+
+El «Florero con tulipanes lilas» salió del deck porque sus tres piezas eran IG-01 a IG-03.
+Los archivos siguen en el historial de git si hicieran falta.
 
 ### Cumplimiento: IG-28 lleva alcohol
 
@@ -920,7 +812,7 @@ puede entrar a la campaña.
   ahora usa el manifiesto de la landing.
 - **«Foto tomada con un celular, sin retoque, en la casa a la que llegó»** (IG-16). Yo no sé
   cómo se tomó esa foto. El copy ahora solo describe lo que se ve: un ramo en una sala.
-- **«Un ramo dura 8 días»** (IG-04) y **«los tulipanes duran una semana»** (IG-02). Cifras mías.
+- **Cifras de duración** («un ramo dura 8 días», «los tulipanes duran una semana»). Eran mías.
 - **La mitad de la reseña de Diego V.** («Pedí a las 11 am, llegaron a las 5:30 pm»). Es textual
   del sitio, pero promete entrega el mismo día. Se cita solo la parte de la duración.
 
