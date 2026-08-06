@@ -121,7 +121,7 @@ export default function Catalogo() {
         <div className="relative inline-block max-w-2xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-8 shadow-[0_28px_70px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-11 md:py-10">
           <span className="text-[12px] font-medium uppercase tracking-[0.28em] text-ink-500">— El catálogo</span>
           <h1 className="mt-3 font-display text-[2.75rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[4rem]">
-            Flores de estación, <em className="italic text-rosa-500">hechas a mano.</em>
+            Flores de estación, <em className="italic text-rosa-500">frescas y del día.</em>
           </h1>
           <p className="mt-5 max-w-md text-ink-700">
             {cat === 'all' && activePrice === 'all'
