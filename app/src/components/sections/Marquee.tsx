@@ -1,5 +1,5 @@
 // Marquee de especies — loop infinito (dos copias, translateX -50%).
-const flowers = ['Phalaenopsis', 'Hortensias', 'Ranúnculos', 'Eucalipto'];
+const flowers = ['Phalaenopsis', 'Hortensias', 'Claveles', 'Girasoles', 'Eucalipto'];
 
 export const Marquee = () => {
   const items = [...flowers, ...flowers];

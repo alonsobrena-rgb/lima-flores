@@ -16,7 +16,7 @@ export const Manifesto = () => (
         className="mt-5 font-display text-[2.5rem] font-light leading-[1.04] tracking-tight text-ink-900 md:text-[4rem]"
       >
         No vendemos flores.<br />
-        Vendemos <em className="italic text-rosa-500">pequeños momentos</em> de calma y belleza.
+        Vendemos <em className="italic text-rosa-500">pequeños momentos</em> de felicidad, amor y agradecimiento.
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.7, delay: 0.1, ease }}
