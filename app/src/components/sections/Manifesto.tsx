@@ -9,7 +9,7 @@ export const Manifesto = () => (
         initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, ease }}
         className="font-display text-[2.5rem] font-light leading-[1.04] tracking-tight text-ink-900 md:text-[4rem]"
       >
-        Hay emociones que merecen algo más que un mensaje.
+        Hay emociones que merecen <em className="italic text-rosa-500">algo más</em> que un mensaje.
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.7, delay: 0.1, ease }}
