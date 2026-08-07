@@ -103,6 +103,109 @@
 .lf-iconbtn:hover .lf-iconbtn__badge { transform: scale(1.08); }
 .lf-iconbtn__badge[hidden] { display: none; }
 
+/* ─────────────────────────── Búsqueda ─────────────────────────── */
+.lf-search {
+  position: fixed; inset: 0; z-index: 200;
+  /* flex-start: si no, el panel se estira a toda la altura de la ventana y
+     quedan 600px de vacío debajo de tres resultados */
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: clamp(72px, 12vh, 140px) var(--cpad, 32px) var(--space-6);
+}
+.lf-search[hidden] { display: none; }
+.lf-search__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(27, 26, 23, 0.42);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity var(--dur-base) var(--ease-soft);
+}
+.lf-search.is-open .lf-search__backdrop { opacity: 1; }
+.lf-search__panel {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: min(72vh, 100%);
+  display: flex; flex-direction: column;
+  background: var(--bg-page, #FBF8F1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(27, 26, 23, 0.18);
+  overflow: hidden;
+  opacity: 0; transform: translateY(-8px);
+  transition: opacity var(--dur-base) var(--ease-soft), transform var(--dur-base) var(--ease-soft);
+}
+.lf-search.is-open .lf-search__panel { opacity: 1; transform: none; }
+
+.lf-search__bar {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: 14px 14px 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.lf-search__icon { color: var(--ink-500); flex: none; }
+.lf-search__input {
+  flex: 1; min-width: 0;
+  border: 0; background: none; outline: none;
+  font-family: var(--font-sans);
+  font-size: 17px; font-weight: 300;
+  color: var(--ink-900);
+  padding: 6px 0;
+}
+.lf-search__input::placeholder { color: var(--ink-500); }
+.lf-search__input::-webkit-search-cancel-button { display: none; }
+.lf-search__close {
+  flex: none;
+  width: 32px; height: 32px; border: 0; border-radius: var(--radius-pill);
+  background: none; color: var(--ink-500); cursor: pointer; font-size: 15px;
+  transition: background var(--dur-fast) var(--ease-soft), color var(--dur-fast) var(--ease-soft);
+}
+.lf-search__close:hover { background: var(--accent-soft); color: var(--rosa-500); }
+
+.lf-search__results { overflow-y: auto; padding: 6px; }
+.lf-search__hint, .lf-search__more {
+  margin: 0; padding: 18px;
+  font-family: var(--font-sans); font-size: 14px; font-weight: 300;
+  color: var(--ink-500);
+}
+.lf-search__more { padding-top: 6px; text-align: center; }
+
+.lf-search__item {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: 10px 12px; border-radius: 10px;
+  text-decoration: none; color: inherit;
+  transition: background var(--dur-fast) var(--ease-soft);
+}
+.lf-search__item:hover, .lf-search__item.is-active { background: var(--accent-soft); }
+.lf-search__thumb {
+  flex: none; width: 52px; height: 52px; border-radius: 8px;
+  background: var(--ivory-100, #F4EFE5); overflow: hidden;
+}
+.lf-search__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lf-search__texts { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lf-search__name {
+  font-family: var(--font-sans); font-size: 15px; font-weight: 400;
+  color: var(--ink-900);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lf-search__name mark { background: none; color: var(--rosa-500); font-weight: 600; }
+.lf-search__cat {
+  font-family: var(--font-sans); font-size: 11px; font-weight: 500;
+  letter-spacing: var(--ls-wide); text-transform: uppercase;
+  color: var(--ink-500);
+}
+.lf-search__price {
+  flex: none;
+  font-family: var(--font-sans); font-size: 14px; font-weight: 500;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 880px) {
+  .lf-search { padding-top: 68px; padding-inline: 16px; }
+  .lf-search__panel { max-height: calc(100% - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lf-search__backdrop, .lf-search__panel, .lf-search__item { transition: none !important; }
+  .lf-search__panel { transform: none !important; }
+}
+
 /* Hamburguesa (solo móvil) */
 .lf-burger {
   display: none;
