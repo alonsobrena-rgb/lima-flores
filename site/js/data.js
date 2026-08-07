@@ -383,7 +383,7 @@ window.LIMA = {
       category: 'ramos', categoryLabel: 'Ramos',
       price: 160, image: 'assets/products/ramo-de-24-rosas.jpg', palette: '#C99CA9',
       tags: ['amor', 'mama'],
-      shortDesc: 'Ramo de 24 rosas rojas con papel plateado.',
+      shortDesc: 'Ramo de 24 rosas rojas premium con follaje verde y papel plateado.',
     },
     {
       id: 'ramo-de-12-rosas', name: 'Ramo de 12 Rosas',
