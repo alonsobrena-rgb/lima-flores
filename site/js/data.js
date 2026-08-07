@@ -154,7 +154,7 @@ window.LIMA = {
       description: 'Orquídea Phaleanopsis amarilla de dos varas, con centro fucsia. Incluye la maceta y viene con una tarjeta dedicatoria. Imagen referencial.',
     },
     {
-      id: 'sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion', name: 'Florero con tulipanes lilas',
+      id: 'sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion', name: 'Florero con 10 tulipanes lilas',
       category: 'floreros', categoryLabel: 'Floreros',
       price: 195, image: 'assets/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg', palette: '#4F5C3F',
       images: ['assets/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion.jpg', 'assets/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-2.jpg', 'assets/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-3.jpg', 'assets/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-4.jpg', 'assets/products/sorprende-con-un-florero-de-tulipanes-lilas-el-regalo-perfecto-para-cualquier-ocasion-5.jpg'],
