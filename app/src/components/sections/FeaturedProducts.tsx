@@ -20,7 +20,7 @@ export const FeaturedProducts = () => (
             initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease }}
             className="mt-3 font-display text-[2.5rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[3.75rem]"
           >
-            Hecho a mano, <em className="italic text-rosa-500">tallo por tallo.</em>
+            Nuestra colección de flores.
           </motion.h2>
         </div>
         <Link to="/catalogo" className="group inline-flex items-center gap-2 whitespace-nowrap text-[13px] font-medium uppercase tracking-[0.18em] text-ink-900">
