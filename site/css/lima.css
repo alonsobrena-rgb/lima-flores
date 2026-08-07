@@ -682,7 +682,7 @@ p { color: var(--ink); }
   letter-spacing: -0.02em;
   max-width: 16ch;
 }
-.philosophy__right h2 em { font-style: italic; }
+.philosophy__right h2 em { font-style: italic; color: var(--accent); }
 .philosophy__lines {
   margin-top: clamp(48px, 6vw, 80px);
   display: grid;
