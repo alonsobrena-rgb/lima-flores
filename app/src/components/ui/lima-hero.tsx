@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/lib/cart';
 import { MobileNav } from '@/components/MobileNav';
+import { useSearch } from '@/components/SearchOverlay';
 
 type NavLink = { label: string; href: string };
 type Social = { label: string; href: string };
@@ -41,6 +42,7 @@ const Icon = {
 // los labels, con un velo ivory para que el titular oscuro se lea.
 export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima', videoSrc, poster }: LimaHeroProps) => {
   const { open: openCart, count } = useCart();
+  const { open: openSearch } = useSearch();
   const sectionRef = useRef<HTMLElement>(null);
   // Parallax/fade sutil del titular y del hint al hacer scroll.
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
@@ -93,7 +95,7 @@ export const LimaHero = ({ navLinks, socials, locationText = 'Miraflores · Lima
           ))}
         </nav>
         <div className="flex items-center gap-5 text-foreground/90">
-          <button aria-label="Buscar" className="transition-colors hover:text-foreground">{Icon.search('h-[18px] w-[18px]')}</button>
+          <button onClick={openSearch} aria-label="Buscar" className="transition-colors hover:text-foreground">{Icon.search('h-[18px] w-[18px]')}</button>
           <button aria-label="Favoritos" className="hidden transition-colors hover:text-foreground sm:block">{Icon.heart('h-[18px] w-[18px]')}</button>
           <button onClick={openCart} aria-label="Carrito" className="relative transition-colors hover:text-foreground">
             {Icon.bag('h-[18px] w-[18px]')}

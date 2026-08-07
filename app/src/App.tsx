@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CartProvider } from '@/lib/cart';
 import { CartDrawer } from '@/components/CartDrawer';
+import { SearchProvider } from '@/components/SearchOverlay';
 import { Ambient } from '@/components/motion/Ambient';
 import { ScrollProgress } from '@/components/motion/ScrollProgress';
 import Home from '@/pages/Home';
@@ -54,13 +55,15 @@ function AnimatedRoutes() {
 function App() {
   return (
     <CartProvider>
-      <ScrollProgress />
-      <Ambient />
-      <ScrollToTop />
-      <div className="relative z-10">
-        <AnimatedRoutes />
-      </div>
-      <CartDrawer />
+      <SearchProvider>
+        <ScrollProgress />
+        <Ambient />
+        <ScrollToTop />
+        <div className="relative z-10">
+          <AnimatedRoutes />
+        </div>
+        <CartDrawer />
+      </SearchProvider>
     </CartProvider>
   );
 }
