@@ -1,0 +1,6 @@
+# Tipografías descargadas y andamios del navegador: se rehacen solos.
+.cache/
+
+# Capturas intermedias (PNG, ~9 MB). El entregable es salida/*.html, que ya las
+# lleva incrustadas en JPEG.
+salida/capturas/
