@@ -1,0 +1,238 @@
+<!-- La tienda, una sola vez. Las tres direcciones son la misma maqueta con
+     tokens distintos — igual que en Claude Design, donde los tres proyectos
+     comparten el mismo storefront y solo difieren en tokens/.
+
+     Si la maqueta cambiara entre direcciones, la dueña estaría eligiendo
+     maqueta y no marca. Por eso esto es un solo archivo. -->
+<meta charset="utf-8">
+<title>Lima Flores</title>
+<style>
+{{FUENTES}}
+
+/* ── tokens de la dirección ─────────────────────────────────────────── */
+{{TOKENS}}
+
+/* ── la tienda ──────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg-page);color:var(--text-body);
+  font:var(--w-regular) var(--text-body-sz)/var(--lh-normal) var(--font-sans)}
+img{display:block;max-width:100%}
+.d{font-family:var(--font-display)}
+.wrap{max-width:var(--container);margin:0 auto;padding-inline:var(--gutter)}
+
+.eti{font-family:var(--font-sans);font-size:var(--text-eyebrow);
+  font-weight:var(--w-semibold);letter-spacing:var(--ls-widest);
+  text-transform:uppercase;color:var(--text-faint)}
+
+/* botones */
+.btn{display:inline-flex;align-items:center;gap:9px;border:0;cursor:pointer;
+  font-family:var(--font-sans);font-weight:var(--w-semibold);font-size:15px;
+  padding:15px 30px;border-radius:var(--radius-md);background:var(--accent);
+  color:var(--text-on-accent);text-decoration:none;letter-spacing:.01em}
+.btn.ghost{background:transparent;color:var(--text-strong);
+  box-shadow:inset 0 0 0 1px var(--border-strong)}
+
+/* cabecera */
+header{background:var(--head-bg);border-bottom:1px solid var(--head-borde);
+  position:relative;z-index:3}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:30px;
+  padding-block:var(--space-4)}
+.hdr img{height:var(--logo-h);width:auto}
+nav{display:flex;gap:26px;font-size:14px;letter-spacing:var(--ls-wide);
+  text-transform:uppercase;font-weight:var(--w-medium)}
+nav a{color:var(--text-muted);text-decoration:none}
+nav a.on{color:var(--accent)}
+.iconos{display:flex;gap:12px}
+.iconos i{width:38px;height:38px;border-radius:999px;display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--border);font-style:normal;font-size:15px;
+  color:var(--text-muted)}
+
+/* la página: el orden de las secciones lo decide cada dirección */
+main{display:flex;flex-direction:column}
+.portada{order:var(--ord-portada,1)}
+.cinta{order:var(--ord-cinta,2)}
+.catalogo{order:var(--ord-catalogo,3)}
+.ficha{order:var(--ord-ficha,4)}
+
+/* portada */
+.portada{background:var(--hero-bg);color:var(--hero-tinta)}
+.heroIn{display:grid;grid-template-columns:var(--hero-cols);gap:var(--space-7);
+  align-items:center;padding-block:var(--hero-pad)}
+.heroIn h1{font-family:var(--font-display);font-size:var(--text-display);
+  line-height:var(--lh-tight);letter-spacing:var(--ls-tight);margin:0;
+  font-weight:var(--w-display);text-wrap:balance;
+  text-transform:var(--tt-titulo,none)}
+.heroIn h1 em{font-style:italic;color:var(--hero-em)}
+.heroIn p{margin:var(--space-4) 0 0;font-size:var(--text-lead);
+  color:var(--hero-parrafo);max-width:44ch}
+.acciones{display:flex;gap:12px;margin-top:var(--space-6);flex-wrap:wrap}
+.heroFoto{overflow:hidden;border-radius:var(--radius-lg);
+  aspect-ratio:var(--hero-ratio);background:var(--bg-alt)}
+.heroFoto img{width:100%;height:100%;object-fit:cover}
+
+/* la cinta de garantías */
+.cinta{background:var(--cinta-bg);color:var(--cinta-tinta);
+  border-block:var(--cinta-borde)}
+.cintaIn{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  padding-block:13px;font-size:12.5px;font-weight:var(--w-semibold);
+  letter-spacing:var(--ls-wide);text-transform:uppercase}
+
+/* catálogo */
+.catalogo{padding-block:var(--sec-pad);background:var(--cat-bg)}
+.secCab{display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+  flex-wrap:wrap;margin-bottom:var(--space-5)}
+.secCab h2{font-family:var(--font-display);font-size:var(--text-h2);margin:0;
+  letter-spacing:var(--ls-tight);font-weight:var(--w-display);
+  text-transform:var(--tt-titulo,none)}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--space-5)}
+.filtros span{font-size:13.5px;padding:8px 15px;border-radius:var(--radius-pill);
+  box-shadow:inset 0 0 0 1px var(--border);color:var(--text-muted)}
+.filtros span.on{background:var(--accent);color:var(--text-on-accent);
+  box-shadow:none;font-weight:var(--w-semibold)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--card-gap)}
+.card{background:var(--surface-card);border-radius:var(--radius-md);
+  overflow:hidden;box-shadow:var(--card-sombra);display:flex;flex-direction:column}
+.card .foto{aspect-ratio:1/1;overflow:hidden;background:var(--bg-alt)}
+.card .foto img{width:100%;height:100%;object-fit:cover}
+.card .cuerpo{padding:var(--card-pad);display:flex;flex-direction:column;gap:5px;
+  flex:1}
+.card h3{font-family:var(--font-display);font-size:var(--text-title);margin:0;
+  font-weight:var(--w-medium);letter-spacing:var(--ls-tight)}
+.card .cat{font-size:10.5px;letter-spacing:var(--ls-widest);text-transform:uppercase;
+  color:var(--text-faint);font-weight:var(--w-semibold)}
+/* la fila de compra: precio siempre visible, agregar sin entrar a la ficha */
+.compra{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:auto;padding-top:var(--space-3)}
+.precio{font-family:var(--font-precio);font-size:var(--text-precio);
+  font-weight:var(--w-precio);color:var(--precio-color);
+  letter-spacing:var(--ls-precio);font-variant-numeric:tabular-nums}
+.add{border:0;cursor:pointer;font-family:var(--font-sans);font-size:13px;
+  font-weight:var(--w-semibold);padding:9px 16px;border-radius:var(--radius-sm);
+  background:var(--add-bg);color:var(--add-tinta);
+  box-shadow:var(--add-borde);letter-spacing:.02em}
+
+/* ficha de producto */
+.ficha{background:var(--ficha-bg);color:var(--ficha-tinta);
+  padding-block:var(--sec-pad)}
+.fichaIn{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-7);
+  align-items:center}
+.fichaFoto{border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/5}
+.fichaFoto img{width:100%;height:100%;object-fit:cover}
+.ficha h2{font-family:var(--font-display);font-size:var(--text-h1);margin:6px 0 0;
+  letter-spacing:var(--ls-tight);font-weight:var(--w-display)}
+.precioG{font-family:var(--font-precio);font-size:38px;margin-top:10px;
+  font-weight:var(--w-precio);color:var(--precio-color);
+  letter-spacing:var(--ls-precio);font-variant-numeric:tabular-nums}
+.ficha p{color:var(--ficha-parrafo);max-width:46ch;margin:var(--space-4) 0 0}
+.datos{display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--space-5)}
+.datos span{font-size:12.5px;padding:8px 14px;border-radius:var(--radius-sm);
+  box-shadow:inset 0 0 0 1px var(--ficha-linea);color:var(--ficha-parrafo)}
+.entrega{margin-top:var(--space-5);padding:15px 17px;border-radius:var(--radius-md);
+  background:var(--entrega-bg);font-size:14px;color:var(--ficha-parrafo);
+  box-shadow:inset 0 0 0 1px var(--ficha-linea)}
+.entrega b{color:var(--ficha-tinta);font-weight:var(--w-semibold)}
+
+/* barra fija de compra — lo que más mueve la aguja en teléfono */
+.barra{background:var(--barra-bg);color:var(--barra-tinta);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:12px var(--gutter)}
+.barra .izq{display:flex;align-items:baseline;gap:12px;font-size:14px}
+.barra .p{font-family:var(--font-precio);font-size:19px;font-weight:var(--w-precio);
+  letter-spacing:var(--ls-precio)}
+.barra .btn{padding:12px 24px;font-size:14px}
+
+footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space-7);
+  font-size:14px}
+.ft{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+@media (max-width:820px){
+  .heroIn,.fichaIn{grid-template-columns:1fr;gap:var(--space-5)}
+  .heroIn{padding-block:var(--space-6)}
+  .heroIn h1{font-size:var(--text-h1)}
+  .grid{grid-template-columns:1fr 1fr;gap:14px}
+  .card h3{font-size:17px}
+  .ficha h2{font-size:var(--text-h2)}
+  .cintaIn{gap:10px;font-size:11px}
+  nav{display:none}
+  .barra .izq{font-size:13px}
+}
+</style>
+
+<header>
+  <div class="wrap hdr">
+    <img src="{{IMG:logo.png@420}}" alt="Lima Flores">
+    <nav>
+      <a href="#" class="on">Catálogo</a><a href="#">Ocasiones</a>
+      <a href="#">Suscripción</a><a href="#">El taller</a>
+    </nav>
+    <div class="iconos"><i>⌕</i><i>◠</i></div>
+  </div>
+</header>
+
+<main>
+  <section class="portada">
+    <div class="wrap heroIn">
+      <div>
+        <p class="eti" style="margin:0 0 14px">{{EYEBROW}}</p>
+        <h1>{{TITULAR}}</h1>
+        <p>Lunes, miércoles y viernes llega el pedido. Lo que ves disponible es lo
+        que llegó esta semana — nada de stock viejo.</p>
+        <div class="acciones">
+          <a class="btn" href="#">Ver el catálogo</a>
+          <a class="btn ghost" href="#">Suscripción mensual</a>
+        </div>
+      </div>
+      <div class="heroFoto"><img src="{{IMG:suscripcion.jpg@1000}}" alt="Ramo de girasoles"></div>
+    </div>
+  </section>
+
+  <div class="cinta"><div class="wrap cintaIn">
+    <span>Tú eliges el día y la hora</span>
+    <span>Franjas de 30 minutos</span>
+    <span>Lima Metropolitana</span>
+    <span>Tarjeta de dedicatoria incluida</span>
+  </div></div>
+
+  <section class="catalogo"><div class="wrap">
+    <div class="secCab">
+      <h2>{{TITULO_CATALOGO}}</h2>
+      <span class="eti">57 piezas disponibles</span>
+    </div>
+    <div class="filtros">
+      <span class="on">Todo</span><span>Arreglos</span><span>Ramos</span>
+      <span>Floreros</span><span>Orquídeas</span><span>Hasta S/180</span>
+    </div>
+    <div class="grid">
+      {{TARJETAS}}
+    </div>
+  </div></section>
+
+  <section class="ficha">
+    <div class="wrap fichaIn">
+      <div class="fichaFoto"><img src="{{IMG:arreglo-rossie-3.jpg@1000}}" alt="Arreglo Rossie"></div>
+      <div>
+        <p class="eti">Arreglos · 30 × 50 cm</p>
+        <h2>Arreglo Rossie</h2>
+        <div class="precioG">S/ 245</div>
+        <p>Rosas, gerberas, claveles importados y pepitas rojas, en florero de
+        vidrio con follaje verde.</p>
+        <div class="datos"><span>30 × 50 cm</span><span>Florero de vidrio</span>
+          <span>Tarjeta incluida</span></div>
+        <div class="acciones"><a class="btn" href="#">Agregar al carrito</a></div>
+        <div class="entrega"><b>Pídelo hoy, llega mañana.</b> Eliges el día y una
+        franja de 30 minutos, desde mañana. Cobertura en Lima Metropolitana.</div>
+      </div>
+    </div>
+    <div class="barra">
+      <div class="izq"><span>Arreglo Rossie</span><span class="p">S/ 245</span></div>
+      <a class="btn" href="#">Agregar al carrito</a>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap ft">
+  <span>Lima Flores · Atelier botánico en Miraflores desde 2017</span>
+  <span>WhatsApp 999 479 855</span>
+</div></footer>

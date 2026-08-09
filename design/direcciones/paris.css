@@ -1,0 +1,62 @@
+/* PARÍS — manda el durazno, con el azul lino de susurro y el listón #B33A48
+   del tamaño de un lacre. Todo lo que es dato se compone como una etiqueta de
+   papel recortada: filete de tinta, esquinas casi rectas, versalitas. */
+:root{
+  --container:1180px; --gutter:38px;
+
+  --bg-page:#FBF6EC; --bg-alt:#F5EDDF; --surface-card:#FEFBF6;
+  --text-strong:#2B2320; --text-body:#4C4038; --text-muted:#6F6156;
+  --text-faint:#A2A19F; --text-on-accent:#FEFBF6;
+  --border:#E9DDC9; --border-strong:#D3C3A8;
+  --accent:#B33A48;
+
+  --font-display:'Bodoni Moda',serif;
+  --font-sans:'Karla',sans-serif;
+  --font-precio:'Karla',sans-serif;
+
+  --text-display:60px; --text-h1:42px; --text-h2:31px; --text-title:20px;
+  --text-lead:18px; --text-body-sz:16px; --text-eyebrow:11px;
+  --text-precio:19px;
+  --w-regular:400; --w-medium:500; --w-semibold:600;
+  --w-display:500; --w-precio:700;
+  --lh-tight:1.04; --lh-normal:1.6;
+  --ls-tight:-0.015em; --ls-wide:.10em; --ls-widest:.26em; --ls-precio:.01em;
+
+  /* de papel cortado, no de burbuja */
+  --radius-sm:2px; --radius-md:3px; --radius-lg:4px; --radius-pill:999px;
+  --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px;
+
+  --head-bg:#FEFBF6; --head-borde:#E9DDC9; --logo-h:42px;
+
+  --ord-portada:1; --ord-cinta:2; --ord-catalogo:3; --ord-ficha:4;
+  --hero-bg:#FBF6EC; --hero-tinta:#2B2320; --hero-em:#B33A48;
+  --hero-parrafo:#6F6156; --hero-cols:1fr 1fr; --hero-pad:60px; --hero-ratio:1/1;
+
+  /* el susurro azul: la cinta es lo único que lo lleva a tamaño grande */
+  --cinta-bg:#61709B; --cinta-tinta:#F3F5F9;
+  --cinta-borde:none;
+
+  --sec-pad:64px; --cat-bg:#FBF6EC;
+  --card-gap:20px; --card-pad:16px 18px 18px;
+  --card-sombra:inset 0 0 0 1px #E9DDC9;
+
+  --precio-color:#B33A48;
+  --add-bg:transparent; --add-tinta:#2B2320;
+  --add-borde:inset 0 0 0 1px #2B2320;
+
+  --ficha-bg:#F5EDDF; --ficha-tinta:#2B2320; --ficha-parrafo:#6F6156;
+  --ficha-linea:#DDCEB4; --entrega-bg:#FEFBF6;
+
+  --barra-bg:#2B2320; --barra-tinta:#FBF6EC;
+  --pie-bg:#2B2320; --pie-tinta:#E9DDC9;
+}
+
+/* La etiqueta atada: el precio y el "Agregar" viven dentro de un recuadro de
+   papel con filete de tinta, como la tarjeta que cuelga del ramo. */
+.compra{background:#FEFBF6;box-shadow:inset 0 0 0 1px #2B2320;
+  border-radius:2px;padding:9px 10px;margin-top:14px}
+.card .cuerpo{gap:4px}
+/* Bodoni aguanta mal el cuerpo chico: los rótulos van en Karla */
+.card .cat,.eti{font-family:'Karla',sans-serif}
+/* el filete dorado bajo el titular, un detalle de etiqueta */
+.heroIn h1{padding-bottom:16px;border-bottom:1px solid #C8A15A;display:inline-block}

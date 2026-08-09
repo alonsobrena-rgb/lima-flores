@@ -34,16 +34,44 @@ UA = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
 
 # Las familias que usa cada dirección. Se bajan una vez y quedan en .cache/.
 FUENTES = {
-    'a': ['Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700',
-          'Karla:wght@400;500;600;700'],
-    'b': ['Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400',
-          'Courier+Prime:wght@400;700'],
-    'c': ['Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800',
-          'Archivo:wght@400;500;600;700'],
+    'florencia': ['Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600',
+                  'Jost:wght@300;400;500;600'],
+    'paris': ['Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400',
+              'Karla:wght@400;500;600;700'],
+    'amsterdam': ['Petrona:ital,wght@0,400;0,500;0,600;0,700;1,400',
+                  'Hanken+Grotesk:wght@400;500;600;700'],
     # La galería no es una de las direcciones: usa una voz de ficha técnica a
     # propósito, para no competir con ninguna de las tres que está presentando.
     'galeria': ['IBM+Plex+Sans:wght@400;500;600;700',
                 'IBM+Plex+Mono:wght@400;500'],
+}
+
+# Los mismos seis productos en las tres, con sus precios y fotos reales del
+# catálogo. Si cambiaran entre direcciones, la comparación no valdría nada.
+PRODUCTOS = [
+    ('Box Rogelia', 'Arreglos', 210, 'box-rogelia-3.jpg'),
+    ('Florero Forti', 'Arreglos', 210, 'florero-forti.jpg'),
+    ('Orquídea Sunrise', 'Orquídeas', 215, 'orquidea-sunrise-de-dos-varas.jpg'),
+    ('Tulipanes de amor', 'Floreros', 195, 'tulipanes-de-amor.jpg'),
+    ('Box Lila', 'Arreglos', 180, 'box-lila.jpg'),
+    ('Ramo Luana', 'Ramos', 180, 'ramo-luana.jpg'),
+]
+
+# Lo único que cambia de copy entre direcciones es el tono del titular. El
+# resto del texto es idéntico, y todo sale del catálogo o de checkout.js.
+DIRECCIONES = {
+    'florencia': dict(
+        eyebrow='Miraflores · desde 2017',
+        titular='Flores frescas,<br>armadas <em>a mano</em>',
+        catalogo='El catálogo de esta semana'),
+    'paris': dict(
+        eyebrow='Flores y diseño · Miraflores',
+        titular='Tres tallos,<br>papel y <em>un listón</em>',
+        catalogo='Lo que llegó esta semana'),
+    'amsterdam': dict(
+        eyebrow='Miraflores · desde 2017',
+        titular='Flores frescas<br>tres veces por semana',
+        catalogo='El puesto de esta semana'),
 }
 
 
@@ -194,34 +222,58 @@ def captura(html, destino, ancho):
     return alto
 
 
+def tarjetas():
+    """Las seis tarjetas del catálogo. Iguales en las tres direcciones."""
+    piezas = []
+    for nombre, cat, precio, foto in PRODUCTOS:
+        piezas.append(f"""      <article class="card">
+        <div class="foto"><img src="{imagen(foto, 620)}" alt="{nombre}"></div>
+        <div class="cuerpo">
+          <span class="cat">{cat}</span>
+          <h3>{nombre}</h3>
+          <div class="compra">
+            <span class="precio">S/ {precio}</span>
+            <button class="add">Agregar</button>
+          </div>
+        </div>
+      </article>""")
+    return '\n'.join(piezas)
+
+
 def main():
     os.makedirs(os.path.join(SALIDA, 'capturas'), exist_ok=True)
-    plantillas = sorted(f for f in os.listdir(os.path.join(HERE, 'direcciones'))
-                        if f.endswith('.html'))
-    if not plantillas:
-        sys.exit('no hay plantillas en design/direcciones/')
+    plantilla = open(os.path.join(HERE, 'tienda.html'), encoding='utf-8').read()
+    caps = os.path.join(SALIDA, 'capturas')
+    tarjetas_html = tarjetas()
 
-    for f in plantillas:
-        clave = f[0]
-        src = open(os.path.join(HERE, 'direcciones', f), encoding='utf-8').read()
-        src = src.replace('{{FUENTES}}', css_fuentes(clave))
+    for clave, copy in DIRECCIONES.items():
+        tokens = os.path.join(HERE, 'direcciones', f'{clave}.css')
+        if not os.path.exists(tokens):
+            sys.exit(f'falta {os.path.relpath(tokens, RAIZ)}')
+
+        src = (plantilla
+               .replace('{{FUENTES}}', css_fuentes(clave))
+               .replace('{{TOKENS}}', open(tokens, encoding='utf-8').read())
+               .replace('{{EYEBROW}}', copy['eyebrow'])
+               .replace('{{TITULAR}}', copy['titular'])
+               .replace('{{TITULO_CATALOGO}}', copy['catalogo'])
+               .replace('{{TARJETAS}}', tarjetas_html))
+
         # {{IMG:archivo.jpg}} o {{IMG:archivo.jpg@900}} para fijar el ancho
         def sub(m):
-            ref = m.group(1)
-            nombre, _, ancho = ref.partition('@')
+            nombre, _, ancho = m.group(1).partition('@')
             return imagen(nombre, int(ancho) if ancho else None)
         src = re.sub(r'\{\{IMG:([^}]+)\}\}', sub, src)
 
-        destino = os.path.join(SALIDA, f)
+        destino = os.path.join(SALIDA, f'{clave}.html')
         open(destino, 'w', encoding='utf-8').write(src)
         kb = round(os.path.getsize(destino) / 1024)
 
-        caps = os.path.join(SALIDA, 'capturas')
         alto = captura(destino, os.path.join(caps, f'{clave}-desktop.png'), 1440)
         altoM = captura(destino, os.path.join(caps, f'{clave}-movil.png'), 430)
-        print(f'  ✓ {f:<22} {kb:>5} KB   1440×{alto}   430×{altoM}')
+        print(f'  ✓ {clave:<12} {kb:>5} KB   1440×{alto}   430×{altoM}')
 
-    print(f'\n{len(plantillas)} direcciones en {os.path.relpath(SALIDA, RAIZ)}/')
+    print(f'\n{len(DIRECCIONES)} direcciones en {os.path.relpath(SALIDA, RAIZ)}/')
 
 
 if __name__ == '__main__':

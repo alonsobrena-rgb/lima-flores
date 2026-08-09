@@ -1,0 +1,64 @@
+/* ÁMSTERDAM — manda el verde, el 29% del logo que nadie había usado. El
+   catálogo es la portada: entras y ya estás frente al puesto. Todo un punto
+   más grande y más cerca; el vacío lo reemplaza la abundancia ordenada. */
+:root{
+  --container:1240px; --gutter:36px;
+
+  --bg-page:#F6F1DF; --bg-alt:#EFE8D1; --surface-card:#FFFFFF;
+  --text-strong:#26221E; --text-body:#453F37; --text-muted:#6B6459;
+  --text-faint:#A2A19F; --text-on-accent:#FCFAF1;
+  --border:#E2D9BC; --border-strong:#CBBF9A;
+  --accent:#0B6E30;
+  --tt-titulo:lowercase;
+
+  --font-display:'Petrona',Georgia,serif;
+  --font-sans:'Hanken Grotesk',sans-serif;
+  --font-precio:'Hanken Grotesk',sans-serif;
+
+  --text-display:58px; --text-h1:40px; --text-h2:30px; --text-title:20px;
+  --text-lead:19px; --text-body-sz:17px; --text-eyebrow:12px;
+  --text-precio:22px;
+  --w-regular:400; --w-medium:500; --w-semibold:600;
+  --w-display:600; --w-precio:700;
+  --lh-tight:1.08; --lh-normal:1.55;
+  --ls-tight:-0.02em; --ls-wide:.06em; --ls-widest:.16em; --ls-precio:-.01em;
+
+  /* más blandos que las otras dos: un puesto no tiene esquinas filosas */
+  --radius-sm:8px; --radius-md:14px; --radius-lg:22px; --radius-pill:999px;
+  --space-3:12px; --space-4:16px; --space-5:22px; --space-6:30px; --space-7:40px;
+
+  --head-bg:#FCFAF1; --head-borde:#E2D9BC; --logo-h:46px;
+
+  /* el catálogo primero: es lo que define la dirección */
+  --ord-catalogo:1; --ord-cinta:2; --ord-portada:3; --ord-ficha:4;
+  --hero-bg:#0B6E30; --hero-tinta:#FCFAF1; --hero-em:#F1E5B9;
+  --hero-parrafo:#CFE3D3; --hero-cols:1fr 1fr; --hero-pad:52px; --hero-ratio:4/3;
+
+  --cinta-bg:#F1E5B9; --cinta-tinta:#26221E;
+  --cinta-borde:none;
+
+  --sec-pad:52px; --cat-bg:#F6F1DF;
+  --card-gap:16px; --card-pad:15px 16px 17px;
+  --card-sombra:0 6px 16px rgba(38,34,30,.08),0 2px 5px rgba(38,34,30,.05);
+
+  /* verde es estructura, rosa es producto: el precio va en rosa tulipán */
+  --precio-color:#A83F58;
+  --add-bg:#0B6E30; --add-tinta:#FCFAF1; --add-borde:none;
+
+  --ficha-bg:#EFE8D1; --ficha-tinta:#26221E; --ficha-parrafo:#6B6459;
+  --ficha-linea:#DACFAF; --entrega-bg:#FCFAF1;
+
+  --barra-bg:#0B6E30; --barra-tinta:#FCFAF1;
+  --pie-bg:#26221E; --pie-tinta:#E2D9BC;
+}
+
+/* Sobre el verde pintado, el botón se invierte: verde sobre verde no se ve. */
+.portada .btn{background:#FCFAF1;color:#0B6E30}
+.portada .btn.ghost{background:transparent;color:#FCFAF1;
+  box-shadow:inset 0 0 0 1px rgba(252,250,241,.5)}
+.portada .eti{color:#CFE3D3}
+.barra .btn{background:#FCFAF1;color:#0B6E30}
+/* la banda de madera pintada que abre la portada */
+.portada{border-top:6px solid #F1E5B9}
+/* etiqueta de categoría en rosa: es el color del producto */
+.card .cat{color:#A83F58}

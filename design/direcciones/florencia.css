@@ -1,0 +1,53 @@
+/* FLORENCIA — manda la rosa. Contención, aire, una sola rosa en un campo de
+   marfil. La portada respira antes de que aparezca el catálogo. */
+:root{
+  --container:1200px; --gutter:40px;
+
+  --bg-page:#F6F3EC; --bg-alt:#EFEAE0; --surface-card:#FFFFFF;
+  --text-strong:#2A2623; --text-body:#4A443F; --text-muted:#6E6862;
+  --text-faint:#A2A19F; --text-on-accent:#FBF9F4;
+  --border:#E4DDD0; --border-strong:#CFC6B6;
+  --accent:#9E2B5E;
+
+  --font-display:'Cormorant Garamond',serif;
+  --font-sans:'Jost',sans-serif;
+  --font-precio:'Cormorant Garamond',serif;
+
+  --text-display:64px; --text-h1:44px; --text-h2:32px; --text-title:21px;
+  --text-lead:19px; --text-body-sz:16px; --text-eyebrow:11px;
+  --text-precio:23px;
+  --w-regular:400; --w-medium:500; --w-semibold:600;
+  --w-display:600; --w-precio:600;
+  --lh-tight:1.05; --lh-normal:1.55;
+  --ls-tight:-0.01em; --ls-wide:.08em; --ls-widest:.22em; --ls-precio:0;
+
+  --radius-sm:4px; --radius-md:8px; --radius-lg:10px; --radius-pill:999px;
+  --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:56px;
+
+  --head-bg:#FBF9F4; --head-borde:#E4DDD0; --logo-h:44px;
+
+  /* el aire es el lujo: la portada va primera y va grande */
+  --ord-portada:1; --ord-cinta:2; --ord-catalogo:3; --ord-ficha:4;
+  --hero-bg:#F6F3EC; --hero-tinta:#2A2623; --hero-em:#9E2B5E;
+  --hero-parrafo:#6E6862; --hero-cols:1.05fr 1fr; --hero-pad:72px; --hero-ratio:4/5;
+
+  --cinta-bg:#EFEAE0; --cinta-tinta:#4A443F;
+  --cinta-borde:1px solid #E4DDD0;
+
+  --sec-pad:80px; --cat-bg:#F6F3EC;
+  --card-gap:26px; --card-pad:18px 20px 20px;
+  --card-sombra:inset 0 0 0 1px #E4DDD0;
+
+  /* precio en serif, del mismo tono que el acento: elegante, no chillón */
+  --precio-color:#9E2B5E;
+  --add-bg:#9E2B5E; --add-tinta:#FBF9F4; --add-borde:none;
+
+  --ficha-bg:#EFEAE0; --ficha-tinta:#2A2623; --ficha-parrafo:#6E6862;
+  --ficha-linea:#DCD3C4; --entrega-bg:#FBF9F4;
+
+  --barra-bg:#2A2623; --barra-tinta:#F6F3EC;
+  --pie-bg:#2A2623; --pie-tinta:#E4DDD0;
+}
+/* la firma del logotipo se repite en la itálica del titular */
+.heroIn h1{font-weight:500}
+.card h3{font-weight:600}

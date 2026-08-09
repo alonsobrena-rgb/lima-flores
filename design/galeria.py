@@ -29,55 +29,54 @@ CAPS = os.path.join(B.SALIDA, 'capturas')
 # reconozca de lejos sin que la página tome partido.
 DIRECCIONES = [
     dict(
-        clave='a', letra='A', nombre='Mercado', firma='#C4471F',
-        lema='El catálogo manda. Entras y ya estás comprando.',
-        parrafo='Es la más directa de las tres. La foto grande vende el ánimo, '
-                'pero abajo aparece el catálogo casi de inmediato, con el precio '
-                'siempre visible y el botón de agregar en cada pieza. Los tres '
-                'puntos del inicio responden lo que la gente pregunta antes de '
-                'pagar: cuándo llega, qué pasa si se acaba, si va con tarjeta.',
-        paleta=[('#FDF6EC', 'Crema'), ('#C4471F', 'Terracota'),
-                ('#2F5D3A', 'Verde hoja'), ('#211A15', 'Tinta')],
-        tipos='Fraunces para los títulos, Karla para el texto',
-        gana=['La ruta a la compra es la más corta de las tres.',
-              'Precio y “Agregar” siempre a la vista, sin entrar a la ficha.',
-              'La más fácil de mantener: soporta fotos disparejas sin romperse.'],
-        cuesta=['Es la más convencional. Se parece a otras tiendas buenas.',
-                'La marca se apoya en el color y la tipografía, no en la puesta.'],
+        clave='florencia', letra='A', nombre='Florencia', firma='#9E2B5E',
+        lema='Contención. Aire, marfil, y una sola rosa.',
+        parrafo='La más elegante de las tres, y la que ya existía: es el sistema '
+                'que armaste en Claude Design, corregido. La portada respira antes '
+                'de que aparezca el catálogo, los títulos van en Cormorant Garamond '
+                'con itálicas de verdad, y el rosa aparece poco — un botón, un '
+                'precio, un enlace. Vende por deseo, no por insistencia.',
+        paleta=[('#F6F3EC', 'Marfil'), ('#9E2B5E', 'Rosa'),
+                ('#88A65C', 'Verde'), ('#2A2623', 'Tinta')],
+        tipos='Cormorant Garamond para títulos, Jost para texto y UI',
+        gana=['La más elegante. Se paga sola en percepción de precio.',
+              'El rosa sale del ramo del logo: el color es de la marca, no prestado.',
+              'Las itálicas del Cormorant conversan con la caligrafía del logotipo.'],
+        cuesta=['Es la que menos empuja a comprar: hay que bajar para ver el catálogo.',
+                'Al ser la más vacía, amplifica cualquier foto floja.'],
     ),
     dict(
-        clave='b', letra='B', nombre='Atelier', firma='#A83A62',
-        lema='Cada pieza es una pieza, con su número y su ficha.',
-        parrafo='Trata el catálogo como un taller y no como un depósito: papel, '
-                'kraft, números correlativos y los precios en máquina de escribir. '
-                'La ficha de producto pasa a ser una tabla de datos — qué trae, '
-                'cuánto pesa, cuándo llega — que es justo lo que convence a quien '
-                'está gastando doscientos soles en algo que no puede tocar.',
-        paleta=[('#F3EFE6', 'Papel'), ('#E7DAC4', 'Kraft'),
-                ('#A83A62', 'Magenta'), ('#7E8E6E', 'Salvia')],
-        tipos='Newsreader para los títulos, Courier Prime para precios y datos',
-        gana=['La que más se aleja de “tienda genérica”. Tiene autor.',
-              'Justifica el precio: se lee artesanal, no de supermercado.',
-              'La tabla de la ficha responde dudas sin que nadie escriba por WhatsApp.'],
-        cuesta=['Pide fotos parejas: con fondos disparejos pierde la mitad de la gracia.',
-                'Es la más lenta de leer. Compra por antojo, no por apuro.'],
+        clave='paris', letra='B', nombre='París', firma='#B33A48',
+        lema='La etiqueta atada. Papel, filete de tinta y un listón.',
+        parrafo='La tienda de la esquina con el toldo a rayas. Todo lo que es dato '
+                '— precio, medida, categoría — se compone como una etiqueta de papel '
+                'recortada, con filete de tinta y esquinas casi rectas. El azul lino '
+                'de la cinta es el 1,4% del logo: los toques celestes de la acuarela.',
+        paleta=[('#FBF6EC', 'Papel'), ('#B33A48', 'Listón'),
+                ('#E8B1A6', 'Durazno'), ('#61709B', 'Azul lino')],
+        tipos='Bodoni Moda para títulos, Karla para texto, precios y etiquetas',
+        gana=['La etiqueta con precio y “Agregar” va en cada pieza, siempre visible.',
+              'Vende insistiendo con elegancia, no gritando.',
+              'Bodoni le da un aire de perfumería que ninguna de las otras tiene.'],
+        cuesta=['Bodoni es de contraste alto: en pantalla chica se ve frágil.',
+                'Es la más ornamentada. Si el catálogo crece mucho, se recarga.'],
     ),
     dict(
-        clave='c', letra='C', nombre='Botánica', firma='#D8226B',
-        lema='Verde profundo, magenta que grita, y una barra que no te suelta.',
-        parrafo='La más contemporánea y la más agresiva comercialmente. Bloques '
-                'de color a sangre, una cinta de datos en lima con las cuatro '
-                'garantías, y una barra de compra fija abajo que sigue al cliente '
-                'por toda la ficha. Es la que mejor se ve en Instagram y la que '
-                'mejor conversa con los anuncios que ya están hechos.',
-        paleta=[('#12301E', 'Verde profundo'), ('#F0EDE4', 'Crema'),
-                ('#D8226B', 'Magenta'), ('#C6E36B', 'Lima')],
-        tipos='Bricolage Grotesque para los títulos, Archivo para el texto',
-        gana=['La más vendedora: barra de compra fija y llamados imposibles de perder.',
-              'El verde oscuro hace que las flores salten. Las fotos ganan.',
-              'Es la que más se parece a los anuncios de Instagram ya producidos.'],
-        cuesta=['Es la más arriesgada. Fuerte, y a quien no le gusta, no le gusta.',
-                'El fondo oscuro obliga a usar el logo en versión clara.'],
+        clave='amsterdam', letra='C', nombre='Ámsterdam', firma='#0B6E30',
+        lema='El puesto del mercado. Entras y ya estás frente a los baldes.',
+        parrafo='La única que usa el verde como color de marca — y es raro, porque '
+                'el verde es el 29% del ramo del logo y estaba sin usar. Acá no hay '
+                'portada: entras y ya estás en el catálogo. Títulos en minúscula, '
+                'todo un punto más grande y más cerca. El encanto no es el vacío, '
+                'es la abundancia ordenada.',
+        paleta=[('#F6F1DF', 'Crema'), ('#0B6E30', 'Verde pintado'),
+                ('#D95F7D', 'Rosa tulipán'), ('#F1E5B9', 'Mantequilla')],
+        tipos='Petrona en minúsculas para títulos, Hanken Grotesk para texto',
+        gana=['La más vendedora de las tres, y sin gritar: vende mostrando.',
+              'El catálogo es lo primero que se ve. Cero scroll para empezar a comprar.',
+              'La más cercana y la más fácil de leer en teléfono.'],
+        cuesta=['Con la grilla llena, las fotos disparejas se vuelven imposibles de esconder.',
+                'Es la menos “de lujo” de las tres. Gana calidez, cede solemnidad.'],
     ),
 ]
 
@@ -270,16 +269,16 @@ def main():
 <header class="tapa"><div class="wrap">
   <img class="marca" src="{B.imagen('logo.png', 420)}" alt="Lima Flores">
   <h1>Tres maneras de que la tienda se vea como Lima&nbsp;Flores</h1>
-  <p>Las tres están armadas sobre las mismas tres pantallas reales — portada,
-  catálogo y ficha de producto — con las fotos y los precios que hoy están en la
-  tienda. No son bocetos: son páginas que ya funcionan, para que la comparación
-  sea justa.</p>
-  <p>El logo no se toca en ninguna. Lo que cambia es la puesta: el color, la
-  tipografía, cuánto tarda el catálogo en aparecer y cuán insistente es el botón
-  de comprar.</p>
-  <p>La idea es elegir una. Después se puede ajustar sobre la elegida — cambiar
-  un color, subir el catálogo, suavizar un título — pero conviene partir de una
-  sola.</p>
+  <p>Las tres son la misma tienda: la misma portada, el mismo catálogo, la misma
+  ficha de producto, con las fotos y los precios que hoy están en el sistema. Lo
+  único que cambia es la marca — el color, la tipografía y en qué orden aparecen
+  las cosas. Así la comparación es entre marcas y no entre maquetas.</p>
+  <p><b>El logo no se toca, y los colores tampoco se inventaron.</b> Los tres
+  juegos de color salen de medir el ramo acuarelado del logotipo: resulta ser
+  52% rosa, 29% verde, 13% durazno y crema, y 1,4% azul. Cada dirección elige
+  cuál de esas familias manda.</p>
+  <p>La idea es elegir una. Después se puede ajustar sobre la elegida — mover un
+  color, subir el catálogo, suavizar un título — pero conviene partir de una sola.</p>
   <nav class="indice">{indice}</nav>
 </div></header>
 
@@ -295,9 +294,12 @@ def main():
   </table></div>
   <div class="nota">
     <p><b>Qué mirar para decidir.</b> No cuál se ve más linda en la captura, sino
-    cuál se parece más a cómo quieres que te recuerden: la tienda rápida y
-    confiable (A), el taller que arma cada pieza (B), o la marca joven y frontal
-    que empuja la compra (C).</p>
+    cuál se parece más a cómo quieres que te recuerden: la florería elegante que
+    se hace desear (Florencia), la tienda de barrio que te atiende y te etiqueta
+    el ramo (París), o el puesto lleno de flores al que entras a comprar
+    (Ámsterdam).</p>
+    <p>Si la duda es entre vender más y verse mejor: Ámsterdam vende más hoy,
+    Florencia sostiene mejor el precio en el tiempo, y París está en el medio.</p>
     <p>Todo lo que se lee en las tres — precios, medidas, qué trae cada caja,
     cómo funciona la entrega — sale del catálogo real. Las entregas son al día
     siguiente: se elige el día y una franja de 30 minutos. Ninguna dirección
