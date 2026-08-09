@@ -1,0 +1,11 @@
+/* ============================================================
+   Lima Flores — Design System
+   Global entry point. Consumers link THIS file only.
+   Import order: fonts → tokens → (no component CSS; components
+   reference custom properties directly).
+   ============================================================ */
+
+@import url('./tokens/fonts.css');
+@import url('./tokens/colors.css');
+@import url('./tokens/typography.css');
+@import url('./tokens/spacing.css');
