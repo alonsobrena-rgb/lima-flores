@@ -50,11 +50,18 @@ Las tres viven también como proyectos de sistema de diseño, con los mismos
 componentes y el mismo storefront en React:
 
 - **Florencia** — `6322844f-ea50-4887-9467-a7e287b76251`
-- **París** — `02b879f7-9835-4e07-8836-302453dc1b49`
-- **Ámsterdam** — `ad781643-a674-4647-be49-f16b9508fb51`
+- **París** — `1349f18c-7d70-4fda-a736-a4b3b3b56a3f`
+- **Ámsterdam** — `96db51d5-f22d-436d-b66a-afff3127fb5e`
 
 París y Ámsterdam se crearon clonando Florencia y reescribiendo solo `tokens/`,
 igual que acá. Se llega por el MCP `claude_design` (requiere `/design consent`).
+
+**Ojo con cómo se crean.** `mcp__claude_design__create_project` crea un proyecto
+normal, y el tipo es **inmutable**: un proyecto normal nunca se convierte en
+sistema de diseño, así que no aparece en la pestaña de sistemas de diseño ni
+sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
+`method: create_project`, y se verifica con `get_project` que devuelva
+`type: PROJECT_TYPE_DESIGN_SYSTEM`.
 
 `claude-design/` guarda una copia de lectura de los tokens de Florencia.
 
