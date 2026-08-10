@@ -39,8 +39,18 @@ python3 design/galeria.py    # la galería con la comparación lado a lado
 ```
 
 `build.py` compone `tienda.html` (la maqueta, una sola vez) con
-`direcciones/<clave>.css` (los tokens de cada una), incrusta las tipografías
-(woff2 en base64) y las fotos, y fotografía cada dirección a 1440 y 430 px.
+`direcciones/<clave>.css` (los tokens de cada una) y `heroes/<clave>.html`,
+incrusta las tipografías (woff2 en base64) y las fotos, y fotografía cada
+dirección a 1440 y 430 px.
+
+El hero **no** es compartido: cada dirección tiene el suyo, porque es donde la
+marca se juega todo.
+
+| | Hero | Qué hace |
+|---|---|---|
+| Florencia | la vitrina | la foto ocupa media página y sangra por la derecha |
+| París | el escaparate | dos fotos montadas con filete de tinta y la etiqueta colgando |
+| Ámsterdam | el puesto | los baldes en fila, en una banda corta antes del catálogo |
 
 `muestra.py` mete las tres pieles en un solo archivo, cada una bajo
 `[data-piel="…"]`, y agrega una barra para cambiarlas en vivo. Es lo que
@@ -88,6 +98,9 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
 - **El CSS de la tienda se inyecta después de los tokens**, así que una regla
   `.add{...}` escrita en un archivo de dirección pierde contra la `.add` de la
   maqueta. Pasó dos veces. Lo que una dirección cambia va **siempre por token**.
+- **`margin: 0 auto` dentro de un contenedor grid anula el estiramiento.**
+  El `.wrap` del hero de Florencia se encogía a 559px en vez de 1200 y el texto
+  terminaba debajo de la foto. Se arregla con un `width:100%` explícito.
 - **En `muestra.html` conviven las tres pieles**, así que ocultar y mostrar los
   textos tiene que empatarle en especificidad a las reglas de dirección. Una
   regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un

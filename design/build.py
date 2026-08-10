@@ -57,21 +57,13 @@ PRODUCTOS = [
     ('Ramo Luana', 'Ramos', 180, 'ramo-luana.jpg'),
 ]
 
-# Lo único que cambia de copy entre direcciones es el tono del titular. El
-# resto del texto es idéntico, y todo sale del catálogo o de checkout.js.
+# El titular y la bajada viven en heroes/<clave>.html, porque cada dirección
+# tiene un hero distinto y no solo otro color. Acá queda lo que la maqueta
+# comparte. Todo el texto sale del catálogo o de checkout.js.
 DIRECCIONES = {
-    'florencia': dict(
-        eyebrow='Miraflores · desde 2017',
-        titular='Flores frescas,<br>armadas <em>a mano</em>',
-        catalogo='El catálogo de esta semana'),
-    'paris': dict(
-        eyebrow='Flores y diseño · Miraflores',
-        titular='Tres tallos,<br>papel y <em>un listón</em>',
-        catalogo='Lo que llegó esta semana'),
-    'amsterdam': dict(
-        eyebrow='Miraflores · desde 2017',
-        titular='Flores frescas<br>tres veces por semana',
-        catalogo='El puesto de esta semana'),
+    'florencia': dict(catalogo='El catálogo de esta semana'),
+    'paris': dict(catalogo='Lo que llegó esta semana'),
+    'amsterdam': dict(catalogo='El puesto de esta semana'),
 }
 
 
@@ -251,11 +243,12 @@ def main():
         if not os.path.exists(tokens):
             sys.exit(f'falta {os.path.relpath(tokens, RAIZ)}')
 
+        hero = open(os.path.join(HERE, 'heroes', f'{clave}.html'),
+                    encoding='utf-8').read()
         src = (plantilla
                .replace('{{FUENTES}}', css_fuentes(clave))
                .replace('{{TOKENS}}', open(tokens, encoding='utf-8').read())
-               .replace('{{EYEBROW}}', copy['eyebrow'])
-               .replace('{{TITULAR}}', copy['titular'])
+               .replace('{{HERO}}', hero)
                .replace('{{TITULO_CATALOGO}}', copy['catalogo'])
                .replace('{{TARJETAS}}', tarjetas_html))
 

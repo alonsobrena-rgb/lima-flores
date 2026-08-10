@@ -108,8 +108,7 @@ GUION = """
 
 def variantes(campo):
     """Las tres versiones del mismo texto, una por piel."""
-    etiqueta = {'eyebrow': 'p class="eti solo"', 'titular': 'h1 class="solo"',
-                'catalogo': 'h2 class="solo"'}[campo]
+    etiqueta = {'catalogo': 'h2 class="solo"'}[campo]
     tag = etiqueta.split()[0]
     piezas = []
     for piel in PIELES:
@@ -133,12 +132,13 @@ def main():
     src = (plantilla
            .replace('{{FUENTES}}', fuentes)
            .replace('{{TOKENS}}', tokens + '\n' + MANDO)
-           .replace('{{TARJETAS}}', B.tarjetas()))
+           .replace('{{TARJETAS}}', B.tarjetas())
+           .replace('{{HERO}}', '\n'.join(
+               open(os.path.join(B.HERE, 'heroes', f'{p}.html'),
+                    encoding='utf-8').read() for p in PIELES)))
 
-    # Los tres placeholders de copy pasan a ser los tres juegos de variantes.
-    src = src.replace('<p class="eti" style="margin:0 0 14px">{{EYEBROW}}</p>',
-                      f'<div style="margin:0 0 14px">{variantes("eyebrow")}</div>')
-    src = src.replace('<h1>{{TITULAR}}</h1>', variantes('titular'))
+    # El título del catálogo es lo único que queda con tres versiones sueltas;
+    # el resto del copy de cada dirección ya viene dentro de su hero.
     src = src.replace('<h2>{{TITULO_CATALOGO}}</h2>', variantes('catalogo'))
 
     def sub(m):

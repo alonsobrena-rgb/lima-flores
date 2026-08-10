@@ -40,7 +40,7 @@
   /* el aire es el lujo: la portada va primera y va grande */
   --ord-portada:1; --ord-cinta:2; --ord-catalogo:3; --ord-ficha:4;
   --hero-bg:#F6F3EC; --hero-tinta:#2A2623; --hero-em:#9E2B5E;
-  --hero-parrafo:#6E6862; --hero-cols:1.05fr 1fr; --hero-pad:72px; --hero-ratio:4/5;
+  --hero-parrafo:#6E6862; --velo:#F6F3EC; --hero-cols:1.05fr 1fr; --hero-pad:72px; --hero-ratio:4/5;
 
   --cinta-bg:#EFEAE0; --cinta-tinta:#4A443F;
   --cinta-borde:1px solid #E4DDD0;

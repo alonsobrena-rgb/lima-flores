@@ -99,21 +99,72 @@ main{display:flex;flex-direction:column}
 .catalogo{order:var(--ord-catalogo,3)}
 .ficha{order:var(--ord-ficha,4)}
 
-/* portada */
-.portada{background:var(--hero-bg);color:var(--hero-tinta)}
-.heroIn{display:grid;grid-template-columns:var(--hero-cols);gap:var(--space-7);
-  align-items:center;padding-block:var(--hero-pad)}
-.heroIn h1{font-family:var(--font-display);font-size:var(--text-display);
+/* ── portada ────────────────────────────────────────────────────────────
+   Cada dirección tiene su propio hero, no el mismo con otro color. Todo el
+   CSS vive acá, después de los tokens, para que ninguna regla de dirección
+   pelee con estas por especificidad. */
+.portada{background:var(--hero-bg);color:var(--hero-tinta);position:relative}
+.portada h1{font-family:var(--font-display);font-size:var(--text-display);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);margin:0;
   font-weight:var(--w-display);text-wrap:balance;
   text-transform:var(--tt-titulo,none)}
-.heroIn h1 em{font-style:italic;color:var(--hero-em)}
-.heroIn p{margin:var(--space-4) 0 0;font-size:var(--text-lead);
-  color:var(--hero-parrafo);max-width:44ch}
-.acciones{display:flex;gap:12px;margin-top:var(--space-6);flex-wrap:wrap}
-.heroFoto{overflow:hidden;border-radius:var(--radius-lg);
-  aspect-ratio:var(--hero-ratio);background:var(--bg-alt)}
-.heroFoto img{width:100%;height:100%;object-fit:cover}
+.portada h1 em{font-style:italic;color:var(--hero-em)}
+.portada .bajada{margin:var(--space-4) 0 0;font-size:var(--text-lead);
+  color:var(--hero-parrafo);max-width:42ch}
+.acciones{display:flex;gap:14px;margin-top:var(--space-6);flex-wrap:wrap;
+  align-items:center}
+.enlace{color:var(--hero-em);text-decoration:none;font-size:14.5px;
+  font-weight:var(--w-semibold);letter-spacing:var(--ls-wide);
+  border-bottom:1px solid currentColor;padding-bottom:2px}
+
+/* FLORENCIA · la vitrina — la foto ocupa media página y sangra por la derecha.
+   El texto nunca se apoya sobre las flores: sobre marfil siempre se lee, y la
+   foto no tiene que aguantar un velo encima que la ensucie. */
+.hero-vitrina{min-height:min(76vh,600px);display:grid;align-items:center;
+  overflow:hidden;padding-bottom:52px}
+.hero-vitrina .fondo{position:absolute;right:0;top:0;bottom:52px;width:50%;
+  height:auto;object-fit:cover;object-position:58% 50%}
+/* el borde de la foto se disuelve en el marfil, no se corta con una línea */
+.hero-vitrina::after{content:"";position:absolute;top:0;bottom:52px;left:50%;width:7%;
+  background:linear-gradient(90deg,var(--velo),transparent);pointer-events:none;z-index:0}
+/* width:100% es obligatorio: .wrap lleva `margin:0 auto`, y un ítem de grid
+   con margen automático deja de estirarse y se encoge a su contenido. */
+.vitrinaIn{position:relative;z-index:1;width:100%;padding-block:76px}
+.vitrinaIn > *{max-width:min(47%,520px)}
+.hero-vitrina .placa{position:absolute;left:0;right:0;bottom:0;
+  padding:15px var(--gutter);background:var(--bg-alt);
+  display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;font-size:13.5px;
+  color:var(--hero-parrafo);border-top:1px solid var(--border);max-width:none}
+
+/* PARÍS · el escaparate — dos fotos montadas y la etiqueta colgando */
+.escaparateIn{display:grid;grid-template-columns:1fr 1fr;gap:60px;
+  align-items:center;padding-block:var(--hero-pad)}
+.vitral{position:relative;padding:0 0 62px 62px}
+.vitral figure{margin:0;background:var(--bg-alt);overflow:hidden}
+.vitral img{width:100%;height:100%;object-fit:cover;display:block}
+.vitral .mayor{aspect-ratio:4/5;box-shadow:0 0 0 1px var(--text-strong)}
+.vitral .menor{position:absolute;left:0;bottom:0;width:47%;aspect-ratio:1/1;
+  box-shadow:0 0 0 1px var(--text-strong),0 14px 34px rgba(43,35,32,.16);
+  background:var(--surface-card)}
+.vitral .colgante{position:absolute;right:-14px;top:34px;background:var(--surface-card);
+  box-shadow:0 0 0 1px var(--text-strong);padding:11px 16px;text-align:center;
+  transform:rotate(3.5deg);font-size:12px;letter-spacing:var(--ls-wide);
+  text-transform:uppercase;color:var(--text-muted);line-height:1.5}
+.vitral .colgante b{display:block;font-size:20px;letter-spacing:0;
+  color:var(--accent);text-transform:none}
+
+/* ÁMSTERDAM · el puesto — los baldes en fila, desbordando la banda */
+.hero-puesto{border-top:6px solid var(--puesto-toldo,transparent)}
+.puestoIn{display:grid;grid-template-columns:1fr 1.05fr;gap:var(--space-6);
+  align-items:end;padding-top:var(--hero-pad)}
+.hero-puesto .dicho{padding-bottom:var(--hero-pad)}
+.baldes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end}
+.baldes figure{margin:0;overflow:hidden;background:var(--surface-card);
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;aspect-ratio:var(--balde,.75)}
+.baldes figure:nth-child(2){--balde:.6}
+.baldes figure:nth-child(3){--balde:.68}
+.baldes figure:nth-child(4){--balde:.88}
+.baldes img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* la cinta de garantías */
 .cinta{background:var(--cinta-bg);color:var(--cinta-tinta);
@@ -192,9 +243,19 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 .ft{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 
 @media (max-width:820px){
-  .heroIn,.fichaIn{grid-template-columns:1fr;gap:var(--space-5)}
-  .heroIn{padding-block:var(--space-6)}
-  .heroIn h1{font-size:var(--text-h1)}
+  .escaparateIn,.puestoIn,.fichaIn{grid-template-columns:1fr;gap:var(--space-5)}
+  .portada h1{font-size:var(--text-h1)}
+  .hero-vitrina{min-height:0;padding-bottom:0}
+  .hero-vitrina .fondo{position:relative;width:100%;height:260px}
+  .hero-vitrina::after{display:none}
+  .vitrinaIn{padding-block:var(--space-6)}
+  .vitrinaIn > *{max-width:none}
+  .hero-vitrina .placa{position:static;padding-inline:var(--gutter)}
+  .escaparateIn{padding-block:var(--space-6);gap:34px}
+  .vitral{padding:0 0 44px 44px}
+  .vitral .colgante{right:0}
+  .hero-puesto .dicho{padding-bottom:var(--space-5)}
+  .baldes{gap:6px}
   .grid{grid-template-columns:1fr 1fr;gap:14px}
   .card h3{font-size:17px}
   .ficha h2{font-size:var(--text-h2)}
@@ -245,21 +306,7 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 </header>
 
 <main>
-  <section class="portada">
-    <div class="wrap heroIn">
-      <div>
-        <p class="eti" style="margin:0 0 14px">{{EYEBROW}}</p>
-        <h1>{{TITULAR}}</h1>
-        <p>Lunes, miércoles y viernes llega el pedido. Lo que ves disponible es lo
-        que llegó esta semana — nada de stock viejo.</p>
-        <div class="acciones">
-          <a class="btn" href="#">Ver el catálogo</a>
-          <a class="btn ghost" href="#">Suscripción mensual</a>
-        </div>
-      </div>
-      <div class="heroFoto"><img src="{{IMG:suscripcion.jpg@1000}}" alt="Ramo de girasoles"></div>
-    </div>
-  </section>
+{{HERO}}
 
   <div class="cinta"><div class="wrap cintaIn">
     <span>Tú eliges el día y la hora</span>

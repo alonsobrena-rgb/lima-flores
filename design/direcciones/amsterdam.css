@@ -40,8 +40,9 @@
   --cats-sz:15px; --cats-ls:0; --cats-tt:none;
   --cats-gap:26px; --cats-pad:13px; --cats-pos:flex-start;
 
-  /* el catálogo primero: es lo que define la dirección */
-  --ord-catalogo:1; --ord-cinta:2; --ord-portada:3; --ord-ficha:4;
+  /* una banda corta y ya estás en el catálogo: el hero mide lo que mide un
+     toldo, no lo que mide una portada */
+  --ord-portada:1; --ord-cinta:2; --ord-catalogo:3; --ord-ficha:4;
   --hero-bg:#0B6E30; --hero-tinta:#FCFAF1; --hero-em:#F1E5B9;
   --hero-parrafo:#CFE3D3; --hero-cols:1fr 1fr; --hero-pad:52px; --hero-ratio:4/3;
 
