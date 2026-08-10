@@ -115,6 +115,22 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
   regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un
   `.solo{display:none}` y salían los tres titulares apilados.
 
+## Lo que dice el sistema original y hay que respetar
+
+En Florencia el **tamaño display va en itálica, peso 500**, y los títulos de
+sección quedan **redondos en 600**. No es decoración: está escrito en
+`guidelines/type-display.html` del sistema de Claude Design.
+
+```
+.d  { font-size:60px; font-weight:500; font-style:italic }   /* display  */
+.h1 { font-size:40px; font-weight:600 }                       /* sección  */
+.h2 { font-size:28px; font-weight:500 }
+```
+
+Va por token (`--titular-estilo`, `--titular-peso`) para que las otras dos
+direcciones no lo hereden: en París un Bodoni display en itálica sería otra
+cosa, y Ámsterdam va en minúscula redonda.
+
 ## Lo que no se toca
 
 - **El logo.** Las tres usan el original.

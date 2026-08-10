@@ -40,6 +40,9 @@
   --text-precio:23px;
   --w-regular:400; --w-medium:500; --w-semibold:600;
   --w-display:600; --w-precio:600;
+  /* el tamaño display va en itálica peso 500 y los títulos de sección redondos
+     en 600 — está así en guidelines/type-display.html del sistema */
+  --titular-estilo:italic; --titular-peso:500;
   --lh-tight:1.05; --lh-normal:1.55;
   --ls-tight:-0.01em; --ls-wide:.08em; --ls-widest:.22em; --ls-precio:0;
 
@@ -94,8 +97,6 @@
   --nom-sans:"Jost";
 
 }
-/* la firma del logotipo se repite en la itálica del titular */
-.heroIn h1{font-weight:500}
 .card h3{font-weight:600
 }
 
@@ -194,7 +195,8 @@ main{display:flex;flex-direction:column}
 .portada{background:var(--hero-bg);color:var(--hero-tinta);position:relative}
 .portada h1{font-family:var(--font-display);font-size:var(--text-display);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);margin:0;
-  font-weight:var(--w-display);text-wrap:balance;
+  font-style:var(--titular-estilo,normal);
+  font-weight:var(--titular-peso,var(--w-display));text-wrap:balance;
   text-transform:var(--tt-titulo,none)}
 .portada h1 em{font-style:italic;color:var(--hero-em)}
 .portada .bajada{margin:var(--space-4) 0 0;font-size:var(--text-lead);
@@ -389,7 +391,9 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 .ej{margin:0;color:var(--text-strong)}
 .titular{font-family:var(--font-display);font-size:var(--text-h1);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);
-  font-weight:var(--w-display);text-transform:var(--tt-titulo,none)}
+  font-style:var(--titular-estilo,normal);
+  font-weight:var(--titular-peso,var(--w-display));
+  text-transform:var(--tt-titulo,none)}
 .titular em{font-style:italic;color:var(--accent)}
 .seccion{font-family:var(--font-display);font-size:var(--text-h2);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);

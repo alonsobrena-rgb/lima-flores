@@ -62,6 +62,8 @@
   --text-precio:23px;
   --w-regular:400; --w-medium:500; --w-semibold:600;
   --w-display:600; --w-precio:600;
+  
+  --titular-estilo:italic; --titular-peso:500;
   --lh-tight:1.05; --lh-normal:1.55;
   --ls-tight:-0.01em; --ls-wide:.08em; --ls-widest:.22em; --ls-precio:0;
 
@@ -113,7 +115,6 @@
   --nom-tinta:"Tinta cálida · #2A2623";
   --nom-display:"Cormorant Garamond";
   --nom-sans:"Jost";}
-[data-piel="florencia"] .heroIn h1{font-weight:500}
 [data-piel="florencia"] .card h3{font-weight:600}
 [data-piel="paris"]{--container:1180px; --gutter:38px;
 
@@ -393,7 +394,8 @@ main{display:flex;flex-direction:column}
 .portada{background:var(--hero-bg);color:var(--hero-tinta);position:relative}
 .portada h1{font-family:var(--font-display);font-size:var(--text-display);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);margin:0;
-  font-weight:var(--w-display);text-wrap:balance;
+  font-style:var(--titular-estilo,normal);
+  font-weight:var(--titular-peso,var(--w-display));text-wrap:balance;
   text-transform:var(--tt-titulo,none)}
 .portada h1 em{font-style:italic;color:var(--hero-em)}
 .portada .bajada{margin:var(--space-4) 0 0;font-size:var(--text-lead);
@@ -588,7 +590,9 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 .ej{margin:0;color:var(--text-strong)}
 .titular{font-family:var(--font-display);font-size:var(--text-h1);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);
-  font-weight:var(--w-display);text-transform:var(--tt-titulo,none)}
+  font-style:var(--titular-estilo,normal);
+  font-weight:var(--titular-peso,var(--w-display));
+  text-transform:var(--tt-titulo,none)}
 .titular em{font-style:italic;color:var(--accent)}
 .seccion{font-family:var(--font-display);font-size:var(--text-h2);
   line-height:var(--lh-tight);letter-spacing:var(--ls-tight);

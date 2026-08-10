@@ -18,6 +18,9 @@
   --text-precio:23px;
   --w-regular:400; --w-medium:500; --w-semibold:600;
   --w-display:600; --w-precio:600;
+  /* el tamaño display va en itálica peso 500 y los títulos de sección redondos
+     en 600 — está así en guidelines/type-display.html del sistema */
+  --titular-estilo:italic; --titular-peso:500;
   --lh-tight:1.05; --lh-normal:1.55;
   --ls-tight:-0.01em; --ls-wide:.08em; --ls-widest:.22em; --ls-precio:0;
 
@@ -72,7 +75,5 @@
   --nom-sans:"Jost";
 
 }
-/* la firma del logotipo se repite en la itálica del titular */
-.heroIn h1{font-weight:500}
 .card h3{font-weight:600
 }
