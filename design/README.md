@@ -131,6 +131,31 @@ Va por token (`--titular-estilo`, `--titular-peso`) para que las otras dos
 direcciones no lo hereden: en París un Bodoni display en itálica sería otra
 cosa, y Ámsterdam va en minúscula redonda.
 
+**El rótulo va en el color de acento**, peso 500 — no en gris. Está en
+`type-eyebrow-script.html` (`color: var(--rosa-500)`) y en
+`brand-photography.html`. Va por `--eti-color`, con el tono propio de cada
+dirección cuando el fondo es de color.
+
+**Los radios son 4 / 8 / 14 / pill** (`radii-shadows.html`). Florencia tenía lg
+en 10 por error.
+
+**El logotipo nunca va sobre fondos movidos** (`brand-logo.html`): «Give it air;
+never on busy backgrounds». Sobre oscuro va en blanco plano
+(`filter: brightness(0) invert(1)`), no la acuarela.
+
+### Tres «mismo día» que estaban dentro del propio sistema
+
+No solo en el readme. Corregidos en los tres proyectos:
+
+| Archivo | Decía | Dice |
+|---|---|---|
+| `type-body.html` | Cada ramo se arma a mano el mismo día | …el día de la entrega |
+| `type-body.html` | Entrega el mismo día en San Isidro, Miraflores y Barranco | Eliges el día y una franja de 30 minutos. Cobertura en Lima Metropolitana |
+| `type-eyebrow-script.html` | Entrega en Lima · Hoy | Entrega en Lima · Elige el día |
+
+Lo segundo además reducía la cobertura a tres distritos, cuando `checkout.js`
+cubre Lima Metropolitana entera.
+
 ## Lo que no se toca
 
 - **El logo.** Las tres usan el original.
