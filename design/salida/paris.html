@@ -364,14 +364,50 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 .n-display::after{content:var(--nom-display,"")}
 .n-sans::after{content:var(--nom-sans,"")}
 
-.espec{display:flex;align-items:center;gap:16px;margin-top:16px}
-.espec .aa{font-size:44px;line-height:1;color:var(--text-strong);
-  width:66px;flex:none}
-.espec .aa.d{font-family:var(--font-display);font-weight:var(--w-display)}
-.espec .aa.s{font-family:var(--font-sans);font-weight:var(--w-medium)}
-.espec b{display:block;font-size:15px;color:var(--text-strong);
-  font-weight:var(--w-semibold)}
-.sisCuerpo{margin:6px 0 0;color:var(--text-body);max-width:44ch}
+/* la tipografía ocupa el ancho entero: es lo que más se mira y con un "Aa"
+   suelto no se ve nada */
+.sisTipo{grid-column:1/-1}
+.familias{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px;
+  padding-bottom:22px;border-bottom:1px solid var(--border)}
+.fam{display:flex;gap:16px;align-items:flex-start}
+.fam .aa{font-size:60px;line-height:.9;color:var(--text-strong);flex:none;
+  width:78px}
+.fam .aa.d{font-family:var(--font-display);font-weight:var(--w-display)}
+.fam .aa.s{font-family:var(--font-sans);font-weight:var(--w-medium)}
+.fam b{display:block;font-size:16px;color:var(--text-strong);
+  font-weight:var(--w-semibold);letter-spacing:var(--ls-tight)}
+.abc{margin:11px 0 0;font-size:15px;line-height:1.8;color:var(--text-body);
+  word-break:break-all}
+.abc.d{font-family:var(--font-display)}
+.abc.s{font-family:var(--font-sans)}
+
+/* la escalera: cada tamaño con el texto que le toca en la tienda */
+.escalera{margin-top:6px}
+.paso{display:grid;grid-template-columns:96px 1fr;gap:20px;align-items:baseline;
+  padding-block:15px;border-bottom:1px solid var(--border)}
+.paso:last-child{border-bottom:0;padding-bottom:0}
+.rol{font-family:var(--font-sans);font-size:10.5px;font-weight:var(--w-semibold);
+  letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--text-faint)}
+.ej{margin:0;color:var(--text-strong)}
+.titular{font-family:var(--font-display);font-size:var(--text-h1);
+  line-height:var(--lh-tight);letter-spacing:var(--ls-tight);
+  font-weight:var(--w-display);text-transform:var(--tt-titulo,none)}
+.titular em{font-style:italic;color:var(--accent)}
+.seccion{font-family:var(--font-display);font-size:var(--text-h2);
+  line-height:var(--lh-tight);letter-spacing:var(--ls-tight);
+  font-weight:var(--w-display);text-transform:var(--tt-titulo,none)}
+.producto{font-family:var(--font-display);font-size:var(--text-title);
+  font-weight:var(--w-medium);letter-spacing:var(--ls-tight)}
+.precioEj{font-family:var(--font-precio);font-size:32px;
+  font-weight:var(--w-precio);color:var(--precio-color);
+  letter-spacing:var(--ls-precio);font-variant-numeric:tabular-nums}
+.bajadaEj{font-size:var(--text-lead);color:var(--text-body);
+  line-height:var(--lh-normal)}
+.cuerpoEj{font-size:var(--text-body-sz);color:var(--text-body);
+  line-height:var(--lh-normal);max-width:56ch}
+.rotuloEj{font-family:var(--font-sans);font-size:var(--text-eyebrow);
+  font-weight:var(--w-semibold);letter-spacing:var(--ls-widest);
+  text-transform:uppercase;color:var(--text-muted)}
 
 .tanda{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
 .chip{font-size:13px;padding:8px 14px;border-radius:var(--radius-pill);
@@ -396,6 +432,8 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 @media (max-width:820px){
   .sisRejilla{grid-template-columns:1fr}
   .muestras{grid-template-columns:repeat(2,1fr)}
+  .familias{grid-template-columns:1fr;gap:18px}
+  .paso{grid-template-columns:1fr;gap:6px}
 }
 
 @media (max-width:820px){
@@ -622,21 +660,49 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
         </div>
       </article>
 
-      <article class="sisBloque">
+      <article class="sisBloque sisTipo">
         <h3>Tipografía</h3>
-        <div class="espec">
-          <span class="aa d">Aa</span>
-          <div><b class="n-display"></b>
-            <span class="sisNota">Títulos. Va en itálica cuando el tono lo pide.</span></div>
+        <p class="sisNota">Dos familias, y cada tamaño con el texto que le toca en
+        la tienda.</p>
+
+        <div class="familias">
+          <div class="fam">
+            <span class="aa d">Aa</span>
+            <div>
+              <b class="n-display"></b>
+              <span class="sisNota">Titulares, secciones y nombres de producto.</span>
+              <p class="abc d">ABCDEFGHIJKLMNÑOPQRSTUVWXYZ<br>
+              abcdefghijklmnñopqrstuvwxyz<br>0123456789 S/ áéíóúü ¿? —</p>
+            </div>
+          </div>
+          <div class="fam">
+            <span class="aa s">Aa</span>
+            <div>
+              <b class="n-sans"></b>
+              <span class="sisNota">Texto, botones, rótulos y precios.</span>
+              <p class="abc s">ABCDEFGHIJKLMNÑOPQRSTUVWXYZ<br>
+              abcdefghijklmnñopqrstuvwxyz<br>0123456789 S/ áéíóúü ¿? —</p>
+            </div>
+          </div>
         </div>
-        <div class="espec">
-          <span class="aa s">Aa</span>
-          <div><b class="n-sans"></b>
-            <span class="sisNota">Texto, botones, rótulos y precios.</span></div>
+
+        <div class="escalera">
+          <div class="paso"><span class="rol">Titular</span>
+            <p class="ej titular">Flores frescas, armadas <em>a mano</em></p></div>
+          <div class="paso"><span class="rol">Sección</span>
+            <p class="ej seccion">El catálogo de esta semana</p></div>
+          <div class="paso"><span class="rol">Producto</span>
+            <p class="ej producto">Arreglo Rossie</p></div>
+          <div class="paso"><span class="rol">Precio</span>
+            <p class="ej precioEj">S/ 245</p></div>
+          <div class="paso"><span class="rol">Bajada</span>
+            <p class="ej bajadaEj">Lunes, miércoles y viernes llega el pedido.</p></div>
+          <div class="paso"><span class="rol">Texto</span>
+            <p class="ej cuerpoEj">Rosas, gerberas, claveles importados y pepitas
+            rojas, en florero de vidrio con follaje verde.</p></div>
+          <div class="paso"><span class="rol">Rótulo</span>
+            <p class="ej rotuloEj">Arreglos · 30 × 50 cm</p></div>
         </div>
-        <p class="eti" style="margin-top:18px">Así se ve un rótulo</p>
-        <p class="sisCuerpo">Cada pieza se arma a mano el día de la entrega y sale
-        envuelta en papel. Peonías de temporada, abiertas al punto justo.</p>
       </article>
 
       <article class="sisBloque">
