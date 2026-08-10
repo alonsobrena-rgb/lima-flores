@@ -346,7 +346,11 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 /* ── los posts de Instagram ─────────────────────────────────────────────
    Cada pieza es un cuadrado con `container-type: inline-size`: todo lo de
    adentro se mide en cqw, así que el arte se ve igual a 340 px que a 1080.
-   Lo que se compone acá es el archivo final, no una miniatura. */
+   Lo que se compone acá es el archivo final, no una miniatura.
+
+   Dos reglas: los cinco llevan foto de producto, y el logo va directo sobre
+   la foto — nunca en una plaquita. Para que se lea sin recuadro se usa la
+   versión clara del logotipo y se apoya siempre en un velo. */
 .posts{background:var(--bg-page);border-top:1px solid var(--border);
   padding-block:var(--sec-pad)}
 .postsTitulo{font-family:var(--font-display);font-size:var(--text-h2);margin:6px 0 0;
@@ -361,17 +365,23 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 .post h3{font-family:var(--font-display);margin:0;font-weight:var(--w-display);
   letter-spacing:var(--ls-tight);line-height:1.06;text-wrap:balance}
 .post p{margin:0}
-/* el logotipo nunca sobre la foto: siempre en su plaquita de fondo plano */
-.marcaChip{background:var(--surface-card);border-radius:2cqw;padding:2cqw 3cqw;
-  display:inline-block;line-height:0}
-.marcaChip img{height:7cqw;width:auto;display:block}
+
+/* el velo: no es un recuadro, es una sombra que baja del borde para que la
+   firma y el texto se lean sobre cualquier foto */
+.veloAlto{position:absolute;top:0;left:0;right:0;height:34%;pointer-events:none;
+  background:linear-gradient(rgba(18,14,12,.5),transparent)}
+.veloBajo{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(transparent 38%,rgba(18,14,12,.76) 100%)}
+/* la firma va sobre la foto, sin fondo. La versión clara del logotipo lleva
+   las letras en marfil y la acuarela intacta. */
+.firma{position:absolute;top:5cqw;left:5.5cqw;z-index:2;height:9cqw;width:auto;
+  filter:drop-shadow(0 1cqw 2cqw rgba(0,0,0,.45))}
+.marco{position:relative;overflow:hidden}
+.marco > img:not(.firma){width:100%;height:100%;object-fit:cover;display:block}
 
 /* 1 · la foto manda */
-.p-foto > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.p-foto .velo{position:absolute;inset:0;
-  background:linear-gradient(transparent 38%,rgba(20,16,14,.72) 100%)}
+.p-foto > img:not(.firma){position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .p-foto .txt{position:relative;margin-top:auto;padding:6cqw;color:#fff}
-.p-foto .marcaChip{margin-bottom:4cqw}
 .p-foto h3{font-size:10cqw;color:#fff;
   font-style:var(--titular-estilo,normal);font-weight:var(--titular-peso,var(--w-display));
   text-transform:var(--tt-titulo,none)}
@@ -379,7 +389,7 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
   text-transform:uppercase;font-weight:var(--w-semibold);color:rgba(255,255,255,.86)}
 
 /* 2 · el precio protagonista */
-.p-precio > img{width:100%;height:62%;object-fit:cover;flex:none}
+.p-precio .marco{height:62%;flex:none}
 .p-precio figcaption{padding:5cqw 6cqw;display:flex;flex-direction:column;
   justify-content:center;flex:1;background:var(--surface-card)}
 .p-precio .eti{font-size:3.2cqw}
@@ -397,37 +407,32 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
 .p-partido{flex-direction:row}
 .p-partido .lado{width:52%;background:var(--accent);color:var(--text-on-accent);
   padding:6cqw;display:flex;flex-direction:column;justify-content:flex-end}
-.p-partido .marcaChip{align-self:flex-start;margin-bottom:auto}
 .p-partido h3{font-size:7.4cqw;color:var(--text-on-accent);
   text-transform:var(--tt-titulo,none)}
 .p-partido p{margin-top:3cqw;font-size:3.9cqw;line-height:1.45;opacity:.88}
-.p-partido > img{width:48%;height:100%;object-fit:cover}
+.p-partido .marco{width:48%}
 
-/* 4 · solo tipografía.
-   Ojo: el relleno del propio contenedor NO puede ir en cqw. `cqw` es el 1% de
-   la caja de contenido del contenedor, y la medida del propio contenedor se
-   resuelve contra el contenedor de más afuera — que acá no existe, así que cae
-   al ancho de la ventana. Resultado: un relleno enorme, la caja de contenido
-   diminuta, y todo el texto de adentro encogido. Va por margen en los hijos. */
-.p-promesa{background:var(--bg-alt);justify-content:center}
-.p-promesa > h3,.p-promesa > p{margin-inline:7cqw}
-.p-promesa .marcaChip{align-self:flex-start;position:absolute;top:6cqw;left:6cqw}
-.p-promesa h3{font-size:11cqw;color:var(--text-strong);
+/* 4 · la promesa sobre la foto teñida del color de marca */
+.p-promesa > img:not(.firma){position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.p-promesa .tinte{position:absolute;inset:0;background:var(--accent);opacity:.84}
+.p-promesa .txt{position:relative;margin:auto;padding:7cqw;color:var(--text-on-accent)}
+.p-promesa h3{font-size:11cqw;
   font-style:var(--titular-estilo,normal);font-weight:var(--titular-peso,var(--w-display));
   text-transform:var(--tt-titulo,none)}
-.p-promesa h3 em{font-style:italic;color:var(--accent)}
-.p-promesa p{margin-top:4cqw;margin-inline:7cqw;font-size:4cqw;line-height:1.5;color:var(--text-muted)}
+.p-promesa p{margin-top:4cqw;font-size:3.9cqw;line-height:1.5;opacity:.9}
 .p-promesa .pie{position:absolute;bottom:6cqw;left:7cqw;font-size:3.2cqw;
-  letter-spacing:var(--ls-widest);text-transform:uppercase;color:var(--accent);
-  font-weight:var(--w-semibold)}
+  letter-spacing:var(--ls-widest);text-transform:uppercase;
+  color:var(--text-on-accent);opacity:.8;font-weight:var(--w-semibold)}
 
-/* 5 · la cuadrícula */
-/* minmax(0,1fr) y no 1fr: `1fr` es `minmax(auto,1fr)`, y el mínimo automático
-   de una imagen es su tamaño intrínseco — las filas se pasaban de la caja. */
+/* 5 · la cuadrícula. minmax(0,1fr) y no 1fr: `1fr` es `minmax(auto,1fr)`, y el
+   mínimo automático de una imagen es su tamaño intrínseco — las filas se
+   pasaban de la caja. */
 .p-grilla .cuatro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:1.4cqw;height:74%;
   background:var(--border)}
-.p-grilla .cuatro img{width:100%;height:100%;object-fit:cover}
+.p-grilla .celda{position:relative;overflow:hidden}
+.p-grilla .celda img:not(.firma){width:100%;height:100%;object-fit:cover;display:block}
+.p-grilla .veloAlto{height:26%}
 .p-grilla figcaption{flex:1;padding:0 6cqw;display:flex;align-items:center;
   justify-content:space-between;gap:3cqw;background:var(--accent);
   color:var(--text-on-accent)}

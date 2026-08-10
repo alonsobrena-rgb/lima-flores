@@ -67,10 +67,19 @@ miniatura.
 | | Post | Qué muestra |
 |---|---|---|
 | 1 | La foto manda | tipo sobre la sombra de la foto, sin recuadros |
-| 2 | El precio protagonista | banda plana con nombre, precio y llamado |
+| 2 | El precio protagonista | foto arriba, banda plana con nombre, precio y llamado |
 | 3 | Partido | medio color con la promesa, media foto |
-| 4 | Solo tipografía | «Pídelo hoy, llega mañana» |
+| 4 | La promesa | «Pídelo hoy, llega mañana» sobre la foto teñida de marca |
 | 5 | La cuadrícula | cuatro piezas y el desde |
+
+Dos reglas duras, las dos por pedido explícito:
+
+1. **Los cinco llevan foto de producto.** Ninguno es solo tipografía.
+2. **El logo va directo sobre la foto, sin plaquita.** Se usa
+   `logo-claro.png` — letras en marfil, la acuarela intacta — y siempre cae
+   sobre una zona con velo, que es una sombra que baja del borde, no un
+   recuadro. Es la excepción razonada a la regla de `brand-logo.html` («never
+   on busy backgrounds»): el velo convierte esa esquina en fondo tranquilo.
 
 `muestra.py` mete las tres pieles en un solo archivo, cada una bajo
 `[data-piel="…"]`, y agrega una barra para cambiarlas en vivo. Es lo que
@@ -132,8 +141,10 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
 - **`1fr` es `minmax(auto, 1fr)`**, y el mínimo automático de una imagen es su
   tamaño intrínseco: las filas de la cuadrícula se pasaban de la caja. Va
   `minmax(0, 1fr)`.
-- **Un selector como `.p-foto img` alcanza también al logo** de la plaquita y lo
-  manda a pantalla completa. Solo la foto es hija directa: `.p-foto > img`.
+- **Un selector como `.p-foto img` alcanza también al logo** y lo manda a
+  pantalla completa detrás del texto. Pasar a `> img` no basta cuando el logo
+  también es hijo directo: hay que excluirlo por clase,
+  `.p-foto > img:not(.firma)`. Costó dos vueltas.
 - **En `muestra.html` conviven las tres pieles**, así que ocultar y mostrar los
   textos tiene que empatarle en especificidad a las reglas de dirección. Una
   regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un
