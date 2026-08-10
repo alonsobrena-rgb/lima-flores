@@ -43,6 +43,12 @@ python3 design/galeria.py    # la galería con la comparación lado a lado
 incrusta las tipografías (woff2 en base64) y las fotos, y fotografía cada
 dirección a 1440 y 430 px.
 
+Debajo de la tienda va `sistema.html`: la paleta, la tipografía, los botones y
+las formas de esa dirección. Es una sola pieza compartida — se pinta con las
+mismas variables que la tienda, así que cambiar de dirección la cambia entera.
+Los nombres de color y de tipografía van por token (`--nom-…`) porque son lo
+único que no se deduce del valor.
+
 El hero **no** es compartido: cada dirección tiene el suyo, porque es donde la
 marca se juega todo.
 
@@ -101,6 +107,9 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
 - **`margin: 0 auto` dentro de un contenedor grid anula el estiramiento.**
   El `.wrap` del hero de Florencia se encogía a 559px en vez de 1200 y el texto
   terminaba debajo de la foto. Se arregla con un `width:100%` explícito.
+- **`content: var(--x)` solo lee tokens del ámbito del elemento.** Los nombres
+  del sistema tienen que declararse dentro de `:root`; metidos por error dentro
+  de una regla suelta al final del archivo, las etiquetas salen vacías.
 - **En `muestra.html` conviven las tres pieles**, así que ocultar y mostrar los
   textos tiene que empatarle en especificidad a las reglas de dirección. Una
   regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un

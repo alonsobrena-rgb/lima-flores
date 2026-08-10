@@ -1,0 +1,82 @@
+<!-- El sistema de diseño de la dirección activa, debajo de su tienda.
+
+     Es una sola pieza compartida por las tres: todo se pinta con las mismas
+     variables que usa la tienda, así que cambiar de piel lo cambia entero. Los
+     nombres de color y de tipografía también son tokens (--nom-…), porque son
+     lo único que no se puede deducir del valor. -->
+<section class="sistema">
+  <div class="wrap">
+    <p class="eti">El sistema de diseño</p>
+    <h2 class="sisTitulo"></h2>
+    <p class="sisLema"></p>
+
+    <div class="sisRejilla">
+
+      <article class="sisBloque sisColor">
+        <h3>Color</h3>
+        <p class="sisNota">Todos medidos en el ramo del logotipo.</p>
+        <div class="muestras">
+          <div class="mu"><i style="background:var(--bg-page)"></i><b class="n-fondo"></b></div>
+          <div class="mu"><i style="background:var(--bg-alt)"></i><b class="n-alt"></b></div>
+          <div class="mu"><i style="background:var(--accent)"></i><b class="n-acento"></b></div>
+          <div class="mu"><i style="background:var(--tercero)"></i><b class="n-tercero"></b></div>
+          <div class="mu"><i style="background:var(--text-strong)"></i><b class="n-tinta"></b></div>
+          <div class="mu"><i style="background:#A2A19F"></i><b>Gris del logotipo · #A2A19F</b></div>
+        </div>
+      </article>
+
+      <article class="sisBloque">
+        <h3>Tipografía</h3>
+        <div class="espec">
+          <span class="aa d">Aa</span>
+          <div><b class="n-display"></b>
+            <span class="sisNota">Títulos. Va en itálica cuando el tono lo pide.</span></div>
+        </div>
+        <div class="espec">
+          <span class="aa s">Aa</span>
+          <div><b class="n-sans"></b>
+            <span class="sisNota">Texto, botones, rótulos y precios.</span></div>
+        </div>
+        <p class="eti" style="margin-top:18px">Así se ve un rótulo</p>
+        <p class="sisCuerpo">Cada pieza se arma a mano el día de la entrega y sale
+        envuelta en papel. Peonías de temporada, abiertas al punto justo.</p>
+      </article>
+
+      <article class="sisBloque">
+        <h3>Botones y piezas</h3>
+        <div class="tanda">
+          <a class="btn" href="#">Agregar al carrito</a>
+          <a class="btn ghost" href="#">Suscripción</a>
+          <button class="add">Agregar</button>
+        </div>
+        <div class="tanda">
+          <span class="chip on">Todo</span><span class="chip">Arreglos</span>
+          <span class="chip">Ramos</span><span class="chip">Hasta S/ 180</span>
+        </div>
+        <div class="tanda">
+          <span class="precio">S/ 210</span>
+          <span class="dato">30 × 50 cm</span>
+          <span class="dato">Tarjeta incluida</span>
+        </div>
+      </article>
+
+      <article class="sisBloque">
+        <h3>Formas y aire</h3>
+        <div class="tanda formas">
+          <span class="caja r-sm">4</span>
+          <span class="caja r-md">8</span>
+          <span class="caja r-lg">14</span>
+          <span class="caja sombra">Sombra</span>
+        </div>
+        <p class="sisNota">Radios en píxeles. La sombra es la de las tarjetas.</p>
+        <div class="escala">
+          <span style="width:var(--space-3)"></span><span style="width:var(--space-4)"></span>
+          <span style="width:var(--space-5)"></span><span style="width:var(--space-6)"></span>
+          <span style="width:var(--space-7)"></span>
+        </div>
+        <p class="sisNota">La escala de espaciado, de 12 px en adelante.</p>
+      </article>
+
+    </div>
+  </div>
+</section>

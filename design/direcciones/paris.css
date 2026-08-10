@@ -58,6 +58,19 @@
 
   --barra-bg:#2B2320; --barra-tinta:#FBF6EC;
   --pie-bg:#2B2320; --pie-tinta:#E9DDC9;
+  /* lo que el sistema muestra de sí mismo: el tercer color y los nombres, que
+     son lo único que no se deduce del valor del token */
+  --tercero:#61709B;
+  --nom-dir:"París";
+  --nom-lema:"La fleuriste de la esquina. Papel, filete de tinta y un listón que aparece del tamaño de un lacre.";
+  --nom-fondo:"Papel · #FBF6EC";
+  --nom-alt:"Papel hondo · #F5EDDF";
+  --nom-acento:"Listón · #B33A48";
+  --nom-tercero:"Azul lino · #61709B";
+  --nom-tinta:"Tinta · #2B2320";
+  --nom-display:"Bodoni Moda";
+  --nom-sans:"Karla";
+
 }
 
 /* Un filete finísimo separa el precio del nombre — nada de recuadros: un
@@ -66,4 +79,5 @@
 .card .cuerpo{gap:4px}
 .buscar:focus-within{box-shadow:inset 0 0 0 1px #2B2320}
 /* Bodoni aguanta mal el cuerpo chico: los rótulos van en Karla */
-.card .cat,.eti{font-family:'Karla',sans-serif}
+.card .cat,.eti{font-family:'Karla',sans-serif
+}

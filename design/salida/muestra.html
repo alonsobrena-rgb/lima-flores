@@ -101,7 +101,18 @@
   --ficha-linea:#DCD3C4; --entrega-bg:#FBF9F4;
 
   --barra-bg:#2A2623; --barra-tinta:#F6F3EC;
-  --pie-bg:#2A2623; --pie-tinta:#E4DDD0;}
+  --pie-bg:#2A2623; --pie-tinta:#E4DDD0;
+  
+  --tercero:#88A65C;
+  --nom-dir:"Florencia";
+  --nom-lema:"Contención. Marfil, aire, y una sola rosa — la del propio ramo del logotipo. Vende por deseo, no por insistencia.";
+  --nom-fondo:"Marfil · #F6F3EC";
+  --nom-alt:"Marfil hondo · #EFEAE0";
+  --nom-acento:"Rosa · #9E2B5E";
+  --nom-tercero:"Verde del ramo · #88A65C";
+  --nom-tinta:"Tinta cálida · #2A2623";
+  --nom-display:"Cormorant Garamond";
+  --nom-sans:"Jost";}
 [data-piel="florencia"] .heroIn h1{font-weight:500}
 [data-piel="florencia"] .card h3{font-weight:600}
 [data-piel="paris"]{--container:1180px; --gutter:38px;
@@ -158,7 +169,18 @@
   --ficha-linea:#DDCEB4; --entrega-bg:#FEFBF6;
 
   --barra-bg:#2B2320; --barra-tinta:#FBF6EC;
-  --pie-bg:#2B2320; --pie-tinta:#E9DDC9;}
+  --pie-bg:#2B2320; --pie-tinta:#E9DDC9;
+  
+  --tercero:#61709B;
+  --nom-dir:"París";
+  --nom-lema:"La fleuriste de la esquina. Papel, filete de tinta y un listón que aparece del tamaño de un lacre.";
+  --nom-fondo:"Papel · #FBF6EC";
+  --nom-alt:"Papel hondo · #F5EDDF";
+  --nom-acento:"Listón · #B33A48";
+  --nom-tercero:"Azul lino · #61709B";
+  --nom-tinta:"Tinta · #2B2320";
+  --nom-display:"Bodoni Moda";
+  --nom-sans:"Karla";}
 [data-piel="paris"] .compra{border-top:1px solid #E9DDC9;margin-top:12px;padding-top:11px}
 [data-piel="paris"] .card .cuerpo{gap:4px}
 [data-piel="paris"] .buscar:focus-within{box-shadow:inset 0 0 0 1px #2B2320}
@@ -220,7 +242,18 @@
   --ficha-linea:#DACFAF; --entrega-bg:#FCFAF1;
 
   --barra-bg:#0B6E30; --barra-tinta:#FCFAF1;
-  --pie-bg:#26221E; --pie-tinta:#E2D9BC;}
+  --pie-bg:#26221E; --pie-tinta:#E2D9BC;
+  
+  --tercero:#D95F7D;
+  --nom-dir:"Ámsterdam";
+  --nom-lema:"El puesto del mercado. La única que usa el verde como color de marca, siendo el 29% del ramo del logotipo.";
+  --nom-fondo:"Crema · #F6F1DF";
+  --nom-alt:"Crema honda · #EFE8D1";
+  --nom-acento:"Verde pintado · #0B6E30";
+  --nom-tercero:"Rosa tulipán · #D95F7D";
+  --nom-tinta:"Tinta · #26221E";
+  --nom-display:"Petrona";
+  --nom-sans:"Hanken Grotesk";}
 [data-piel="amsterdam"] .portada .btn{background:#FCFAF1;color:#0B6E30}
 [data-piel="amsterdam"] .portada .btn.ghost{background:transparent;color:#FCFAF1;
   box-shadow:inset 0 0 0 1px rgba(252,250,241,.5)}
@@ -496,6 +529,72 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
   font-size:14px}
 .ft{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 
+
+/* ── el sistema de diseño, debajo de la tienda ──────────────────────────
+   Se pinta con las mismas variables que la tienda: cambiar de dirección lo
+   cambia entero. Los nombres van por token porque son lo único que no se
+   deduce del valor. */
+.sistema{background:var(--bg-alt);border-top:1px solid var(--border);
+  padding-block:var(--sec-pad)}
+.sisTitulo{font-family:var(--font-display);font-size:var(--text-h2);margin:6px 0 0;
+  letter-spacing:var(--ls-tight);font-weight:var(--w-display);color:var(--text-strong)}
+.sisTitulo::after{content:var(--nom-dir,"")}
+.sisLema{margin:8px 0 0;color:var(--text-muted);max-width:56ch}
+.sisLema::after{content:var(--nom-lema,"")}
+.sisRejilla{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:var(--space-6)}
+.sisBloque{background:var(--surface-card);border-radius:var(--radius-md);
+  padding:22px 24px 24px;box-shadow:inset 0 0 0 1px var(--border)}
+.sisBloque h3{font-family:var(--font-display);font-size:var(--text-title);margin:0 0 4px;
+  font-weight:var(--w-display);color:var(--text-strong);letter-spacing:var(--ls-tight)}
+.sisNota{margin:6px 0 0;font-size:13px;color:var(--text-muted);display:block}
+
+.muestras{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.mu i{display:block;height:52px;border-radius:var(--radius-sm);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.mu b{display:block;margin-top:7px;font-size:11.5px;font-weight:var(--w-semibold);
+  color:var(--text-muted);letter-spacing:.01em;line-height:1.35}
+.n-fondo::after{content:var(--nom-fondo,"")}
+.n-alt::after{content:var(--nom-alt,"")}
+.n-acento::after{content:var(--nom-acento,"")}
+.n-tercero::after{content:var(--nom-tercero,"")}
+.n-tinta::after{content:var(--nom-tinta,"")}
+.n-display::after{content:var(--nom-display,"")}
+.n-sans::after{content:var(--nom-sans,"")}
+
+.espec{display:flex;align-items:center;gap:16px;margin-top:16px}
+.espec .aa{font-size:44px;line-height:1;color:var(--text-strong);
+  width:66px;flex:none}
+.espec .aa.d{font-family:var(--font-display);font-weight:var(--w-display)}
+.espec .aa.s{font-family:var(--font-sans);font-weight:var(--w-medium)}
+.espec b{display:block;font-size:15px;color:var(--text-strong);
+  font-weight:var(--w-semibold)}
+.sisCuerpo{margin:6px 0 0;color:var(--text-body);max-width:44ch}
+
+.tanda{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.chip{font-size:13px;padding:8px 14px;border-radius:var(--radius-pill);
+  box-shadow:inset 0 0 0 1px var(--border);color:var(--text-muted)}
+.chip.on{background:var(--accent);color:var(--text-on-accent);box-shadow:none;
+  font-weight:var(--w-semibold)}
+.dato{font-size:12.5px;padding:8px 13px;border-radius:var(--radius-sm);
+  box-shadow:inset 0 0 0 1px var(--border);color:var(--text-muted)}
+
+.formas .caja{width:74px;height:56px;display:grid;place-items:center;
+  background:var(--bg-alt);color:var(--text-muted);font-size:12px;
+  box-shadow:inset 0 0 0 1px var(--border)}
+.formas .r-sm{border-radius:var(--radius-sm)}
+.formas .r-md{border-radius:var(--radius-md)}
+.formas .r-lg{border-radius:var(--radius-lg)}
+.formas .sombra{width:auto;padding-inline:18px;background:var(--surface-card);
+  border-radius:var(--radius-md);box-shadow:var(--card-sombra)}
+.escala{display:flex;align-items:flex-end;gap:6px;margin-top:18px}
+.escala span{height:22px;background:var(--accent);opacity:.22;
+  border-radius:2px;flex:none}
+
+@media (max-width:820px){
+  .sisRejilla{grid-template-columns:1fr}
+  .muestras{grid-template-columns:repeat(2,1fr)}
+}
+
 @media (max-width:820px){
   .escaparateIn,.puestoIn,.fichaIn{grid-template-columns:1fr;gap:var(--space-5)}
   .portada h1{font-size:var(--text-h1)}
@@ -741,6 +840,90 @@ Aprieta abajo para cambiarla.</div>
     </div>
   </section>
 </main>
+
+<!-- El sistema de diseño de la dirección activa, debajo de su tienda.
+
+     Es una sola pieza compartida por las tres: todo se pinta con las mismas
+     variables que usa la tienda, así que cambiar de piel lo cambia entero. Los
+     nombres de color y de tipografía también son tokens (--nom-…), porque son
+     lo único que no se puede deducir del valor. -->
+<section class="sistema">
+  <div class="wrap">
+    <p class="eti">El sistema de diseño</p>
+    <h2 class="sisTitulo"></h2>
+    <p class="sisLema"></p>
+
+    <div class="sisRejilla">
+
+      <article class="sisBloque sisColor">
+        <h3>Color</h3>
+        <p class="sisNota">Todos medidos en el ramo del logotipo.</p>
+        <div class="muestras">
+          <div class="mu"><i style="background:var(--bg-page)"></i><b class="n-fondo"></b></div>
+          <div class="mu"><i style="background:var(--bg-alt)"></i><b class="n-alt"></b></div>
+          <div class="mu"><i style="background:var(--accent)"></i><b class="n-acento"></b></div>
+          <div class="mu"><i style="background:var(--tercero)"></i><b class="n-tercero"></b></div>
+          <div class="mu"><i style="background:var(--text-strong)"></i><b class="n-tinta"></b></div>
+          <div class="mu"><i style="background:#A2A19F"></i><b>Gris del logotipo · #A2A19F</b></div>
+        </div>
+      </article>
+
+      <article class="sisBloque">
+        <h3>Tipografía</h3>
+        <div class="espec">
+          <span class="aa d">Aa</span>
+          <div><b class="n-display"></b>
+            <span class="sisNota">Títulos. Va en itálica cuando el tono lo pide.</span></div>
+        </div>
+        <div class="espec">
+          <span class="aa s">Aa</span>
+          <div><b class="n-sans"></b>
+            <span class="sisNota">Texto, botones, rótulos y precios.</span></div>
+        </div>
+        <p class="eti" style="margin-top:18px">Así se ve un rótulo</p>
+        <p class="sisCuerpo">Cada pieza se arma a mano el día de la entrega y sale
+        envuelta en papel. Peonías de temporada, abiertas al punto justo.</p>
+      </article>
+
+      <article class="sisBloque">
+        <h3>Botones y piezas</h3>
+        <div class="tanda">
+          <a class="btn" href="#">Agregar al carrito</a>
+          <a class="btn ghost" href="#">Suscripción</a>
+          <button class="add">Agregar</button>
+        </div>
+        <div class="tanda">
+          <span class="chip on">Todo</span><span class="chip">Arreglos</span>
+          <span class="chip">Ramos</span><span class="chip">Hasta S/ 180</span>
+        </div>
+        <div class="tanda">
+          <span class="precio">S/ 210</span>
+          <span class="dato">30 × 50 cm</span>
+          <span class="dato">Tarjeta incluida</span>
+        </div>
+      </article>
+
+      <article class="sisBloque">
+        <h3>Formas y aire</h3>
+        <div class="tanda formas">
+          <span class="caja r-sm">4</span>
+          <span class="caja r-md">8</span>
+          <span class="caja r-lg">14</span>
+          <span class="caja sombra">Sombra</span>
+        </div>
+        <p class="sisNota">Radios en píxeles. La sombra es la de las tarjetas.</p>
+        <div class="escala">
+          <span style="width:var(--space-3)"></span><span style="width:var(--space-4)"></span>
+          <span style="width:var(--space-5)"></span><span style="width:var(--space-6)"></span>
+          <span style="width:var(--space-7)"></span>
+        </div>
+        <p class="sisNota">La escala de espaciado, de 12 px en adelante.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
 
 <footer><div class="wrap ft">
   <span>Lima Flores · Atelier botánico en Miraflores desde 2017</span>

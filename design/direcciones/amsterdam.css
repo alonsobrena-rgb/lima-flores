@@ -62,6 +62,19 @@
 
   --barra-bg:#0B6E30; --barra-tinta:#FCFAF1;
   --pie-bg:#26221E; --pie-tinta:#E2D9BC;
+  /* lo que el sistema muestra de sí mismo: el tercer color y los nombres, que
+     son lo único que no se deduce del valor del token */
+  --tercero:#D95F7D;
+  --nom-dir:"Ámsterdam";
+  --nom-lema:"El puesto del mercado. La única que usa el verde como color de marca, siendo el 29% del ramo del logotipo.";
+  --nom-fondo:"Crema · #F6F1DF";
+  --nom-alt:"Crema honda · #EFE8D1";
+  --nom-acento:"Verde pintado · #0B6E30";
+  --nom-tercero:"Rosa tulipán · #D95F7D";
+  --nom-tinta:"Tinta · #26221E";
+  --nom-display:"Petrona";
+  --nom-sans:"Hanken Grotesk";
+
 }
 
 /* Sobre el verde pintado, el botón se invierte: verde sobre verde no se ve. */
@@ -74,4 +87,5 @@
 /* la banda de madera pintada que abre la portada */
 .portada{border-top:6px solid #F1E5B9}
 /* etiqueta de categoría en rosa: es el color del producto */
-.card .cat{color:#A83F58}
+.card .cat{color:#A83F58
+}
