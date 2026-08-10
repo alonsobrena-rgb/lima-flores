@@ -28,5 +28,10 @@
     "slug": "funebre",
     "label": "Condolencias",
     "count": 5
+  },
+  {
+    "slug": "accesorios",
+    "label": "Accesorios",
+    "count": 0
   }
 ]
