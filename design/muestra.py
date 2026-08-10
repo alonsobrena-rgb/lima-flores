@@ -135,6 +135,8 @@ def main():
            .replace('{{TARJETAS}}', B.tarjetas())
            .replace('{{SISTEMA}}', open(os.path.join(B.HERE, 'sistema.html'),
                                         encoding='utf-8').read())
+           .replace('{{POSTS}}', open(os.path.join(B.HERE, 'posts.html'),
+                                      encoding='utf-8').read())
            .replace('{{HERO}}', '\n'.join(
                open(os.path.join(B.HERE, 'heroes', f'{p}.html'),
                     encoding='utf-8').read() for p in PIELES)))

@@ -58,6 +58,20 @@ marca se juega todo.
 | París | el escaparate | dos fotos montadas con filete de tinta y la etiqueta colgando |
 | Ámsterdam | el puesto | los baldes en fila, en una banda corta antes del catálogo |
 
+Al final va `posts.html`: cinco piezas de Instagram con los mismos tokens, en
+una tira que se desliza. Cada post es un cuadrado con
+`container-type: inline-size` y todo adentro se mide en `cqw`, así que el arte
+se ve igual a 340 px que a 1080 — lo que se compone es el archivo final, no una
+miniatura.
+
+| | Post | Qué muestra |
+|---|---|---|
+| 1 | La foto manda | tipo sobre la sombra de la foto, sin recuadros |
+| 2 | El precio protagonista | banda plana con nombre, precio y llamado |
+| 3 | Partido | medio color con la promesa, media foto |
+| 4 | Solo tipografía | «Pídelo hoy, llega mañana» |
+| 5 | La cuadrícula | cuatro piezas y el desde |
+
 `muestra.py` mete las tres pieles en un solo archivo, cada una bajo
 `[data-piel="…"]`, y agrega una barra para cambiarlas en vivo. Es lo que
 conviene mandarle a la dueña: aprieta un botón y ve la misma tienda cambiar de
@@ -110,6 +124,16 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
 - **`content: var(--x)` solo lee tokens del ámbito del elemento.** Los nombres
   del sistema tienen que declararse dentro de `:root`; metidos por error dentro
   de una regla suelta al final del archivo, las etiquetas salen vacías.
+- **El relleno del propio contenedor no puede ir en `cqw`.** `cqw` es el 1% de
+  la *caja de contenido* del contenedor, y la medida del propio contenedor se
+  resuelve contra el contenedor de más afuera — que no existe, así que cae al
+  ancho de la ventana. Un `padding:7cqw` de 100 px dejó la caja de contenido en
+  138 px y encogió todo el texto del post. Va por margen en los hijos.
+- **`1fr` es `minmax(auto, 1fr)`**, y el mínimo automático de una imagen es su
+  tamaño intrínseco: las filas de la cuadrícula se pasaban de la caja. Va
+  `minmax(0, 1fr)`.
+- **Un selector como `.p-foto img` alcanza también al logo** de la plaquita y lo
+  manda a pantalla completa. Solo la foto es hija directa: `.p-foto > img`.
 - **En `muestra.html` conviven las tres pieles**, así que ocultar y mostrar los
   textos tiene que empatarle en especificidad a las reglas de dirección. Una
   regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un

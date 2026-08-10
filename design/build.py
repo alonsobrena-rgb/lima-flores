@@ -236,6 +236,7 @@ def main():
     os.makedirs(os.path.join(SALIDA, 'capturas'), exist_ok=True)
     plantilla = open(os.path.join(HERE, 'tienda.html'), encoding='utf-8').read()
     sistema = open(os.path.join(HERE, 'sistema.html'), encoding='utf-8').read()
+    posts = open(os.path.join(HERE, 'posts.html'), encoding='utf-8').read()
     caps = os.path.join(SALIDA, 'capturas')
     tarjetas_html = tarjetas()
 
@@ -251,6 +252,7 @@ def main():
                .replace('{{TOKENS}}', open(tokens, encoding='utf-8').read())
                .replace('{{HERO}}', hero)
                .replace('{{SISTEMA}}', sistema)
+               .replace('{{POSTS}}', posts)
                .replace('{{TITULO_CATALOGO}}', copy['catalogo'])
                .replace('{{TARJETAS}}', tarjetas_html))
 

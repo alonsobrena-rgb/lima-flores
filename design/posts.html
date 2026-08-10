@@ -1,0 +1,74 @@
+<!-- Cinco posts de Instagram con los tokens de la dirección activa.
+
+     Van en una tira que se desliza, como un feed. Cada post es un cuadrado con
+     `container-type: inline-size`, así que todo adentro se mide en cqw y la
+     pieza se ve igual a 340 px que a 1080: lo que se diseña acá es el arte
+     final, no una miniatura.
+
+     Ningún texto promete entrega el mismo día. -->
+<section class="posts">
+  <div class="wrap">
+    <p class="eti">La marca en Instagram</p>
+    <h2 class="postsTitulo">Cinco piezas con el mismo sistema</h2>
+    <p class="sisNota">Los mismos colores, la misma tipografía y el mismo logo
+    que la tienda. Se deslizan hacia el lado.</p>
+
+    <div class="tira">
+
+      <!-- 1 · la foto manda y el texto se apoya en la sombra, sin recuadros -->
+      <figure class="post p-foto">
+        <img src="{{IMG:arreglo-rossie-3.jpg@700}}" alt="">
+        <div class="velo"></div>
+        <div class="txt">
+          <span class="marcaChip"><img src="{{IMG:logo.png@420}}" alt="Lima Flores"></span>
+          <h3>Rojo que no pide permiso</h3>
+          <p>Arreglo Rossie · S/ 245</p>
+        </div>
+      </figure>
+
+      <!-- 2 · el precio protagonista, sobre banda plana -->
+      <figure class="post p-precio">
+        <img src="{{IMG:florero-forti.jpg@700}}" alt="">
+        <figcaption>
+          <span class="eti">Arreglos</span>
+          <h3>Florero Forti</h3>
+          <div class="fila"><span class="precioPost">S/ 210</span>
+            <span class="pastilla">Elige el día y la hora</span></div>
+        </figcaption>
+      </figure>
+
+      <!-- 3 · partido: media pieza de color con la promesa, media foto -->
+      <figure class="post p-partido">
+        <div class="lado">
+          <span class="marcaChip"><img src="{{IMG:logo.png@420}}" alt="Lima Flores"></span>
+          <h3>Lunes, miércoles y viernes llega el pedido</h3>
+          <p>Lo que ves disponible es lo que llegó esta semana.</p>
+        </div>
+        <img src="{{IMG:tulipanes-de-amor.jpg@620}}" alt="">
+      </figure>
+
+      <!-- 4 · solo tipografía: la promesa de entrega, que es lo que frena la compra -->
+      <figure class="post p-promesa">
+        <span class="marcaChip"><img src="{{IMG:logo.png@420}}" alt="Lima Flores"></span>
+        <h3>Pídelo hoy,<br><em>llega mañana</em></h3>
+        <p>Eliges el día y una franja de 30 minutos.<br>Cobertura en Lima Metropolitana.</p>
+        <span class="pie">limaflores.pe</span>
+      </figure>
+
+      <!-- 5 · la cuadrícula: lo que hay esta semana, de un vistazo -->
+      <figure class="post p-grilla">
+        <div class="cuatro">
+          <img src="{{IMG:box-rogelia-3.jpg@420}}" alt="">
+          <img src="{{IMG:ramo-luana.jpg@420}}" alt="">
+          <img src="{{IMG:orquidea-sunrise-de-dos-varas.jpg@420}}" alt="">
+          <img src="{{IMG:box-lila.jpg@420}}" alt="">
+        </div>
+        <figcaption>
+          <h3>Lo de esta semana</h3>
+          <span>Desde S/ 180 · 57 piezas disponibles</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
