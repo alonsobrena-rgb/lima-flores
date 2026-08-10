@@ -27,7 +27,18 @@
   --radius-sm:8px; --radius-md:14px; --radius-lg:22px; --radius-pill:999px;
   --space-3:12px; --space-4:16px; --space-5:22px; --space-6:30px; --space-7:40px;
 
-  --head-bg:#FCFAF1; --head-borde:#E2D9BC; --logo-h:46px;
+  /* cabecera: el logo a la izquierda y el buscador grande al centro. Un puesto
+     de mercado no es simétrico, y lo primero es encontrar lo que buscas. */
+  --head-bg:#FCFAF1; --head-borde:#E2D9BC; --logo-h:62px;
+  --hdr-cols:auto 1fr auto; --hdr-pad:18px;
+  --ord-marca:1; --ord-buscar:2; --marca-pos:start;
+  --sup-bg:#0B6E30; --sup-tinta:#DCEEE1;
+  --buscar-bg:#FFFFFF; --buscar-borde:#CBBF9A; --buscar-radio:999px;
+  --buscar-max:460px;
+  --carrito-bg:#0B6E30; --carrito-tinta:#FCFAF1; --carrito-borde:none;
+  --cats-bg:#F6F1DF; --cats-tinta:#453F37; --cats-on:#0B6E30;
+  --cats-sz:15px; --cats-ls:0; --cats-tt:none;
+  --cats-gap:26px; --cats-pad:13px; --cats-pos:flex-start;
 
   /* el catálogo primero: es lo que define la dirección */
   --ord-catalogo:1; --ord-cinta:2; --ord-portada:3; --ord-ficha:4;
@@ -58,6 +69,7 @@
   box-shadow:inset 0 0 0 1px rgba(252,250,241,.5)}
 .portada .eti{color:#CFE3D3}
 .barra .btn{background:#FCFAF1;color:#0B6E30}
+.carrito .n{background:#FCFAF1;color:#0B6E30}
 /* la banda de madera pintada que abre la portada */
 .portada{border-top:6px solid #F1E5B9}
 /* etiqueta de categoría en rosa: es el color del producto */

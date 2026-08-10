@@ -33,20 +33,64 @@ img{display:block;max-width:100%}
 .btn.ghost{background:transparent;color:var(--text-strong);
   box-shadow:inset 0 0 0 1px var(--border-strong)}
 
-/* cabecera */
-header{background:var(--head-bg);border-bottom:1px solid var(--head-borde);
-  position:relative;z-index:3}
-.hdr{display:flex;align-items:center;justify-content:space-between;gap:30px;
-  padding-block:var(--space-4)}
-.hdr img{height:var(--logo-h);width:auto}
-nav{display:flex;gap:26px;font-size:14px;letter-spacing:var(--ls-wide);
-  text-transform:uppercase;font-weight:var(--w-medium)}
-nav a{color:var(--text-muted);text-decoration:none}
-nav a.on{color:var(--accent)}
-.iconos{display:flex;gap:12px}
-.iconos i{width:38px;height:38px;border-radius:999px;display:grid;place-items:center;
-  box-shadow:inset 0 0 0 1px var(--border);font-style:normal;font-size:15px;
-  color:var(--text-muted)}
+/* ── cabecera ───────────────────────────────────────────────────────────
+   Tres pisos: la promesa de entrega, la marca, y el catálogo. Cada dirección
+   decide dónde va el logo y de qué color es la banda de arriba, pero la
+   estructura es la misma en las tres. */
+header{background:var(--head-bg);position:relative;z-index:5}
+
+/* 1. la promesa — lo primero que se lee, antes que nada */
+.promesa{background:var(--sup-bg);color:var(--sup-tinta);
+  font-size:12.5px;letter-spacing:var(--ls-wide)}
+.promesaIn{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-block:9px;flex-wrap:wrap}
+.promesaIn b{font-weight:var(--w-semibold)}
+.promesaIn a{color:inherit;text-decoration:none;display:inline-flex;
+  align-items:center;gap:7px;font-weight:var(--w-semibold);white-space:nowrap}
+.promesaIn a:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* 2. la marca — centrada en las que son boutique, a la izquierda en el puesto */
+.hdr{display:grid;grid-template-columns:var(--hdr-cols);align-items:center;
+  gap:var(--space-5);padding-block:var(--hdr-pad)}
+.hdr .marca{order:var(--ord-marca,2);justify-self:var(--marca-pos,center)}
+.hdr .marca img{height:var(--logo-h);width:auto}
+.buscar{order:var(--ord-buscar,1);display:flex;align-items:center;gap:10px;
+  background:var(--buscar-bg);border-radius:var(--buscar-radio);
+  box-shadow:inset 0 0 0 1px var(--buscar-borde);padding:0 14px;height:42px;
+  max-width:var(--buscar-max,320px);width:100%}
+.buscar svg{width:17px;height:17px;flex:none;color:var(--text-muted)}
+.buscar input{border:0;background:none;outline:0;width:100%;height:100%;
+  font:var(--w-regular) 14.5px var(--font-sans);color:var(--text-strong)}
+.buscar input::placeholder{color:var(--text-faint)}
+.acc{order:3;justify-self:end;display:flex;align-items:center;gap:var(--space-4)}
+.acc a{color:var(--text-muted);text-decoration:none;font-size:13.5px;
+  letter-spacing:var(--ls-wide);text-transform:uppercase;
+  font-weight:var(--w-semibold);white-space:nowrap}
+.acc a:hover{color:var(--accent)}
+.carrito{position:relative;display:flex;align-items:center;gap:9px;border:0;
+  cursor:pointer;background:var(--carrito-bg);color:var(--carrito-tinta);
+  box-shadow:var(--carrito-borde);border-radius:var(--radius-sm);
+  padding:10px 15px;font:var(--w-semibold) 13.5px var(--font-sans);
+  letter-spacing:var(--ls-wide);text-transform:uppercase}
+.carrito svg{width:17px;height:17px}
+.carrito .n{background:var(--accent);color:var(--text-on-accent);
+  font-size:11px;font-weight:var(--w-semibold);min-width:19px;height:19px;
+  border-radius:999px;display:grid;place-items:center;letter-spacing:0}
+
+/* 3. el catálogo — categorías de verdad, no etiquetas vagas */
+.cats{border-top:1px solid var(--head-borde);border-bottom:1px solid var(--head-borde);
+  background:var(--cats-bg)}
+.catsIn{display:flex;align-items:center;gap:var(--cats-gap);
+  justify-content:var(--cats-pos,center);padding-block:var(--cats-pad);
+  overflow-x:auto;scrollbar-width:none}
+.catsIn::-webkit-scrollbar{display:none}
+.catsIn a{color:var(--cats-tinta);text-decoration:none;white-space:nowrap;
+  font-size:var(--cats-sz);letter-spacing:var(--cats-ls);
+  text-transform:var(--cats-tt);font-weight:var(--w-medium);
+  padding-bottom:3px;border-bottom:2px solid transparent}
+.catsIn a:hover{color:var(--cats-on)}
+.catsIn a.on{color:var(--cats-on);border-bottom-color:var(--cats-on);
+  font-weight:var(--w-semibold)}
 
 /* la página: el orden de las secciones lo decide cada dirección */
 main{display:flex;flex-direction:column}
@@ -155,20 +199,49 @@ footer{background:var(--pie-bg);color:var(--pie-tinta);padding-block:var(--space
   .card h3{font-size:17px}
   .ficha h2{font-size:var(--text-h2)}
   .cintaIn{gap:10px;font-size:11px}
-  nav{display:none}
+  .promesaIn{justify-content:center;font-size:11.5px;gap:4px 14px}
+  .hdr{grid-template-columns:1fr auto;gap:12px;padding-block:12px}
+  .hdr .marca{order:1;justify-self:start}
+  .acc{order:2;gap:10px}
+  .acc .ingresar{display:none}
+  .carrito{padding:9px 13px;font-size:12.5px}
+  .buscar{order:3;grid-column:1/-1;max-width:none}
+  .catsIn{justify-content:flex-start;gap:20px}
   .barra .izq{font-size:13px}
 }
 </style>
 
 <header>
+  <div class="promesa"><div class="wrap promesaIn">
+    <span><b>Pídelo hoy, llega mañana.</b> Eliges el día y una franja de 30 minutos.</span>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"
+      aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.9-.9L3 21l1.9-5A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/></svg>999 479 855</a>
+  </div></div>
+
   <div class="wrap hdr">
-    <img src="{{IMG:logo.png@420}}" alt="Lima Flores">
-    <nav>
-      <a href="#" class="on">Catálogo</a><a href="#">Ocasiones</a>
-      <a href="#">Suscripción</a><a href="#">El taller</a>
-    </nav>
-    <div class="iconos"><i>⌕</i><i>◠</i></div>
+    <form class="buscar" role="search" onsubmit="return false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+        stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Buscar rosas, tulipanes, orquídeas…"
+        aria-label="Buscar en el catálogo">
+    </form>
+    <a class="marca" href="#"><img src="{{IMG:logo.png@420}}" alt="Lima Flores"></a>
+    <div class="acc">
+      <a href="#" class="ingresar">Ingresar</a>
+      <button class="carrito" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        Carrito <span class="n">2</span>
+      </button>
+    </div>
   </div>
+
+  <nav class="cats" aria-label="Categorías"><div class="wrap catsIn">
+    <a href="#" class="on">Todo el catálogo</a><a href="#">Arreglos</a>
+    <a href="#">Ramos</a><a href="#">Floreros</a><a href="#">Orquídeas</a>
+    <a href="#">Suscripción</a><a href="#">Fúnebre</a>
+  </div></nav>
 </header>
 
 <main>

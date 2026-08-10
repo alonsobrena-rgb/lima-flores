@@ -85,6 +85,9 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
   dirección quiera cambiar va por variable (`--tt-titulo`), no por regla.
 - **Un nombre de producto en minúscula se lee como error de tipeo.** La minúscula
   de Ámsterdam es solo para titulares y cabeceras de sección.
+- **El CSS de la tienda se inyecta después de los tokens**, así que una regla
+  `.add{...}` escrita en un archivo de dirección pierde contra la `.add` de la
+  maqueta. Pasó dos veces. Lo que una dirección cambia va **siempre por token**.
 - **En `muestra.html` conviven las tres pieles**, así que ocultar y mostrar los
   textos tiene que empatarle en especificidad a las reglas de dirección. Una
   regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un

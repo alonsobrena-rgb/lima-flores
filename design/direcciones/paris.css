@@ -26,14 +26,24 @@
   --radius-sm:2px; --radius-md:3px; --radius-lg:4px; --radius-pill:999px;
   --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px;
 
-  --head-bg:#FEFBF6; --head-borde:#E9DDC9; --logo-h:42px;
+  /* cabecera: el azul lino sube a la banda de la promesa — es el único lugar
+     donde ese 1,4% del logo se lleva a tamaño grande. */
+  --head-bg:#FEFBF6; --head-borde:#E9DDC9; --logo-h:66px;
+  --hdr-cols:1fr auto 1fr; --hdr-pad:24px;
+  --ord-marca:2; --ord-buscar:1; --marca-pos:center;
+  --sup-bg:#61709B; --sup-tinta:#F3F5F9;
+  --buscar-bg:#FBF6EC; --buscar-borde:#D3C3A8; --buscar-radio:2px;
+  --buscar-max:300px;
+  --carrito-bg:#B33A48; --carrito-tinta:#FEFBF6; --carrito-borde:none;
+  --cats-bg:#FEFBF6; --cats-tinta:#4C4038; --cats-on:#B33A48;
+  --cats-sz:12px; --cats-ls:.20em; --cats-tt:uppercase;
+  --cats-gap:28px; --cats-pad:13px; --cats-pos:center;
 
   --ord-portada:1; --ord-cinta:2; --ord-catalogo:3; --ord-ficha:4;
   --hero-bg:#FBF6EC; --hero-tinta:#2B2320; --hero-em:#B33A48;
   --hero-parrafo:#6F6156; --hero-cols:1fr 1fr; --hero-pad:60px; --hero-ratio:1/1;
 
-  /* el susurro azul: la cinta es lo único que lo lleva a tamaño grande */
-  --cinta-bg:#61709B; --cinta-tinta:#F3F5F9;
+  --cinta-bg:#F5EDDF; --cinta-tinta:#4C4038;
   --cinta-borde:none;
 
   --sec-pad:64px; --cat-bg:#FBF6EC;
@@ -41,8 +51,7 @@
   --card-sombra:inset 0 0 0 1px #E9DDC9;
 
   --precio-color:#B33A48;
-  --add-bg:transparent; --add-tinta:#2B2320;
-  --add-borde:inset 0 0 0 1px #2B2320;
+  --add-bg:#B33A48; --add-tinta:#FEFBF6; --add-borde:none;
 
   --ficha-bg:#F5EDDF; --ficha-tinta:#2B2320; --ficha-parrafo:#6F6156;
   --ficha-linea:#DDCEB4; --entrega-bg:#FEFBF6;
@@ -51,10 +60,10 @@
   --pie-bg:#2B2320; --pie-tinta:#E9DDC9;
 }
 
-/* La etiqueta atada: el precio y el "Agregar" viven dentro de un recuadro de
-   papel con filete de tinta, como la tarjeta que cuelga del ramo. */
-.compra{background:#FEFBF6;box-shadow:inset 0 0 0 1px #2B2320;
-  border-radius:2px;padding:9px 10px;margin-top:14px}
+/* Un filete finísimo separa el precio del nombre — nada de recuadros: un
+   recuadro dentro de otro recuadro es exactamente lo que no queremos. */
+.compra{border-top:1px solid #E9DDC9;margin-top:12px;padding-top:11px}
 .card .cuerpo{gap:4px}
+.buscar:focus-within{box-shadow:inset 0 0 0 1px #2B2320}
 /* Bodoni aguanta mal el cuerpo chico: los rótulos van en Karla */
 .card .cat,.eti{font-family:'Karla',sans-serif}
