@@ -34,14 +34,20 @@ reemplazó por los verdes medidos.
 
 ```sh
 python3 design/build.py      # las tres direcciones + capturas
-python3 design/galeria.py    # la galería que se le manda a la dueña
+python3 design/muestra.py    # la tienda con las tres pieles conmutables
+python3 design/galeria.py    # la galería con la comparación lado a lado
 ```
 
 `build.py` compone `tienda.html` (la maqueta, una sola vez) con
 `direcciones/<clave>.css` (los tokens de cada una), incrusta las tipografías
 (woff2 en base64) y las fotos, y fotografía cada dirección a 1440 y 430 px.
 
-Los cuatro archivos de `salida/` se abren solos y se pueden mandar por WhatsApp:
+`muestra.py` mete las tres pieles en un solo archivo, cada una bajo
+`[data-piel="…"]`, y agrega una barra para cambiarlas en vivo. Es lo que
+conviene mandarle a la dueña: aprieta un botón y ve la misma tienda cambiar de
+marca, en vez de comparar tres capturas.
+
+Todos los archivos de `salida/` se abren solos y se pueden mandar por WhatsApp:
 no dependen de red ni de servidor.
 
 ## En Claude Design
@@ -79,6 +85,10 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
   dirección quiera cambiar va por variable (`--tt-titulo`), no por regla.
 - **Un nombre de producto en minúscula se lee como error de tipeo.** La minúscula
   de Ámsterdam es solo para titulares y cabeceras de sección.
+- **En `muestra.html` conviven las tres pieles**, así que ocultar y mostrar los
+  textos tiene que empatarle en especificidad a las reglas de dirección. Una
+  regla como `.heroIn h1{display:inline-block}` de una dirección le ganaba a un
+  `.solo{display:none}` y salían los tres titulares apilados.
 
 ## Lo que no se toca
 
@@ -96,6 +106,11 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
 3. Rehacer los anuncios: hoy `build.mjs` tiene 11 colores escritos a mano en 9
    plantillas que cada una se inventó su look. Ya usa Cormorant Garamond y Jost,
    así que la mitad del camino está hecha.
-4. Sanear el catálogo: cinco productos fúnebres sin foto, `box-lupita` con la
-   descripción de otro producto, y el Arreglo Florencia cuya foto es un gráfico
-   de marketing con texto quemado.
+4. Sanear el catálogo: `box-lupita` tiene la descripción de otro producto, y la
+   foto del Arreglo Florencia es un gráfico de marketing con el texto quemado
+   encima.
+
+   (Los cinco productos fúnebres **sí** tienen foto, a 1080×1440 en
+   `app/public/products/`. Faltan en `site/assets/products/`, la carpeta del
+   sitio viejo, que producción ya no sirve — mirar ahí lleva a conclusiones
+   falsas.)
