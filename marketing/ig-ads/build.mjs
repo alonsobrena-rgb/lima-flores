@@ -24,18 +24,33 @@ const OUT = path.join(HERE, 'creativos');
 const CACHE = path.join(HERE, '.fontcache');
 
 const FONT_CSS_URL =
-  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap';
+  'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap';
 
-// Paleta del sitio — site/css/lima.css
+// La paleta no se escribe acá: se lee del sistema de diseño Florencia, que a su
+// vez sale de medir el ramo del logotipo. Si el sistema cambia de fondo o de
+// acento, los 32 anuncios cambian con él sin tocar este archivo.
+const TOKENS = Object.fromEntries(
+  [...fs.readFileSync(path.join(ROOT, 'design/direcciones/florencia.css'), 'utf8')
+      .matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/gi)]
+    .map((m) => [m[1], m[2].trim()]),
+);
+const tk = (nombre) => {
+  const v = TOKENS[nombre];
+  if (!v) throw new Error(`falta el token ${nombre} en florencia.css`);
+  return v;
+};
+
 const C = {
-  bone: '#F4EFE5',
-  paper: '#FBF8F1',
-  ink: '#1B1A17',
-  line: '#DCD4C2',
-  moss: '#4F5C3F',
-  terra: '#B6855E',
-  gold: '#A57F45',
-  rosa: '#9E2B5E',
+  fondo: tk('--bg-page'),        // blanco total
+  alt: tk('--bg-alt'),           // gris de sección
+  ink: tk('--text-strong'),
+  body: tk('--text-body'),
+  muted: tk('--text-muted'),
+  faint: tk('--text-faint'),     // el gris del logotipo
+  line: tk('--border'),
+  rosa: tk('--accent'),
+  rosaHonda: tk('--accent-hover'),
+  verde: tk('--leaf'),
 };
 
 /* ─────────────────────────────  utilidades  ───────────────────────────── */
@@ -141,11 +156,18 @@ const base = (fonts, w, h, body) => `<!doctype html><meta charset="utf-8"><style
 ${fonts}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:${w}px;height:${h}px;overflow:hidden}
-body{position:relative;background:${C.bone};font-family:'Jost',-apple-system,'Helvetica Neue',sans-serif;color:${C.ink};
+body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sans-serif;color:${C.body};
   -webkit-font-smoothing:antialiased}
-.d{font-family:'Cormorant Garamond','EB Garamond',Georgia,serif;font-weight:300;letter-spacing:-.022em;line-height:.94}
-.d em{font-style:italic;font-weight:400;color:var(--em,${C.rosa})}
-.mono{font-family:'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.24em}
+/* El sistema fija el tamaño display en itálica peso 500 — guidelines/
+   type-display.html. Con todo en itálica, el acento se distingue por color y
+   no por estilo, que además es más elegante. */
+.d{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;
+  letter-spacing:-.018em;line-height:.98}
+.d em{font-style:italic;font-weight:500;color:var(--em,${C.rosa})}
+/* No hay mono en el sistema: los rótulos son Jost en versalita muy espaciada,
+   como manda type-eyebrow-script.html. */
+.mono{font-family:'Jost',sans-serif;font-weight:500;text-transform:uppercase;
+  letter-spacing:.22em}
 .rule{height:1px;background:${C.line}}
 .shot{width:100%;height:100%;object-fit:cover;display:block}
 </style>${body}`;
@@ -167,9 +189,9 @@ const img = (a, ph, banda) => {
 
 // A · Editorial: foto grande, titular abajo. Para público frío.
 const editorial = (a, ph) => `
-<div style="position:absolute;inset:0;background:${C.bone}">
+<div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:60px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center">
-    <span class="mono" style="font-size:19px;color:${C.gold}">${a.creative.eyebrow}</span>
+    <span class="mono" style="font-size:19px;color:${C.rosa}">${a.creative.eyebrow}</span>
     ${logo(74)}
   </div>
   <div class="rule" style="position:absolute;top:126px;left:72px;right:72px"></div>
@@ -178,34 +200,34 @@ const editorial = (a, ph) => `
   </div>
   <div style="position:absolute;top:966px;left:72px;right:72px;height:266px">
     <h1 class="d" style="font-size:${a.creative.hlSize || 100}px">${a.creative.headline}</h1>
-    <p style="font-size:27px;font-weight:300;line-height:1.42;color:#4A473F;margin-top:24px;max-width:820px">${a.creative.sub}</p>
+    <p style="font-size:27px;font-weight:300;line-height:1.42;color:${C.body};margin-top:24px;max-width:820px">${a.creative.sub}</p>
   </div>
   <div class="rule" style="position:absolute;top:1236px;left:72px;right:72px"></div>
   <div style="position:absolute;top:1258px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center">
     <span class="d" style="font-size:46px;font-weight:400">${a.creative.price}</span>
-    <span class="mono" style="font-size:17px;color:${C.moss}">${a.creative.footer}</span>
+    <span class="mono" style="font-size:17px;color:${C.muted}">${a.creative.footer}</span>
   </div>
 </div>`;
 
 // B · Split: panel oscuro con la lista de entregables + foto a sangre. Objeciones.
 const split = (a, ph) => `
 <div style="position:absolute;inset:0">
-  <div style="position:absolute;top:0;bottom:0;left:0;width:486px;background:${C.ink};color:${C.bone}">
-    <span class="mono" style="position:absolute;top:64px;left:52px;font-size:17px;color:${C.terra}">${a.creative.eyebrow}</span>
+  <div style="position:absolute;top:0;bottom:0;left:0;width:486px;background:${C.alt};color:${C.ink}">
+    <span class="mono" style="position:absolute;top:64px;left:52px;font-size:17px;color:${C.rosa}">${a.creative.eyebrow}</span>
     <h1 class="d" style="position:absolute;top:112px;left:52px;right:52px;font-size:${a.creative.hlSize || 82}px">${a.creative.headline}</h1>
     <ul style="position:absolute;left:52px;right:52px;bottom:214px;list-style:none;
-               border-top:1px solid rgba(244,239,229,.28)">
+               border-top:1px solid ${C.line}">
       ${a.creative.items
         .map(
           (t) => `<li style="display:flex;gap:16px;align-items:flex-start;padding:19px 0;
-              border-bottom:1px solid rgba(244,239,229,.14);font-size:24px;font-weight:300;line-height:1.34">
-            <span style="color:${C.terra};font-size:18px;line-height:1.75">—</span><span>${t}</span></li>`,
+              border-bottom:1px solid ${C.line};font-size:24px;font-weight:400;line-height:1.34;color:${C.body}">
+            <span style="color:${C.verde};font-size:18px;line-height:1.75">—</span><span>${t}</span></li>`,
         )
         .join('')}
     </ul>
     <div style="position:absolute;left:52px;bottom:64px">
-      <div class="d" style="font-size:64px;font-weight:400;color:#fff">${a.creative.price}</div>
-      <div class="mono" style="font-size:15px;color:rgba(244,239,229,.6);margin-top:12px">${a.creative.footer}</div>
+      <div class="d" style="font-size:64px;color:${C.rosa}">${a.creative.price}</div>
+      <div class="mono" style="font-size:15px;color:${C.muted};margin-top:12px">${a.creative.footer}</div>
     </div>
   </div>
   <div style="position:absolute;top:0;bottom:0;left:486px;right:0;background:${ph.bg};overflow:hidden">
@@ -216,9 +238,9 @@ const split = (a, ph) => `
 
 // C · Cita: prueba social o manifiesto arriba, foto abajo. Para consideración.
 const quote = (a, ph) => `
-<div style="position:absolute;inset:0;background:${C.paper}">
+<div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:70px;left:76px;right:76px;display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:23px;letter-spacing:.42em;color:${C.gold}">★★★★★</span>
+    <span style="font-size:23px;letter-spacing:.42em;color:${C.rosa}">★★★★★</span>
     ${logo(72)}
   </div>
   <blockquote class="d" style="position:absolute;top:148px;left:76px;right:76px;
@@ -228,7 +250,7 @@ const quote = (a, ph) => `
       <span style="width:44px;height:1px;background:${C.line}"></span>
       <span style="font-size:23px;font-weight:400">${a.creative.author}</span>
     </div>
-    <div class="mono" style="font-size:15px;color:${C.moss};margin-top:14px;margin-left:62px">${a.creative.meta}</div>
+    <div class="mono" style="font-size:15px;color:${C.muted};margin-top:14px;margin-left:62px">${a.creative.meta}</div>
   </div>
   <div style="position:absolute;left:0;right:0;bottom:0;height:700px;background:${ph.bg};
               border-top:1px solid ${C.line};overflow:hidden">
@@ -237,7 +259,7 @@ const quote = (a, ph) => `
                 justify-content:space-between;align-items:center;
                 background:linear-gradient(to top,rgba(251,248,241,.97) 40%,rgba(251,248,241,0))">
       <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
-      <span class="mono" style="font-size:16px;color:${C.moss}">${a.creative.footer}</span>
+      <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
     </div>
   </div>
 </div>`;
@@ -245,22 +267,22 @@ const quote = (a, ph) => `
 // S · Historia 9:16. Todo el texto vive entre los 250px de arriba y los 372px de
 // abajo que tapan la interfaz de Instagram.
 const story = (a, ph) => `
-<div style="position:absolute;inset:0;background:${C.bone}">
+<div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:0;left:0;right:0;height:1010px;background:${ph.bg};overflow:hidden">
     ${img(a, ph)}
     <div style="position:absolute;left:0;right:0;bottom:0;height:240px;
-                background:linear-gradient(to top,${C.bone},rgba(244,239,229,0))"></div>
+                background:linear-gradient(to top,${C.fondo},rgba(255,255,255,0))"></div>
   </div>
   <div style="position:absolute;left:78px;right:78px;top:1128px;height:312px">
-    <span class="mono" style="font-size:18px;color:${C.gold}">${a.creative.eyebrow}</span>
+    <span class="mono" style="font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
     <h1 class="d" style="font-size:${a.creative.hlSize || 96}px;margin-top:24px">${a.creative.headline}</h1>
-    <p style="font-size:30px;font-weight:300;line-height:1.4;color:#4A473F;margin-top:26px;max-width:860px">${a.creative.sub}</p>
+    <p style="font-size:30px;font-weight:300;line-height:1.4;color:${C.body};margin-top:26px;max-width:860px">${a.creative.sub}</p>
   </div>
   <div style="position:absolute;left:78px;right:78px;bottom:372px;display:flex;justify-content:space-between;align-items:center">
-    <span style="display:inline-flex;align-items:center;gap:18px;background:${C.ink};color:${C.bone};
+    <span style="display:inline-flex;align-items:center;gap:18px;background:${C.rosa};color:#fff;
                  padding:26px 46px;border-radius:999px">
-      <span style="font-size:26px;font-weight:400">${a.creative.pill}</span>
-      <span style="font-size:24px;color:${C.terra}">→</span>
+      <span style="font-size:26px;font-weight:500">${a.creative.pill}</span>
+      <span style="font-size:24px">→</span>
     </span>
     ${logo(72)}
   </div>
@@ -273,7 +295,7 @@ const story = (a, ph) => `
 const puro = (a, ph, w, h) => {
   const light = a.creative.tone === 'light';
   const fg = light ? '#fff' : C.ink;
-  const mut = light ? 'rgba(255,255,255,.8)' : '#4A473F';
+  const mut = light ? 'rgba(255,255,255,.8)' : '${C.body}';
   const safe = h === 1920 ? 372 : 76;
   // `anchor:'top'` para fotos cuyo aire está arriba: el texto se apoya en el
   // vacío de la propia toma en vez de caer sobre el producto.
@@ -313,18 +335,18 @@ const sello = (a, ph, w, h) => {
   // fondo claro se invierte, porque un velo negro ahí se ve como un parche.
   const onDark = a.creative.tone === 'light';
   const fg = onDark ? '#fff' : C.ink;
-  const mut = onDark ? 'rgba(255,255,255,.8)' : '#4A473F';
-  const velo = onDark ? '10,7,6' : '244,239,229';
+  const mut = onDark ? 'rgba(255,255,255,.8)' : C.body;
+  const velo = onDark ? '10,7,6' : '255,255,255';
   return `
 <div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
   ${img(a, ph)}
   <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.5)}px;
        background:linear-gradient(to top,rgba(${velo},${onDark ? '.78' : '.96'}),rgba(${velo},0))"></div>
   <div style="position:absolute;top:${h === 1920 ? 300 : 74}px;right:74px;width:244px;height:244px;
-              background:${onDark ? C.bone : C.ink};border-radius:50%;color:${onDark ? C.ink : C.bone};
+              background:${C.rosa};border-radius:50%;color:#fff;
               display:flex;flex-direction:column;align-items:center;justify-content:center">
     <span class="d" style="font-size:64px;font-weight:400;line-height:1">${a.creative.price}</span>
-    <span class="mono" style="font-size:12px;color:${onDark ? C.moss : C.terra};margin-top:12px">${a.creative.seal}</span>
+    <span class="mono" style="font-size:12px;color:rgba(255,255,255,.78);margin-top:12px">${a.creative.seal}</span>
   </div>
   <div style="position:absolute;left:76px;right:76px;bottom:${h === 1920 ? 372 : 76}px;color:${fg}">
     <h1 class="d" style="font-size:${a.creative.hlSize || 96}px">${a.creative.headline}</h1>
@@ -341,8 +363,10 @@ const sello = (a, ph, w, h) => {
 const cuadro = (a, ph) => `
 <div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden">
   ${img(a, ph)}
+  <div style="position:absolute;top:0;right:0;left:330px;height:560px;pointer-events:none;
+       background:linear-gradient(205deg,rgba(255,255,255,.97) 26%,rgba(255,255,255,.72) 52%,rgba(255,255,255,0) 82%)"></div>
   <div style="position:absolute;top:62px;right:58px;left:498px;text-align:right">
-    <span class="mono" style="font-size:15px;color:${C.moss}">${a.creative.eyebrow}</span>
+    <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.eyebrow}</span>
     <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:20px">${a.creative.headline}</h1>
     <div style="height:1px;background:${C.line};margin:24px 0 0;margin-left:auto;width:180px"></div>
     <div style="margin-top:22px;display:flex;justify-content:flex-end;align-items:center;gap:20px">
@@ -358,15 +382,15 @@ const titular = (a, ph, w, h) => {
   const bandTop = tall ? 788 : 640;
   const bandH = tall ? 760 : 710;
   return `
-<div style="position:absolute;inset:0;background:${C.bone}">
+<div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:${tall ? 262 : 60}px;left:76px">${logo(80)}</div>
-  <span class="mono" style="position:absolute;top:${tall ? 372 : 170}px;left:76px;font-size:18px;color:${C.gold}">${a.creative.eyebrow}</span>
+  <span class="mono" style="position:absolute;top:${tall ? 372 : 170}px;left:76px;font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
   <h1 class="d" style="position:absolute;top:${tall ? 418 : 214}px;left:76px;right:76px;
       font-size:${a.creative.hlSize || (tall ? 128 : 122)}px">${a.creative.headline}</h1>
   <div style="position:absolute;left:76px;right:76px;top:${bandTop - 74}px;display:flex;
               justify-content:space-between;align-items:baseline">
     <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
-    <span class="mono" style="font-size:16px;color:${C.moss}">${a.creative.footer}</span>
+    <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
   </div>
   <div style="position:absolute;left:0;right:0;top:${bandTop}px;height:${bandH}px;background:${ph.bg};overflow:hidden">
     ${img(a, ph, true)}
@@ -381,16 +405,16 @@ const postal = (a, ph, w, h) => {
   const box = w - side * 2;
   const top = tall ? 402 : 150;
   return `
-<div style="position:absolute;inset:0;background:${C.paper};text-align:center">
+<div style="position:absolute;inset:0;background:${C.fondo};text-align:center">
   <div style="position:absolute;top:${tall ? 276 : 66}px;left:0;right:0;display:flex;justify-content:center">${logo(86)}</div>
   <div style="position:absolute;left:${side}px;top:${top}px;width:${box}px;height:${box}px;
               background:${ph.bg};border:1px solid ${C.line};overflow:hidden">${img(a, ph)}</div>
   <div style="position:absolute;left:${side}px;right:${side}px;top:${top + box + 46}px">
     <h1 class="d" style="font-size:${a.creative.hlSize || 70}px">${a.creative.headline}</h1>
-    <p style="font-size:25px;font-weight:300;line-height:1.4;color:#4A473F;margin-top:20px">${a.creative.sub}</p>
+    <p style="font-size:25px;font-weight:300;line-height:1.4;color:${C.body};margin-top:20px">${a.creative.sub}</p>
     <div style="margin-top:22px;display:flex;justify-content:center;align-items:baseline;gap:20px">
       <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
-      <span class="mono" style="font-size:15px;color:${C.moss}">${a.creative.footer}</span>
+      <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.footer}</span>
     </div>
   </div>
 </div>`;
@@ -570,7 +594,7 @@ function writeDeck({ campaign, products, ads }) {
   L.push('| `titular` | Manda la tipografía; la foto entra como franja al pie. | Rompe el patrón visual cuando el resto del conjunto es todo foto. |');
   L.push('| `postal` | Margen amplio y la foto montada como lámina. Simétrica. | Fotos que no aguantan ir a sangre por resolución o encuadre. |');
   L.push('| `editorial` | Foto grande arriba, titular abajo, filetes finos. | Presentación de producto en público frío. |');
-  L.push('| `split` | Panel oscuro con la lista de entregables + foto a sangre. | Desarmar objeciones de precio: convierte el ticket en una lista. |');
+  L.push('| `split` | Panel claro con la lista de entregables + foto a sangre. | Desarmar objeciones de precio: convierte el ticket en una lista. |');
   L.push('| `quote` | Cita grande arriba, foto abajo. | Prueba social o manifiesto de marca. |');
   L.push('| `story` | Banda de foto arriba, texto y botón en zona segura. | Historias de retargeting con llamada a la acción. |');
   L.push('');
@@ -588,8 +612,11 @@ function writeDeck({ campaign, products, ads }) {
   L.push('  descarta: no daba aire y sí cambiaba el encuadre. Las franjas mucho más anchas que altas');
   L.push('  (`titular`, `quote`) usan la toma original a sangre, porque ahí un recorte vertical entraría');
   L.push('  contenido y se vería diminuto.');
-  L.push('- Tipografías y paleta: las del sitio (`site/css/lima.css`) — Cormorant Garamond, Jost,');
-  L.push('  JetBrains Mono sobre hueso `#F4EFE5` y tinta `#1B1A17`.');
+  L.push('- Tipografías y paleta: **no se eligen acá**. Se leen del sistema de diseño Florencia');
+  L.push('  (`design/direcciones/florencia.css`), que a su vez saca sus colores de medir el ramo del');
+  L.push('  logotipo. Hoy: blanco total `#FFFFFF`, tinta cálida `#2A2623`, rosa `#9E2B5E`, y');
+  L.push('  Cormorant Garamond en itálica 500 para los titulares con Jost para todo lo demás. Si el');
+  L.push('  sistema cambia, los 32 creativos cambian con él sin tocar `build.mjs`.');
   L.push('- Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.');
   L.push('  En `marca/` hay dos versiones, generadas con `marca/prep-logo.py`: `logo.png` para');
   L.push('  fondos claros y `logo-claro.png` para fondos oscuros, donde la caligrafía gris del');

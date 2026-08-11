@@ -1107,7 +1107,7 @@ Diego V. antes de publicar IG-05.
 | `titular` | Manda la tipografía; la foto entra como franja al pie. | Rompe el patrón visual cuando el resto del conjunto es todo foto. |
 | `postal` | Margen amplio y la foto montada como lámina. Simétrica. | Fotos que no aguantan ir a sangre por resolución o encuadre. |
 | `editorial` | Foto grande arriba, titular abajo, filetes finos. | Presentación de producto en público frío. |
-| `split` | Panel oscuro con la lista de entregables + foto a sangre. | Desarmar objeciones de precio: convierte el ticket en una lista. |
+| `split` | Panel claro con la lista de entregables + foto a sangre. | Desarmar objeciones de precio: convierte el ticket en una lista. |
 | `quote` | Cita grande arriba, foto abajo. | Prueba social o manifiesto de marca. |
 | `story` | Banda de foto arriba, texto y botón en zona segura. | Historias de retargeting con llamada a la acción. |
 
@@ -1125,8 +1125,11 @@ catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` 
   descarta: no daba aire y sí cambiaba el encuadre. Las franjas mucho más anchas que altas
   (`titular`, `quote`) usan la toma original a sangre, porque ahí un recorte vertical entraría
   contenido y se vería diminuto.
-- Tipografías y paleta: las del sitio (`site/css/lima.css`) — Cormorant Garamond, Jost,
-  JetBrains Mono sobre hueso `#F4EFE5` y tinta `#1B1A17`.
+- Tipografías y paleta: **no se eligen acá**. Se leen del sistema de diseño Florencia
+  (`design/direcciones/florencia.css`), que a su vez saca sus colores de medir el ramo del
+  logotipo. Hoy: blanco total `#FFFFFF`, tinta cálida `#2A2623`, rosa `#9E2B5E`, y
+  Cormorant Garamond en itálica 500 para los titulares con Jost para todo lo demás. Si el
+  sistema cambia, los 32 creativos cambian con él sin tocar `build.mjs`.
 - Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.
   En `marca/` hay dos versiones, generadas con `marca/prep-logo.py`: `logo.png` para
   fondos claros y `logo-claro.png` para fondos oscuros, donde la caligrafía gris del

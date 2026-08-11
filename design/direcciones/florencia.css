@@ -7,7 +7,7 @@
   --text-strong:#2A2623; --text-body:#4A443F; --text-muted:#6E6862;
   --text-faint:#A2A19F; --text-on-accent:#FFFFFF;
   --border:#E6E5E3; --border-strong:#CBC9C6;
-  --accent:#9E2B5E;
+  --accent:#9E2B5E; --accent-hover:#842049;
 
   --font-display:'Cormorant Garamond',serif;
   --font-sans:'Jost',sans-serif;
@@ -53,6 +53,8 @@
   --card-sombra:inset 0 0 0 1px #E6E5E3;
 
   /* precio en serif, del mismo tono que el acento: elegante, no chillón */
+  --leaf:#88A65C; --leaf-soft:#EDF1E4;
+
   --precio-color:#9E2B5E;
   --add-bg:#9E2B5E; --add-tinta:#FBF9F4; --add-borde:none;
 
