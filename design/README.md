@@ -9,7 +9,7 @@ estaría eligiendo maqueta y no marca.
 
 | | Dirección | Manda | Vende por |
 |---|---|---|---|
-| **A** | Florencia | la rosa `#9E2B5E` | deseo |
+| **A** | Florencia | la rosa `#9E2B5E` sobre blanco total | deseo |
 | **B** | París | el durazno, con el listón `#B33A48` | insistencia elegante |
 | **C** | Ámsterdam | el verde pintado `#0B6E30` | abundancia |
 
@@ -109,6 +109,12 @@ sirve para sincronizar. Para crear uno de verdad va `DesignSync` con
 `type: PROJECT_TYPE_DESIGN_SYSTEM`.
 
 `claude-design/` guarda una copia de lectura de los tokens de Florencia.
+
+**Los tokens de Florencia se leen de Claude Design, no se inventan acá.** El
+fondo pasó de marfil `#F6F3EC` a **blanco total `#FFFFFF`** por decisión en el
+sistema; `#F4F4F3` quedó para las secciones alternas y `#E6E5E3` para los
+filetes. Cuando el sistema cambie, se vuelve a leer con `read_file` y se
+sincroniza `direcciones/florencia.css`.
 
 ## Detalles que cuestan encontrar
 

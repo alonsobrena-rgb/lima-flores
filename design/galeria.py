@@ -30,13 +30,13 @@ CAPS = os.path.join(B.SALIDA, 'capturas')
 DIRECCIONES = [
     dict(
         clave='florencia', letra='A', nombre='Florencia', firma='#9E2B5E',
-        lema='Contención. Aire, marfil, y una sola rosa.',
+        lema='Contención. Aire, blanco total, y una sola rosa.',
         parrafo='La más elegante de las tres, y la que ya existía: es el sistema '
                 'que armaste en Claude Design, corregido. La portada respira antes '
                 'de que aparezca el catálogo, los títulos van en Cormorant Garamond '
                 'con itálicas de verdad, y el rosa aparece poco — un botón, un '
                 'precio, un enlace. Vende por deseo, no por insistencia.',
-        paleta=[('#F6F3EC', 'Marfil'), ('#9E2B5E', 'Rosa'),
+        paleta=[('#FFFFFF', 'Blanco'), ('#9E2B5E', 'Rosa'),
                 ('#88A65C', 'Verde'), ('#2A2623', 'Tinta')],
         tipos='Cormorant Garamond para títulos, Jost para texto y UI',
         gana=['La más elegante. Se paga sola en percepción de precio.',

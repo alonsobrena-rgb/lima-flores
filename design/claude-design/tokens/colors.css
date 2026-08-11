@@ -1,23 +1,23 @@
 /* ============================================================
    Lima Flores — Color
-   An Italian flower-cart palette: warm ivory grounds, a single
+   An Italian flower-cart palette: pure white grounds, a single
    refined deep-rose drawn from the logotype's bouquet, garden
    sage, and a soft peach. Used sparingly — the brand is mostly
    ivory, ink, and air, with rose as the one note that sings.
    ============================================================ */
 
 :root {
-  /* ---- Raw neutrals (warm, paper-like) ---- */
-  --ivory-50:  #FBF9F4;   /* lightest paper */
-  --ivory-100: #F6F3EC;   /* page canvas */
-  --ivory-200: #EFEAE0;   /* sunken / alt section */
-  --ivory-300: #E4DDD0;   /* hairline borders */
-  --ivory-400: #CFC6B6;   /* disabled / faint rule */
+  /* ---- Raw neutrals (white + near-neutral greys) ---- */
+  --ivory-50:  #FFFFFF;   /* lightest paper */
+  --ivory-100: #FFFFFF;   /* page canvas — blanco total */
+  --ivory-200: #F4F4F3;   /* sunken / alt section */
+  --ivory-300: #E6E5E3;   /* hairline borders */
+  --ivory-400: #CBC9C6;   /* disabled / faint rule */
 
   --ink-900: #2A2623;     /* primary text — warm near-black */
   --ink-700: #4A443F;     /* strong secondary */
   --ink-500: #6E6862;     /* muted text / captions */
-  --ink-400: #8E8A86;     /* the logotype gray */
+  --ink-400: #A2A19F;     /* el gris exacto del logotipo (medido) */
   --ink-300: #B4ADA4;     /* placeholder / faint */
 
   /* ---- Rosa — the signature accent (from the logo bouquet) ---- */
