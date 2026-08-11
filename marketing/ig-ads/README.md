@@ -1111,6 +1111,34 @@ Diego V. antes de publicar IG-05.
 | `quote` | Cita grande arriba, foto abajo. | Prueba social o manifiesto de marca. |
 | `story` | Banda de foto arriba, texto y botón en zona segura. | Historias de retargeting con llamada a la acción. |
 
+### Tres más, todavía en prueba
+
+`vitrina` (la foto dentro de un arco), `tira` (tres productos con su precio, apoyados en
+la misma repisa) y `cifra` (el precio a tamaño de titular). Viven en un carril aparte,
+`pruebas.json`, y se rinden en `pruebas/` sin tocar la campaña:
+
+```
+node marketing/ig-ads/build.mjs --pruebas   # dos piezas de cada formato nuevo
+python3 marketing/ig-ads/pruebas.py         # la hoja para decidir cuáles entran
+```
+
+Cuando uno se apruebe, pasa a `ads.json` con su copy, su objetivo y su público, igual que
+los otros nueve, y desde ahí entra a la galería de la campaña.
+
+### Los velos no llevan canto
+
+Un `linear-gradient(color, transparent)` tiene la derivada rota justo donde arranca: la
+opacidad cae en línea recta y de golpe deja de caer, y el ojo lee esa esquina de la curva
+como el borde de un recuadro aunque no haya recuadro. Sobre foto clara se ve peor todavía,
+porque el velo blanco no aclara nada y lo único que queda visible es su propio borde: eso
+era el rectángulo con fade de IG-22 y IG-30. Los velos van por `velo()` y `veloEsquina()`,
+que aproximan una smoothstep y siempre llegan a sangre, así que el único borde recto que
+existe es el del lienzo.
+
+De paso apareció otro: el marfil `251,248,241` del velo de las citas era de la paleta
+anterior y sobrevivió al paso a blanco total, así que al pie de IG-05, IG-08 e IG-19 había
+una banda amarillenta. Ahora el velo saca su color del token, no de un rgb escrito a mano.
+
 Para agregar un anuncio basta con otra entrada en `ads.json`: la plantilla, la foto del
 catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` —
 `4:5`, `1:1` o `9:16`.

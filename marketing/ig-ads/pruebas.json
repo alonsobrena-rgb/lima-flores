@@ -1,0 +1,133 @@
+{
+  "_": "Banco de pruebas de formatos. NO es la campaña: acá se mira una plantilla nueva antes de que exista un solo anuncio con ella. Se rinde con `node build.mjs --pruebas` y sale en pruebas/. Los textos son reales (catálogo y checkout), para que la prueba diga la verdad sobre cómo se comporta el formato con el copy de verdad.",
+  "products": [],
+  "ads": [
+    {
+      "code": "PR-vitrina-1",
+      "template": "vitrina",
+      "format": "4:5",
+      "photo": "orquidea-rosado-vintage-2.jpg",
+      "title": "Vitrina · orquídea",
+      "creative": {
+        "eyebrow": "Orquídeas · No. 12",
+        "headline": "Rosado <em>vintage</em>",
+        "sub": "Phalaenopsis en maceta blanca, armada a mano en Miraflores.",
+        "price": "S/ 200",
+        "footer": "Orquídea Rosado Vintage",
+        "fit": "cover",
+        "position": "50% 46%"
+      }
+    },
+    {
+      "code": "PR-vitrina-2",
+      "template": "vitrina",
+      "format": "9:16",
+      "photo": "tulipanes-de-amor.jpg",
+      "title": "Vitrina · tulipanes 9:16",
+      "creative": {
+        "eyebrow": "Floreros · No. 07",
+        "headline": "Tulipanes, <em>en florero</em>",
+        "sub": "Llega puesto en agua. Eliges el día y una franja de 30 minutos.",
+        "price": "S/ 195",
+        "footer": "Tulipanes de Amor",
+        "hlSize": 84,
+        "fit": "cover",
+        "position": "50% 44%"
+      }
+    },
+    {
+      "code": "PR-tira-1",
+      "template": "tira",
+      "format": "4:5",
+      "photo": "ramo-de-flores-sofia.jpg",
+      "title": "Tira · tres ramos",
+      "creative": {
+        "eyebrow": "Ramos",
+        "headline": "Tres maneras de <em>decir lo mismo</em>",
+        "sub": "Eliges el día y una franja de 30 minutos",
+        "footer": "Entrega en Lima Metropolitana",
+        "price": "S/ 160",
+        "hlSize": 82,
+        "piezas": [
+          {
+            "photo": "ramo-de-flores-sofia.jpg",
+            "name": "Ramo Sofía",
+            "price": "S/ 160"
+          },
+          {
+            "photo": "ramo-luana.jpg",
+            "name": "Ramo Luana",
+            "price": "S/ 180"
+          },
+          {
+            "photo": "ramo-de-24-rosas-con-papel-de-estrellas.jpg",
+            "name": "24 rosas con papel de estrellas",
+            "price": "S/ 190"
+          }
+        ]
+      }
+    },
+    {
+      "code": "PR-tira-2",
+      "template": "tira",
+      "format": "4:5",
+      "photo": "box-simona.jpg",
+      "title": "Tira · tres cajas",
+      "creative": {
+        "eyebrow": "Arreglos en caja",
+        "headline": "La caja <em>ya es el regalo</em>",
+        "sub": "Armado a mano en el atelier de Miraflores",
+        "footer": "Entrega en Lima Metropolitana",
+        "price": "S/ 176",
+        "hlSize": 82,
+        "piezas": [
+          {
+            "photo": "box-simona.jpg",
+            "name": "Box Simona",
+            "price": "S/ 176"
+          },
+          {
+            "photo": "box-lila.jpg",
+            "name": "Box Lila",
+            "price": "S/ 180"
+          },
+          {
+            "photo": "box-rogelia-3.jpg",
+            "name": "Box Rogelia",
+            "price": "S/ 210"
+          }
+        ]
+      }
+    },
+    {
+      "code": "PR-cifra-1",
+      "template": "cifra",
+      "format": "4:5",
+      "photo": "arreglo-rossie-3.jpg",
+      "title": "Cifra · Rossie",
+      "creative": {
+        "eyebrow": "Arreglo Rossie · 30 × 50 cm",
+        "headline": "Ocupa la <em>mesa entera</em>",
+        "price": "S/ 245",
+        "footer": "Florero de vidrio · Tarjeta incluida",
+        "fit": "cover",
+        "position": "50% 42%"
+      }
+    },
+    {
+      "code": "PR-cifra-2",
+      "template": "cifra",
+      "format": "9:16",
+      "photo": "orquideas-amarillas-con-lineas-fucsias-3.jpg",
+      "title": "Cifra · orquídeas 9:16",
+      "creative": {
+        "eyebrow": "Dos varas · maceta de cobre",
+        "headline": "Amarillo con <em>líneas fucsias</em>",
+        "price": "S/ 215",
+        "footer": "Eliges el día y la hora",
+        "fit": "cover",
+        "position": "50% 46%"
+      }
+    }
+  ]
+}

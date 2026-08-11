@@ -51,6 +51,7 @@ const C = {
   rosa: tk('--accent'),
   rosaHonda: tk('--accent-hover'),
   verde: tk('--leaf'),
+  radio: tk('--radius-sm'),      // el pie del arco, para que no quede en punta
 };
 
 /* ─────────────────────────────  utilidades  ───────────────────────────── */
@@ -151,6 +152,31 @@ const logo = (h, onDark) =>
         style="height:${h}px;width:auto;display:block">`;
 
 /* ─────────────────────────────  plantillas  ───────────────────────────── */
+
+/* ── velos ───────────────────────────────────────────────────────────────
+   Un velo es lo que vuelve legible un texto sobre foto. El problema es que un
+   `linear-gradient(a, transparent)` tiene la derivada rota justo donde arranca:
+   la opacidad cae en línea recta y de golpe deja de caer. El ojo lee esa
+   esquina de la curva como el canto de un recuadro — aunque no haya recuadro.
+   Con foto clara detrás se ve peor todavía, porque el velo blanco no aclara
+   nada y lo único que queda visible es su propio borde.
+
+   Estos paros aproximan una smoothstep: entra y sale en cero, sin cantos. Y el
+   velo va siempre a sangre por los tres lados que toca el lienzo, así que el
+   único borde recto que existe es el del propio anuncio. */
+// El velo se pide en rgb y el sistema da hex. Se convierte acá, en vez de
+// escribir el rgb a mano: así el velo no se queda con el color viejo cuando el
+// token cambia. Pasó — el marfil `251,248,241` sobrevivió al paso a blanco
+// total y se veía como una banda amarillenta al pie de las citas.
+const rgb = (hex) => hex.replace('#', '').match(/../g).map((h) => parseInt(h, 16)).join(',');
+const PASOS = [[0, 1], [12, .972], [24, .896], [36, .776], [48, .62], [60, .448],
+  [72, .28], [82, .152], [91, .06], [100, 0]];
+const velo = (dir, rgb, alfa = 1) =>
+  `linear-gradient(${dir},${PASOS.map(([p, a]) => `rgba(${rgb},${(a * alfa).toFixed(3)}) ${p}%`).join(',')})`;
+// Versión radial, para cuando el texto se apoya en una esquina: una elipse
+// anclada fuera del lienzo no tiene ni un lado recto.
+const veloEsquina = (at, rgb, alfa = 1, tam = '118% 86%') =>
+  `radial-gradient(${tam} at ${at},${PASOS.map(([p, a]) => `rgba(${rgb},${(a * alfa).toFixed(3)}) ${p}%`).join(',')})`;
 
 const base = (fonts, w, h, body) => `<!doctype html><meta charset="utf-8"><style>
 ${fonts}
@@ -255,9 +281,9 @@ const quote = (a, ph) => `
   <div style="position:absolute;left:0;right:0;bottom:0;height:700px;background:${ph.bg};
               border-top:1px solid ${C.line};overflow:hidden">
     ${img(a, ph, true)}
-    <div style="position:absolute;left:0;right:0;bottom:0;padding:40px 76px;display:flex;
-                justify-content:space-between;align-items:center;
-                background:linear-gradient(to top,rgba(251,248,241,.97) 40%,rgba(251,248,241,0))">
+    <div style="position:absolute;left:0;right:0;bottom:0;height:330px;padding:0 76px 40px;
+                display:flex;justify-content:space-between;align-items:flex-end;
+                background:${velo('to top', rgb(C.fondo), .98)}">
       <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
       <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
     </div>
@@ -270,8 +296,8 @@ const story = (a, ph) => `
 <div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:0;left:0;right:0;height:1010px;background:${ph.bg};overflow:hidden">
     ${img(a, ph)}
-    <div style="position:absolute;left:0;right:0;bottom:0;height:240px;
-                background:linear-gradient(to top,${C.fondo},rgba(255,255,255,0))"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:300px;
+                background:${velo('to top', rgb(C.fondo))}"></div>
   </div>
   <div style="position:absolute;left:78px;right:78px;top:1128px;height:312px">
     <span class="mono" style="font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
@@ -312,8 +338,8 @@ const puro = (a, ph, w, h) => {
             --em:${light ? '#F0BFCB' : C.rosa}">
   <div style="position:absolute;left:0;right:0;${fotoPos};overflow:hidden">${img(a, ph)}</div>
   ${light
-    ? `<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.68)}px;
-         background:linear-gradient(to top,rgba(10,7,6,.84),rgba(10,7,6,.3) 46%,rgba(10,7,6,0))"></div>`
+    ? `<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.74)}px;
+         background:${velo('to top', '10,7,6', .86)}"></div>`
     : ''}
   <div style="position:absolute;${markPos};left:76px">${logo(74, light)}</div>
   <div style="position:absolute;left:76px;right:76px;${textPos}">
@@ -336,12 +362,12 @@ const sello = (a, ph, w, h) => {
   const onDark = a.creative.tone === 'light';
   const fg = onDark ? '#fff' : C.ink;
   const mut = onDark ? 'rgba(255,255,255,.8)' : C.body;
-  const velo = onDark ? '10,7,6' : '255,255,255';
+  const tinte = onDark ? '10,7,6' : rgb(C.fondo);
   return `
 <div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
   ${img(a, ph)}
-  <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.5)}px;
-       background:linear-gradient(to top,rgba(${velo},${onDark ? '.78' : '.96'}),rgba(${velo},0))"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.62)}px;
+       background:${velo('to top', tinte, onDark ? .8 : .95)}"></div>
   <div style="position:absolute;top:${h === 1920 ? 300 : 74}px;right:74px;width:244px;height:244px;
               background:${C.rosa};border-radius:50%;color:#fff;
               display:flex;flex-direction:column;align-items:center;justify-content:center">
@@ -363,8 +389,8 @@ const sello = (a, ph, w, h) => {
 const cuadro = (a, ph) => `
 <div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden">
   ${img(a, ph)}
-  <div style="position:absolute;top:0;right:0;left:330px;height:560px;pointer-events:none;
-       background:linear-gradient(205deg,rgba(255,255,255,.97) 26%,rgba(255,255,255,.72) 52%,rgba(255,255,255,0) 82%)"></div>
+  <div style="position:absolute;inset:0;pointer-events:none;
+       background:${veloEsquina('88% 2%', '255,255,255', .97)}"></div>
   <div style="position:absolute;top:62px;right:58px;left:498px;text-align:right">
     <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.eyebrow}</span>
     <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:20px">${a.creative.headline}</h1>
@@ -420,7 +446,150 @@ const postal = (a, ph, w, h) => {
 </div>`;
 };
 
-const TEMPLATES = { editorial, split, quote, story, puro, sello, cuadro, titular, postal };
+/* ── tres formatos nuevos ────────────────────────────────────────────────
+   Los nueve de arriba resuelven el mismo problema de nueve maneras: una foto,
+   un titular y un precio. Estos tres cambian la pregunta. */
+
+// V · Vitrina: la foto dentro de un arco, apoyada en la repisa. Es la puerta de
+// una florería europea — el encargo de la marca, dicho con una sola forma. El
+// arco es la única figura del sistema que no es un rectángulo, así que se gana
+// la atención sin gritar y sin tapar nada de la foto.
+const vitrina = (a, ph, w, h) => {
+  const tall = h === 1920;
+  // En 9:16 el arco no puede crecer a gusto: entre los 250 px de arriba y los
+  // 372 de abajo que tapa Instagram quedan 1298, y abajo del arco todavía van
+  // titular, bajada y precio. El arco se queda con poco más de la mitad.
+  const arcoW = tall ? 700 : 640;
+  const arcoH = tall ? 706 : 754;
+  const arcoY = tall ? 394 : 206;
+  const x = Math.round((w - arcoW) / 2);
+  const repisa = arcoY + arcoH;
+  return `
+<div style="position:absolute;inset:0;background:${C.fondo};text-align:center">
+  <div style="position:absolute;top:${tall ? 268 : 62}px;left:0;right:0;display:flex;justify-content:center">${logo(tall ? 62 : 70)}</div>
+  <span class="mono" style="position:absolute;top:${tall ? 348 : 158}px;left:0;right:0;
+        font-size:16px;color:${C.rosa}">${a.creative.eyebrow}</span>
+  <div style="position:absolute;left:${x}px;top:${arcoY}px;width:${arcoW}px;height:${arcoH}px;
+              background:${ph.bg};overflow:hidden;
+              /* Casi todas las tomas son de estudio sobre blanco, así que sin
+                 este filete el arco no existe: se funde con la página y la foto
+                 queda flotando. El filete es la ventana, no un recuadro sobre la
+                 foto — por eso va en el borde de la forma y no encima de nada. */
+              box-shadow:inset 0 0 0 1px ${C.line};
+              border-radius:${arcoW / 2}px ${arcoW / 2}px ${C.radio} ${C.radio}">
+    ${img(a, ph)}
+  </div>
+  <div class="rule" style="position:absolute;left:${tall ? 96 : 76}px;right:${tall ? 96 : 76}px;top:${repisa}px"></div>
+  <div style="position:absolute;left:76px;right:76px;top:${repisa + (tall ? 46 : 44)}px">
+    <h1 class="d" style="font-size:${a.creative.hlSize || (tall ? 82 : 68)}px">${a.creative.headline}</h1>
+    ${a.creative.sub
+      ? `<p style="font-size:${tall ? 28 : 25}px;font-weight:300;line-height:1.42;color:${C.body};
+           margin:${tall ? 22 : 20}px auto 0;max-width:${tall ? 780 : 700}px">${a.creative.sub}</p>`
+      : ''}
+  </div>
+  <div style="position:absolute;left:76px;right:76px;bottom:${tall ? 372 : 74}px;display:flex;
+              justify-content:center;align-items:baseline;gap:22px">
+    <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
+    <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.footer}</span>
+  </div>
+</div>`;
+};
+
+// TR · Tira: tres piezas del catálogo en columnas, con su nombre y su precio.
+// El único formato que no vende un producto sino un surtido — es lo que hace
+// una carretilla de flores, que no ofrece una flor sino para elegir. Sirve
+// donde un carrusel no cabe: una sola imagen que ya muestra el rango de precio.
+const tira = (a, ph, w, h) => {
+  const tall = h === 1920;
+  const m = 72;
+  const gap = 20;
+  const piezas = a.creative.piezas;
+  const colW = Math.round((w - m * 2 - gap * (piezas.length - 1)) / piezas.length);
+  // Tres columnas en 1080 dan paneles de 298 px: si además se hacen altos, la
+  // relación queda en 1:2 y no hay foto de ramo que entre sin perder los lados.
+  // Se los deja casi cuadrados y entran a sangre — lo que se recorta es fondo.
+  const panelY = tall ? 866 : 452;
+  const panelH = tall ? 660 : 578;
+  return `
+<div style="position:absolute;inset:0;background:${C.fondo}">
+  <div style="position:absolute;top:${tall ? 274 : 60}px;left:${m}px;right:${m}px;display:flex;
+              justify-content:space-between;align-items:center">
+    <span class="mono" style="font-size:17px;color:${C.rosa}">${a.creative.eyebrow}</span>
+    ${logo(70)}
+  </div>
+  <!-- Anclado por abajo, no por arriba: el titular puede salir de una línea o de
+       dos y anclado por arriba el hueco contra los paneles cambia de tamaño. -->
+  <h1 class="d" style="position:absolute;bottom:${h - panelY + (tall ? 46 : 38)}px;left:${m}px;right:${m}px;
+      font-size:${a.creative.hlSize || (tall ? 104 : 84)}px">${a.creative.headline}</h1>
+  ${piezas
+    .map((p, i) => {
+      const fx = foto(p.photo);
+      const left = m + i * (colW + gap);
+      return `
+  <div style="position:absolute;left:${left}px;top:${panelY}px;width:${colW}px;height:${panelH}px;
+              background:${fx.bg};overflow:hidden">
+    <!-- Apoyados en el borde de abajo, no centrados: cada recorte del catálogo
+         tiene su propia proporción, y centrados quedan flotando a tres alturas
+         distintas. Contra el piso comparten repisa — que es justo lo que hace
+         una carretilla de flores. -->
+    <img src="${fx.uri}" class="shot" style="object-fit:${fx.recortada ? 'contain' : 'cover'};
+         object-position:${p.position || '50% 100%'}">
+  </div>
+  <div style="position:absolute;left:${left}px;top:${panelY + panelH + 20}px;width:${colW}px">
+    <div class="rule" style="margin-bottom:14px"></div>
+    <div style="font-size:19px;font-weight:400;color:${C.ink};line-height:1.25;min-height:48px">${p.name}</div>
+    <div class="d" style="font-size:34px;font-weight:400;color:${C.rosa};margin-top:6px">${p.price}</div>
+  </div>`;
+    })
+    .join('')}
+  <div style="position:absolute;left:${m}px;right:${m}px;bottom:${tall ? 372 : 74}px;display:flex;
+              justify-content:space-between;align-items:baseline">
+    <span style="font-size:24px;font-weight:300;color:${C.body}">${a.creative.sub}</span>
+    <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.footer}</span>
+  </div>
+</div>`;
+};
+
+// CF · Cifra: el precio a tamaño de titular. Los otros ocho lo dicen en letra
+// chica al pie; acá el número es el anuncio. Para el final del embudo, donde
+// quien mira ya vio el producto y lo único que le falta saber es cuánto cuesta.
+const cifra = (a, ph, w, h) => {
+  const tall = h === 1920;
+  const fotoY = tall ? 250 : 0;
+  const fotoH = tall ? 940 : 852;
+  const m = 76;
+  return `
+<div style="position:absolute;inset:0;background:${C.fondo}">
+  <div style="position:absolute;left:0;right:0;top:${fotoY}px;height:${fotoH}px;
+              background:${ph.bg};overflow:hidden">
+    <!-- Banda: más ancha que alta. Un recorte vertical entra contenido y deja
+         dos franjas del color de fondo a los lados, que contra el fondo real de
+         la toma se ven como una costura. Va la toma original, a sangre. -->
+    ${img(a, ph, true)}
+    <!-- Solo lo justo para que el logotipo gris se lea: una elipse chica pegada
+         a su esquina, no un velo sobre media foto. -->
+    <div style="position:absolute;inset:0;pointer-events:none;
+         background:${veloEsquina('7% 3%', rgb(C.fondo), .82, '46% 26%')}"></div>
+    <div style="position:absolute;top:${tall ? 44 : 56}px;left:${m}px">${logo(70)}</div>
+  </div>
+  <div style="position:absolute;left:${m}px;right:${m}px;top:${fotoY + fotoH}px;
+              bottom:${tall ? 372 : 0}px;
+              display:flex;align-items:center;justify-content:space-between;gap:36px">
+    <div>
+      <span class="mono" style="font-size:15px;color:${C.rosa};display:block;margin-bottom:${tall ? 14 : 8}px">${a.creative.eyebrow}</span>
+      <span class="d" style="font-size:${tall ? 176 : 148}px;color:${C.rosa};display:block;line-height:.82">${a.creative.price}</span>
+    </div>
+    <div style="text-align:right;padding-bottom:${tall ? 16 : 10}px;max-width:${tall ? 520 : 470}px">
+      <h1 class="d" style="font-size:${a.creative.hlSize || (tall ? 62 : 52)}px">${a.creative.headline}</h1>
+      <div class="rule" style="margin:${tall ? 20 : 16}px 0 0;margin-left:auto;width:150px"></div>
+      <span class="mono" style="font-size:14px;color:${C.muted};display:block;margin-top:${tall ? 18 : 14}px">${a.creative.footer}</span>
+    </div>
+  </div>
+</div>`;
+};
+
+const TEMPLATES = { editorial, split, quote, story, puro, sello, cuadro, titular, postal,
+  vitrina, tira, cifra };
 const FORMATS = { '4:5': [1080, 1350], '1:1': [1080, 1080], '9:16': [1080, 1920] };
 
 /* ──────────────────────────────  render  ─────────────────────────────── */
@@ -598,6 +767,34 @@ function writeDeck({ campaign, products, ads }) {
   L.push('| `quote` | Cita grande arriba, foto abajo. | Prueba social o manifiesto de marca. |');
   L.push('| `story` | Banda de foto arriba, texto y botón en zona segura. | Historias de retargeting con llamada a la acción. |');
   L.push('');
+  L.push('### Tres más, todavía en prueba');
+  L.push('');
+  L.push('`vitrina` (la foto dentro de un arco), `tira` (tres productos con su precio, apoyados en');
+  L.push('la misma repisa) y `cifra` (el precio a tamaño de titular). Viven en un carril aparte,');
+  L.push('`pruebas.json`, y se rinden en `pruebas/` sin tocar la campaña:');
+  L.push('');
+  L.push('```');
+  L.push('node marketing/ig-ads/build.mjs --pruebas   # dos piezas de cada formato nuevo');
+  L.push('python3 marketing/ig-ads/pruebas.py         # la hoja para decidir cuáles entran');
+  L.push('```');
+  L.push('');
+  L.push('Cuando uno se apruebe, pasa a `ads.json` con su copy, su objetivo y su público, igual que');
+  L.push('los otros nueve, y desde ahí entra a la galería de la campaña.');
+  L.push('');
+  L.push('### Los velos no llevan canto');
+  L.push('');
+  L.push('Un `linear-gradient(color, transparent)` tiene la derivada rota justo donde arranca: la');
+  L.push('opacidad cae en línea recta y de golpe deja de caer, y el ojo lee esa esquina de la curva');
+  L.push('como el borde de un recuadro aunque no haya recuadro. Sobre foto clara se ve peor todavía,');
+  L.push('porque el velo blanco no aclara nada y lo único que queda visible es su propio borde: eso');
+  L.push('era el rectángulo con fade de IG-22 y IG-30. Los velos van por `velo()` y `veloEsquina()`,');
+  L.push('que aproximan una smoothstep y siempre llegan a sangre, así que el único borde recto que');
+  L.push('existe es el del lienzo.');
+  L.push('');
+  L.push('De paso apareció otro: el marfil `251,248,241` del velo de las citas era de la paleta');
+  L.push('anterior y sobrevivió al paso a blanco total, así que al pie de IG-05, IG-08 e IG-19 había');
+  L.push('una banda amarillenta. Ahora el velo saca su color del token, no de un rgb escrito a mano.');
+  L.push('');
   L.push('Para agregar un anuncio basta con otra entrada en `ads.json`: la plantilla, la foto del');
   L.push('catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` —');
   L.push('`4:5`, `1:1` o `9:16`.');
@@ -633,18 +830,29 @@ function writeDeck({ campaign, products, ads }) {
 /* ───────────────────────────────  main  ──────────────────────────────── */
 
 const main = async () => {
-  const data = JSON.parse(fs.readFileSync(path.join(HERE, 'ads.json'), 'utf8'));
-  const { ads } = data;
+  const campana = JSON.parse(fs.readFileSync(path.join(HERE, 'ads.json'), 'utf8'));
+  // `node build.mjs IG-22 IG-30` rehace solo esas. Sirve para mirar un cambio de
+  // plantilla sin esperar los 32 renders; el README solo se reescribe cuando se
+  // rehace la campaña entera, para que no quede describiendo media galería.
+  const solo = process.argv.slice(2).filter((x) => x !== '--pruebas');
+  // `--pruebas` rinde `pruebas.json` en `pruebas/`: es el banco donde se mira un
+  // formato nuevo antes de que exista un solo anuncio con él. No toca la
+  // campaña ni el README, así que se puede probar sin comprometer nada.
+  const banco = process.argv.includes('--pruebas');
+  const data = banco ? JSON.parse(fs.readFileSync(path.join(HERE, 'pruebas.json'), 'utf8')) : campana;
+  const salida = banco ? path.join(HERE, 'pruebas') : OUT;
+  const ads = solo.length ? data.ads.filter((a) => solo.includes(a.code)) : data.ads;
+  if (solo.length && !ads.length) throw new Error(`no existe ninguna de: ${solo.join(', ')}`);
   const chrome = findChromium();
   const fonts = await fontCss();
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-ads-'));
-  fs.mkdirSync(OUT, { recursive: true });
+  fs.mkdirSync(salida, { recursive: true });
 
   for (const ad of ads) {
     const [w, h] = FORMATS[ad.format || (ad.template === 'story' ? '9:16' : '4:5')];
     const html = path.join(tmp, `${ad.code}.html`);
     const png = path.join(tmp, `${ad.code}.png`);
-    const jpg = path.join(OUT, `${ad.code}.jpg`);
+    const jpg = path.join(salida, `${ad.code}.jpg`);
 
     fs.writeFileSync(html, base(fonts, w, h, TEMPLATES[ad.template](ad, foto(ad.photo), w, h)));
     execFileSync(chrome, [
@@ -655,7 +863,7 @@ const main = async () => {
 
     let final = jpg;
     if (!toJpeg(chrome, png, jpg, tmp, w, h)) {
-      final = path.join(OUT, `${ad.code}.png`);
+      final = path.join(salida, `${ad.code}.png`);
       fs.copyFileSync(png, final);
       console.warn(`  ! ${ad.code}: no pude reencodear a JPEG, dejo el PNG.`);
     }
@@ -664,8 +872,8 @@ const main = async () => {
   }
 
   fs.rmSync(tmp, { recursive: true, force: true });
-  writeDeck(data);
-  console.log(`\n${ads.length} creativos en ${path.relative(ROOT, OUT)}/ + README.md`);
+  if (!solo.length && !banco) writeDeck(data);
+  console.log(`\n${ads.length} creativos en ${path.relative(ROOT, salida)}/`);
 };
 
 main().catch((err) => {
