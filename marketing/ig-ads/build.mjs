@@ -592,12 +592,15 @@ const tira = (a, ph, w, h) => {
 // quien mira ya vio el producto y lo único que le falta saber es cuánto cuesta.
 const cifra = (a, ph, w, h) => {
   const tall = h === 1920;
-  const fotoY = tall ? 250 : 0;
-  const fotoH = tall ? 940 : 852;
+  // La foto sangra hasta el borde de arriba tambien en 9:16. Los 250 px que tapa
+  // Instagram limitan el texto y el logotipo, no la imagen: dejarlos en blanco
+  // parte la pieza en dos con un canto recto de lado a lado, y se lee como si el
+  // anuncio estuviera recortado. Todas las demas plantillas verticales sangran.
+  const fotoH = tall ? 1190 : 852;
   const m = 76;
   return `
 <div style="position:absolute;inset:0;background:${C.fondo}">
-  <div style="position:absolute;left:0;right:0;top:${fotoY}px;height:${fotoH}px;
+  <div style="position:absolute;left:0;right:0;top:0;height:${fotoH}px;
               background:${ph.bg};overflow:hidden">
     <!-- A sangre, y por eso el encuadre lo fija el anuncio con \`position\`. Aca
          no sirve entrar contenida: el fondo de estas tomas no es un color plano
@@ -611,9 +614,11 @@ const cifra = (a, ph, w, h) => {
          a su esquina, no un velo sobre media foto. -->
     <div style="position:absolute;inset:0;pointer-events:none;
          background:${veloEsquina('7% 3%', rgb(C.fondo), .82, '46% 26%')}"></div>
-    <div style="position:absolute;top:${tall ? 44 : 56}px;left:${m}px">${logo(70)}</div>
+    <!-- El logotipo si respeta la zona segura: en 9:16 arranca despues de los
+         250 px donde Instagram monta la cabecera del perfil. -->
+    <div style="position:absolute;top:${tall ? 296 : 56}px;left:${m}px">${logo(70)}</div>
   </div>
-  <div style="position:absolute;left:${m}px;right:${m}px;top:${fotoY + fotoH}px;
+  <div style="position:absolute;left:${m}px;right:${m}px;top:${fotoH}px;
               bottom:${tall ? 372 : 0}px;
               display:flex;align-items:center;justify-content:space-between;gap:36px">
     <div>
