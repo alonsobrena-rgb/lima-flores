@@ -40,9 +40,9 @@
       "template": "tira",
       "format": "4:5",
       "photo": "ramo-de-flores-sofia.jpg",
-      "title": "Tira · tres ramos",
+      "title": "Tira · escalera de precio",
       "creative": {
-        "eyebrow": "Ramos",
+        "eyebrow": "Desde S/ 160",
         "headline": "Tres maneras de <em>decir lo mismo</em>",
         "sub": "Eliges el día y una franja de 30 minutos",
         "footer": "Entrega en Lima Metropolitana",
@@ -55,14 +55,14 @@
             "price": "S/ 160"
           },
           {
-            "photo": "ramo-luana.jpg",
-            "name": "Ramo Luana",
-            "price": "S/ 180"
-          },
-          {
             "photo": "ramo-de-24-rosas-con-papel-de-estrellas.jpg",
             "name": "24 rosas con papel de estrellas",
             "price": "S/ 190"
+          },
+          {
+            "photo": "orquideas-grandes-en-maceta-3.jpg",
+            "name": "Orquídeas en maceta",
+            "price": "S/ 200"
           }
         ]
       }
@@ -92,8 +92,8 @@
             "price": "S/ 180"
           },
           {
-            "photo": "box-rogelia-3.jpg",
-            "name": "Box Rogelia",
+            "photo": "box-lucy.jpg",
+            "name": "Box Lucy",
             "price": "S/ 210"
           }
         ]
@@ -126,7 +126,7 @@
         "price": "S/ 215",
         "footer": "Eliges el día y la hora",
         "fit": "cover",
-        "position": "50% 46%"
+        "position": "50% 0%"
       }
     }
   ]

@@ -123,6 +123,20 @@ async function fontCss() {
 // medio del vacío. Las que ya llenan el encuadre siguen entrando a sangre.
 const ENCUADRES = JSON.parse(fs.readFileSync(path.join(HERE, 'fotos/encuadres.json'), 'utf8'));
 
+// Los recortes al ras que usa la tira — fotos/prep-tira.py. Van aparte porque la
+// regla es distinta: ahí se recorta siempre, aunque el recorte gane poco, para
+// que tres fotos vecinas entren del mismo tamaño.
+const TIRA = fs.existsSync(path.join(HERE, 'fotos/tira/encuadres.json'))
+  ? JSON.parse(fs.readFileSync(path.join(HERE, 'fotos/tira/encuadres.json'), 'utf8'))
+  : {};
+const fotoTira = (file) => {
+  if (!TIRA[file]) throw new Error(`falta el recorte de ${file}: corre fotos/prep-tira.py`);
+  return {
+    uri: `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, 'fotos/tira', file)).toString('base64')}`,
+    bg: TIRA[file].fondo,
+  };
+};
+
 const foto = (file) => {
   const enc = ENCUADRES[file] || { fondo: '#FFFFFF', recortada: false };
   const src = enc.recortada ? path.join(HERE, 'fotos', file) : path.join(PHOTOS, file);
@@ -169,6 +183,11 @@ const logo = (h, onDark) =>
 // token cambia. Pasó — el marfil `251,248,241` sobrevivió al paso a blanco
 // total y se veía como una banda amarillenta al pie de las citas.
 const rgb = (hex) => hex.replace('#', '').match(/../g).map((h) => parseInt(h, 16)).join(',');
+// Luminancia percibida, para comparar fondos de fotos entre si.
+const lum = (hex) => {
+  const [r, g, b] = hex.replace('#', '').match(/../g).map((h) => parseInt(h, 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
 const PASOS = [[0, 1], [12, .972], [24, .896], [36, .776], [48, .62], [60, .448],
   [72, .28], [82, .152], [91, .06], [100, 0]];
 const velo = (dir, rgb, alfa = 1) =>
@@ -504,12 +523,26 @@ const tira = (a, ph, w, h) => {
   const m = 72;
   const gap = 20;
   const piezas = a.creative.piezas;
+  // El taller no fotografio todo sobre el mismo fondo: hay tomas sobre blanco y
+  // tomas sobre un gris de estudio. En cualquier otra plantilla da igual, porque
+  // se ve una sola foto; en la tira las tres se ven juntas y la del fondo mas
+  // oscuro aparece como un recuadro gris al lado de dos que se funden con la
+  // pagina. No es un problema de maquetacion — no hay relleno que empareje un
+  // fondo que ya viene quemado en el JPEG — asi que se avisa al armar, que es
+  // cuando todavia se puede cambiar el producto por otro del mismo catalogo.
+  const lums = piezas.map((p) => lum(fotoTira(p.photo).bg));
+  const salto = Math.max(...lums) - Math.min(...lums);
+  if (salto > 12) {
+    const peor = piezas[lums.indexOf(Math.min(...lums))];
+    console.warn(`  ! ${a.code}: los fondos de las fotos no empatan (salto ${Math.round(salto)}).`
+      + ` ${peor.photo} se va a ver como un recuadro gris — cambiala por otra tomada sobre blanco.`);
+  }
   const colW = Math.round((w - m * 2 - gap * (piezas.length - 1)) / piezas.length);
   // Tres columnas en 1080 dan paneles de 298 px: si además se hacen altos, la
   // relación queda en 1:2 y no hay foto de ramo que entre sin perder los lados.
   // Se los deja casi cuadrados y entran a sangre — lo que se recorta es fondo.
-  const panelY = tall ? 866 : 452;
-  const panelH = tall ? 660 : 578;
+  const panelY = tall ? 906 : 496;
+  const panelH = tall ? 620 : 534;
   return `
 <div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:${tall ? 274 : 60}px;left:${m}px;right:${m}px;display:flex;
@@ -523,16 +556,20 @@ const tira = (a, ph, w, h) => {
       font-size:${a.creative.hlSize || (tall ? 104 : 84)}px">${a.creative.headline}</h1>
   ${piezas
     .map((p, i) => {
-      const fx = foto(p.photo);
+      const fx = fotoTira(p.photo);
       const left = m + i * (colW + gap);
       return `
   <div style="position:absolute;left:${left}px;top:${panelY}px;width:${colW}px;height:${panelH}px;
               background:${fx.bg};overflow:hidden">
-    <!-- Apoyados en el borde de abajo, no centrados: cada recorte del catálogo
-         tiene su propia proporción, y centrados quedan flotando a tres alturas
-         distintas. Contra el piso comparten repisa — que es justo lo que hace
-         una carretilla de flores. -->
-    <img src="${fx.uri}" class="shot" style="object-fit:${fx.recortada ? 'contain' : 'cover'};
+    <!-- Siempre contenidas, nunca a sangre: en una tira lo que se compara son
+         los productos entre si, asi que ninguno se recorta y las tres entran
+         igual. Y sobre el recorte al ras de prep-tira.py, no sobre la toma del
+         catalogo: con \`contain\` el navegador ajusta el cuadro, no el producto,
+         asi que la foto que trae mas aire alrededor rinde el producto mas
+         chico aunque el panel mida lo mismo. Apoyadas en el borde de abajo,
+         ademas: cada recorte tiene su propia proporcion y centradas quedan
+         flotando a tres alturas distintas. Contra el piso comparten repisa. -->
+    <img src="${fx.uri}" class="shot" style="object-fit:contain;
          object-position:${p.position || '50% 100%'}">
   </div>
   <div style="position:absolute;left:${left}px;top:${panelY + panelH + 20}px;width:${colW}px">
@@ -562,9 +599,13 @@ const cifra = (a, ph, w, h) => {
 <div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;left:0;right:0;top:${fotoY}px;height:${fotoH}px;
               background:${ph.bg};overflow:hidden">
-    <!-- Banda: más ancha que alta. Un recorte vertical entra contenido y deja
-         dos franjas del color de fondo a los lados, que contra el fondo real de
-         la toma se ven como una costura. Va la toma original, a sangre. -->
+    <!-- A sangre, y por eso el encuadre lo fija el anuncio con \`position\`. Aca
+         no sirve entrar contenida: el fondo de estas tomas no es un color plano
+         sino un degradado de estudio, asi que las franjas del relleno se ven
+         como una costura vertical contra la foto. Llenando la banda no hay
+         relleno que se note — pero se recorta, y el recorte por defecto va al
+         centro y le come la punta a lo que sea alto. De ahi que cada anuncio
+         diga desde donde recortar. -->
     ${img(a, ph, true)}
     <!-- Solo lo justo para que el logotipo gris se lea: una elipse chica pegada
          a su esquina, no un velo sobre media foto. -->
@@ -774,9 +815,27 @@ function writeDeck({ campaign, products, ads }) {
   L.push('`pruebas.json`, y se rinden en `pruebas/` sin tocar la campaña:');
   L.push('');
   L.push('```');
-  L.push('node marketing/ig-ads/build.mjs --pruebas   # dos piezas de cada formato nuevo');
-  L.push('python3 marketing/ig-ads/pruebas.py         # la hoja para decidir cuáles entran');
+  L.push('python3 marketing/ig-ads/fotos/prep-tira.py  # recortes al ras para las tiras');
+  L.push('node marketing/ig-ads/build.mjs --pruebas    # dos piezas de cada formato nuevo');
+  L.push('python3 marketing/ig-ads/pruebas.py          # la hoja para decidir cuáles entran');
   L.push('```');
+  L.push('');
+  L.push('**La tira pide fotos parejas, y ahí el catálogo aprieta.** Las tres se ven juntas, así que');
+  L.push('cualquier diferencia entre las tomas salta: la que no tenía recorte llenaba el panel y');
+  L.push('salía cortada al lado de dos contenidas, y la tomada sobre el gris de estudio aparecía');
+  L.push('como un recuadro gris al lado de dos sobre blanco. Lo primero se arregla en la maqueta —');
+  L.push('todas contenidas, sobre el recorte al ras de `prep-tira.py`, porque `contain` ajusta el');
+  L.push('cuadro y no el producto, y la foto con más aire alrededor rinde el producto más chico. Lo');
+  L.push('segundo no: un fondo ya quemado en el JPEG no se empareja con relleno. El generador avisa');
+  L.push('cuando las luminancias se separan más de 12, que es cuando todavía se puede cambiar el');
+  L.push('producto. Consecuencia: hoy no hay tira posible de tres **ramos** — solo dos están');
+  L.push('fotografiados sobre blanco.');
+  L.push('');
+  L.push('**`cifra` recorta a propósito.** Su banda es más ancha que alta, así que la foto entra a');
+  L.push('sangre: contenida dejaría dos franjas de relleno que contra el degradado del ciclorama se');
+  L.push('ven como una costura vertical. Al ir a sangre hay que decidir por dónde recortar, y eso lo');
+  L.push('dice cada anuncio con `position`. Sin eso el recorte cae al centro y le come la punta a');
+  L.push('todo lo que sea alto — le pasó a la orquídea de dos varas.');
   L.push('');
   L.push('Cuando uno se apruebe, pasa a `ads.json` con su copy, su objetivo y su público, igual que');
   L.push('los otros nueve, y desde ahí entra a la galería de la campaña.');

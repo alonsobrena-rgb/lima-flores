@@ -1118,9 +1118,27 @@ la misma repisa) y `cifra` (el precio a tamaño de titular). Viven en un carril 
 `pruebas.json`, y se rinden en `pruebas/` sin tocar la campaña:
 
 ```
-node marketing/ig-ads/build.mjs --pruebas   # dos piezas de cada formato nuevo
-python3 marketing/ig-ads/pruebas.py         # la hoja para decidir cuáles entran
+python3 marketing/ig-ads/fotos/prep-tira.py  # recortes al ras para las tiras
+node marketing/ig-ads/build.mjs --pruebas    # dos piezas de cada formato nuevo
+python3 marketing/ig-ads/pruebas.py          # la hoja para decidir cuáles entran
 ```
+
+**La tira pide fotos parejas, y ahí el catálogo aprieta.** Las tres se ven juntas, así que
+cualquier diferencia entre las tomas salta: la que no tenía recorte llenaba el panel y
+salía cortada al lado de dos contenidas, y la tomada sobre el gris de estudio aparecía
+como un recuadro gris al lado de dos sobre blanco. Lo primero se arregla en la maqueta —
+todas contenidas, sobre el recorte al ras de `prep-tira.py`, porque `contain` ajusta el
+cuadro y no el producto, y la foto con más aire alrededor rinde el producto más chico. Lo
+segundo no: un fondo ya quemado en el JPEG no se empareja con relleno. El generador avisa
+cuando las luminancias se separan más de 12, que es cuando todavía se puede cambiar el
+producto. Consecuencia: hoy no hay tira posible de tres **ramos** — solo dos están
+fotografiados sobre blanco.
+
+**`cifra` recorta a propósito.** Su banda es más ancha que alta, así que la foto entra a
+sangre: contenida dejaría dos franjas de relleno que contra el degradado del ciclorama se
+ven como una costura vertical. Al ir a sangre hay que decidir por dónde recortar, y eso lo
+dice cada anuncio con `position`. Sin eso el recorte cae al centro y le come la punta a
+todo lo que sea alto — le pasó a la orquídea de dos varas.
 
 Cuando uno se apruebe, pasa a `ads.json` con su copy, su objetivo y su público, igual que
 los otros nueve, y desde ahí entra a la galería de la campaña.

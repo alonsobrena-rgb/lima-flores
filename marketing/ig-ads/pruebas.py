@@ -44,7 +44,8 @@ FORMATOS = [
      'vende un producto sino un surtido — que es lo que hace una carretilla de '
      'flores: no ofrece una flor, ofrece para elegir.',
      'Donde un carrusel no cabe. Una sola imagen que ya muestra el rango de '
-     'precio, y sirve de portada de categoría: ramos, cajas, orquídeas.'),
+     'precio, y sirve de portada de categoría. Pide tres fotos tomadas sobre el '
+     'mismo fondo, que es lo que limita qué productos pueden ir juntos.'),
     ('cifra', 'La cifra', 'El precio manda',
      'El precio a tamaño de titular, en el rosa de la marca. Los otros formatos '
      'lo dicen en letra chica al pie; acá el número es el anuncio, y la foto va '
@@ -184,10 +185,16 @@ def main():
     entre se suma a <code>ads.json</code> con su copy de anuncio, su objetivo y
     su público, igual que los otros nueve, y aparece en la galería de la
     campaña.</p>
-    <p><b>La tira necesita curaduría.</b> Los otros formatos toman un producto
-    del catálogo; este toma tres y hay que elegir cuáles van juntos. Los dos
-    ejemplos agrupan por categoría — tres ramos, tres cajas — pero también
-    podría agrupar por precio, por color o por ocasión.</p>
+    <p><b>La tira necesita curaduría, y el catálogo la limita.</b> Los otros
+    formatos toman un producto; este toma tres, y las tres fotos tienen que
+    haberse tomado sobre el mismo fondo. El taller fotografió parte del catálogo
+    sobre blanco y parte sobre un gris de estudio, y la del fondo más oscuro
+    aparece como un recuadro gris al lado de las otras dos — no hay maquetación
+    que arregle un fondo ya quemado en el JPEG. El generador ahora lo avisa al
+    armar, así que se descubre antes de mandar nada. Consecuencia práctica: hoy
+    no se puede armar una tira de tres <em>ramos</em>, porque solo dos están
+    fotografiados sobre blanco. La primera muestra es por eso una escalera de
+    precio y no una categoría.</p>
     <p><b>La cifra dice el precio a gritos.</b> Es a propósito: es la respuesta
     al diagnóstico de que la marca se veía poco vendedora. Conviene usarla solo
     al final del embudo, donde ya no molesta, y no como primera impresión.</p>
