@@ -45,7 +45,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 
 ## 02 · Orquídeas grandes en maceta — S/200
 
-**Categoría** Orquídeas · **Ángulo** Durabilidad (8–12 semanas) frente al ramo que se marchita en 8 días.
+**Categoría** Orquídeas · **Ángulo** Planta viva en maceta, no flor cortada: es otra categoría de regalo, y eso es lo que justifica el precio.
 
 **Público** 30–55, Lima Metropolitana. Momentos: agradecimiento, casa nueva, jefas/suegras, cumpleaños de mamá. Retargeting 30 días de visitantes de /catalogo.html categoría Orquídeas.
 
