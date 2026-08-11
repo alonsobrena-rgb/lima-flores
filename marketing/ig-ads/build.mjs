@@ -614,9 +614,12 @@ const cifra = (a, ph, w, h) => {
          a su esquina, no un velo sobre media foto. -->
     <div style="position:absolute;inset:0;pointer-events:none;
          background:${veloEsquina('7% 3%', rgb(C.fondo), .82, '46% 26%')}"></div>
-    <!-- El logotipo si respeta la zona segura: en 9:16 arranca despues de los
-         250 px donde Instagram monta la cabecera del perfil. -->
-    <div style="position:absolute;top:${tall ? 296 : 56}px;left:${m}px">${logo(70)}</div>
+    <!-- Arriba del todo, con el mismo margen en los dos formatos: si la foto
+         sangra hasta el borde y el logotipo se queda 300 px mas abajo, queda
+         flotando en el medio de la nada. Ojo con esto en historias — ahi
+         Instagram monta la cabecera del perfil sobre los primeros 250 px y le
+         pasa por encima. En feed vertical y en reels no lo tapa nada. -->
+    <div style="position:absolute;top:${tall ? 64 : 56}px;left:${m}px">${logo(70)}</div>
   </div>
   <div style="position:absolute;left:${m}px;right:${m}px;top:${fotoH}px;
               bottom:${tall ? 372 : 0}px;
