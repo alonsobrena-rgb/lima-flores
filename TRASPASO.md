@@ -106,9 +106,13 @@ Primera pasada del sistema Florencia sobre `app/`:
 
 - Blanco total. Fuera el fondo floral generado de la portada, las manchas de
   acuarela globales y la foto de carretilla fija del catálogo.
-- El hero era un video de banco de imágenes; ahora es **la vitrina**
-  (`app/src/components/sections/HeroVitrina.tsx`): foto real del catálogo
-  sangrando por la derecha, titular en el blanco.
+- El hero era un video de banco de imágenes. Pasó por **la vitrina**
+  (`HeroVitrina.tsx`, foto sangrando por la derecha) y hoy en la portada va
+  **el herbario** (`HeroHerbario.tsx`): la mecánica de la referencia
+  «Leandra Isler» —lienzo de borde a borde, la escala como única jerarquía, la
+  planta apoyada sobre el papel sin marco, filete de 1 px, enlaces subrayados en
+  vez de píldoras— vestida con Florencia. La vitrina queda en el repo sin usar,
+  como repuesto: volver es cambiar dos líneas en `Home.tsx`.
 - Una sola cabecera en todo el sitio.
 - Datos comunes en `app/src/lib/tienda.ts`: redes, contacto, medios de pago y
   la letra chica de producto. La letra chica tiene que decir lo mismo en la

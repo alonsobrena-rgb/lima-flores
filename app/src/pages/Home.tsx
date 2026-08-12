@@ -1,5 +1,5 @@
 import { SiteHeader } from '@/components/SiteHeader';
-import { HeroVitrina } from '@/components/sections/HeroVitrina';
+import { HeroHerbario } from '@/components/sections/HeroHerbario';
 import { Marquee } from '@/components/sections/Marquee';
 import { Manifesto } from '@/components/sections/Manifesto';
 import { SignatureProduct } from '@/components/sections/SignatureProduct';
@@ -17,7 +17,7 @@ export default function Home() {
           propia barra dentro del hero, así que el sitio cambiaba de cabecera al
           navegar. */}
       <SiteHeader />
-      <HeroVitrina />
+      <HeroHerbario />
       {/* El sistema Florencia es blanco y aire: el fondo floral generado y las
           manchas de acuarela que había detrás de todo ensuciaban el blanco y
           peleaban con las fotos de producto, que son lo que tiene que mandar. */}
