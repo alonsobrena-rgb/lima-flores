@@ -295,8 +295,8 @@
         "headline": "Cuando el ramo <em>no alcanza</em>",
         "sub": "La suegra. La jefa. La casa nueva. El gracias pendiente.",
         "pill": "S/ 200 · Ver orquídeas",
-        "fit": "cover",
-        "position": "50% 15%"
+        "fit": "contain",
+        "position": "50% 100%"
       },
       "why": "Lista de ocasiones: deja que la persona se reconozca en una de las cuatro en menos de dos segundos."
     },
@@ -386,8 +386,8 @@
         "headline": "Difícil de decir. <em>Fácil de mandar.</em>",
         "sub": "Gracias. Perdón. Felicitaciones. Te extraño. Cuatro cosas difíciles y una sola manera de decirlas bien.",
         "pill": "Desde S/ 160 · Ver el ramo",
-        "fit": "cover",
-        "position": "50% 45%"
+        "fit": "contain",
+        "position": "50% 100%"
       },
       "why": "El texto hace el trabajo de segmentación solo: cada línea es una intención de compra distinta y el clic revela cuál."
     },
@@ -514,7 +514,8 @@
         "tone": "dark",
         "fit": "cover",
         "position": "50% 52%",
-        "hlSize": 108
+        "hlSize": 108,
+        "franja": true
       },
       "why": "La foto ya tiene el aire arriba: el texto se apoya en el fondo crema sin recuadros ni velos. Es el formato más limpio del set y el que mejor pasa por publicación orgánica."
     },
@@ -929,8 +930,8 @@
         "sub": "Doce de cada una, con follaje verde.",
         "pill": "S/ 176 · Ver el box",
         "hlSize": 96,
-        "fit": "cover",
-        "position": "50% 44%"
+        "fit": "contain",
+        "position": "50% 100%"
       },
       "why": "Ticket bajo en historia: el formato vertical con botón es el que mejor cierra en retargeting."
     },
@@ -1090,7 +1091,8 @@
         ],
         "price": "S/ 210",
         "footer": "Box Gaby Café",
-        "hlSize": 84
+        "hlSize": 84,
+        "fit": "contain"
       },
       "why": "Las dos tacitas cambian el destinatario: no es para una persona, es para una pareja."
     },
@@ -1121,7 +1123,9 @@
         "sub": "Con mini rosas amarillas y blancas, pompones y margaritas.",
         "price": "S/ 210",
         "footer": "Florero Forti",
-        "hlSize": 98
+        "hlSize": 98,
+        "fit": "cover",
+        "position": "50% 26%"
       },
       "why": "Los girasoles son lo más visible del catálogo: en el feed frenan el pulgar solos."
     },
@@ -1150,7 +1154,9 @@
         "headline": "Cuatro colores <em>a elegir</em>",
         "sub": "Fucsia, amarillas, naranjas o blancas. Con globo incluido.",
         "pill": "S/ 210 · Ver el arreglo",
-        "hlSize": 92
+        "hlSize": 92,
+        "position": "50% 8%",
+        "fit": "cover"
       },
       "why": "El color a elegir es el gancho, igual que en los tulipanes, pero en arreglo con globo."
     },

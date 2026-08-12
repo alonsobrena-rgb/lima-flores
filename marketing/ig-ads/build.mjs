@@ -240,17 +240,20 @@ const editorial = (a, ph) => `
     ${logo(74)}
   </div>
   <div class="rule" style="position:absolute;top:126px;left:72px;right:72px"></div>
-  <div style="position:absolute;top:162px;left:72px;width:936px;height:770px;background:${ph.bg};overflow:hidden">
+  <!-- De borde a borde. Metido 72 px de cada lado se le ve el canto al bloque
+       cuando la foto no es sobre blanco, y eso se lee como un marco. -->
+  <div style="position:absolute;top:150px;left:0;right:0;height:892px;background:${ph.bg};overflow:hidden">
     ${img(a, ph)}
   </div>
-  <div style="position:absolute;top:966px;left:72px;right:72px;height:266px">
-    <h1 class="d" style="font-size:${a.creative.hlSize || 100}px">${a.creative.headline}</h1>
-    <p style="font-size:27px;font-weight:300;line-height:1.42;color:${C.body};margin-top:24px;max-width:820px">${a.creative.sub}</p>
-  </div>
-  <div class="rule" style="position:absolute;top:1236px;left:72px;right:72px"></div>
-  <div style="position:absolute;top:1258px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center">
-    <span class="d" style="font-size:46px;font-weight:400">${a.creative.price}</span>
-    <span class="mono" style="font-size:17px;color:${C.muted}">${a.creative.footer}</span>
+  <!-- Titular, bajada y precio en un mismo flujo anclado abajo. Anclados por
+       separado, una bajada de dos lineas le pisa el precio. -->
+  <div style="position:absolute;left:72px;right:72px;bottom:46px">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 82}px">${a.creative.headline}</h1>
+    <p style="font-size:24px;font-weight:300;line-height:1.4;color:${C.body};margin-top:12px;max-width:860px">${a.creative.sub}</p>
+    <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+      <span class="d" style="font-size:46px;font-weight:400">${a.creative.price}</span>
+      <span class="mono" style="font-size:17px;color:${C.muted}">${a.creative.footer}</span>
+    </div>
   </div>
 </div>`;
 
@@ -315,23 +318,27 @@ const quote = (a, ph) => `
 // abajo que tapan la interfaz de Instagram.
 const story = (a, ph) => `
 <div style="position:absolute;inset:0;background:${C.fondo}">
-  <div style="position:absolute;top:0;left:0;right:0;height:1010px;background:${ph.bg};overflow:hidden">
+  <!-- La franja llega hasta los 1180 px y el producto se apoya en su borde de
+       abajo. Antes eran 1010 a sangre: lo que sobraba se perdia por arriba, que
+       es justo donde esta la flor. -->
+  <div style="position:absolute;top:0;left:0;right:0;height:1120px;background:${ph.bg};overflow:hidden">
     ${img(a, ph)}
-    <div style="position:absolute;left:0;right:0;bottom:0;height:300px;
-                background:${velo('to top', rgb(C.fondo))}"></div>
   </div>
-  <div style="position:absolute;left:78px;right:78px;top:1128px;height:312px">
+  <!-- Todo el pie en un mismo flujo, anclado a la zona segura de abajo. Con el
+       texto y el boton anclados por separado, una bajada de tres lineas se le
+       mete debajo al boton y se corta. -->
+  <div style="position:absolute;left:78px;right:78px;bottom:372px">
     <span class="mono" style="font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
-    <h1 class="d" style="font-size:${a.creative.hlSize || 96}px;margin-top:24px">${a.creative.headline}</h1>
-    <p style="font-size:30px;font-weight:300;line-height:1.4;color:${C.body};margin-top:26px;max-width:860px">${a.creative.sub}</p>
-  </div>
-  <div style="position:absolute;left:78px;right:78px;bottom:372px;display:flex;justify-content:space-between;align-items:center">
-    <span style="display:inline-flex;align-items:center;gap:18px;background:${C.rosa};color:#fff;
-                 padding:26px 46px;border-radius:999px">
-      <span style="font-size:26px;font-weight:500">${a.creative.pill}</span>
-      <span style="font-size:24px">→</span>
-    </span>
-    ${logo(72)}
+    <h1 class="d" style="font-size:${a.creative.hlSize || 84}px;margin-top:18px">${a.creative.headline}</h1>
+    <p style="font-size:26px;font-weight:300;line-height:1.38;color:${C.body};margin-top:16px;max-width:920px">${a.creative.sub}</p>
+    <div style="margin-top:26px;display:flex;justify-content:space-between;align-items:center">
+      <span style="display:inline-flex;align-items:center;gap:18px;background:${C.rosa};color:#fff;
+                   padding:24px 44px;border-radius:999px">
+        <span style="font-size:26px;font-weight:500">${a.creative.pill}</span>
+        <span style="font-size:24px">→</span>
+      </span>
+      ${logo(72)}
+    </div>
   </div>
 </div>`;
 
@@ -426,18 +433,24 @@ const cuadro = (a, ph) => `
 // T · Titular: aquí manda la tipografía y la foto entra como una franja al pie.
 const titular = (a, ph, w, h) => {
   const tall = h === 1920;
-  const bandTop = tall ? 788 : 640;
-  const bandH = tall ? 760 : 710;
+  // La franja sube y crece: antes empezaba a media pieza y dejaba el resto en
+  // blanco, con el titular solo arriba.
+  const bandTop = tall ? 766 : 520;
+  const bandH = tall ? 782 : 830;
   return `
 <div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:${tall ? 262 : 60}px;left:76px">${logo(80)}</div>
-  <span class="mono" style="position:absolute;top:${tall ? 372 : 170}px;left:76px;font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
-  <h1 class="d" style="position:absolute;top:${tall ? 418 : 214}px;left:76px;right:76px;
-      font-size:${a.creative.hlSize || (tall ? 128 : 122)}px">${a.creative.headline}</h1>
-  <div style="position:absolute;left:76px;right:76px;top:${bandTop - 74}px;display:flex;
-              justify-content:space-between;align-items:baseline">
-    <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
-    <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
+  <!-- Rotulo, titular y precio en un mismo flujo, anclado al borde de la franja.
+       Anclados por separado, un titular de dos lineas le pisa el precio y el
+       precio se mete debajo de la foto. -->
+  <div style="position:absolute;left:76px;right:76px;bottom:${h - bandTop + 26}px">
+    <span class="mono" style="display:block;font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
+    <h1 class="d" style="margin-top:${tall ? 22 : 18}px;
+        font-size:${a.creative.hlSize || (tall ? 112 : 104)}px">${a.creative.headline}</h1>
+    <div style="margin-top:${tall ? 26 : 20}px;display:flex;justify-content:space-between;align-items:baseline">
+      <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
+      <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
+    </div>
   </div>
   <div style="position:absolute;left:0;right:0;top:${bandTop}px;height:${bandH}px;background:${ph.bg};overflow:hidden">
     ${img(a, ph, true)}
@@ -445,21 +458,24 @@ const titular = (a, ph, w, h) => {
 </div>`;
 };
 
-// PC · Postal: margen amplio y la foto montada como una lámina. Simétrica.
+// PC · Postal: simétrica y centrada. Era una lámina con margen ancho y filete;
+// el filete se lee como un marco y el margen dejaba el producto chico, así que
+// la foto pasa a ir de borde a borde y lo simétrico lo sostiene el texto.
 const postal = (a, ph, w, h) => {
   const tall = h === 1920;
-  const side = tall ? 108 : 96;
-  const box = w - side * 2;
-  const top = tall ? 402 : 150;
+  const fotoY = tall ? 396 : 176;
+  const fotoH = tall ? 848 : 856;
   return `
 <div style="position:absolute;inset:0;background:${C.fondo};text-align:center">
-  <div style="position:absolute;top:${tall ? 276 : 66}px;left:0;right:0;display:flex;justify-content:center">${logo(86)}</div>
-  <div style="position:absolute;left:${side}px;top:${top}px;width:${box}px;height:${box}px;
-              background:${ph.bg};border:1px solid ${C.line};overflow:hidden">${img(a, ph)}</div>
-  <div style="position:absolute;left:${side}px;right:${side}px;top:${top + box + 46}px">
-    <h1 class="d" style="font-size:${a.creative.hlSize || 70}px">${a.creative.headline}</h1>
-    <p style="font-size:25px;font-weight:300;line-height:1.4;color:${C.body};margin-top:20px">${a.creative.sub}</p>
-    <div style="margin-top:22px;display:flex;justify-content:center;align-items:baseline;gap:20px">
+  <div style="position:absolute;top:${tall ? 274 : 62}px;left:0;right:0;display:flex;justify-content:center">${logo(84)}</div>
+  <div style="position:absolute;left:0;right:0;top:${fotoY}px;height:${fotoH}px;
+              background:${ph.bg};overflow:hidden">${img(a, ph)}</div>
+  <!-- Titular, bajada y precio en un mismo flujo: anclados por separado, una
+       bajada de dos lineas se lleva el precio fuera del lienzo. -->
+  <div style="position:absolute;left:64px;right:64px;bottom:${tall ? 372 : 56}px">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 66}px">${a.creative.headline}</h1>
+    <p style="font-size:24px;font-weight:300;line-height:1.4;color:${C.body};margin-top:14px">${a.creative.sub}</p>
+    <div style="margin-top:18px;display:flex;justify-content:center;align-items:baseline;gap:20px">
       <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
       <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.footer}</span>
     </div>
