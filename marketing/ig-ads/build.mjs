@@ -123,23 +123,24 @@ async function fontCss() {
 // medio del vacío. Las que ya llenan el encuadre siguen entrando a sangre.
 const ENCUADRES = JSON.parse(fs.readFileSync(path.join(HERE, 'fotos/encuadres.json'), 'utf8'));
 
-// Los recortes al ras del producto — fotos/prep-ras.py.
-const RAS = fs.existsSync(path.join(HERE, 'fotos/ras/encuadres.json'))
-  ? JSON.parse(fs.readFileSync(path.join(HERE, 'fotos/ras/encuadres.json'), 'utf8'))
+// Los recortes al ras que usa la tira — fotos/prep-tira.py. Van aparte porque la
+// regla es distinta: ahí se recorta siempre, aunque el recorte gane poco, para
+// que tres fotos vecinas entren del mismo tamaño.
+const TIRA = fs.existsSync(path.join(HERE, 'fotos/tira/encuadres.json'))
+  ? JSON.parse(fs.readFileSync(path.join(HERE, 'fotos/tira/encuadres.json'), 'utf8'))
   : {};
+const fotoTira = (file) => {
+  if (!TIRA[file]) throw new Error(`falta el recorte de ${file}: corre fotos/prep-tira.py`);
+  return {
+    uri: `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, 'fotos/tira', file)).toString('base64')}`,
+    bg: TIRA[file].fondo,
+  };
+};
 
 const foto = (file) => {
   const enc = ENCUADRES[file] || { fondo: '#FFFFFF', recortada: false };
   const src = enc.recortada ? path.join(HERE, 'fotos', file) : path.join(PHOTOS, file);
-  if (!RAS[file]) throw new Error(`falta el recorte al ras de ${file}: corre fotos/prep-ras.py`);
   return {
-    // El recorte al ras — fotos/prep-ras.py. Es el que va en cualquier hueco que
-    // no tenga la proporción de la toma, que son todos: pegado a los bordes el
-    // producto sale lo más grande que puede sin que se corte nada.
-    ras: `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, 'fotos/ras', file)).toString('base64')}`,
-    rasBg: RAS[file].fondo,
-    rasW: RAS[file].w,
-    rasH: RAS[file].h,
     uri: `data:image/jpeg;base64,${fs.readFileSync(src).toString('base64')}`,
     // La original hace falta donde la foto entra en una franja mucho más ancha
     // que alta: ahí el recorte, que suele ser vertical, quedaría minúsculo.
@@ -221,34 +222,6 @@ body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sa
 // `banda` la piden las plantillas cuyo hueco de foto es mucho más ancho que
 // alto: ahí conviene la toma original a sangre, porque el recorte vertical
 // entraría contenido y se vería diminuto.
-/* ── la placa ─────────────────────────────────────────────────────────────
-   Un hueco de foto casi nunca tiene la proporción de la toma, así que hay que
-   elegir entre cortar (`cover`) o encoger (`contain`). Las dos son malas: con
-   `cover` se pierde la punta del ramo, con `contain` el producto queda chico y
-   flotando en el margen de la propia toma.
-
-   La placa sale de las dos. Va el recorte al ras, contenido — el producto toca
-   dos bordes del hueco, que es lo más grande que puede ser sin que se corte
-   nada — y detrás va la misma toma a sangre y muy desenfocada, que rellena lo
-   que sobra. Un relleno de color plano no sirve: el fondo de estas tomas es un
-   degradado de estudio, y cualquier color fijo deja una costura recta contra la
-   foto. Con la propia toma desenfocada no hay costura posible.
-
-   `sangra` la piden los formatos donde la foto ES el anuncio: ahí no se
-   rellena nada, entra a sangre y el encuadre lo fija el anuncio con `position`. */
-const placa = (a, ph, { sangra = false, pos } = {}) => {
-  const encuadre = pos || a.creative.position || '50% 50%';
-  if (sangra) {
-    return `<img src="${ph.uriOrig}" class="shot"
-       style="object-fit:cover;object-position:${encuadre}">`;
-  }
-  return `<img src="${ph.uriOrig}" aria-hidden="true"
-       style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-              filter:blur(44px) saturate(.9);transform:scale(1.12)">
-  <img src="${ph.ras}" class="shot"
-       style="position:absolute;inset:0;object-fit:contain;object-position:${encuadre}">`;
-};
-
 const img = (a, ph, banda) => {
   // Recortada → contain, para no volver a cortar lo que ya está justo.
   // Intacta → cover, que es lo que quieren los macros y las de ambiente.
@@ -259,57 +232,22 @@ const img = (a, ph, banda) => {
        style="object-fit:${fit};object-position:${pos}">`;
 };
 
-/* ── manda el producto ────────────────────────────────────────────────────
-   La regla de la marca: manda el producto, y el diseño va encima. Eso son dos
-   cosas, y las dos hacen falta.
-
-   Una: el hueco de la foto es casi todo el lienzo, y el texto se apoya encima
-   sobre los velos. Antes media pieza era papel en blanco.
-
-   Dos: entra el recorte al ras de prep-ras.py y no la toma del catálogo. Con
-   `contain` el navegador ajusta el cuadro, no el producto, así que el aire que
-   traía la toma se convierte en producto chico — medido, el 15% del lienzo.
-
-   Y entra a sangre, siempre. Se probó rellenar lo que sobra al contener, tanto
-   con el color medido del fondo como con la propia toma desenfocada, y las dos
-   veces se ve el rectángulo del recorte contra el relleno: el fondo de estas
-   tomas es un degradado, así que no hay relleno que empate por los cuatro
-   lados. A sangre no hay nada que empatar. Lo que se paga es el recorte, y por
-   eso el recorte al ras deja un 9% de margen: lo primero que se pierde es aire.
-   Cuánto se pierde y por dónde lo decide el anuncio con `anclaje`. */
-const producto = (a, ph, zona, w, h, pos) => {
-  const zw = w - (zona.l || 0) - (zona.r || 0);
-  const zh = h - (zona.t || 0) - (zona.b || 0);
-  return `<div style="position:absolute;left:${zona.l || 0}px;top:${zona.t || 0}px;
-      width:${zw}px;height:${zh}px;overflow:hidden">
-    <!-- El ancho y el alto van en píxeles, no con los cuatro lados. Una imagen
-         es un elemento reemplazado: con \`left\` y \`right\` puestos y \`width:auto\`
-         el navegador se queda con el tamaño intrínseco del archivo e ignora
-         \`right\`, y la foto sale ampliada y cortada sin que \`object-fit\` llegue a
-         intervenir. Con el div de por medio el 100% de adentro ya mide bien. -->
-    <img src="${ph.ras}" style="width:100%;height:100%;object-fit:cover;display:block;
-         object-position:${pos || a.creative.anclaje || '50% 50%'}">
-  </div>`;
-};
-
 // A · Editorial: foto grande, titular abajo. Para público frío.
-const editorial = (a, ph, w, h) => `
-<div style="position:absolute;inset:0;background:${C.fondo};overflow:hidden">
-  <div style="position:absolute;top:60px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center;z-index:1">
+const editorial = (a, ph) => `
+<div style="position:absolute;inset:0;background:${C.fondo}">
+  <div style="position:absolute;top:60px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center">
     <span class="mono" style="font-size:19px;color:${C.rosa}">${a.creative.eyebrow}</span>
     ${logo(74)}
   </div>
-  <div class="rule" style="position:absolute;top:126px;left:72px;right:72px;z-index:1"></div>
-  ${producto(a, ph, { l: 30, r: 30, t: 140, b: 320 }, w, h)}
-  <div style="position:absolute;left:0;right:0;top:0;height:230px;pointer-events:none;
-       background:${velo('to bottom', rgb(C.fondo), .96)}"></div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:520px;pointer-events:none;
-       background:${velo('to top', rgb(C.fondo), .97)}"></div>
+  <div class="rule" style="position:absolute;top:126px;left:72px;right:72px"></div>
+  <div style="position:absolute;top:162px;left:72px;width:936px;height:770px;background:${ph.bg};overflow:hidden">
+    ${img(a, ph)}
+  </div>
   <div style="position:absolute;top:966px;left:72px;right:72px;height:266px">
     <h1 class="d" style="font-size:${a.creative.hlSize || 100}px">${a.creative.headline}</h1>
     <p style="font-size:27px;font-weight:300;line-height:1.42;color:${C.body};margin-top:24px;max-width:820px">${a.creative.sub}</p>
   </div>
-  <div class="rule" style="position:absolute;top:1236px;left:72px;right:72px;z-index:1"></div>
+  <div class="rule" style="position:absolute;top:1236px;left:72px;right:72px"></div>
   <div style="position:absolute;top:1258px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center">
     <span class="d" style="font-size:46px;font-weight:400">${a.creative.price}</span>
     <span class="mono" style="font-size:17px;color:${C.muted}">${a.creative.footer}</span>
@@ -317,9 +255,9 @@ const editorial = (a, ph, w, h) => `
 </div>`;
 
 // B · Split: panel oscuro con la lista de entregables + foto a sangre. Objeciones.
-const split = (a, ph, w, h) => `
+const split = (a, ph) => `
 <div style="position:absolute;inset:0">
-  <div style="position:absolute;top:0;bottom:0;left:0;width:446px;background:${C.alt};color:${C.ink};z-index:1">
+  <div style="position:absolute;top:0;bottom:0;left:0;width:486px;background:${C.alt};color:${C.ink}">
     <span class="mono" style="position:absolute;top:64px;left:52px;font-size:17px;color:${C.rosa}">${a.creative.eyebrow}</span>
     <h1 class="d" style="position:absolute;top:112px;left:52px;right:52px;font-size:${a.creative.hlSize || 82}px">${a.creative.headline}</h1>
     <ul style="position:absolute;left:52px;right:52px;bottom:214px;list-style:none;
@@ -337,49 +275,49 @@ const split = (a, ph, w, h) => `
       <div class="mono" style="font-size:15px;color:${C.muted};margin-top:12px">${a.creative.footer}</div>
     </div>
   </div>
-  <div style="position:absolute;top:0;bottom:0;left:446px;right:0;overflow:hidden">
-      ${producto(a, ph, { l: 0, r: 0, t: 0, b: 0 }, w - 446, h)}
-    <div style="position:absolute;left:0;right:0;top:0;height:230px;pointer-events:none;
-         background:${velo('to bottom', rgb(C.fondo), .9)}"></div>
+  <div style="position:absolute;top:0;bottom:0;left:486px;right:0;background:${ph.bg};overflow:hidden">
+    ${img(a, ph)}
     <div style="position:absolute;top:40px;right:40px">${logo(72)}</div>
   </div>
 </div>`;
 
-// C · Cita: la prueba social encima de la foto. Para consideración.
-const quote = (a, ph, w, h) => `
-<div style="position:absolute;inset:0;background:${C.fondo};overflow:hidden">
-  ${producto(a, ph, { l: 30, r: 30, t: 190, b: 30 }, w, h)}
-  <div style="position:absolute;left:0;right:0;top:0;height:640px;pointer-events:none;
-       background:${velo('to bottom', rgb(C.fondo), .97)}"></div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:340px;pointer-events:none;
-       background:${velo('to top', rgb(C.fondo), .96)}"></div>
+// C · Cita: prueba social o manifiesto arriba, foto abajo. Para consideración.
+const quote = (a, ph) => `
+<div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:70px;left:76px;right:76px;display:flex;justify-content:space-between;align-items:center">
     <span style="font-size:23px;letter-spacing:.42em;color:${C.rosa}">★★★★★</span>
     ${logo(72)}
   </div>
   <blockquote class="d" style="position:absolute;top:148px;left:76px;right:76px;
               font-size:${a.creative.hlSize || 74}px;line-height:1.04">«${a.creative.quote}»</blockquote>
-  <div style="position:absolute;left:76px;top:${a.creative.autorY || 400}px">
+  <div style="position:absolute;left:76px;bottom:730px">
     <div style="display:flex;align-items:center;gap:18px">
       <span style="width:44px;height:1px;background:${C.line}"></span>
       <span style="font-size:23px;font-weight:400">${a.creative.author}</span>
     </div>
     <div class="mono" style="font-size:15px;color:${C.muted};margin-top:14px;margin-left:62px">${a.creative.meta}</div>
   </div>
-  <div style="position:absolute;left:76px;right:76px;bottom:56px;display:flex;
-              justify-content:space-between;align-items:flex-end">
-    <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
-    <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:700px;background:${ph.bg};
+              border-top:1px solid ${C.line};overflow:hidden">
+    ${img(a, ph, true)}
+    <div style="position:absolute;left:0;right:0;bottom:0;height:330px;padding:0 76px 40px;
+                display:flex;justify-content:space-between;align-items:flex-end;
+                background:${velo('to top', rgb(C.fondo), .98)}">
+      <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
+      <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
+    </div>
   </div>
 </div>`;
 
 // S · Historia 9:16. Todo el texto vive entre los 250px de arriba y los 372px de
 // abajo que tapan la interfaz de Instagram.
-const story = (a, ph, w, h) => `
-<div style="position:absolute;inset:0;background:${C.fondo};overflow:hidden">
-  ${producto(a, ph, { l: 30, r: 30, t: 250, b: 560 }, w, h)}
-  <div style="position:absolute;left:0;right:0;bottom:0;height:1020px;pointer-events:none;
-       background:${velo('to top', rgb(C.fondo), .99)}"></div>
+const story = (a, ph) => `
+<div style="position:absolute;inset:0;background:${C.fondo}">
+  <div style="position:absolute;top:0;left:0;right:0;height:1010px;background:${ph.bg};overflow:hidden">
+    ${img(a, ph)}
+    <div style="position:absolute;left:0;right:0;bottom:0;height:300px;
+                background:${velo('to top', rgb(C.fondo))}"></div>
+  </div>
   <div style="position:absolute;left:78px;right:78px;top:1128px;height:312px">
     <span class="mono" style="font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
     <h1 class="d" style="font-size:${a.creative.hlSize || 96}px;margin-top:24px">${a.creative.headline}</h1>
@@ -407,7 +345,6 @@ const puro = (a, ph, w, h) => {
   // `anchor:'top'` para fotos cuyo aire está arriba: el texto se apoya en el
   // vacío de la propia toma en vez de caer sobre el producto.
   const top = a.creative.anchor === 'top';
-  const tallP = h === 1920;
   const textPos = top ? `top:${h === 1920 ? 286 : 76}px` : `bottom:${safe}px`;
   const markPos = top ? `bottom:${safe}px` : `top:${h === 1920 ? 272 : 66}px`;
   // `franja` reserva una banda para el texto, del color de fondo de la foto: el
@@ -418,7 +355,7 @@ const puro = (a, ph, w, h) => {
   return `
 <div style="position:absolute;inset:0;background:${a.creative.bg || ph.bg};overflow:hidden;
             --em:${light ? '#F0BFCB' : C.rosa}">
-  ${producto(a, ph, { l: 24, r: 24, t: tallP ? 250 : 24, b: tallP ? 430 : 300 }, w, h)}
+  <div style="position:absolute;left:0;right:0;${fotoPos};overflow:hidden">${img(a, ph)}</div>
   ${light
     ? `<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.74)}px;
          background:${velo('to top', '10,7,6', .86)}"></div>`
@@ -446,8 +383,8 @@ const sello = (a, ph, w, h) => {
   const mut = onDark ? 'rgba(255,255,255,.8)' : C.body;
   const tinte = onDark ? '10,7,6' : rgb(C.fondo);
   return `
-<div style="position:absolute;inset:0;overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
-  ${producto(a, ph, { l: 24, r: 24, t: h === 1920 ? 250 : 24, b: h === 1920 ? 500 : 280 }, w, h)}
+<div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
+  ${img(a, ph)}
   <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.62)}px;
        background:${velo('to top', tinte, onDark ? .8 : .95)}"></div>
   <div style="position:absolute;top:${h === 1920 ? 300 : 74}px;right:74px;width:244px;height:244px;
@@ -468,11 +405,11 @@ const sello = (a, ph, w, h) => {
 
 // C2 · Cuadro 1:1: la foto ocupa el lienzo y el texto se apoya en el vacío que
 // la propia foto deja a un costado.
-const cuadro = (a, ph, w, h) => `
-<div style="position:absolute;inset:0;overflow:hidden">
-  ${producto(a, ph, { l: 22, r: 22, t: 22, b: 22 }, w, h)}
+const cuadro = (a, ph) => `
+<div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden">
+  ${img(a, ph)}
   <div style="position:absolute;inset:0;pointer-events:none;
-       background:${veloEsquina('88% 2%', rgb(C.fondo), .97)}"></div>
+       background:${veloEsquina('88% 2%', '255,255,255', .97)}"></div>
   <div style="position:absolute;top:62px;right:58px;left:498px;text-align:right">
     <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.eyebrow}</span>
     <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:20px">${a.creative.headline}</h1>
@@ -484,54 +421,45 @@ const cuadro = (a, ph, w, h) => `
   </div>
 </div>`;
 
-// T · Titular: manda la tipografía, y la foto ya no es una franja al pie sino
-// todo el lienzo — el titular se apoya encima.
+// T · Titular: aquí manda la tipografía y la foto entra como una franja al pie.
 const titular = (a, ph, w, h) => {
   const tall = h === 1920;
-  const zonaTexto = tall ? 900 : 560;
+  const bandTop = tall ? 788 : 640;
+  const bandH = tall ? 760 : 710;
   return `
-<div style="position:absolute;inset:0;background:${C.fondo};overflow:hidden">
-  ${producto(a, ph, { l: 30, r: 30, t: tall ? 420 : 120, b: tall ? 372 : 30 }, w, h)}
-  <div style="position:absolute;left:0;right:0;top:0;height:${zonaTexto + 190}px;pointer-events:none;
-       background:${velo('to bottom', rgb(C.fondo), .97)}"></div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:${tall ? 520 : 260}px;pointer-events:none;
-       background:${velo('to top', rgb(C.fondo), .94)}"></div>
+<div style="position:absolute;inset:0;background:${C.fondo}">
   <div style="position:absolute;top:${tall ? 262 : 60}px;left:76px">${logo(80)}</div>
   <span class="mono" style="position:absolute;top:${tall ? 372 : 170}px;left:76px;font-size:18px;color:${C.rosa}">${a.creative.eyebrow}</span>
   <h1 class="d" style="position:absolute;top:${tall ? 418 : 214}px;left:76px;right:76px;
       font-size:${a.creative.hlSize || (tall ? 128 : 122)}px">${a.creative.headline}</h1>
-  <div style="position:absolute;left:76px;right:76px;bottom:${tall ? 372 : 62}px;display:flex;
+  <div style="position:absolute;left:76px;right:76px;top:${bandTop - 74}px;display:flex;
               justify-content:space-between;align-items:baseline">
     <span class="d" style="font-size:44px;font-weight:400">${a.creative.price}</span>
     <span class="mono" style="font-size:16px;color:${C.muted}">${a.creative.footer}</span>
   </div>
+  <div style="position:absolute;left:0;right:0;top:${bandTop}px;height:${bandH}px;background:${ph.bg};overflow:hidden">
+    ${img(a, ph, true)}
+  </div>
 </div>`;
 };
 
-// PC · Postal: la lámina, pero con el margen justo para que se lea como lámina
-// y no como una foto chica en medio de una hoja. Simétrica.
+// PC · Postal: margen amplio y la foto montada como una lámina. Simétrica.
 const postal = (a, ph, w, h) => {
   const tall = h === 1920;
-  const m = tall ? 44 : 38;
-  const top = tall ? 250 : m;
-  const bot = tall ? 372 : m;
+  const side = tall ? 108 : 96;
+  const box = w - side * 2;
+  const top = tall ? 402 : 150;
   return `
 <div style="position:absolute;inset:0;background:${C.fondo};text-align:center">
-  <div style="position:absolute;left:${m}px;right:${m}px;top:${top}px;bottom:${bot}px;
-              overflow:hidden;box-shadow:inset 0 0 0 1px ${C.line}">
-      ${producto(a, ph, { l: 20, r: 20, t: 88, b: 20 }, w - m * 2, h - top - bot, '50% 100%')}
-    <div style="position:absolute;left:0;right:0;top:0;height:250px;pointer-events:none;
-         background:${velo('to bottom', rgb(C.fondo), .96)}"></div>
-    <div style="position:absolute;left:0;right:0;bottom:0;height:360px;pointer-events:none;
-         background:${velo('to top', rgb(C.fondo), .97)}"></div>
-    <div style="position:absolute;top:44px;left:0;right:0;display:flex;justify-content:center">${logo(78)}</div>
-    <div style="position:absolute;left:56px;right:56px;bottom:44px">
-      <h1 class="d" style="font-size:${a.creative.hlSize || 70}px">${a.creative.headline}</h1>
-      <p style="font-size:25px;font-weight:300;line-height:1.4;color:${C.body};margin-top:18px">${a.creative.sub}</p>
-      <div style="margin-top:20px;display:flex;justify-content:center;align-items:baseline;gap:20px">
-        <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
-        <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.footer}</span>
-      </div>
+  <div style="position:absolute;top:${tall ? 276 : 66}px;left:0;right:0;display:flex;justify-content:center">${logo(86)}</div>
+  <div style="position:absolute;left:${side}px;top:${top}px;width:${box}px;height:${box}px;
+              background:${ph.bg};border:1px solid ${C.line};overflow:hidden">${img(a, ph)}</div>
+  <div style="position:absolute;left:${side}px;right:${side}px;top:${top + box + 46}px">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 70}px">${a.creative.headline}</h1>
+    <p style="font-size:25px;font-weight:300;line-height:1.4;color:${C.body};margin-top:20px">${a.creative.sub}</p>
+    <div style="margin-top:22px;display:flex;justify-content:center;align-items:baseline;gap:20px">
+      <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
+      <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.footer}</span>
     </div>
   </div>
 </div>`;
@@ -568,7 +496,7 @@ const vitrina = (a, ph, w, h) => {
                  foto — por eso va en el borde de la forma y no encima de nada. */
               box-shadow:inset 0 0 0 1px ${C.line};
               border-radius:${arcoW / 2}px ${arcoW / 2}px ${C.radio} ${C.radio}">
-      ${producto(a, ph, { l: 12, r: 12, t: 12, b: 0 }, arcoW, arcoH)}
+    ${img(a, ph)}
   </div>
   <div class="rule" style="position:absolute;left:${tall ? 96 : 76}px;right:${tall ? 96 : 76}px;top:${repisa}px"></div>
   <div style="position:absolute;left:76px;right:76px;top:${repisa + (tall ? 46 : 44)}px">
@@ -602,7 +530,7 @@ const tira = (a, ph, w, h) => {
   // pagina. No es un problema de maquetacion — no hay relleno que empareje un
   // fondo que ya viene quemado en el JPEG — asi que se avisa al armar, que es
   // cuando todavia se puede cambiar el producto por otro del mismo catalogo.
-  const lums = piezas.map((p) => lum(foto(p.photo).rasBg));
+  const lums = piezas.map((p) => lum(fotoTira(p.photo).bg));
   const salto = Math.max(...lums) - Math.min(...lums);
   if (salto > 12) {
     const peor = piezas[lums.indexOf(Math.min(...lums))];
@@ -628,7 +556,7 @@ const tira = (a, ph, w, h) => {
       font-size:${a.creative.hlSize || (tall ? 104 : 84)}px">${a.creative.headline}</h1>
   ${piezas
     .map((p, i) => {
-      const fx = foto(p.photo);
+      const fx = fotoTira(p.photo);
       const left = m + i * (colW + gap);
       return `
   <div style="position:absolute;left:${left}px;top:${panelY}px;width:${colW}px;height:${panelH}px;
@@ -641,7 +569,8 @@ const tira = (a, ph, w, h) => {
          chico aunque el panel mida lo mismo. Apoyadas en el borde de abajo,
          ademas: cada recorte tiene su propia proporcion y centradas quedan
          flotando a tres alturas distintas. Contra el piso comparten repisa. -->
-    ${producto(a, fx, { l: 0, r: 0, t: 0, b: 0 }, colW, panelH, p.position || '50% 100%')}
+    <img src="${fx.uri}" class="shot" style="object-fit:contain;
+         object-position:${p.position || '50% 100%'}">
   </div>
   <div style="position:absolute;left:${left}px;top:${panelY + panelH + 20}px;width:${colW}px">
     <div class="rule" style="margin-bottom:14px"></div>
@@ -680,7 +609,7 @@ const cifra = (a, ph, w, h) => {
          relleno que se note — pero se recorta, y el recorte por defecto va al
          centro y le come la punta a lo que sea alto. De ahi que cada anuncio
          diga desde donde recortar. -->
-      ${producto(a, ph, { l: 24, r: 24, t: tall ? 250 : 24, b: 18 }, w, fotoH)}
+    ${img(a, ph, true)}
     <!-- Solo lo justo para que el logotipo gris se lea: una elipse chica pegada
          a su esquina, no un velo sobre media foto. -->
     <div style="position:absolute;inset:0;pointer-events:none;
@@ -875,26 +804,6 @@ function writeDeck({ campaign, products, ads }) {
   L.push('');
   L.push('## Los nueve formatos');
   L.push('');
-  L.push('**Manda el producto y el diseño va encima.** Las nueve plantillas cambiaron de fondo por');
-  L.push('eso. Antes la mitad tenía la foto en una franja o en una lámina chica, con media pieza en');
-  L.push('blanco: medido, el producto ocupaba el 15% del lienzo. Ahora la foto es el lienzo, y el');
-  L.push('texto se apoya encima sobre los velos.');
-  L.push('');
-  L.push('El mecanismo son dos capas. Detrás, la toma a sangre, muy desenfocada y casi sin color:');
-  L.push('no se lee como foto sino como el papel de la pieza, y evita que se vea el canto del');
-  L.push('relleno. Delante, el recorte al ras de `fotos/prep-ras.py`, que quita el aire que traía');
-  L.push('cada toma — `prep-fotos.py` lo dejaba cuando el recorte ganaba poco, y ese margen es');
-  L.push('justo lo que encogía el producto, porque `contain` ajusta el cuadro y no el producto.');
-  L.push('');
-  L.push('Y el hueco decide solo: se conoce cuánto mide el recorte y cuánto el hueco, así que se');
-  L.push('calcula qué se perdería entrando a sangre. Si es poco — y lo primero que se va es el 3%');
-  L.push('de margen del propio recorte — entra a sangre y llena. Si es mucho, entra contenido y no');
-  L.push('se corta nada. Ni una regla ni la otra sola sirven: cada una deja el producto chico la');
-  L.push('mitad de las veces.');
-  L.push('');
-  L.push('`medir-producto.py` mide la fracción del lienzo con color, que es el número con el que se');
-  L.push('discute si una pieza «se ve chica».');
-  L.push('');
   L.push('| Plantilla | Qué hace | Cuándo conviene |');
   L.push('| --- | --- | --- |');
   L.push('| `puro` | Foto a sangre y un titular encima. Sin cajas. | Público frío: compite con imagen, no con texto. |');
@@ -914,7 +823,7 @@ function writeDeck({ campaign, products, ads }) {
   L.push('`pruebas.json`, y se rinden en `pruebas/` sin tocar la campaña:');
   L.push('');
   L.push('```');
-  L.push('python3 marketing/ig-ads/fotos/prep-ras.py   # recortes al ras del producto');
+  L.push('python3 marketing/ig-ads/fotos/prep-tira.py  # recortes al ras para las tiras');
   L.push('node marketing/ig-ads/build.mjs --pruebas    # dos piezas de cada formato nuevo');
   L.push('python3 marketing/ig-ads/pruebas.py          # la hoja para decidir cuáles entran');
   L.push('```');

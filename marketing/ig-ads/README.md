@@ -1099,26 +1099,6 @@ Diego V. antes de publicar IG-05.
 
 ## Los nueve formatos
 
-**Manda el producto y el diseño va encima.** Las nueve plantillas cambiaron de fondo por
-eso. Antes la mitad tenía la foto en una franja o en una lámina chica, con media pieza en
-blanco: medido, el producto ocupaba el 15% del lienzo. Ahora la foto es el lienzo, y el
-texto se apoya encima sobre los velos.
-
-El mecanismo son dos capas. Detrás, la toma a sangre, muy desenfocada y casi sin color:
-no se lee como foto sino como el papel de la pieza, y evita que se vea el canto del
-relleno. Delante, el recorte al ras de `fotos/prep-ras.py`, que quita el aire que traía
-cada toma — `prep-fotos.py` lo dejaba cuando el recorte ganaba poco, y ese margen es
-justo lo que encogía el producto, porque `contain` ajusta el cuadro y no el producto.
-
-Y el hueco decide solo: se conoce cuánto mide el recorte y cuánto el hueco, así que se
-calcula qué se perdería entrando a sangre. Si es poco — y lo primero que se va es el 3%
-de margen del propio recorte — entra a sangre y llena. Si es mucho, entra contenido y no
-se corta nada. Ni una regla ni la otra sola sirven: cada una deja el producto chico la
-mitad de las veces.
-
-`medir-producto.py` mide la fracción del lienzo con color, que es el número con el que se
-discute si una pieza «se ve chica».
-
 | Plantilla | Qué hace | Cuándo conviene |
 | --- | --- | --- |
 | `puro` | Foto a sangre y un titular encima. Sin cajas. | Público frío: compite con imagen, no con texto. |
@@ -1138,7 +1118,7 @@ la misma repisa) y `cifra` (el precio a tamaño de titular). Viven en un carril 
 `pruebas.json`, y se rinden en `pruebas/` sin tocar la campaña:
 
 ```
-python3 marketing/ig-ads/fotos/prep-ras.py   # recortes al ras del producto
+python3 marketing/ig-ads/fotos/prep-tira.py  # recortes al ras para las tiras
 node marketing/ig-ads/build.mjs --pruebas    # dos piezas de cada formato nuevo
 python3 marketing/ig-ads/pruebas.py          # la hoja para decidir cuáles entran
 ```
