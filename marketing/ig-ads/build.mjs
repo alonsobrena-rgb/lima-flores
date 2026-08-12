@@ -288,18 +288,20 @@ const quote = (a, ph) => `
     <span style="font-size:23px;letter-spacing:.42em;color:${C.rosa}">★★★★★</span>
     ${logo(72)}
   </div>
-  <blockquote class="d" style="position:absolute;top:148px;left:76px;right:76px;
-              font-size:${a.creative.hlSize || 74}px;line-height:1.04">«${a.creative.quote}»</blockquote>
-  <div style="position:absolute;left:76px;bottom:730px">
-    <div style="display:flex;align-items:center;gap:18px">
+  <!-- La cita y la firma van en un mismo flujo, no cada una anclada por su
+       cuenta: la cita puede salir de dos lineas o de cuatro, y ancladas por
+       separado la firma se le monta encima cuando crece. -->
+  <div style="position:absolute;top:112px;left:76px;right:76px">
+    <blockquote class="d" style="font-size:${a.creative.hlSize || 62}px;line-height:1.06">«${a.creative.quote}»</blockquote>
+    <div style="display:flex;align-items:center;gap:18px;margin-top:30px">
       <span style="width:44px;height:1px;background:${C.line}"></span>
       <span style="font-size:23px;font-weight:400">${a.creative.author}</span>
     </div>
-    <div class="mono" style="font-size:15px;color:${C.muted};margin-top:14px;margin-left:62px">${a.creative.meta}</div>
+    <div class="mono" style="font-size:15px;color:${C.muted};margin-top:11px;margin-left:62px">${a.creative.meta}</div>
   </div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:700px;background:${ph.bg};
-              border-top:1px solid ${C.line};overflow:hidden">
-    ${img(a, ph, true)}
+  <div style="position:absolute;left:0;right:0;bottom:0;height:${a.creative.fotoH || 856}px;background:${ph.bg};
+              overflow:hidden">
+    ${img(a, ph)}
     <div style="position:absolute;left:0;right:0;bottom:0;height:330px;padding:0 76px 40px;
                 display:flex;justify-content:space-between;align-items:flex-end;
                 background:${velo('to top', rgb(C.fondo), .98)}">
