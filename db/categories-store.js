@@ -9,6 +9,12 @@ const db = require('./index');
 
 const SEED_FILE = path.join(__dirname, 'categories.seed.json');
 
+// Normaliza una etiqueta para compararla con el ojo: sin tildes, sin
+// mayúsculas y sin espacios de sobra.
+const norm = (s) => String(s || '')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/\s+/g, ' ').trim();
+
 function slugify(s) {
   return String(s || '')
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -40,9 +46,14 @@ async function ensureSeeded() {
   try { seed = require(SEED_FILE); } catch { seed = []; }
   if (!seed.length) { seeded = true; return; }
 
-  const { rows: existentes } = await db.query('SELECT slug FROM categories');
+  const { rows: existentes } = await db.query('SELECT slug, label FROM categories');
   const tiene = new Set(existentes.map((r) => r.slug));
-  const faltan = seed.filter((c) => !tiene.has(c.slug || slugify(c.label)));
+  // También por etiqueta, no solo por slug. La tabla solo impide repetir el
+  // slug, así que una categoría creada a mano desde el admin con otro slug —
+  // «accesorios-2», por ejemplo — no chocaba con la del seed y el catálogo
+  // terminaba mostrando «Accesorios» dos veces. Para el que mira son la misma.
+  const etiquetas = new Set(existentes.map((r) => norm(r.label)));
+  const faltan = seed.filter((c) => !tiene.has(c.slug || slugify(c.label)) && !etiquetas.has(norm(c.label)));
 
   // Las nuevas van al final del orden actual, no en su índice del seed: el orden
   // lo maneja el admin y no se le pisa por agregar una categoría.

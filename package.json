@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "seed": "node scripts/seed-products.js"
+    "seed": "node scripts/seed-products.js",
+    "dedupe-categorias": "node scripts/dedupe-categories.js"
   },
   "dependencies": {
     "@higgsfield/client": "^0.2.1",
