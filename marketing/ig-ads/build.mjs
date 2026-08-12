@@ -294,7 +294,10 @@ const quote = (a, ph) => `
   <!-- La cita y la firma van en un mismo flujo, no cada una anclada por su
        cuenta: la cita puede salir de dos lineas o de cuatro, y ancladas por
        separado la firma se le monta encima cuando crece. -->
-  <div style="position:absolute;top:112px;left:76px;right:76px">
+  <!-- Debajo de la cabecera, no a su misma altura. La cita ocupa el ancho
+       completo, asi que arrancando a 112 px su primera linea le pasa por debajo
+       al logotipo — en IG-08 «pequenos» quedaba encima de la marca. -->
+  <div style="position:absolute;top:206px;left:76px;right:76px">
     <blockquote class="d" style="font-size:${a.creative.hlSize || 62}px;line-height:1.06">«${a.creative.quote}»</blockquote>
     <div style="display:flex;align-items:center;gap:18px;margin-top:30px">
       <span style="width:44px;height:1px;background:${C.line}"></span>
@@ -302,7 +305,7 @@ const quote = (a, ph) => `
     </div>
     <div class="mono" style="font-size:15px;color:${C.muted};margin-top:11px;margin-left:62px">${a.creative.meta}</div>
   </div>
-  <div style="position:absolute;left:0;right:0;bottom:0;height:${a.creative.fotoH || 856}px;background:${ph.bg};
+  <div style="position:absolute;left:0;right:0;bottom:0;height:${a.creative.fotoH || 800}px;background:${ph.bg};
               overflow:hidden">
     ${img(a, ph)}
     <div style="position:absolute;left:0;right:0;bottom:0;height:330px;padding:0 76px 40px;
