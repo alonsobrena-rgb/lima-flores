@@ -102,50 +102,44 @@ export default function Catalogo() {
     (p) => (cat === 'all' || p.category === cat) && priceTest(Number(p.price) || 0)
   );
 
+  // Blanco y aire. Antes había una foto de carretilla fija detrás de toda la
+  // página, con velo y desenfoque, y el título dentro de un panel esmerilado para
+  // poder leerse encima: dos parches para un fondo que competía con las fotos de
+  // producto, que son lo que tiene que mandar.
   return (
-    <div className="relative min-h-screen">
-      {/* Fondo: carretilla de flores en Milán al mediodía (Higgsfield) con velo
-          ivory para legibilidad. El header lleva un plinth esmerilado; la carretilla
-          + la florista se ven alrededor y en toda la página. */}
-      <div aria-hidden className="fixed inset-0 -z-10">
-        <img src="/bg/catalogo-milan-mediodia.webp" alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/76 via-ivory-100/66 to-ivory-100/72" />
-        <div className="absolute inset-0 backdrop-blur-[1.5px]" />
-      </div>
-
-      <div className="relative z-10">
+    <div className="relative min-h-screen bg-background">
+      <div className="relative">
       <SiteHeader />
-      <header className="relative z-30 mx-auto max-w-7xl px-6 pb-10 pt-16 md:px-12 md:pt-20">
-        {/* Plinth esmerilado: fondo ivory propio para que el título y los filtros
-            se lean sobre la carretilla. */}
-        <div className="relative inline-block max-w-2xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-8 shadow-[0_28px_70px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-11 md:py-10">
-          <span className="text-[12px] font-medium uppercase tracking-[0.28em] text-ink-500">— El catálogo</span>
-          <h1 className="mt-3 font-display text-[2.75rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[4rem]">
-            Flores de estación, <em className="italic text-rosa-500">frescas y del día.</em>
+      <header className="relative z-30 mx-auto max-w-7xl px-6 pb-12 pt-16 md:px-12 md:pt-24">
+        <div className="max-w-3xl">
+          <span className="rotulo">El catálogo</span>
+          <h1 className="display mt-4 text-[2.75rem] text-ink-900 md:text-[4.25rem]">
+            Flores de estación, <em>frescas y del día.</em>
           </h1>
-          <p className="mt-5 max-w-md text-ink-700">
+          <p className="mt-6 max-w-md text-ink-700">
             {cat === 'all' && activePrice === 'all'
               ? `${products.length} creaciones, armadas tallo por tallo y entregadas en Lima.`
               : `${list.length} ${list.length === 1 ? 'creación' : 'creaciones'} con estos filtros.`}
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-2.5">
-            {chips.map((c) => (
-              <button
-                key={c.slug} onClick={() => setCat(c.slug)}
-                className={`rounded-full border px-5 py-2 text-[13px] font-medium uppercase tracking-[0.14em] transition-colors ${
-                  cat === c.slug ? 'border-rosa-500 bg-rosa-500 text-ivory-50' : 'border-ink-900/15 text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+        </div>
 
-          {/* Filtro de precio (dropdown con opciones + precio máximo personalizado) */}
-          <div className="mt-4 flex flex-wrap items-center gap-2.5">
-            <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
-            <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
-          </div>
+        <div className="mt-10 flex flex-wrap gap-2.5 border-t border-border pt-8">
+          {chips.map((c) => (
+            <button
+              key={c.slug} onClick={() => setCat(c.slug)}
+              className={`rounded-pill border px-5 py-2 text-[12.5px] font-medium uppercase tracking-[0.14em] transition-colors ${
+                cat === c.slug ? 'border-rosa-500 bg-rosa-500 text-white' : 'border-border text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Filtro de precio (dropdown con opciones + precio máximo personalizado) */}
+        <div className="mt-4 flex flex-wrap items-center gap-2.5">
+          <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
+          <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
         </div>
       </header>
 
@@ -153,7 +147,6 @@ export default function Catalogo() {
           que las etiquetas se lean nítidas; la carretilla asoma arriba y queda
           como presencia cálida y suave detrás de los productos. */}
       <div className="relative">
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 -top-40 -z-10" style={{ background: 'linear-gradient(to bottom, rgba(246,243,236,0) 0px, rgba(246,243,236,0.92) 150px)' }} />
         <section className="relative mx-auto max-w-7xl px-6 pb-24 md:px-12 md:pb-32">
         <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 md:gap-x-7 lg:grid-cols-4">
           {list.map((p, i) => (
@@ -163,9 +156,11 @@ export default function Catalogo() {
               className="group"
             >
               <Link to={`/producto/${p.id}`} className="block">
-                <div className="relative overflow-hidden rounded-sm bg-ivory-200 shadow-[0_10px_30px_-18px_rgba(42,38,35,0.4)] transition-shadow duration-500 group-hover:shadow-[0_28px_55px_-26px_rgba(42,38,35,0.5)]">
-                  <img src={p.image} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink-900/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                {/* Filete en vez de sombra: casi todas las fotos son de estudio
+                    sobre blanco, así que sin filete el producto flota sin borde
+                    y la tarjeta no existe. */}
+                <div className="relative overflow-hidden rounded-md bg-secondary ring-1 ring-border transition-all duration-500 group-hover:ring-ink-900/25">
+                  <img src={p.image} alt={p.name} className="aspect-square w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
                 </div>
               </Link>
               <div className="mt-3.5">
@@ -176,7 +171,7 @@ export default function Catalogo() {
                 </div>
                 <AddToCart
                   id={p.id}
-                  className="mt-3 w-full border border-ink-900/15 py-2.5 text-[12px] font-medium uppercase tracking-[0.16em] text-ink-900 transition-colors hover:border-rosa-500 hover:bg-rosa-500 hover:text-ivory-50 data-[done=true]:border-verde-700"
+                  className="mt-3.5 w-full rounded-pill border border-border py-2.5 text-[12px] font-medium uppercase tracking-[0.16em] text-ink-900 transition-colors hover:border-rosa-500 hover:bg-rosa-500 hover:text-white data-[done=true]:border-verde-700"
                 />
               </div>
             </motion.div>

@@ -4,6 +4,8 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 import { AddToCart } from '@/components/AddToCart';
 import { money, useProducts } from '@/lib/cart';
+import { MediosDePago } from '@/components/MediosDePago';
+import { AVISOS_PRODUCTO, PROMESAS } from '@/lib/tienda';
 
 export default function Producto() {
   const { id } = useParams();
@@ -79,9 +81,28 @@ export default function Producto() {
             </div>
 
             <ul className="mt-10 space-y-2.5 border-t border-border pt-6 text-sm text-ink-600">
-              <li>· Entrega a domicilio en Lima Metropolitana.</li>
-              <li>· Armado a mano con flores frescas de la semana.</li>
-              <li>· Incluye tarjeta de dedicatoria sin costo.</li>
+              {PROMESAS.map((t) => (
+                <li key={t} className="flex gap-2.5">
+                  <span aria-hidden="true" className="text-verde-500">—</span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-7">
+              <MediosDePago />
+            </div>
+
+            {/* La letra chica va debajo de todo producto, no en una página de
+                condiciones que nadie abre: se lee antes de comprar, que es
+                cuando sirve. */}
+            <ul className="mt-7 space-y-2 border-t border-border pt-5 text-[12.5px] leading-relaxed text-foreground/50">
+              {AVISOS_PRODUCTO.map((t) => (
+                <li key={t} className="flex gap-2.5">
+                  <span aria-hidden="true" className="mt-[7px] h-[4px] w-[4px] shrink-0 rounded-pill bg-foreground/25" />
+                  <span>{t}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

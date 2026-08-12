@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CartProvider } from '@/lib/cart';
 import { CartDrawer } from '@/components/CartDrawer';
 import { SearchProvider } from '@/components/SearchOverlay';
-import { Ambient } from '@/components/motion/Ambient';
 import { ScrollProgress } from '@/components/motion/ScrollProgress';
 import Home from '@/pages/Home';
 import Catalogo from '@/pages/Catalogo';
@@ -57,7 +56,6 @@ function App() {
     <CartProvider>
       <SearchProvider>
         <ScrollProgress />
-        <Ambient />
         <ScrollToTop />
         <div className="relative z-10">
           <AnimatedRoutes />

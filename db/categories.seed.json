@@ -1,9 +1,34 @@
 [
-  { "slug": "orquideas", "label": "Orquídeas" },
-  { "slug": "arreglos", "label": "Arreglos" },
-  { "slug": "floreros", "label": "Floreros" },
-  { "slug": "ramos", "label": "Ramos" },
-  { "slug": "plantas", "label": "Plantas y Cactus" },
-  { "slug": "funebre", "label": "Condolencias" },
-  { "slug": "accesorios", "label": "Accesorios" }
+  {
+    "slug": "orquideas",
+    "label": "Orquídeas"
+  },
+  {
+    "slug": "arreglos",
+    "label": "Arreglos"
+  },
+  {
+    "slug": "floreros",
+    "label": "Floreros"
+  },
+  {
+    "slug": "ramos",
+    "label": "Ramos"
+  },
+  {
+    "slug": "plantas",
+    "label": "Plantas y Cactus"
+  },
+  {
+    "slug": "tierras",
+    "label": "Tierras y sustratos"
+  },
+  {
+    "slug": "funebre",
+    "label": "Condolencias"
+  },
+  {
+    "slug": "accesorios",
+    "label": "Accesorios"
+  }
 ]

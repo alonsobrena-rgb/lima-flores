@@ -1,5 +1,5 @@
-import { LimaHero } from '@/components/ui/lima-hero';
-import { HomeFloralBg } from '@/components/HomeFloralBg';
+import { SiteHeader } from '@/components/SiteHeader';
+import { HeroVitrina } from '@/components/sections/HeroVitrina';
 import { Marquee } from '@/components/sections/Marquee';
 import { Manifesto } from '@/components/sections/Manifesto';
 import { SignatureProduct } from '@/components/sections/SignatureProduct';
@@ -10,35 +10,18 @@ import { InstagramGallery } from '@/components/sections/InstagramGallery';
 import { SubscriptionTeaser } from '@/components/sections/SubscriptionTeaser';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 
-const navLinks = [
-  { label: 'Inicio', href: '/' },
-  { label: 'Catálogo', href: '/catalogo' },
-  { label: 'Condolencias', href: '/funebre' },
-  { label: 'Suscripción', href: '/suscripcion' },
-  { label: 'Contacto', href: 'https://wa.me/51999479855' },
-];
-
-const socials = [
-  { label: 'Instagram', href: 'https://instagram.com/lima_flores' },
-  { label: 'Facebook', href: 'https://facebook.com/limafloresperu' },
-];
-
 export default function Home() {
   return (
     <>
-      {/* Fondo fijo para toda la landing (jardín de rosas a contraluz, desenfocado).
-          El video va solo en el hero. */}
-      <HomeFloralBg src="/bg/landing-jardin.webp" />
-      <LimaHero
-        navLinks={navLinks}
-        socials={socials}
-        locationText="Miraflores · Lima"
-        videoSrc="/hero/mujer-florero-tulipanes.mp4"
-        poster="/hero/mujer-florero-tulipanes-poster.webp"
-      />
-      {/* Velo ivory translúcido sobre el fondo floral: deja ver las flores pero
-          mantiene legible el contenido de las secciones (más blanco = más legible). */}
-      <div className="relative bg-ivory-100/[0.78]">
+      {/* La cabecera es la misma en toda la tienda. Antes la portada tenía su
+          propia barra dentro del hero, así que el sitio cambiaba de cabecera al
+          navegar. */}
+      <SiteHeader />
+      <HeroVitrina />
+      {/* El sistema Florencia es blanco y aire: el fondo floral generado y las
+          manchas de acuarela que había detrás de todo ensuciaban el blanco y
+          peleaban con las fotos de producto, que son lo que tiene que mandar. */}
+      <div className="relative bg-background">
         <Marquee />
         <Manifesto />
         <FeaturedProducts />

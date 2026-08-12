@@ -1,35 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+/* Solo las dos familias del sistema. Playfair Display estaba importada y sin
+   usar: pesaba en cada carga sin pintar un solo carácter. */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================================
-   Lima Flores — shadcn tokens mapeados a la paleta de marca
-   (ver site/css/lf-design/tokens/colors.css). HSL triplets.
+   Lima Flores — sistema Florencia, mapeado a los tokens de shadcn.
+   La fuente de verdad es design/direcciones/florencia.css, que a su vez
+   sale de medir el ramo del logotipo. Acá van los mismos colores en
+   tripletes HSL porque es lo que consume Tailwind.
+
+   El cambio grande respecto de lo anterior: el fondo era marfil #F6F3EC y
+   ahora es blanco total. El marfil se queda solo para las secciones
+   alternas (#F4F4F3), y los filetes bajan a #E6E5E3.
    ============================================================ */
 @layer base {
   :root {
-    --background: 44 33% 94%;          /* ivory-100  #F6F3EC */
-    --foreground: 26 9% 15%;           /* ink-900    #2A2623 */
+    --background: 0 0% 100%;           /* blanco total     #FFFFFF */
+    --foreground: 26 9% 15%;           /* tinta cálida     #2A2623 */
     --card: 0 0% 100%;
     --card-foreground: 26 9% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 26 9% 15%;
-    --primary: 333 57% 39%;            /* rosa-500   #9E2B5E */
-    --primary-foreground: 40 33% 97%;  /* ivory-50   #FBF9F4 */
-    --secondary: 40 28% 91%;           /* ivory-200  #EFEAE0 */
+    --primary: 333 57% 39%;            /* rosa del ramo    #9E2B5E */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 3% 96%;            /* gris de sección  #F4F4F3 */
     --secondary-foreground: 26 9% 15%;
-    --muted: 40 28% 91%;
-    --muted-foreground: 30 6% 41%;     /* ink-500    #6E6862 */
+    --muted: 60 3% 96%;
+    --muted-foreground: 30 6% 41%;     /* apagado          #6E6862 */
     --accent: 333 57% 39%;
-    --accent-foreground: 40 33% 97%;
-    --destructive: 354 51% 47%;        /* danger     #B23A48 */
-    --destructive-foreground: 40 33% 97%;
-    --border: 38 25% 85%;              /* ivory-300  #E4DDD0 */
-    --input: 38 25% 85%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 354 51% 47%;        /* danger           #B23A48 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 4% 90%;               /* filete           #E6E5E3 */
+    --input: 40 4% 90%;
     --ring: 333 57% 39%;
-    --radius: 0.75rem;
+    /* Los radios del sistema son 4 / 8 / 14 / pill — radii-shadows.html. */
+    --radius: 0.5rem;
   }
 
   * {
@@ -40,6 +49,28 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* El tamaño display va en itálica peso 500 y los títulos de sección redondos
+     en 600. No es decoración: está escrito en guidelines/type-display.html del
+     sistema. Se aplica por clase para no forzarlo en toda la serif. */
+  .display {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.03;
+  }
+  .display em { font-style: italic; color: hsl(var(--primary)); }
+
+  /* Rótulo: versalita muy espaciada en el acento, peso 500 — no en gris.
+     type-eyebrow-script.html. */
+  .rotulo {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
   }
 
   /* Selección de texto en rosa de marca (detalle "diseñado") */

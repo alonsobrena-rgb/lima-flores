@@ -29,22 +29,34 @@ async function uniqueSlug(base) {
 }
 
 let seeded = false;
+// Siembra idempotente. Antes cortaba en seco si la tabla ya tenía filas, así que
+// una categoría agregada al seed no llegaba nunca a una base ya poblada: aparecía
+// solo en el snapshot que trae el bundle y desaparecía en cuanto respondía la API.
+// Ahora inserta las que falten — el ON CONFLICT deja intactas las que el admin ya
+// editó o desactivó, que es lo que corresponde: manda la base, no el archivo.
 async function ensureSeeded() {
   if (seeded || !db.enabled) return;
-  const { rows } = await db.query('SELECT COUNT(*)::int AS n FROM categories');
-  if (rows[0].n > 0) { seeded = true; return; }
   let seed = [];
   try { seed = require(SEED_FILE); } catch { seed = []; }
-  for (let i = 0; i < seed.length; i++) {
-    const c = seed[i];
+  if (!seed.length) { seeded = true; return; }
+
+  const { rows: existentes } = await db.query('SELECT slug FROM categories');
+  const tiene = new Set(existentes.map((r) => r.slug));
+  const faltan = seed.filter((c) => !tiene.has(c.slug || slugify(c.label)));
+
+  // Las nuevas van al final del orden actual, no en su índice del seed: el orden
+  // lo maneja el admin y no se le pisa por agregar una categoría.
+  const { rows: max } = await db.query('SELECT COALESCE(MAX(sort_order), -1)::int AS n FROM categories');
+  let orden = max[0].n + 1;
+  for (const c of faltan) {
     await db.query(
       `INSERT INTO categories (slug, label, sort_order, active)
        VALUES ($1, $2, $3, TRUE) ON CONFLICT (slug) DO NOTHING`,
-      [c.slug || slugify(c.label), c.label, i]
+      [c.slug || slugify(c.label), c.label, existentes.length ? orden++ : seed.indexOf(c)]
     );
   }
   seeded = true;
-  if (seed.length) console.log(`[categories] sembradas ${seed.length} categorías`);
+  if (faltan.length) console.log(`[categories] sembradas ${faltan.length} categorías nuevas: ${faltan.map((c) => c.slug).join(', ')}`);
 }
 
 // Cada categoría con su número de productos ACTIVOS (para "X diseños").

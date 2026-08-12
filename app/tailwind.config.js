@@ -40,11 +40,16 @@ export default {
           foreground: 'hsl(var(--popover-foreground) / <alpha-value>)',
         },
 
-        // ── Lima Flores raw palette (from site/css/lf-design/tokens/colors.css) ──
-        ivory: { 50: '#FBF9F4', 100: '#F6F3EC', 200: '#EFEAE0', 300: '#E4DDD0', 400: '#CFC6B6' },
-        ink: { 300: '#B4ADA4', 400: '#8E8A86', 500: '#6E6862', 700: '#4A443F', 900: '#2A2623' },
+        // ── Paleta cruda del sistema Florencia (design/direcciones/florencia.css).
+        //    Los nombres se mantienen para no tocar 40 archivos; los valores son
+        //    los nuevos. `ivory` ya no es marfil: es la escala de blancos.
+        ivory: { 50: '#FFFFFF', 100: '#FFFFFF', 200: '#F4F4F3', 300: '#E6E5E3', 400: '#CBC9C6' },
+        //    ink-400 es el gris exacto del logotipo, medido sobre el archivo.
+        ink: { 300: '#B4ADA4', 400: '#A2A19F', 500: '#6E6862', 600: '#4A443F', 700: '#4A443F', 800: '#2A2623', 900: '#2A2623' },
         rosa: { 50: '#FBEEF2', 100: '#F4D6E0', 200: '#E7AFC2', 300: '#D584A1', 500: '#9E2B5E', 600: '#842049', 700: '#6A1A3B' },
-        verde: { 100: '#E8ECE1', 300: '#B6C2A7', 500: '#7E8E6E', 700: '#5A6850' },
+        //    El salvia anterior (#7E8E6E) no existe en el logotipo: se reemplaza
+        //    por el verde medido del ramo.
+        verde: { 100: '#EDF1E4', 300: '#B6C2A7', 500: '#88A65C', 700: '#5A6850' },
         pesca: { 100: '#FBF0DE', 300: '#F0D9B5', 500: '#E3B785' },
         blush: { 100: '#FCEEF1', 300: '#E7B8C6' },
         surface: { DEFAULT: '#FFFFFF', card: '#FDFCF8' },
@@ -61,12 +66,13 @@ export default {
       fontFamily: {
         sans: ['Jost', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-        serifAlt: ['"Playfair Display"', 'Georgia', 'serif'],
       },
+      // 4 / 8 / 14 / pill — radii-shadows.html del sistema.
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        sm: '4px',
+        md: '8px',
+        lg: '14px',
+        pill: '999px',
       },
     },
   },
