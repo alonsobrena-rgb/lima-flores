@@ -43,6 +43,10 @@ const Chevron = ({ abierto }: { abierto: boolean }) => (
   <svg className={`h-3.5 w-3.5 transition-transform ${abierto ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
 );
 
+const Tilde = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-3 w-3"><path d="M20 6 9 17l-5-5" /></svg>
+);
+
 /**
  * Categorías como desplegable, no como fila de píldoras.
  *
@@ -51,17 +55,41 @@ const Chevron = ({ abierto }: { abierto: boolean }) => (
  * de la derecha quedaban escondidas: el filtro no se puede leer de un vistazo si
  * hay que arrastrarlo. Acá el disparador ocupa una línea y el panel las muestra
  * **todas a la vez**, en dos columnas y sin scroll, con su conteo al lado.
+ *
+ * El botón «Varias» cambia el modo del panel sin cambiar de control:
+ *
+ * - **Apagado** (lo normal): elegir una categoría reemplaza la anterior y cierra
+ *   el panel. Es lo que hace el 90 % de la gente y no debería costar dos toques.
+ * - **Encendido**: cada categoría se marca o se desmarca y el panel se queda
+ *   abierto, para armar la combinación de una sentada.
+ *
+ * Se enciende solo si la URL ya trae más de una — así un enlace compartido con
+ * dos categorías abre el panel en el modo en que se armó.
  */
 function CategoryDropdown({
-  chips, value, onSelect,
+  categorias, seleccion, onChange,
 }: {
-  chips: { slug: string; label: string; count?: number }[];
-  value: string;
-  onSelect: (slug: string) => void;
+  categorias: { slug: string; label: string; count?: number }[];
+  seleccion: string[];
+  onChange: (slugs: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [varias, setVarias] = useState(seleccion.length > 1);
   const ref = useCerrarAlSalir(open, () => setOpen(false));
-  const actual = chips.find((c) => c.slug === value) ?? chips[0];
+  const elegidas = new Set(seleccion);
+
+  const etiqueta =
+    seleccion.length === 0
+      ? 'Todos'
+      : seleccion.length === 1
+        ? categorias.find((c) => c.slug === seleccion[0])?.label ?? 'Todos'
+        : `${seleccion.length} categorías`;
+
+  const tocar = (slug: string) => {
+    if (!varias) { onChange([slug]); setOpen(false); return; }
+    onChange(elegidas.has(slug) ? seleccion.filter((s) => s !== slug) : [...seleccion, slug]);
+  };
+
   return (
     /* `static` a propósito: el panel se posiciona contra la fila de filtros, no
        contra el botón — ver el comentario de la fila. */
@@ -72,32 +100,76 @@ function CategoryDropdown({
         aria-expanded={open}
         className={disparador}
       >
-        {actual.label}
+        {etiqueta}
         <Chevron abierto={open} />
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-full z-30 mt-2 w-[min(86vw,430px)] rounded-md border border-ink-900/10 bg-ivory-50 p-1.5 shadow-[0_24px_60px_-28px_rgba(42,38,35,0.6)]"
+          className="absolute left-0 top-full z-30 mt-2 w-[min(92vw,440px)] rounded-md border border-ink-900/10 bg-ivory-50 p-1.5 shadow-[0_24px_60px_-28px_rgba(42,38,35,0.6)]"
         >
-          <div className="grid grid-cols-2 gap-0.5">
-            {chips.map((c) => (
-              <button
-                key={c.slug}
-                role="menuitem"
-                onClick={() => { onSelect(c.slug); setOpen(false); }}
-                className={`flex items-baseline justify-between gap-2 rounded px-3 py-2 text-left text-[13px] leading-snug transition-colors ${
-                  value === c.slug ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:bg-ink-900/5'
-                }`}
-              >
-                <span>{c.label}</span>
-                {c.count ? (
-                  <span className={`shrink-0 text-[10px] tabular-nums ${value === c.slug ? 'text-ivory-50/70' : 'text-ink-500'}`}>
-                    {c.count}
+          <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-1">
+            <button
+              onClick={() => { onChange([]); if (!varias) setOpen(false); }}
+              className={`rounded px-1.5 py-1 text-[13px] transition-colors ${
+                seleccion.length === 0 ? 'font-medium text-rosa-500' : 'text-ink-700 hover:text-ink-900'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => {
+                const siguiente = !varias;
+                setVarias(siguiente);
+                // Al apagarlo, una sola combinación no puede sobrevivir: se queda
+                // la primera, que es la que el disparador ya venía mostrando.
+                if (!siguiente && seleccion.length > 1) onChange([seleccion[0]]);
+              }}
+              aria-pressed={varias}
+              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] transition-colors ${
+                varias
+                  ? 'border-rosa-500 bg-rosa-500 text-ivory-50'
+                  : 'border-ink-900/15 text-ink-500 hover:border-ink-900/40 hover:text-ink-900'
+              }`}
+            >
+              {varias && <Tilde />}
+              Varias
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-0.5 border-t border-ink-900/10 pt-1.5">
+            {categorias.map((c) => {
+              const activa = elegidas.has(c.slug);
+              return (
+                <button
+                  key={c.slug}
+                  role={varias ? 'menuitemcheckbox' : 'menuitem'}
+                  aria-checked={varias ? activa : undefined}
+                  onClick={() => tocar(c.slug)}
+                  className={`flex items-center justify-between gap-1.5 rounded px-2.5 py-2 text-left text-[13px] leading-snug transition-colors ${
+                    activa ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:bg-ink-900/5'
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    {varias && (
+                      <span
+                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[3px] border ${
+                          activa ? 'border-ivory-50 bg-ivory-50 text-rosa-500' : 'border-ink-900/25'
+                        }`}
+                      >
+                        {activa && <Tilde />}
+                      </span>
+                    )}
+                    <span className="truncate">{c.label}</span>
                   </span>
-                ) : null}
-              </button>
-            ))}
+                  {c.count ? (
+                    <span className={`shrink-0 text-[10px] tabular-nums ${activa ? 'text-ivory-50/70' : 'text-ink-500'}`}>
+                      {c.count}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -169,12 +241,16 @@ function PriceDropdown({ value, label, onSelect }: { value: string; label: strin
 export default function Catalogo() {
   const { products } = useProducts();
   const { categories } = useCategories();
-  const chips = [{ slug: 'all', label: 'Todos' }, ...categories];
-  // Filtros en la URL (?cat=ramos&precio=150-250) — compartible/navegable con
-  // back/forward; las categorías llegan así desde la sección del home.
+  // Filtros en la URL (?cat=ramos,arreglos&precio=150-250) — compartible y
+  // navegable con back/forward. Las categorías llegan así desde la sección del
+  // home, con un solo slug; varias van separadas por coma. Se filtran contra las
+  // categorías reales para que una URL vieja o rota no deje el catálogo vacío.
   const [params, setParams] = useSearchParams();
-  const raw = params.get('cat') || 'all';
-  const cat = chips.some((c) => c.slug === raw) ? raw : 'all';
+  const validas = new Set(categories.map((c) => c.slug));
+  const sel = (params.get('cat') || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => validas.has(s));
   const rawPrice = params.get('precio') || 'all';
   const isPreset = PRICE_RANGES.some((r) => r.key === rawPrice);
   const customMax = !isPreset ? /^max(\d+)$/.exec(rawPrice) : null;
@@ -187,10 +263,11 @@ export default function Catalogo() {
     if (!val || val === 'all') next.delete(key); else next.set(key, val);
     setParams(next, { replace: true });
   };
-  const setCat = (slug: string) => setParam('cat', slug);
+  const setCats = (slugs: string[]) => setParam('cat', slugs.join(','));
   const setPrice = (key: string) => setParam('precio', key);
+  const elegidas = new Set(sel);
   const list = products.filter(
-    (p) => (cat === 'all' || p.category === cat) && priceTest(Number(p.price) || 0)
+    (p) => (elegidas.size === 0 || elegidas.has(p.category)) && priceTest(Number(p.price) || 0)
   );
 
   // Blanco y aire. Antes había una foto de carretilla fija detrás de toda la
@@ -204,8 +281,8 @@ export default function Catalogo() {
       {/* En móvil esta cabecera ocupaba la pantalla entera: al entrar al catálogo
           no se veía ni una foto, había que hacer scroll para llegar al producto.
           Se achica todo lo que sobra —el aire de arriba, el titular, el conteo—
-          y los chips pasan de tres filas envueltas a una sola que se desliza de
-          costado. De md para arriba queda como estaba: ahí sobraba pantalla. */}
+          y las ocho categorías, que eran tres filas de píldoras, se recogen en un
+          desplegable. De md para arriba se achica menos: ahí sobraba pantalla. */}
       <header className="relative z-30 mx-auto max-w-7xl px-6 pb-6 pt-7 md:px-12 md:pb-12 md:pt-24">
         <div className="max-w-3xl">
           <span className="rotulo">El catálogo</span>
@@ -221,7 +298,7 @@ export default function Catalogo() {
               «Precio» al final de una línea y su botón al principio de la otra. */}
           <div className="flex items-center gap-2.5">
             <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Categoría</span>
-            <CategoryDropdown chips={chips} value={cat} onSelect={setCat} />
+            <CategoryDropdown categorias={categories} seleccion={sel} onChange={setCats} />
           </div>
           <div className="flex items-center gap-2.5 md:ml-2">
             <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
