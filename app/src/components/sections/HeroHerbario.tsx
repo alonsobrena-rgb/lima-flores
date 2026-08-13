@@ -21,6 +21,10 @@ const ease = [0.22, 1, 0.36, 1] as const;
  *
  * El pie va **debajo** del cartel, en su propia banda con filete: metido dentro
  * quedaba tapado por las hojas, y un enlace que la foto esconde no es un enlace.
+ * Es una sola línea: dos enlaces y tres datos. El párrafo que había acá repetía
+ * lo que ya dicen los datos («al día siguiente», «24 h de anticipación») y lo
+ * que la ficha del producto cuenta mejor — entre el cartel y las fotos del
+ * catálogo no debería haber un muro de texto.
  *
  * La foto es la del catálogo (`orquideas-grandes-en-maceta-2`), recortada desde
  * el calado de `bloom/` —la misma toma, a 2,6× de resolución— y con el
@@ -104,33 +108,28 @@ export const HeroHerbario = () => (
       transition={{ duration: 0.9, delay: 0.2, ease }}
       className="relative z-30 border-t border-border bg-background px-6 py-8 sm:px-8 lg:px-12"
     >
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-16">
-        <div className="grid gap-8 sm:grid-cols-[minmax(0,26rem)_auto] sm:items-start sm:gap-12">
-          <p className="max-w-[52ch] text-[16px] leading-relaxed text-ink-700">
-            En maceta decorativa, con tarjeta de dedicatoria e instrucciones de
-            mantenimiento. Eliges el día y una franja de treinta minutos, con
-            veinticuatro horas de anticipación.
-          </p>
-          <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
-            <Link to="/catalogo?cat=orquideas" className={enlace}>
-              Ver las orquídeas <span aria-hidden="true">→</span>
-            </Link>
-            <a
-              href={CONTACTO.whatsapp.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={enlace}
-            >
-              Escribir por WhatsApp <span aria-hidden="true">→</span>
-            </a>
-          </div>
+      <div className="grid gap-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:gap-16">
+        <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+          <Link to="/catalogo?cat=orquideas" className={enlace}>
+            Ver las orquídeas <span aria-hidden="true">→</span>
+          </Link>
+          <a
+            href={CONTACTO.whatsapp.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={enlace}
+          >
+            Escribir por WhatsApp <span aria-hidden="true">→</span>
+          </a>
         </div>
 
-        <dl className="grid gap-x-10 gap-y-5 sm:grid-cols-3 lg:justify-items-end lg:text-right">
+        {/* Tres columnas también en móvil: apilados eran tres bloques y media
+            pantalla de texto entre el cartel y las fotos. */}
+        <dl className="grid grid-cols-3 gap-x-5 gap-y-5 sm:gap-x-10 lg:justify-items-end lg:text-right">
           {DATOS.map((d) => (
             <div key={d.valor}>
-              <dt className="display text-[19px] leading-snug text-ink-900">{d.valor}</dt>
-              <dd className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-ink-500">
+              <dt className="display text-[15px] leading-snug text-ink-900 sm:text-[19px]">{d.valor}</dt>
+              <dd className="mt-1 text-[9px] font-medium uppercase leading-tight tracking-[0.16em] text-ink-500 sm:mt-1.5 sm:text-[11px] sm:tracking-[0.18em]">
                 {d.nota}
               </dd>
             </div>

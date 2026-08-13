@@ -110,25 +110,26 @@ export default function Catalogo() {
     <div className="relative min-h-screen bg-background">
       <div className="relative">
       <SiteHeader />
-      <header className="relative z-30 mx-auto max-w-7xl px-6 pb-12 pt-16 md:px-12 md:pt-24">
+      {/* En móvil esta cabecera ocupaba la pantalla entera: al entrar al catálogo
+          no se veía ni una foto, había que hacer scroll para llegar al producto.
+          Se achica todo lo que sobra —el aire de arriba, el titular, el conteo—
+          y los chips pasan de tres filas envueltas a una sola que se desliza de
+          costado. De md para arriba queda como estaba: ahí sobraba pantalla. */}
+      <header className="relative z-30 mx-auto max-w-7xl px-6 pb-6 pt-7 md:px-12 md:pb-12 md:pt-24">
         <div className="max-w-3xl">
           <span className="rotulo">El catálogo</span>
-          <h1 className="display mt-4 text-[2.75rem] text-ink-900 md:text-[4.25rem]">
+          <h1 className="display mt-2.5 text-[2rem] text-ink-900 sm:text-[2.75rem] md:mt-4 md:text-[4.25rem]">
             Flores de estación, <em>frescas y del día.</em>
           </h1>
-          <p className="mt-6 max-w-md text-ink-700">
-            {cat === 'all' && activePrice === 'all'
-              ? `${products.length} creaciones, armadas tallo por tallo y entregadas en Lima.`
-              : `${list.length} ${list.length === 1 ? 'creación' : 'creaciones'} con estos filtros.`}
-          </p>
-
         </div>
 
-        <div className="mt-10 flex flex-wrap gap-2.5 border-t border-border pt-8">
+        {/* Una sola fila que se desliza: ocho categorías envueltas eran tres
+            filas de píldoras, media pantalla de móvil en botones. */}
+        <div className="-mx-6 mt-5 flex gap-2 overflow-x-auto border-t border-border px-6 pt-5 [scrollbar-width:none] md:mx-0 md:mt-10 md:flex-wrap md:gap-2.5 md:overflow-visible md:px-0 md:pt-8 [&::-webkit-scrollbar]:hidden">
           {chips.map((c) => (
             <button
               key={c.slug} onClick={() => setCat(c.slug)}
-              className={`rounded-pill border px-5 py-2 text-[12.5px] font-medium uppercase tracking-[0.14em] transition-colors ${
+              className={`shrink-0 rounded-pill border px-4 py-1.5 text-[11.5px] font-medium uppercase tracking-[0.14em] transition-colors md:px-5 md:py-2 md:text-[12.5px] ${
                 cat === c.slug ? 'border-rosa-500 bg-rosa-500 text-white' : 'border-border text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
             >
               {c.label}
@@ -136,10 +137,14 @@ export default function Catalogo() {
           ))}
         </div>
 
-        {/* Filtro de precio (dropdown con opciones + precio máximo personalizado) */}
-        <div className="mt-4 flex flex-wrap items-center gap-2.5">
+        {/* Filtro de precio (dropdown con opciones + precio máximo personalizado).
+            El conteo se muda acá: era un párrafo suelto y es un dato de una línea. */}
+        <div className="mt-3.5 flex flex-wrap items-center gap-2.5 md:mt-4">
           <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
           <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
+          <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">
+            {list.length} {list.length === 1 ? 'creación' : 'creaciones'}
+          </span>
         </div>
       </header>
 

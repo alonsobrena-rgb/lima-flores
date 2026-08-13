@@ -2,35 +2,26 @@ import { Reveal } from '@/components/motion/Reveal';
 import { Seccion } from './Seccion';
 
 /**
- * El manifiesto — la tesis de la casa, y el único sitio de la portada donde el
- * texto es el producto.
+ * El manifiesto — la tesis de la casa.
  *
- * Antes era una columna de 768 px centrada con el título y los dos párrafos
- * apilados debajo, del mismo tamaño que cualquier otra sección. Ahora la frase
- * ocupa el ancho completo a tamaño de cartel y la prosa se retira a una columna
- * angosta a la derecha: el contraste de escala es la jerarquía, que es la misma
- * regla del hero.
+ * Antes eran tres bloques de texto seguidos: el título, y debajo dos párrafos
+ * que decían casi lo mismo con otras palabras. Entre el cartel del hero y las
+ * fotos del catálogo eso es un muro: el visitante viene a ver flores, no a leer.
+ * Queda la frase a tamaño de cartel —que a esa escala funciona como imagen, no
+ * como texto— y una sola línea al lado. Los dos párrafos se fundieron en uno.
  */
 export const Manifesto = () => (
-  <Seccion filete={false} className="pt-[clamp(88px,14vh,168px)]">
-    <Reveal>
-      <p className="display max-w-[16ch] text-[clamp(2.6rem,7.6vw,7rem)] leading-[0.96] text-ink-900">
-        Hay emociones que merecen <em>algo más</em> que un mensaje.
-      </p>
-    </Reveal>
-
-    <div className="mt-14 grid gap-10 border-t border-border pt-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-16 lg:mt-20 lg:grid-cols-[1fr_minmax(0,44ch)] lg:pt-12">
-      <Reveal delay={0.06}>
-        <p className="max-w-[42ch] text-[17px] leading-relaxed text-ink-700">
-          Las flores tienen una forma única de expresar lo que muchas veces no
-          sabemos decir con palabras.
+  <Seccion filete={false} className="py-[clamp(64px,8vh,104px)]">
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,34ch)] lg:items-end lg:gap-20">
+      <Reveal>
+        <p className="display max-w-[15ch] text-[clamp(2.4rem,6.4vw,5.6rem)] leading-[0.98] text-ink-900">
+          Hay emociones que merecen <em>algo más</em> que un mensaje.
         </p>
       </Reveal>
-      <Reveal delay={0.14}>
-        <p className="max-w-[44ch] text-[17px] leading-relaxed text-ink-700">
-          En Lima Flores diseñamos arreglos de flores y elegimos cada detalle para
-          ayudarte a expresar amor, cariño, gratitud, admiración o apoyo cuando las
-          palabras no son suficientes.
+      <Reveal delay={0.1}>
+        <p className="border-t border-border pt-6 text-[16px] leading-relaxed text-ink-700">
+          En Lima Flores elegimos cada detalle para ayudarte a expresar amor,
+          cariño, gratitud o apoyo cuando las palabras no son suficientes.
         </p>
       </Reveal>
     </div>
