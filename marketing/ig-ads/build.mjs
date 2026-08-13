@@ -889,7 +889,14 @@ function writeDeck({ campaign, products, ads }) {
   L.push('');
   L.push('## Notas de producción');
   L.push('');
-  L.push('- Fotos: las del catálogo (`app/public/products/`). No se generó ninguna imagen con IA.');
+  // La frase de las fotos sale de los datos y no cableada: la regla de la casa es
+  // que la foto de producto no se genera con IA, pero el cliente puede pedirlo. Si
+  // alguna pieza lleva `generada: true`, el README lo dice con nombre y apellido
+  // en vez de afirmar en falso que no hay ninguna.
+  const generadas = ads.filter((a) => a.generada).map((a) => a.code);
+  L.push(generadas.length
+    ? `- Fotos: las del catálogo (\`app/public/products/\`), salvo ${generadas.length === 1 ? 'la de' : 'las de'} ${generadas.join(', ')}, generada${generadas.length === 1 ? '' : 's'} con IA a pedido del cliente.`
+    : '- Fotos: las del catálogo (`app/public/products/`). No se generó ninguna imagen con IA.');
   L.push('- Encuadre: `fotos/prep-fotos.py` detecta el fondo de cada toma y el recuadro que ocupa el');
   L.push('  producto, y guarda una versión recortada a ese recuadro. El generador la mete con `contain`');
   L.push('  sobre un contenedor pintado del mismo color de fondo, así el producto entra completo, ocupa');

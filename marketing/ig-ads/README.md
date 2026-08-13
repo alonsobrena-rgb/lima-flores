@@ -1032,7 +1032,7 @@ general ni supuesto.
 
 | Afirmación | Fuente | Texto de origen |
 | --- | --- | --- |
-| «Eliges el día y la hora» | `site/js/checkout.js` | `LEAD_MS = 24h`; el cliente elige fecha y slot de 30 min entre 8:00 y 20:30, con ventana de ±30 min |
+| «Eliges el día y la hora» | `app/src/pages/Checkout.tsx` | la fecha mínima es mañana (`minDate = hoy + 1`); las franjas salen de `app/src/lib/delivery.ts` |
 | «Entrega en Lima Metropolitana» | landing | «entrega a domicilio dentro de Lima Metropolitana» |
 | «Flores frescas los lunes, miércoles y viernes» | landing | «recibe flores frescas los lunes, miércoles y viernes» |
 | «Si algo se acaba, te avisamos en menos de una hora» | landing | textual |
@@ -1163,7 +1163,7 @@ catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` 
 
 ## Notas de producción
 
-- Fotos: las del catálogo (`site/assets/products/`). No se generó ninguna imagen con IA.
+- Fotos: las del catálogo (`app/public/products/`). No se generó ninguna imagen con IA.
 - Encuadre: `fotos/prep-fotos.py` detecta el fondo de cada toma y el recuadro que ocupa el
   producto, y guarda una versión recortada a ese recuadro. El generador la mete con `contain`
   sobre un contenedor pintado del mismo color de fondo, así el producto entra completo, ocupa
@@ -1176,7 +1176,7 @@ catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` 
   logotipo. Hoy: blanco total `#FFFFFF`, tinta cálida `#2A2623`, rosa `#9E2B5E`, y
   Cormorant Garamond en itálica 500 para los titulares con Jost para todo lo demás. Si el
   sistema cambia, los 32 creativos cambian con él sin tocar `build.mjs`.
-- Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.
+- Marca: el logo original de la página (`app/public/assets/logo.png`) va en los 18 creativos.
   En `marca/` hay dos versiones, generadas con `marca/prep-logo.py`: `logo.png` para
   fondos claros y `logo-claro.png` para fondos oscuros, donde la caligrafía gris del
   original desaparecería. La versión clara solo cambia el color de la caligrafía; la

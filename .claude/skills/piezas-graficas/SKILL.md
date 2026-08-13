@@ -125,10 +125,19 @@ del CSS**, no los copia, para que un cambio del sistema llegue solo. Ver
 
 ## Si el encargo es generar una imagen con IA
 
-Higgsfield (`integrations/higgsfield/`) está para eso, pero:
+Higgsfield (`integrations/higgsfield/`) está para eso.
 
-1. **Ninguna foto de producto se genera.** El catálogo es fotografía real; una
-   orquídea inventada es una promesa que la florería no puede cumplir.
-2. La IA sirve para fondos, texturas y video ambiente — nunca para el producto.
-3. Requiere que `platform.higgsfield.ai` esté permitido en la política de red del
+1. **Por defecto, la foto de producto no se genera.** El catálogo es fotografía
+   real, y una orquídea inventada es una promesa que la florería no puede
+   cumplir. Fondos, texturas y video ambiente: adelante, sin preguntar.
+2. **Salvo que el cliente lo pida.** Entonces se hace: es su decisión, no una
+   regla del sistema. Dos cosas al hacerlo:
+   - No reemplaza a la foto de catálogo de un producto que se vende. Ahí manda la
+     foto real, siempre.
+   - Se anota en la pieza —en `ads.json` o en el README que genera `build.mjs`—
+     que esa imagen es generada. Dentro de seis meses nadie se acuerda, y la
+     tabla de fuentes existe justamente para no tener que adivinar.
+3. No lo propongas tú. Si una pieza pide una foto que no existe en el catálogo,
+   dilo y pregunta; no la generes por tu cuenta para rellenar el hueco.
+4. Requiere que `platform.higgsfield.ai` esté permitido en la política de red del
    entorno, y eso solo aplica a una sesión abierta **después** de configurarlo.

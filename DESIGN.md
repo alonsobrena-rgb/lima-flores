@@ -260,9 +260,12 @@ cerámica», y nada de eso existía. Toda afirmación tiene que poder citarse.
 abrir. ¿El producto está entero? ¿El logo se lee sobre lo que tiene debajo? ¿El
 texto entra en el área segura? ¿Lo que afirma se puede citar?
 
-**Con IA:** ninguna foto de producto se genera. El catálogo es fotografía real;
-una orquídea inventada es una promesa que la florería no puede cumplir. La IA
-sirve para fondos, texturas y video ambiente.
+**Con IA:** por defecto la foto de producto no se genera — el catálogo es
+fotografía real, y una orquídea inventada es una promesa que la florería no puede
+cumplir. Fondos, texturas y video ambiente, adelante. **Salvo que el cliente lo
+pida**, y entonces se hace: es su decisión. Con dos condiciones — no reemplaza a
+la foto de catálogo de un producto que se vende, y queda anotado que esa imagen
+es generada.
 
 > En el repo, estas reglas están como skill de Claude Code en
 > `.claude/skills/piezas-graficas/SKILL.md` —con los comandos del pipeline y las
