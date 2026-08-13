@@ -72,7 +72,10 @@ cometido.
 - **En piezas gráficas manda el producto**, entero y grande, con el diseño
   encima. Nada de marcos, nada cortado. Está todo en
   `.claude/skills/piezas-graficas/SKILL.md` — **leerlo antes de tocar un
-  creativo o entregar una imagen.**
+  creativo o entregar una imagen**. Ese skill ya está versionado: `.gitignore`
+  ignora `.claude/*` pero deja pasar `.claude/skills/`, así que las reglas de la
+  casa viajan con el repo en vez de vivir en un solo portátil. La versión para
+  quien diseña fuera del repo está en `DESIGN.md`, sección «Piezas gráficas».
 - **Mirar cada pieza antes de entregarla, y de a una.** Se perdió una tarde
   optimizando una métrica mientras las piezas salían cortadas y con marcos.
 

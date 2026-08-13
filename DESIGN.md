@@ -222,6 +222,54 @@ grillas de «features», ni tablas de precios, ni tarjetas.
 
 ---
 
+## Piezas gráficas — anuncios, historias, posts
+
+El sistema no vive solo en la web. Estas reglas son para cualquier imagen que
+lleve la marca, y **cada una salió de un error ya cometido**. Van aparte porque
+son las que más caro cuestan romper.
+
+**Formatos y área segura**
+
+| Sitio | Lienzo | Área segura |
+|---|---|---|
+| Feed de Instagram (4:5) | 1080 × 1350 | 76 px por lado |
+| Historias / Reels (9:16) | 1080 × 1920 | **372 px arriba y abajo** |
+
+Los 372 px de las historias no son margen estético: es lo que tapan la UI de
+Instagram, el avatar y la caja de respuesta. Un titular que entra ahí no existe.
+
+**Manda el producto: entero y grande.** La foto es el contenido, no el fondo.
+Nada cortado, nada dentro de un marco; el diseño va encima de la foto, no al lado
+en una cajita. Cuando una toma trae fondo de sobra se recorta al producto y **se
+mide el color de ese fondo**, para que la foto entre con `contain` sobre un
+contenedor del mismo color: así el producto nunca se corta y tampoco flota en el
+vacío. Las tomas que ya llenan el encuadre entran a sangre.
+
+**El logotipo va directo sobre la foto**, nunca en una plaquita ni en una banda
+inventada para él. Dos versiones y solo dos: la caligrafía gris sobre fondo claro,
+y la versión en hueso —la única que se lee— sobre foto oscura o panel de tinta.
+Entre 52 y 84 px de alto sobre lienzo de 1080. No se deforma, no se recolorea, no
+lleva sombra.
+
+**Nada inventado.** Precios, medidas, tiempos y composición salen del catálogo,
+de la landing o del checkout. Si un dato no está ahí, no se escribe: hubo una
+pieza que afirmaba «florece entre ocho y doce semanas», «60–70 cm» y «maceta de
+cerámica», y nada de eso existía. Toda afirmación tiene que poder citarse.
+
+**Mirar cada pieza antes de entregarla, y de a una.** No se entrega un lote sin
+abrir. ¿El producto está entero? ¿El logo se lee sobre lo que tiene debajo? ¿El
+texto entra en el área segura? ¿Lo que afirma se puede citar?
+
+**Con IA:** ninguna foto de producto se genera. El catálogo es fotografía real;
+una orquídea inventada es una promesa que la florería no puede cumplir. La IA
+sirve para fondos, texturas y video ambiente.
+
+> En el repo, estas reglas están como skill de Claude Code en
+> `.claude/skills/piezas-graficas/SKILL.md` —con los comandos del pipeline y las
+> trampas del render— y se cargan solas al abrir una sesión ahí.
+
+---
+
 ## Agent Prompt Guide
 
 **Referencia rápida de color**
@@ -333,3 +381,5 @@ colors: {
 | El hero | `app/src/components/sections/HeroHerbario.tsx` |
 | Las reglas que no se negocian | `TRASPASO.md` |
 | Cómo se ve el sistema solo | `python3 design/build.py` → `design/salida/` |
+| Las reglas de piezas gráficas, como skill | `.claude/skills/piezas-graficas/SKILL.md` |
+| La fábrica de anuncios | `marketing/ig-ads/` — `ads.json` + `build.mjs` |

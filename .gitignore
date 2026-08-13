@@ -6,7 +6,10 @@ app/dist/
 .DS_Store
 .env
 .railway/
-.claude/
+# Config local de Claude (ajustes, historial). Las SKILLS sí van al repo: son
+# las reglas de la casa y no sirven de nada si viven en un solo portátil.
+.claude/*
+!.claude/skills/
 
 # Presupuestos / documentos privados — no publicar en el repo público
 presupuesto-*
