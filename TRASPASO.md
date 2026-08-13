@@ -171,6 +171,10 @@ Las dos categorías nuevas no tienen productos: en portada la tarjeta dice
 - **Una imagen es un elemento reemplazado**: con `left` y `right` puestos y
   `width:auto` el navegador ignora `right` y usa el tamaño del archivo. Va
   dentro de un div con los cuatro lados y el 100% adentro.
+- **Algo puede leer un archivo desde fuera del repo.** Al borrar `site/` se
+  buscó quién lo leía *dentro* del código y no apareció nada roto — pero un
+  workflow de GitHub Actions subía esa carpeta a Pages en cada push, y reventó.
+  Antes de borrar una carpeta, mirar también `.github/workflows/`.
 - El login del admin corta a los **8 intentos por IP cada 15 minutos**
   (`server.js:99`), en memoria: un redeploy lo limpia.
 - `claudeusercontent.com` está bloqueado por el proxy, así que las vistas
