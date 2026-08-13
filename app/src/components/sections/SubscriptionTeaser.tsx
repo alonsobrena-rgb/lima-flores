@@ -2,55 +2,73 @@
 import { Link } from 'react-router-dom';
 import { money } from '@/lib/cart';
 import { plans } from '@/data/plans';
-import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
+import { Reveal } from '@/components/motion/Reveal';
+import { Seccion, Encabezado, enlaceTexto } from './Seccion';
 
-export const SubscriptionTeaser = () => (
-  <section className="relative overflow-hidden bg-transparent px-6 py-24 md:px-12 md:py-32">
-    <div className="mx-auto max-w-7xl">
-      <header className="mb-14 max-w-2xl">
+/**
+ * Era una tarjeta con borde, una etiqueta rosa colgando de la esquina («Más
+ * popular») y el precio adentro — y una sola tarjeta en una grilla, así que la
+ * caja no separaba nada de nada: encerraba un plan solo. Ahora el plan se
+ * presenta como lo que es: un precio grande, lo que incluye en una lista de
+ * filetes, y un enlace. Sin caja, sin borde y sin etiqueta.
+ */
+const PLAN = plans.find((p) => p.tier === 'mensual');
+
+export const SubscriptionTeaser = () => {
+  if (!PLAN) return null;
+  return (
+    <Seccion>
+      <Encabezado
+        rotulo="Suscripción"
+        titulo={<>Flores frescas en casa,<br />todo el <em>mes.</em></>}
+        enlace={{ texto: 'Ver cómo funciona', a: '/suscripcion' }}
+        className="mb-16"
+      />
+
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,42ch)_minmax(0,1fr)] lg:gap-24">
         <Reveal>
-          <span className="text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45">— No. 07 · Suscripción</span>
-          <h2 className="mt-3 font-display text-[2.5rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[3.75rem]">
-            Flores frescas en casa,<br />todo el <em className="italic text-rosa-500">mes.</em>
-          </h2>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <p className="mt-5 leading-relaxed text-ink-700">
-            Elige tu plan y recibe flores de estación <strong>dos veces al mes</strong> — seleccionadas y armadas a mano,
-            siempre distintas. Pausa o cancela cuando quieras.
+          <p className="text-[17px] leading-relaxed text-ink-700">
+            Elige tu plan y recibe flores de estación{' '}
+            <strong className="font-medium text-ink-900">dos veces al mes</strong> —
+            seleccionadas y armadas a mano, siempre distintas. Pausa o cancela cuando
+            quieras.
+          </p>
+          <p className="mt-8 text-[13px] text-ink-500">
+            Todas las suscripciones incluyen entrega a domicilio en Lima Metropolitana.
           </p>
         </Reveal>
-      </header>
 
-      <Stagger className="grid max-w-sm gap-5">
-        {plans.filter((p) => p.tier === 'mensual').map((p) => (
-          <StaggerItem key={p.name} className="h-full">
-            <Link to="/suscripcion" className={`group relative flex h-full flex-col border bg-surface p-6 transition-colors hover:border-rosa-500 ${p.featured ? 'border-rosa-500' : 'border-border'}`}>
-              {(p.featured || p.value) && (
-                <span className="absolute -top-3 right-5 bg-rosa-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory-50">
-                  {p.featured ? 'Más popular' : 'Mejor valor'}
+        <Reveal delay={0.1}>
+          <Link to="/suscripcion" className="group block border-t border-border pt-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+              <h3 className="display text-[clamp(2.6rem,4.4vw,3.6rem)] leading-none text-ink-900">
+                {money(PLAN.price)}
+                <span className="ml-3 align-middle font-sans text-[13px] font-normal not-italic tracking-[0.02em] text-ink-500">
+                  al mes
                 </span>
-              )}
-              <h3 className="font-display text-xl font-medium text-ink-900">{p.name}</h3>
-              <p className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-foreground/45">{p.period}</p>
-              <p className="mt-4 font-display text-3xl text-ink-900">{money(p.price)}</p>
-              <p className="mt-1 flex-1 text-[12px] text-foreground/55">{p.note}</p>
-              <span className="mt-5 inline-flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.14em] text-rosa-500">
-                Ver plan <span className="transition-transform group-hover:translate-x-1">→</span>
+              </h3>
+              <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-ink-500">
+                {PLAN.period}
               </span>
-            </Link>
-          </StaggerItem>
-        ))}
-      </Stagger>
+            </div>
 
-      <Reveal delay={0.1}>
-        <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
-          <span className="text-[12px] uppercase tracking-[0.14em] text-foreground/45">Todas las suscripciones incluyen entrega a domicilio en Lima Metropolitana.</span>
-          <Link to="/suscripcion" className="group inline-flex items-center gap-2 text-[13px] font-medium uppercase tracking-[0.18em] text-ink-900">
-            Ver cómo funciona <span className="transition-transform group-hover:translate-x-1">→</span>
+            <ul className="mt-8 grid gap-0 sm:grid-cols-2">
+              {PLAN.features.map((f) => (
+                <li
+                  key={f}
+                  className="border-t border-border py-3.5 text-[15px] leading-snug text-ink-700"
+                >
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <span className={`${enlaceTexto} mt-8`}>
+              Suscribirme <span aria-hidden="true">→</span>
+            </span>
           </Link>
-        </div>
-      </Reveal>
-    </div>
-  </section>
-);
+        </Reveal>
+      </div>
+    </Seccion>
+  );
+};

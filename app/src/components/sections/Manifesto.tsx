@@ -1,29 +1,38 @@
-import { motion } from 'framer-motion';
+import { Reveal } from '@/components/motion/Reveal';
+import { Seccion } from './Seccion';
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
+/**
+ * El manifiesto — la tesis de la casa, y el único sitio de la portada donde el
+ * texto es el producto.
+ *
+ * Antes era una columna de 768 px centrada con el título y los dos párrafos
+ * apilados debajo, del mismo tamaño que cualquier otra sección. Ahora la frase
+ * ocupa el ancho completo a tamaño de cartel y la prosa se retira a una columna
+ * angosta a la derecha: el contraste de escala es la jerarquía, que es la misma
+ * regla del hero.
+ */
 export const Manifesto = () => (
-  <section className="relative overflow-hidden bg-transparent px-6 pt-24 pb-16 md:px-12 md:pt-36 md:pb-20">
-    <div className="relative mx-auto max-w-3xl">
-      <motion.h2
-        initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.7, ease }}
-        className="font-display text-[2.5rem] font-light leading-[1.04] tracking-tight text-ink-900 md:text-[4rem]"
-      >
-        Hay emociones que merecen <em className="italic text-rosa-500">algo más</em> que un mensaje.
-      </motion.h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.7, delay: 0.1, ease }}
-        className="mt-8 max-w-xl text-base leading-relaxed text-ink-700"
-      >
-        Las flores tienen una forma única de expresar lo que muchas veces no sabemos decir con palabras.
-      </motion.p>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.7, delay: 0.2, ease }}
-        className="mt-4 max-w-xl text-base leading-relaxed text-ink-700"
-      >
-        En Lima Flores diseñamos arreglos de flores y elegimos cada detalle para ayudarte a expresar amor, cariño,
-        gratitud, admiración o apoyo cuando las palabras no son suficientes.
-      </motion.p>
+  <Seccion filete={false} className="pt-[clamp(88px,14vh,168px)]">
+    <Reveal>
+      <p className="display max-w-[16ch] text-[clamp(2.6rem,7.6vw,7rem)] leading-[0.96] text-ink-900">
+        Hay emociones que merecen <em>algo más</em> que un mensaje.
+      </p>
+    </Reveal>
+
+    <div className="mt-14 grid gap-10 border-t border-border pt-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-16 lg:mt-20 lg:grid-cols-[1fr_minmax(0,44ch)] lg:pt-12">
+      <Reveal delay={0.06}>
+        <p className="max-w-[42ch] text-[17px] leading-relaxed text-ink-700">
+          Las flores tienen una forma única de expresar lo que muchas veces no
+          sabemos decir con palabras.
+        </p>
+      </Reveal>
+      <Reveal delay={0.14}>
+        <p className="max-w-[44ch] text-[17px] leading-relaxed text-ink-700">
+          En Lima Flores diseñamos arreglos de flores y elegimos cada detalle para
+          ayudarte a expresar amor, cariño, gratitud, admiración o apoyo cuando las
+          palabras no son suficientes.
+        </p>
+      </Reveal>
     </div>
-  </section>
+  </Seccion>
 );

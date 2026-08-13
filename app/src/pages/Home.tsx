@@ -10,6 +10,19 @@ import { InstagramGallery } from '@/components/sections/InstagramGallery';
 import { SubscriptionTeaser } from '@/components/sections/SubscriptionTeaser';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 
+/**
+ * La portada.
+ *
+ * El orden es el de siempre; lo que cambia es que ahora todas las secciones
+ * salen del mismo molde (`sections/Seccion.tsx`): el mismo margen que el hero,
+ * un filete de 1 px entre una y otra, y un único tamaño de título. El `<div>`
+ * que envolvía todo para pintar un fondo ya no hace falta — el fondo es blanco
+ * y viene del `body`.
+ *
+ * La tinta aparece una sola vez en el medio (la firma de la casa) y otra al
+ * final (el pie): dos respiros oscuros en una página blanca, no seis fondos
+ * distintos.
+ */
 export default function Home() {
   return (
     <>
@@ -18,20 +31,15 @@ export default function Home() {
           navegar. */}
       <SiteHeader />
       <HeroHerbario />
-      {/* El sistema Florencia es blanco y aire: el fondo floral generado y las
-          manchas de acuarela que había detrás de todo ensuciaban el blanco y
-          peleaban con las fotos de producto, que son lo que tiene que mandar. */}
-      <div className="relative bg-background">
-        <Marquee />
-        <Manifesto />
-        <FeaturedProducts />
-        <Categories />
-        <SignatureProduct />
-        <AtelierStory />
-        <InstagramGallery />
-        <SubscriptionTeaser />
-        <SiteFooter />
-      </div>
+      <Marquee />
+      <Manifesto />
+      <FeaturedProducts />
+      <Categories />
+      <SignatureProduct />
+      <AtelierStory />
+      <InstagramGallery />
+      <SubscriptionTeaser />
+      <SiteFooter />
     </>
   );
 }

@@ -4,6 +4,7 @@
 // de fotos del catálogo que enlazan al perfil — la sección nunca se ve rota.
 import { useEffect, useState } from 'react';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
+import { Seccion, enlaceTexto } from './Seccion';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
 const PROFILE = 'https://instagram.com/lima_flores';
@@ -66,28 +67,29 @@ export const InstagramGallery = () => {
   }, []);
 
   return (
-    <section className="bg-transparent px-6 py-24 md:px-12 md:py-32">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-14 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <Seccion>
+        <header className="mb-16 grid gap-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-12">
           <Reveal>
-            <span className="text-[12px] font-medium uppercase tracking-[0.28em] text-foreground/45">— No. 06 · Síguenos</span>
-            <h2 className="mt-3 font-display text-[2.5rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[3.75rem]">
-              Lima Flores<br />en <em className="italic text-rosa-500">Instagram.</em>
+            <p className="rotulo">Síguenos</p>
+            <h2 className="display mt-4 text-[clamp(2.3rem,5.4vw,4.6rem)] leading-[0.98] text-ink-900">
+              Lima Flores<br />en <em>Instagram.</em>
             </h2>
           </Reveal>
-          <a
-            href={PROFILE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2.5 self-start border border-ink-900/20 px-6 py-3 text-[12px] font-medium uppercase tracking-[0.16em] text-ink-900 transition-colors hover:bg-ink-900 hover:text-ivory-50 sm:self-auto"
-          >
-            <IgGlyph className="h-4 w-4" />
-            Seguir {HANDLE}
-            <span className="transition-transform group-hover:translate-x-1">→</span>
-          </a>
+          <Reveal delay={0.1} className="sm:pb-2">
+            <a
+              href={PROFILE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${enlaceTexto} inline-flex items-center gap-2.5`}
+            >
+              <IgGlyph className="h-4 w-4" />
+              Seguir {HANDLE}
+              <span aria-hidden="true">→</span>
+            </a>
+          </Reveal>
         </header>
 
-        <Stagger className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <Stagger className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
           {posts.map((p) => (
             <StaggerItem key={p.id}>
               <a
@@ -95,7 +97,7 @@ export const InstagramGallery = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={p.caption ? `Ver en Instagram: ${p.caption}` : 'Ver publicación en Instagram'}
-                className="group relative block aspect-square overflow-hidden border border-border bg-surface"
+                className="group relative block aspect-square overflow-hidden bg-secondary"
               >
                 <img
                   src={p.image}
@@ -110,7 +112,6 @@ export const InstagramGallery = () => {
             </StaggerItem>
           ))}
         </Stagger>
-      </div>
-    </section>
+    </Seccion>
   );
 };
