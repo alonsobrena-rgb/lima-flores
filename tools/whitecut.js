@@ -8,7 +8,7 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   const url = process.argv[2] || 'http://localhost:3000/assets/orquideas-completa.png';
-  const out = process.argv[3] || path.join(__dirname, '..', 'site', 'assets', 'orquideas-completa-cut.png');
+  const out = process.argv[3] || path.join(__dirname, '..', 'app', 'public', 'bloom', 'orquideas-completa-cut.png');
   const thr = Number(process.argv[4]) || 232;
   const b = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
   const p = await b.newPage();

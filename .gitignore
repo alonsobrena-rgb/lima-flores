@@ -21,3 +21,6 @@ integrations/higgsfield/out/
 # Python
 __pycache__/
 *.pyc
+
+# Salida de design/build.py (se regenera)
+design/salida/

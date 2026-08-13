@@ -153,7 +153,7 @@ def main():
   </div></section>""")
 
     filas = ''.join(f'<tr><td>{a}</td><td>{b}</td></tr>' for a, b in [
-        ('«Eliges el día y la hora»', '<code>site/js/checkout.js</code> — 24 h de anticipación, franjas de 30 min'),
+        ('«Eliges el día y la hora»', '<code>app/src/pages/Checkout.tsx</code> — la fecha mínima es mañana; franjas en <code>lib/delivery.ts</code>'),
         ('«Entrega en Lima Metropolitana»', 'landing'),
         ('«Flores frescas los lunes, miércoles y viernes»', 'landing'),
         ('«Si algo se acaba, te avisamos en menos de una hora»', 'landing'),

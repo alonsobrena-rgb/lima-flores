@@ -23,8 +23,8 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(HERE)
-FOTOS = os.path.join(RAIZ, 'site/assets/products')
-ASSETS = os.path.join(RAIZ, 'site/assets')
+FOTOS = os.path.join(RAIZ, 'app/public/products')
+ASSETS = os.path.join(RAIZ, 'app/public')
 MARCA = os.path.join(RAIZ, 'marketing/ig-ads/marca')
 CACHE = os.path.join(HERE, '.cache')
 SALIDA = os.path.join(HERE, 'salida')
@@ -36,12 +36,7 @@ UA = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
 FUENTES = {
     'florencia': ['Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600',
                   'Jost:wght@300;400;500;600'],
-    'paris': ['Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400',
-              'Karla:wght@400;500;600;700'],
-    'amsterdam': ['Petrona:ital,wght@0,400;0,500;0,600;0,700;1,400',
-                  'Hanken+Grotesk:wght@400;500;600;700'],
-    # La galería no es una de las direcciones: usa una voz de ficha técnica a
-    # propósito, para no competir con ninguna de las tres que está presentando.
+    # La galería no es una dirección: usa una voz de ficha técnica a propósito.
     'galeria': ['IBM+Plex+Sans:wght@400;500;600;700',
                 'IBM+Plex+Mono:wght@400;500'],
 }
@@ -57,13 +52,15 @@ PRODUCTOS = [
     ('Ramo Luana', 'Ramos', 180, 'ramo-luana.jpg'),
 ]
 
-# El titular y la bajada viven en heroes/<clave>.html, porque cada dirección
-# tiene un hero distinto y no solo otro color. Acá queda lo que la maqueta
-# comparte. Todo el texto sale del catálogo o de checkout.js.
+# El titular y la bajada viven en heroes/florencia.html. Acá queda lo que la
+# maqueta comparte. Todo el texto sale del catálogo o del checkout.
+#
+# Esto llegó a ser un diccionario de tres: Florencia, París y Ámsterdam, para que
+# la dueña eligiera una. Eligió. Las otras dos se borraron —con su galería
+# comparativa y su conmutador en vivo— porque un sistema de diseño con tres
+# opciones abiertas no es un sistema, es una encuesta.
 DIRECCIONES = {
     'florencia': dict(catalogo='El catálogo de esta semana'),
-    'paris': dict(catalogo='Lo que llegó esta semana'),
-    'amsterdam': dict(catalogo='El puesto de esta semana'),
 }
 
 

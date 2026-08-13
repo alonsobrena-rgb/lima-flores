@@ -5,7 +5,7 @@
 //
 // Renderiza cada anuncio como HTML y lo fotografía con Chromium headless al tamaño
 // exacto que pide Meta (1080×1350 para feed, 1080×1920 para historias). Las fotos
-// salen del catálogo real: site/assets/products/.
+// salen del catálogo real: app/public/products/.
 //
 // Dependencias: solo un Chromium en el sistema. Las tipografías (Cormorant Garamond,
 // Jost, JetBrains Mono) se bajan una vez de Google Fonts y quedan cacheadas en
@@ -19,7 +19,7 @@ import { execFileSync } from 'node:child_process';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
-const PHOTOS = path.join(ROOT, 'site/assets/products');
+const PHOTOS = path.join(ROOT, 'app/public/products');
 const OUT = path.join(HERE, 'creativos');
 const CACHE = path.join(HERE, '.fontcache');
 
@@ -150,7 +150,7 @@ const foto = (file) => {
   };
 };
 
-// El logo de la página (site/assets/logo.png), en sus dos versiones —
+// El logo de la página (app/public/assets/logo.png), en sus dos versiones —
 // ver marca/prep-logo.py.
 const MARCA = Object.fromEntries(
   ['logo', 'logo-claro'].map((n) => [
@@ -758,7 +758,7 @@ function writeDeck({ campaign, products, ads }) {
   L.push('');
   L.push('| Afirmación | Fuente | Texto de origen |');
   L.push('| --- | --- | --- |');
-  L.push('| «Eliges el día y la hora» | `site/js/checkout.js` | `LEAD_MS = 24h`; el cliente elige fecha y slot de 30 min entre 8:00 y 20:30, con ventana de ±30 min |');
+  L.push('| «Eliges el día y la hora» | `app/src/pages/Checkout.tsx` | la fecha mínima es mañana (`minDate = hoy + 1`); las franjas salen de `app/src/lib/delivery.ts` |');
   L.push('| «Entrega en Lima Metropolitana» | landing | «entrega a domicilio dentro de Lima Metropolitana» |');
   L.push('| «Flores frescas los lunes, miércoles y viernes» | landing | «recibe flores frescas los lunes, miércoles y viernes» |');
   L.push('| «Si algo se acaba, te avisamos en menos de una hora» | landing | textual |');
@@ -889,7 +889,7 @@ function writeDeck({ campaign, products, ads }) {
   L.push('');
   L.push('## Notas de producción');
   L.push('');
-  L.push('- Fotos: las del catálogo (`site/assets/products/`). No se generó ninguna imagen con IA.');
+  L.push('- Fotos: las del catálogo (`app/public/products/`). No se generó ninguna imagen con IA.');
   L.push('- Encuadre: `fotos/prep-fotos.py` detecta el fondo de cada toma y el recuadro que ocupa el');
   L.push('  producto, y guarda una versión recortada a ese recuadro. El generador la mete con `contain`');
   L.push('  sobre un contenedor pintado del mismo color de fondo, así el producto entra completo, ocupa');
@@ -902,7 +902,7 @@ function writeDeck({ campaign, products, ads }) {
   L.push('  logotipo. Hoy: blanco total `#FFFFFF`, tinta cálida `#2A2623`, rosa `#9E2B5E`, y');
   L.push('  Cormorant Garamond en itálica 500 para los titulares con Jost para todo lo demás. Si el');
   L.push('  sistema cambia, los 32 creativos cambian con él sin tocar `build.mjs`.');
-  L.push('- Marca: el logo original de la página (`site/assets/logo.png`) va en los 18 creativos.');
+  L.push('- Marca: el logo original de la página (`app/public/assets/logo.png`) va en los 18 creativos.');
   L.push('  En `marca/` hay dos versiones, generadas con `marca/prep-logo.py`: `logo.png` para');
   L.push('  fondos claros y `logo-claro.png` para fondos oscuros, donde la caligrafía gris del');
   L.push('  original desaparecería. La versión clara solo cambia el color de la caligrafía; la');

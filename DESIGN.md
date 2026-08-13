@@ -332,4 +332,4 @@ colors: {
 | El molde de las secciones | `app/src/components/sections/Seccion.tsx` |
 | El hero | `app/src/components/sections/HeroHerbario.tsx` |
 | Las reglas que no se negocian | `TRASPASO.md` |
-| Las otras dos direcciones (sin elegir) | `design/direcciones/paris.css` · `amsterdam.css` |
+| Cómo se ve el sistema solo | `python3 design/build.py` → `design/salida/` |

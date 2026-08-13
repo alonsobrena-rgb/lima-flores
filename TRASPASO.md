@@ -36,10 +36,11 @@ Tienda de flores de Lima. Dos frentes en paralelo:
 
 - **`marketing/ig-ads/`** — campaña de Instagram, 32 creativos generados con
   Node + Chromium desde `ads.json`. Terminada y revisada pieza por pieza.
-- **`app/`** — la tienda React (Vite + Tailwind + React Router). **Es lo que
-  sirve producción**; `site/` es el sitio vanilla viejo, solo respaldo.
-  Railway compila `app/dist` en cada deploy (`railway.json`), no está
-  versionado.
+- **`app/`** — la tienda React (Vite + Tailwind + React Router). **Es lo único
+  que sirve producción.** Railway compila `app/dist` en cada deploy
+  (`railway.json`), no está versionado. El sitio vanilla que vivía en `site/` se
+  borró: sus fotos estaban duplicadas en `app/public/` con el mismo md5, y ahora
+  esa es la única copia del catálogo.
 
 El sistema de diseño es **Florencia**: `design/direcciones/florencia.css` es la
 fuente de verdad, y sale de **medir el ramo del logotipo** con
@@ -55,10 +56,14 @@ en el sistema, no es decoración) y Jost para todo lo demás. Radios 4/8/14/pill
 Cada una salió de una corrección del cliente. Romperlas es repetir un error ya
 cometido.
 
-- **Las entregas son al día siguiente.** Se elige el día y una franja de 30
-  minutos, con 24 h de anticipación (`site/js/checkout.js`). Ninguna pieza
-  promete entrega el mismo día, aunque la landing todavía lo diga en algún
-  lado: manda el código del checkout.
+- **Las entregas son al día siguiente.** Ninguna pieza promete entrega el mismo
+  día: manda el código del checkout, que hoy es `app/src/pages/Checkout.tsx`
+  (`minDate` = mañana).
+  **Ojo con la franja:** el checkout vanilla daba franjas de 30 minutos con 24 h
+  de anticipación, y toda la copia del sitio sigue diciendo eso. El checkout
+  React ofrece **tres franjas de cuatro horas** (`app/src/lib/delivery.ts`:
+  09–13, 13–17, 17–20). La promesa y el código no coinciden — hay que decidir
+  cuál de las dos es la verdad y alinear la otra.
 - **Nada inventado.** Precios, medidas y contenido salen de
   `db/products.seed.json`, de la landing o del checkout. La galería de anuncios
   lleva una tabla que dice de dónde sale cada afirmación.
@@ -148,9 +153,9 @@ Las dos categorías nuevas no tienen productos: en portada la tarjeta dice
 3. **Pulir el resto de la web** a la altura del hero nuevo: suscripción,
    checkout, condolencias, y las secciones internas de la portada (manifiesto,
    historia del atelier).
-4. **La dueña no eligió dirección de diseño.** Hay tres armadas en `design/`
-   (Florencia, París, Ámsterdam) con una página que las conmuta en vivo
-   (`python3 design/muestra.py`). Se está trabajando con Florencia por defecto.
+4. **La franja de entrega no coincide con el checkout.** Ver la regla de arriba:
+   la copia promete 30 minutos y el código da cuatro horas. Es una decisión de
+   operación, no de diseño.
 5. **Sanear el catálogo**: `box-lupita` tiene la descripción de otro producto, y
    la foto del Arreglo Florencia es un gráfico de marketing con el texto quemado
    encima — no sirve para un creativo.

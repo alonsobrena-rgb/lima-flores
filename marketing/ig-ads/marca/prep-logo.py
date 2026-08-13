@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prepara el logo de Lima Flores para los creativos.
 
-Parte de site/assets/logo.png (el original de la página) y saca dos archivos:
+Parte de app/public/assets/logo.png (el original de la página) y saca dos archivos:
 
   logo.png        recortado al contenido, listo para fondos claros.
   logo-claro.png  misma marca para fondos oscuros: la caligrafía gris pasa a
@@ -16,7 +16,7 @@ import os
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, '../../../site/assets/logo.png')
+SRC = os.path.join(HERE, '../../../app/public/assets/logo.png')
 ANCHO = 700           # de sobra: en el creativo se usa a ~150 px
 HUESO = (244, 239, 229)
 UMBRAL_SAT = 0.15     # por debajo de esto lo tratamos como caligrafía gris

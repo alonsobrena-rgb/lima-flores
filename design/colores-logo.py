@@ -15,7 +15,7 @@ from collections import defaultdict
 from PIL import Image
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-POR_DEFECTO = os.path.join(RAIZ, 'site/assets/logo.png')
+POR_DEFECTO = os.path.join(RAIZ, 'app/public/assets/logo.png')
 
 # Un píxel cuenta como "color del ramo" si está bien opaco, tiene saturación
 # de verdad y no es ni casi-blanco ni casi-negro.

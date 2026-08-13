@@ -1,5 +1,5 @@
 // Lima Flores · servidor Node minimal (zero-dependencies).
-// Sirve los estáticos de site/ y monta /api/quote → integrations/urbaner.
+// Sirve el build de la tienda React (app/dist) y monta /api/quote → integrations/urbaner.
 // Pensado para Railway (Node 18+ con fetch nativo).
 'use strict';
 
@@ -26,11 +26,11 @@ const { applySecurityHeaders, clientIp, rateLimit } = require('./lib/security');
 let _chromiumProbe = null;
 let _chromiumProbeAt = 0;
 
-const SITE_DIR = path.join(__dirname, 'site');
-// Build del panel/tienda React (app/dist). Si existe, es el frontend principal y
-// el sitio vanilla queda solo como respaldo + fuente de /assets (fotos de producto
-// que usa el Studio). Si NO existe (build falló), cae al sitio vanilla → nunca se
-// cae el deploy por esto.
+// El frontend es el build de la tienda React. El sitio vanilla que vivía en
+// site/ —y que hacía de respaldo y de fuente de /assets— ya no existe: sus fotos
+// estaban duplicadas en app/public (md5 idéntico, 107 archivos) y esa es ahora la
+// única copia. Si el build falla no hay a qué caer, que es lo correcto: mejor un
+// 404 visible que servir en silencio una tienda de hace seis meses.
 const APP_DIST = path.join(__dirname, 'app', 'dist');
 const APP_DIST_EXISTS = fs.existsSync(path.join(APP_DIST, 'index.html'));
 const PORT = Number(process.env.PORT) || 3000;
@@ -165,18 +165,9 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  // ─── /admin · /admin.html — panel vanilla (solo si NO hay build React) ───
-  // Con el panel React activo (app/dist), /admin lo maneja el SPA (más abajo).
-  if (!APP_DIST_EXISTS && (parsed.pathname === '/admin' || parsed.pathname === '/admin.html')) {
-    const adminFile = path.join(SITE_DIR, 'admin.html');
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-    return fs.createReadStream(adminFile).pipe(res);
-  }
-
-  // ─── /api/config — keys públicas (legacy, kept for backward compat) ───
-  // El checkout ya no depende de esto: el HTML se sirve con la key inlineada
-  // (ver bloque /checkout.html abajo). Este endpoint sigue como red de
-  // seguridad por si algún cliente viejo todavía lo llama.
+  // ─── /api/config — keys públicas (legacy) ───
+  // La tienda React no lo usa: Vite hornea VITE_GOOGLE_MAPS_KEY en el build. Se
+  // deja como red de seguridad por si algún cliente viejo todavía lo llama.
   if (parsed.pathname === '/api/config') {
     res.writeHead(200, {
       'Content-Type': 'application/json; charset=utf-8',
@@ -187,41 +178,17 @@ const server = http.createServer(async (req, res) => {
     }));
   }
 
-  // ─── /checkout.html — HTML con la API key de Maps inlineada ───
-  // Substituimos un placeholder por la key en cada request. Así no existe un
-  // endpoint separado que el navegador pueda cachear con valor vacío: la key
-  // viaja junto al HTML, que ya tiene Cache-Control: no-cache. Resultado:
-  // cualquier cambio de GOOGLE_MAPS_API_KEY en Railway es visible al instante,
-  // sin caches intermedios ni necesidad de hard-refresh.
-  if (!APP_DIST_EXISTS && (parsed.pathname === '/checkout.html' || parsed.pathname === '/checkout')) {
-    const filePath = path.join(SITE_DIR, 'checkout.html');
-    return fs.readFile(filePath, 'utf8', (err, html) => {
-      if (err) return send(res, 500, 'read error');
-      const key = process.env.GOOGLE_MAPS_API_KEY || '';
-      // Escapar el valor para evitar romper el contexto de string JS o inyectar código.
-      const safeKey = JSON.stringify(key).slice(1, -1);
-      const out = html.replace(/__LIMA_GMAPS_KEY_PLACEHOLDER__/g, safeKey);
-      res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-store',
-      });
-      res.end(out);
-    });
-  }
-
-  // ─── Estáticos: app/dist (React) → site/ (assets/legacy) → SPA fallback ───
+  // ─── Estáticos: app/dist (React) → SPA fallback ───
   let pathname = decodeURIComponent(parsed.pathname);
   if (pathname.endsWith('/')) pathname += 'index.html';
 
-  // Roots a probar en orden. Con build React, va primero; site/ aporta /assets/*
-  // (fotos de producto que usa el Studio) y el resto del sitio vanilla legacy.
-  const roots = APP_DIST_EXISTS ? [APP_DIST, SITE_DIR] : [SITE_DIR];
-  for (const root of roots) {
-    const fp = path.normalize(path.join(root, pathname));
-    if (!fp.startsWith(root)) continue; // anti-traversal
-    let stat;
-    try { stat = fs.statSync(fp); } catch { stat = null; }
-    if (stat && stat.isFile()) return serveFile(req, res, fp, stat);
+  if (APP_DIST_EXISTS) {
+    const fp = path.normalize(path.join(APP_DIST, pathname));
+    if (fp.startsWith(APP_DIST)) { // anti-traversal
+      let stat;
+      try { stat = fs.statSync(fp); } catch { stat = null; }
+      if (stat && stat.isFile()) return serveFile(req, res, fp, stat);
+    }
   }
 
   // SPA fallback: rutas de cliente del React (sin extensión) → index.html.

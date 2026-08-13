@@ -23,7 +23,7 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ADS = os.path.join(HERE, '../ads.json')
-ORIG = os.path.join(HERE, '../../../site/assets/products')
+ORIG = os.path.join(HERE, '../../../app/public/products')
 
 ANALISIS = 400     # lado máximo para detectar el recuadro; de sobra y rápido
 TOLERANCIA = 26    # cuánto se puede alejar un píxel del fondo y seguir siendo fondo

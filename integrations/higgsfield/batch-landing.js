@@ -1,4 +1,4 @@
-// Lima Flores — genera la tanda de videos de la landing (Fase 1) y los guarda en site/assets/video/.
+// Lima Flores — genera la tanda de videos de la landing (Fase 1) y los guarda en integrations/higgsfield/out/video/.
 'use strict';
 require('./load-env')();
 const fs = require('fs');
@@ -7,7 +7,7 @@ const https = require('https');
 
 const KEY = process.env.HF_API_KEY, SECRET = process.env.HF_API_SECRET, HOST = 'platform.higgsfield.ai';
 const MODEL = process.argv[2] || 'dop-turbo';
-const OUT = path.join(__dirname, '..', '..', 'site', 'assets', 'video');
+const OUT = path.join(__dirname, 'out', 'video');
 fs.mkdirSync(OUT, { recursive: true });
 
 // Prompts: el HERO necesita movimiento continuo/progresivo (para scrubbing con scroll);

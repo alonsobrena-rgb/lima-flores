@@ -26,7 +26,7 @@ from PIL import Image, ImageChops
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ADS = os.path.dirname(HERE)
-FOTOS = os.path.join(os.path.dirname(os.path.dirname(ADS)), 'site/assets/products')
+FOTOS = os.path.join(os.path.dirname(os.path.dirname(ADS)), 'app/public/products')
 SALIDA = os.path.join(HERE, 'tira')
 
 # Margen que se le deja al producto, en fracción del lado recortado. Sin nada de

@@ -42,7 +42,7 @@ El `readme.md` del sistema propone copy de ejemplo con **entrega el mismo día**
 - CTA «Enviar flores hoy»
 - «Cada ramo se arma a mano el mismo día»
 
-**Eso no es cierto.** Según `site/js/checkout.js` (`LEAD_MS = 24h`), la entrega
+**Eso no es cierto.** Según `app/src/pages/Checkout.tsx` (`LEAD_MS = 24h`), la entrega
 es **al día siguiente**, con día y franja de 30 minutos elegidos por el cliente.
 Si ese copy se lleva a la tienda, se promete algo que no se cumple.
 

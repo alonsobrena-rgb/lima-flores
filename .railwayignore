@@ -5,12 +5,14 @@ npm-debug.log*
 .DS_Store
 .env
 
-# Este servicio (lima-flores) es el backend Node: solo sirve site/ + /api. Lo de
-# abajo no lo usa el runtime y reventaba el límite de subida de `railway up`
-# (tools/ ~340MB de capturas; app/ = panel React, deploya aparte).
-app/
+# Sube solo lo que el runtime necesita. `tools/` son ~340 MB de capturas de
+# pruebas y reventaba el límite de subida de `railway up`.
+#
+# OJO: `app/` NO va acá. El deploy de GitHub compila la tienda React
+# (railway.json → `cd app && npm run build`) y `server.js` sirve `app/dist`; sin
+# app/ no hay frontend. Se excluía cuando el frontend era el sitio vanilla, que
+# ya no existe.
 tools/
-_wc/
 .claude/
 integrations/higgsfield/out/
 integrations/cards/out/
