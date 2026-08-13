@@ -16,6 +16,95 @@ const PRICE_RANGES = [
   { key: 'o350', label: 'Más de S/350', test: (n: number) => n > 350 },
 ];
 
+/** Cierra el panel al hacer clic afuera o al apretar Escape. */
+function useCerrarAlSalir(abierto: boolean, cerrar: () => void) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const enDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) cerrar();
+    };
+    const enTecla = (e: KeyboardEvent) => { if (e.key === 'Escape') cerrar(); };
+    document.addEventListener('mousedown', enDoc);
+    document.addEventListener('keydown', enTecla);
+    return () => {
+      document.removeEventListener('mousedown', enDoc);
+      document.removeEventListener('keydown', enTecla);
+    };
+  }, [abierto, cerrar]);
+  return ref;
+}
+
+const disparador =
+  'flex items-center gap-2 rounded-full border border-ink-900/15 bg-ivory-50/80 px-4 py-1.5 ' +
+  'text-[12px] font-medium tracking-[0.03em] text-ink-900 transition-colors hover:border-ink-900/40';
+
+const Chevron = ({ abierto }: { abierto: boolean }) => (
+  <svg className={`h-3.5 w-3.5 transition-transform ${abierto ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+);
+
+/**
+ * Categorías como desplegable, no como fila de píldoras.
+ *
+ * Ocho categorías en píldoras eran tres filas envueltas —media pantalla de
+ * móvil en botones antes de la primera flor—, y en una sola fila deslizable las
+ * de la derecha quedaban escondidas: el filtro no se puede leer de un vistazo si
+ * hay que arrastrarlo. Acá el disparador ocupa una línea y el panel las muestra
+ * **todas a la vez**, en dos columnas y sin scroll, con su conteo al lado.
+ */
+function CategoryDropdown({
+  chips, value, onSelect,
+}: {
+  chips: { slug: string; label: string; count?: number }[];
+  value: string;
+  onSelect: (slug: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useCerrarAlSalir(open, () => setOpen(false));
+  const actual = chips.find((c) => c.slug === value) ?? chips[0];
+  return (
+    /* `static` a propósito: el panel se posiciona contra la fila de filtros, no
+       contra el botón — ver el comentario de la fila. */
+    <div ref={ref} className="static">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={disparador}
+      >
+        {actual.label}
+        <Chevron abierto={open} />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute left-0 top-full z-30 mt-2 w-[min(86vw,430px)] rounded-md border border-ink-900/10 bg-ivory-50 p-1.5 shadow-[0_24px_60px_-28px_rgba(42,38,35,0.6)]"
+        >
+          <div className="grid grid-cols-2 gap-0.5">
+            {chips.map((c) => (
+              <button
+                key={c.slug}
+                role="menuitem"
+                onClick={() => { onSelect(c.slug); setOpen(false); }}
+                className={`flex items-baseline justify-between gap-2 rounded px-3 py-2 text-left text-[13px] leading-snug transition-colors ${
+                  value === c.slug ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:bg-ink-900/5'
+                }`}
+              >
+                <span>{c.label}</span>
+                {c.count ? (
+                  <span className={`shrink-0 text-[10px] tabular-nums ${value === c.slug ? 'text-ivory-50/70' : 'text-ink-500'}`}>
+                    {c.count}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Filtro de precio como dropdown: las opciones predefinidas + un campo para
 // escribir un precio máximo personalizado (se guarda en la URL como `maxNNN`).
 function PriceDropdown({ value, label, onSelect }: { value: string; label: string; onSelect: (key: string) => void }) {
@@ -37,10 +126,12 @@ function PriceDropdown({ value, label, onSelect }: { value: string; label: strin
     if (Number.isFinite(n) && n > 0) { onSelect(`max${n}`); setOpen(false); }
   };
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="static">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-full border border-ink-900/15 bg-ivory-50/80 px-4 py-1.5 text-[12px] font-medium tracking-[0.03em] text-ink-900 transition-colors hover:border-ink-900/40"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={disparador}
       >
         {label}
         <svg className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -123,26 +214,20 @@ export default function Catalogo() {
           </h1>
         </div>
 
-        {/* Una sola fila que se desliza: ocho categorías envueltas eran tres
-            filas de píldoras, media pantalla de móvil en botones. */}
-        <div className="-mx-6 mt-5 flex gap-2 overflow-x-auto border-t border-border px-6 pt-5 [scrollbar-width:none] md:mx-0 md:mt-10 md:flex-wrap md:gap-2.5 md:overflow-visible md:px-0 md:pt-8 [&::-webkit-scrollbar]:hidden">
-          {chips.map((c) => (
-            <button
-              key={c.slug} onClick={() => setCat(c.slug)}
-              className={`shrink-0 rounded-pill border px-4 py-1.5 text-[11.5px] font-medium uppercase tracking-[0.14em] transition-colors md:px-5 md:py-2 md:text-[12.5px] ${
-                cat === c.slug ? 'border-rosa-500 bg-rosa-500 text-white' : 'border-border text-ink-700 hover:border-ink-900/40 hover:text-ink-900'}`}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Filtro de precio (dropdown con opciones + precio máximo personalizado).
-            El conteo se muda acá: era un párrafo suelto y es un dato de una línea. */}
-        <div className="mt-3.5 flex flex-wrap items-center gap-2.5 md:mt-4">
-          <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
-          <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
-          <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">
+        {/* Los dos filtros en una línea, cada uno con su panel. El conteo va al
+            final: era un párrafo suelto y es un dato de una línea. */}
+        <div className="relative mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-3 border-t border-border pt-5 md:mt-10 md:pt-8">
+          {/* Rótulo y disparador van juntos: sueltos, al envolverse quedaba
+              «Precio» al final de una línea y su botón al principio de la otra. */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Categoría</span>
+            <CategoryDropdown chips={chips} value={cat} onSelect={setCat} />
+          </div>
+          <div className="flex items-center gap-2.5 md:ml-2">
+            <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
+            <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
+          </div>
+          <span className="ml-auto text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">
             {list.length} {list.length === 1 ? 'creación' : 'creaciones'}
           </span>
         </div>
