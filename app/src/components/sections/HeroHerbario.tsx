@@ -11,8 +11,14 @@ const ease = [0.22, 1, 0.36, 1] as const;
  * El movimiento que define al hero es uno solo: **la planta pasa por delante
  * del titular**. El texto no se corre para dejarle sitio, se deja tapar. Por eso
  * la foto va en `z-20` sobre el titular en `z-10`, y el titular está centrado y
- * dimensionado para que la línea de abajo quede cruzada por las varas — si la
- * planta no muerde el texto, el efecto no existe.
+ * dimensionado para que quede cruzado por las varas — si la planta no muerde el
+ * texto, el efecto no existe.
+ *
+ * La frase, el tamaño de la letra y el ancho de la foto **se mueven juntos**: el
+ * texto tiene que caer en la franja donde la planta es fina —tallos, no pétalos—,
+ * así que una frase más larga pide letra más chica y planta más grande. Si
+ * cambias la frase, revisa las tres cosas a la vez y mira el resultado en móvil,
+ * que es donde el margen es estrecho.
  *
  * De Florencia sale todo lo demás, sin inventar un solo token: blanco total,
  * Cormorant Garamond en itálica peso 500 con el `<em>` en rosa del ramo, Jost
@@ -70,13 +76,11 @@ export const HeroHerbario = () => (
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease }}
-          className="display mb-[12vh] mt-auto text-center text-[clamp(2.9rem,9vw,150px)] leading-[0.94] text-ink-900 lg:mb-[13vh]"
+          className="display mb-[26vh] mt-auto text-center text-[clamp(2.7rem,8.8vw,145px)] leading-[0.96] text-ink-900 lg:mb-[10vh] lg:text-[clamp(2.9rem,9vw,150px)] lg:leading-[0.94]"
         >
-          Orquídeas
+          Llega mañana.
           <br />
-          <em>Phalaenopsis</em>
-          <br />
-          en maceta
+          <em>Se queda <br className="lg:hidden" />meses.</em>
         </motion.h1>
       </div>
 
@@ -92,7 +96,7 @@ export const HeroHerbario = () => (
         <img
           src="/hero/orquideas-herbario.webp"
           alt="Cuatro orquídeas Phalaenopsis en maceta: amarilla, fucsia, crema con líneas y rosada"
-          className="w-[190%] max-w-none translate-y-[10%] select-none sm:w-[128%] lg:w-[80%] lg:translate-y-[7%] xl:w-[74%]"
+          className="w-[250%] max-w-none translate-y-[6%] select-none sm:w-[128%] lg:w-[80%] lg:translate-y-[7%] xl:w-[74%]"
           width={1314}
           height={857}
           fetchPriority="high"

@@ -159,7 +159,12 @@ Las dos categorías nuevas no tienen productos: en portada la tarjeta dice
 4. **La franja de entrega no coincide con el checkout.** Ver la regla de arriba:
    la copia promete 30 minutos y el código da cuatro horas. Es una decisión de
    operación, no de diseño.
-5. **Sanear el catálogo**: `box-lupita` tiene la descripción de otro producto, y
+5. **Confirmar cuánto dura la flor.** El hero dice «Llega mañana. Se queda
+   meses.» y esa segunda frase **no sale de ninguna fuente**: el catálogo no dice
+   cuánto florece una Phalaenopsis. Es la única afirmación del sitio sin
+   respaldo, y está puesta a pedido del cliente. Preguntar a la dueña y anotarlo
+   —o cambiar la frase, que es una línea en `HeroHerbario.tsx`.
+6. **Sanear el catálogo**: `box-lupita` tiene la descripción de otro producto, y
    la foto del Arreglo Florencia es un gráfico de marketing con el texto quemado
    encima — no sirve para un creativo.
 
