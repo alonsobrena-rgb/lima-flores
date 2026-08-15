@@ -53,7 +53,12 @@ export default function Funebre() {
             con el texto. */}
         <EncabezadoCalado
           rotulo="Condolencias"
-          titulo={<>Acompañamos tu adiós <em>con flores.</em></>}
+          titulo={
+            // El salto es solo de móvil: ahí «con flores.» caía debajo de la
+            // corona y la palabra que da nombre a la página no se leía. En
+            // escritorio el titular ya rompe solo, antes del calado.
+            <>Acompañamos tu adiós <br className="lg:hidden" /><em>con flores.</em></>
+          }
           foto="/calados/corona-eternidad.webp"
           alt="Corona Eternidad: corona fúnebre de liliums, gerberas, rosas y hortensias blancas sobre trípode"
           medida="w-[58vw] max-w-[280px] lg:h-[58vh] lg:max-h-[600px] lg:w-auto"
