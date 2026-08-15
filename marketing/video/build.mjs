@@ -100,8 +100,14 @@ const rotulo = (v) => pagina(`
 <div style="position:absolute;top:${SEGURO}px;left:76px">
   <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:84px;display:block">
 </div>
-<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(H * 0.38)}px;
-     background:linear-gradient(to top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.74) 46%, rgba(255,255,255,0) 100%)"></div>
+<!-- El velo tiene que estar opaco **donde apoya el texto**, no solo en el filo:
+     el titular vive a media altura del degradado, y con la parada fuerte pegada
+     abajo los pétalos amarillos pasaban por detrás de las letras. Por eso el
+     tramo denso llega hasta el 66 % del velo —arriba del titular— y recién ahí
+     empieza a apagarse, con 160 px de transición para que la unión no se lea. -->
+<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(H * 0.46)}px;
+     background:linear-gradient(to top, rgba(255,255,255,.97) 0%, rgba(255,255,255,.95) 48%,
+       rgba(255,255,255,.9) 66%, rgba(255,255,255,.5) 82%, rgba(255,255,255,0) 100%)"></div>
 <div style="position:absolute;left:76px;right:76px;bottom:${SEGURO}px">
   <h1 class="d" style="font-size:${v.hlSize || 92}px">${v.headline}</h1>
   ${v.sub ? `<p style="font-size:30px;font-weight:300;line-height:1.4;color:${C.body};margin-top:22px">${v.sub}</p>` : ''}
