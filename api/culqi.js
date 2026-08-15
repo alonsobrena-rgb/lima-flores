@@ -5,7 +5,8 @@
 // Flujo (la tarjeta NUNCA toca este servidor):
 //   1. El checkout abre el modal de Culqi (https://checkout.culqi.com/js/v4) con
 //      la LLAVE PÚBLICA. El cliente paga; Culqi maneja 3-D Secure y devuelve un
-//      token (tkn_...).
+//      token: tkn_... si pagó con tarjeta, ype_... si pagó con Yape (celular +
+//      código de aprobación). Ambos se cobran igual, como source_id.
 //   2. El front manda { token, email, items, shipping_fee } acá.
 //   3. Recalculamos el monto en el servidor (precios desde la BD — nunca se
 //      confía en el monto del cliente) y creamos el cargo con la LLAVE SECRETA:
@@ -14,7 +15,8 @@
 //      recién entonces registra el pedido en /api/order con el charge_id.
 //
 // La llave secreta vive SOLO en el servidor (env CULQI_SECRET_KEY en Railway).
-// Yape/billeteras requieren además el flujo de Órdenes + webhook (pendiente).
+// Banca móvil, agente y billetera sí requieren el flujo de Órdenes + webhook
+// (pendiente); Yape no, va por token como la tarjeta.
 'use strict';
 
 const https = require('https');
@@ -28,6 +30,12 @@ const gchat = require('../integrations/notify/gchat');
 
 const CULQI_HOST = 'api.culqi.com';
 const SECRET = () => process.env.CULQI_SECRET_KEY || '';
+
+// /v2/charges acepta tokens con prefijo distinto según el método: tarjeta genera
+// tkn_..., Yape genera ype_test_... / ype_live_.... El checkout puede devolver
+// cualquiera de los dos, así que el cargo admite ambos. (No aceptamos crd_ —
+// tarjeta ya guardada en un customer — porque el checkout nunca lo produce.)
+const CHARGE_TOKEN = /^(tkn|ype)_/;
 
 function send(res, code, payload) {
   res.statusCode = code;
@@ -91,7 +99,7 @@ async function charge(req, res) {
 
   const token = typeof body.token === 'string' ? body.token.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim() : '';
-  if (!token || !token.startsWith('tkn_')) return send(res, 400, { error: 'Token de pago inválido.' });
+  if (!token || !CHARGE_TOKEN.test(token)) return send(res, 400, { error: 'Token de pago inválido.' });
   if (!email || !email.includes('@')) return send(res, 400, { error: 'Email inválido.' });
 
   let amount;
