@@ -20,6 +20,18 @@ const ease = [0.22, 1, 0.36, 1] as const;
  * cambias la frase, revisa las tres cosas a la vez y mira el resultado en móvil,
  * que es donde el margen es estrecho.
  *
+ * **En móvil el titular va escalonado y la planta entera.** Una línea arriba a la
+ * izquierda, la otra abajo a la derecha, y las cuatro orquídeas dentro del cuadro
+ * (146 % de ancho: se recortan los bordes exteriores de la primera y la última,
+ * no la planta). Se probaron siete repartos: centrado con la planta al 250 %
+ * dejaba solo dos flores; con el titular más abajo, los pétalos se comían la
+ * primera línea; a 14 vw la segunda línea perdía la «S» debajo de la orquídea
+ * crema y el punto final se iba fuera del papel. El que quedó —12,6 vw y la
+ * segunda línea a 27 vh— es el más grande que se lee entero: cada línea cae en un
+ * hueco distinto de la foto y la de abajo la cruzan los tallos, no los pétalos.
+ * De lg para arriba se mantiene el mismo reparto —una línea a cada lado— pero sin
+ * el salto vertical: ahí sobra ancho y las dos caben una debajo de la otra.
+ *
  * De Florencia sale todo lo demás, sin inventar un solo token: blanco total,
  * Cormorant Garamond en itálica peso 500 con el `<em>` en rosa del ramo, Jost
  * para el resto, filetes en #E6E5E3 y el pie de datos con el patrón de la
@@ -60,7 +72,7 @@ export const HeroHerbario = () => (
         className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[clamp(220px,38vh,480px)] bg-[linear-gradient(184deg,#FBF0DE_0%,#FDF7EC_26%,#FFFFFF00_72%)]"
       />
 
-      <div className="relative z-10 flex min-h-[78vh] flex-col px-6 pt-10 sm:px-8 lg:min-h-[min(92vh,900px)] lg:px-12 lg:pt-12">
+      <div className="relative z-10 flex min-h-[72vh] flex-col px-6 pt-10 sm:px-8 lg:min-h-[min(92vh,900px)] lg:px-12 lg:pt-12">
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -76,11 +88,10 @@ export const HeroHerbario = () => (
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease }}
-          className="display mb-[26vh] mt-auto text-center text-[clamp(2.7rem,8.8vw,145px)] leading-[0.96] text-ink-900 lg:mb-[10vh] lg:text-[clamp(2.9rem,9vw,150px)] lg:leading-[0.94]"
+          className="display mb-[9vh] mt-[2vh] flex flex-col justify-between text-[clamp(3.3rem,12.6vw,145px)] leading-[0.88] text-ink-900 lg:mb-[10vh] lg:mt-auto lg:block lg:text-[clamp(2.9rem,9vw,150px)] lg:leading-[0.94]"
         >
-          Llega mañana.
-          <br />
-          <em>Se queda <br className="lg:hidden" />meses.</em>
+          <span className="block text-left">Llega mañana.</span>
+          <em className="mt-[27vh] block text-right lg:mt-0">Se queda <br className="lg:hidden" />meses.</em>
         </motion.h1>
       </div>
 
@@ -96,7 +107,7 @@ export const HeroHerbario = () => (
         <img
           src="/hero/orquideas-herbario.webp"
           alt="Cuatro orquídeas Phalaenopsis en maceta: amarilla, fucsia, crema con líneas y rosada"
-          className="w-[250%] max-w-none translate-y-[6%] select-none sm:w-[128%] lg:w-[80%] lg:translate-y-[7%] xl:w-[74%]"
+          className="w-[146%] max-w-none translate-y-[3%] select-none sm:w-[124%] lg:w-[80%] lg:translate-y-[7%] xl:w-[74%]"
           width={1314}
           height={857}
           fetchPriority="high"

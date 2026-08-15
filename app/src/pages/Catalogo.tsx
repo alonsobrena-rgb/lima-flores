@@ -284,11 +284,24 @@ export default function Catalogo() {
           y las ocho categorías, que eran tres filas de píldoras, se recogen en un
           desplegable. De md para arriba se achica menos: ahí sobraba pantalla. */}
       <header className="relative z-30 mx-auto max-w-7xl px-6 pb-6 pt-7 md:px-12 md:pb-12 md:pt-24">
-        <div className="max-w-3xl">
-          <span className="rotulo">El catálogo</span>
-          <h1 className="display mt-2.5 text-[2rem] text-ink-900 sm:text-[2.75rem] md:mt-4 md:text-[4.25rem]">
-            Flores de estación, <em>frescas y del día.</em>
-          </h1>
+        {/* Título y foto entrelazados: la foto sale del último producto de la
+            selección actual, así que cambia con el filtro y nunca miente sobre lo
+            que hay debajo — y no repite la que abre la grilla. En móvil la cabecera va sin foto — ahí lo que hace
+            falta es llegar a la grilla, no otra imagen antes de las de verdad. */}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28%)] lg:items-start lg:gap-12">
+          <div className="max-w-3xl">
+            <span className="rotulo">El catálogo</span>
+            <h1 className="display mt-2.5 text-[2rem] text-ink-900 sm:text-[2.75rem] md:mt-4 md:text-[4.5rem]">
+              Flores de estación, <em>frescas y del día.</em>
+            </h1>
+          </div>
+          {list.length > 0 && (
+            <img
+              src={list[list.length - 1].image}
+              alt={list[list.length - 1].name}
+              className="hidden aspect-[3/4] w-full object-cover lg:-mb-[10vh] lg:-mr-12 lg:-mt-[6vh] lg:block"
+            />
+          )}
         </div>
 
         {/* Los dos filtros en una línea, cada uno con su panel. El conteo va al

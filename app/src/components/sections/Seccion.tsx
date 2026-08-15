@@ -88,3 +88,68 @@ export const Encabezado = ({
     )}
   </header>
 );
+
+/**
+ * Encabezado con foto de producto entrelazada.
+ *
+ * El pedido: que las páginas interiores no abran con un bloque de texto solo,
+ * sino con una foto **mezclada** con el título — como el hero, pero sin que el
+ * texto quede detrás de la imagen.
+ *
+ * Cómo se resuelve el «mezclado» sin tapar nada: la foto vive en su columna a la
+ * derecha, **se sale por el borde de la página** (los `-mr` que anulan el
+ * `px` de la sección) y ocupa las dos filas del texto — arranca por encima de la
+ * línea del rótulo (`-mt`) y termina por debajo del filete (`-mb`). El bloque de
+ * texto y la imagen comparten altura y se entrelazan en el ojo, pero nunca en el
+ * mismo punto: el título se lee entero, siempre.
+ *
+ * En móvil no hay ancho para poner la foto al lado, así que se mete **entre el
+ * título y el texto** —no debajo de todo— y también sale por el borde derecho.
+ * El orden queda: título, foto, datos. La foto se ve al abrir, sin scroll, y el
+ * texto se lee alrededor de ella y no antes de ella.
+ *
+ * El sangrado va con `-mr` y no con `w-screen`: la sección no recorta, así que
+ * basta con anular su propio margen para llegar al filo del papel.
+ */
+export const EncabezadoFoto = ({
+  rotulo,
+  titulo,
+  foto,
+  alt,
+  children,
+}: {
+  rotulo: string;
+  titulo: ReactNode;
+  foto: string;
+  alt: string;
+  children?: ReactNode;
+}) => (
+  <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,31%)] lg:items-start lg:gap-12">
+    <Reveal className="lg:col-start-1 lg:row-start-1">
+      <p className="rotulo">{rotulo}</p>
+      <h1 className="display mt-4 text-[clamp(2.6rem,6vw,5.2rem)] leading-[0.96] text-ink-900">
+        {titulo}
+      </h1>
+    </Reveal>
+
+    {/* La foto sale del papel por la derecha y ocupa las dos filas del texto:
+        eso es lo que la mezcla con el título y con los datos de abajo. */}
+    <Reveal
+      delay={0.12}
+      className="-mr-6 sm:-mr-8 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:-mr-12 lg:-mb-[9vh] lg:-mt-[7vh] lg:pl-2"
+    >
+      <img
+        src={foto}
+        alt={alt}
+        loading="eager"
+        className="aspect-[5/4] w-full object-cover sm:aspect-[16/9] lg:aspect-[3/4]"
+      />
+    </Reveal>
+
+    {children && (
+      <Reveal delay={0.08} className="lg:col-start-1 lg:row-start-2">
+        <div className="border-t border-border pt-7">{children}</div>
+      </Reveal>
+    )}
+  </div>
+);

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 import { AddToCart } from '@/components/AddToCart';
-import { Seccion, Encabezado, enlaceTexto } from '@/components/sections/Seccion';
+import { Seccion, EncabezadoFoto, enlaceTexto } from '@/components/sections/Seccion';
 import { money, useProducts } from '@/lib/cart';
 
 // Orden de presentación pedido por la florería (coronas, lágrima y box).
@@ -46,27 +46,33 @@ export default function Funebre() {
       <SiteHeader />
 
       <Seccion filete={false} className="pb-0 pt-[clamp(40px,6vh,72px)]">
-        <Encabezado
+        {/* La foto sale del propio catálogo fúnebre —si mañana cambia el orden,
+            cambia la portada sola— pero del ÚLTIMO arreglo: con uno de los
+            primeros salía dos veces en la misma pantalla, en la cabecera y
+            abriendo la grilla. */}
+        <EncabezadoFoto
           rotulo="Condolencias"
           titulo={<>Acompañamos tu adiós <em>con flores.</em></>}
-          className="mb-10"
-        />
-        <div className="grid gap-8 border-t border-border pt-8 lg:grid-cols-[minmax(0,58ch)_auto] lg:items-start lg:gap-16">
-          <p className="text-[17px] leading-relaxed text-ink-700">
-            Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir
-            a quien partió. Cada pieza se arma con flores frescas de la semana, incluye
-            tarjeta de dedicatoria y la entregamos en Lima. Estamos contigo en este
-            momento. Las imágenes son referenciales.
-          </p>
-          <a
-            href="https://wa.me/51999479855"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={enlaceTexto}
-          >
-            ¿Necesitas ayuda? Escríbenos <span aria-hidden="true">→</span>
-          </a>
-        </div>
+          foto={list[list.length - 1]?.image || '/products/funebre-corona-eternidad.jpg'}
+          alt={list[list.length - 1]?.name || 'Corona fúnebre de Lima Flores'}
+        >
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:items-start lg:gap-12">
+            <p className="text-[17px] leading-relaxed text-ink-700">
+              Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir
+              a quien partió. Cada pieza se arma con flores frescas de la semana, incluye
+              tarjeta de dedicatoria y la entregamos en Lima. Estamos contigo en este
+              momento. Las imágenes son referenciales.
+            </p>
+            <a
+              href="https://wa.me/51999479855"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={enlaceTexto}
+            >
+              ¿Necesitas ayuda? Escríbenos <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </EncabezadoFoto>
       </Seccion>
 
       <Seccion filete={false} className="pt-[clamp(40px,6vh,72px)]">

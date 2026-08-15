@@ -4,7 +4,7 @@ import { SiteFooter } from '@/components/sections/SiteFooter';
 import { money } from '@/lib/cart';
 import { plans, MONTHLY_PRICE, type Plan } from '@/data/plans';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
-import { Seccion, Encabezado } from '@/components/sections/Seccion';
+import { Seccion, EncabezadoFoto } from '@/components/sections/Seccion';
 import { attachAutocomplete, geocodeText, mapsAvailable, onMapsAuthFailure, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
@@ -35,6 +35,10 @@ const PHOTOS = [
   { src: '/suscripcion/estacion-4.webp', alt: 'Ramo de estación magenta con girasoles pequeños' },
   { src: '/suscripcion/estacion-1.webp', alt: 'Ramo de estación con statice morado y flores amarillas' },
 ];
+
+/** La que abre la página y las que quedan para la tira: nunca la misma dos veces. */
+const PORTADA = PHOTOS[PHOTOS.length - 1];
+const TIRA = PHOTOS.slice(0, -1);
 
 const CheckIcon = () => (
   <svg className="mt-0.5 h-4 w-4 shrink-0 text-rosa-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
@@ -72,15 +76,17 @@ export default function Suscripcion() {
         <SiteHeader />
 
         <Seccion filete={false} className="pb-0 pt-[clamp(40px,6vh,72px)]">
-          <Encabezado
+          {/* Foto de una entrega real, entrelazada con el título. */}
+          <EncabezadoFoto
             rotulo="Suscripción"
             titulo={<>Flores frescas en casa, <em>todo el mes.</em></>}
-            className="mb-10"
-          />
+            foto={PORTADA.src}
+            alt={PORTADA.alt}
+          >
           {/* La entrada y los tres datos en una sola fila: el párrafo solo dejaba
               media pantalla en blanco a su derecha. Mismo patrón que el pie del
               hero de la portada. */}
-          <div className="grid gap-8 border-t border-border pt-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:gap-16">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,44ch)_auto] lg:gap-12">
             <p className="text-[17px] leading-relaxed text-ink-700">
               Un mismo precio — <strong className="font-medium text-ink-900">S/130 al mes</strong> —
               y dos entregas mensuales de flores de estación, seleccionadas y armadas a
@@ -99,6 +105,7 @@ export default function Suscripcion() {
               ))}
             </dl>
           </div>
+          </EncabezadoFoto>
         </Seccion>
 
         {/* ── Flores de estación: galería de entregas reales ──
@@ -122,8 +129,11 @@ export default function Suscripcion() {
               </p>
             </Reveal>
           </div>
-          <Stagger className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-            {PHOTOS.map((ph) => (
+          {/* La tira va sin la foto de la cabecera: si no, la misma entrega salía
+              dos veces en la misma pantalla. Tres columnas en vez de cuatro, así
+              que además se ven más grandes. */}
+          <Stagger className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+            {TIRA.map((ph) => (
               <StaggerItem key={ph.src}>
                 <div className="group overflow-hidden bg-secondary">
                   <img src={ph.src} alt={ph.alt} loading="lazy" className="aspect-[3/4] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
