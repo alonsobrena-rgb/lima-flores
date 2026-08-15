@@ -273,8 +273,30 @@ export default function Checkout() {
     const w = window as any;
     const Culqi = w.Culqi;
     const amountCents = Math.round((total ?? subtotal) * 100);
+
+    // Yape no se puede abrir "a secas": Culqi.js solo ofrece tarjeta si no hay
+    // orden, y con yape:true aborta con CCKT-400 ("Ups! Algo salió mal") sin
+    // llegar a pedir el código de aprobación. La orden se crea en el servidor,
+    // que es quien recalcula el monto.
+    let orderId: string | null = null;
+    if (method === 'Yape') {
+      const r = await fetch(`${API_BASE}/api/culqi/order`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: payload.items, shipping_fee: payload.shipping_fee,
+          email: buyer.email, name: buyer.name, phone: buyer.phone,
+        }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.order_id) throw new Error(d.error || 'No pudimos iniciar el pago con Yape.');
+      orderId = d.order_id as string;
+    }
+
     Culqi.publicKey = CULQI_PK;
-    Culqi.settings({ title: 'Lima Flores', currency: 'PEN', amount: amountCents });
+    Culqi.settings({
+      title: 'Lima Flores', currency: 'PEN', amount: amountCents,
+      ...(orderId ? { order: orderId } : {}),
+    });
     const paymentMethods = method === 'Yape'
       ? { tarjeta: false, yape: true, bancaMovil: false, agente: false, billetera: false, cuotealo: false }
       : { tarjeta: true, yape: false, bancaMovil: false, agente: false, billetera: false, cuotealo: false };
@@ -297,6 +319,14 @@ export default function Checkout() {
         } catch (err: any) {
           setError(err?.message || 'No se pudo procesar el pago.'); setSending(false);
         }
+      } else if (Culqi.order && Culqi.order.id) {
+        // Yape se paga en el acto y debería devolver token. Si en cambio vuelve
+        // la orden, el pago aún no está confirmado y confirmarlo exige el webhook,
+        // que no está montado. No registramos el pedido a ciegas: daríamos por
+        // cobrado algo que nadie ha pagado.
+        console.warn('[culqi] el checkout devolvió orden en vez de token:', Culqi.order.id);
+        setError(`Tu pago quedó pendiente de confirmación. Escríbenos por WhatsApp con este código y lo completamos: ${Culqi.order.id}`);
+        setSending(false);
       } else if (Culqi.error) {
         setError(Culqi.error.user_message || Culqi.error.merchant_message || 'No se pudo procesar el pago.'); setSending(false);
       } else {
