@@ -151,11 +151,53 @@ async function ensureCategoryReorg() {
   }
 }
 
+// ─── Producto de prueba de pago ───────────────────────────────────────────────
+// TEMPORAL — borrar este bloque (y el producto, desde /admin) cuando Yape quede
+// confirmado en producción.
+//
+// Yape solo se puede probar de verdad con llaves reales, y nadie va a pagar
+// S/ 180 para comprobar que el modal funciona. Este cuesta S/ 2.
+//
+// Sale en el catálogo a propósito: la ficha /producto/:id se resuelve contra la
+// lista pública, que filtra por active, así que uno inactivo daría "No
+// encontramos ese producto" y no se podría ni añadir al carrito. Va con
+// sort_order 9999 para quedar el último y con un nombre que nadie confunda.
+//
+// Para que el total sea exactamente S/ 2, elige "Recojo en el taller" al pagar:
+// el envío a domicilio suma su tarifa por encima del precio.
+const TEST_PRODUCT = {
+  id: 'prueba-de-pago',
+  name: 'Prueba de pago — uso interno, no comprar',
+  price: 2,
+  image: '/products/orquidea-sunrise-de-dos-varas.jpg',
+  shortDesc: 'Producto interno para verificar la pasarela de pago. No está a la venta y no se despacha.',
+  description: 'Producto interno de Lima Flores para comprobar que el cobro con Yape y tarjeta funciona en producción. No es un arreglo, no está a la venta y no se despacha. Si llegaste aquí por error, vuelve al catálogo.',
+};
+let testProductEnsured = false;
+async function ensureTestProduct() {
+  if (testProductEnsured || !db.enabled) return;
+  const p = TEST_PRODUCT;
+  const { rowCount } = await db.query(
+    `INSERT INTO products
+       (id, name, category, category_label, price, image, images, palette,
+        short_desc, description, tags, badge, details, sort_order, active)
+     VALUES ($1,$2,NULL,NULL,$3,$4,NULL,NULL,$5,$6,NULL,NULL,NULL,9999,TRUE)
+     ON CONFLICT (id) DO NOTHING`,
+    [p.id, p.name, p.price, p.image, p.shortDesc, p.description]
+  );
+  testProductEnsured = true;
+  // ON CONFLICT DO NOTHING: si el admin lo borra a mano, no vuelve a nacer en el
+  // mismo arranque, pero sí en el siguiente deploy. Por eso hay que quitar el
+  // bloque, no solo el producto.
+  if (rowCount) console.log(`[products] producto de prueba creado: /producto/${p.id} (S/ ${p.price})`);
+}
+
 // ─── Lecturas ──────────────────────────────────────────────────────────────────
 async function listPublic() {
   await ensureSeeded();
   await ensureExtras();
   await ensureCategoryReorg();
+  await ensureTestProduct();
   const { rows } = await db.query(
     `SELECT * FROM products WHERE active = TRUE ORDER BY sort_order ASC, created_at ASC`
   );
@@ -166,6 +208,7 @@ async function listAll() {
   await ensureSeeded();
   await ensureExtras();
   await ensureCategoryReorg();
+  await ensureTestProduct();
   const { rows } = await db.query(
     `SELECT * FROM products ORDER BY sort_order ASC, created_at ASC`
   );
