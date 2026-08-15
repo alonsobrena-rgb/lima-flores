@@ -39,6 +39,13 @@ propio arreglo.
 **Área segura: 372 px arriba y abajo.** Es lo que tapan la UI de Instagram, el
 avatar y la caja de respuesta. Un titular que entra ahí no existe.
 
+**El rótulo se dibuja dentro de `#lienzo`, una caja de 1080×1920 posicionada.**
+No es un detalle de estilo: el viewport de Chromium llega más corto que el
+`--window-size` que se le pide, así que un `bottom:0` colgado del viewport deja
+el velo cien píxeles antes del filo y una franja de video crudo debajo, con un
+corte recto. Pasó una vez. Por eso, además, `png()` comprueba que el archivo mida
+exactamente 1080×1920 y revienta el build si no.
+
 ## La música
 
 `musica.py` la sintetiza con numpy: un arpegio lento en fa mayor con cola larga y

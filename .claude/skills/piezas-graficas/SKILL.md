@@ -115,6 +115,14 @@ del CSS**, no los copia, para que un cambio del sistema llegue solo. Ver
 
 - **Chromium no baja de 500 px de viewport**, y su alto queda ~78 px por debajo
   del `--window-size`. Se pide de más y se recorta.
+- **Nada se ancla al viewport: todo se dibuja dentro de una caja del tamaño
+  exacto de la pieza.** Es la otra mitad de la trampa de arriba y es la que se
+  cuela: si el `bottom:0` de un velo cuelga del viewport y no de un contenedor
+  posicionado de 1080×1920, el velo termina cien píxeles antes del filo y queda
+  una franja de foto cruda abajo, con un corte recto. `build.mjs` lo resuelve con
+  `body{position:relative;width;height}` y `marketing/video/build.mjs` con un
+  `#lienzo` de medidas fijas. **Y después se comprueba la medida del PNG**: si no
+  mide lo que tiene que medir, el build revienta en vez de entregar la franja.
 - **Sin `<meta charset>`, Chromium abre `file://` como windows-1252** y parte
   todos los acentos.
 - **Una imagen es un elemento reemplazado**: con `left` y `right` puestos y

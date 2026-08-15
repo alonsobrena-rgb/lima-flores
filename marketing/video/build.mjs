@@ -72,16 +72,22 @@ function chromium() {
   throw new Error('No encontré Chromium. Exporta CHROME_PATH=/ruta/al/chrome');
 }
 
+// Todo el dibujo vive dentro de `#lienzo`, una caja de 1080×1920 posicionada:
+// así `bottom:0` es el borde del video y no el del viewport de Chromium, que
+// llega más corto que el `--window-size` que se pide. Anclado al viewport, el
+// velo de abajo terminaba 105 px antes del filo y quedaba una franja de video
+// crudo debajo, con un corte recto. Se ve horrible y no se puede repetir.
 const pagina = (cuerpo, fondo) => `<!doctype html><html lang="es"><head><meta charset="utf-8">
 <style>
 ${FUENTES}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:${W}px;height:${H}px;background:${fondo};overflow:hidden}
+html,body{width:${W}px;height:${H}px;background:transparent;overflow:hidden}
 body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
+#lienzo{position:absolute;top:0;left:0;width:${W}px;height:${H}px;background:${fondo};overflow:hidden}
 .d{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;letter-spacing:-.018em;line-height:1.03;color:${C.ink}}
 .d em{font-style:italic;color:${C.rosa}}
 .mono{font-weight:500;letter-spacing:.2em;text-transform:uppercase}
-</style></head><body>${cuerpo}</body></html>`;
+</style></head><body><div id="lienzo">${cuerpo}</div></body></html>`;
 
 // Rótulo sobre el video: logo arriba y el bloque de texto abajo, los dos dentro
 // del área segura. El texto se apoya en un velo que sube desde el borde — una
@@ -118,14 +124,32 @@ const cierre = (v) => pagina(`
   <span class="mono" style="font-size:17px;color:${C.muted}">${v.footer} · ${v.price}</span>
 </div>`, C.fondo);
 
+// Se pide una ventana más alta de la cuenta —Chromium se queda unos 100 px por
+// debajo del `--window-size`— y después se recorta al lienzo exacto. Al final se
+// comprueba el tamaño: un PNG que no mida 1080×1920 deja una franja del video
+// sin cubrir, y eso tiene que reventar el build, no salir en el anuncio.
 function png(html, destino) {
-  const archivo = path.join(TMP, path.basename(destino, '.png') + '.html');
+  const nombre = path.basename(destino, '.png');
+  const archivo = path.join(TMP, `${nombre}.html`);
+  const crudo = path.join(TMP, `${nombre}-crudo.png`);
   fs.writeFileSync(archivo, html);
   execFileSync(chromium(), [
     '--headless', '--no-sandbox', '--disable-gpu', '--hide-scrollbars',
     '--default-background-color=00000000', '--force-device-scale-factor=1',
-    `--window-size=${W},${H}`, `--screenshot=${destino}`, `file://${archivo}`,
+    `--window-size=${W},${H + 200}`, `--screenshot=${crudo}`, `file://${archivo}`,
   ], { stdio: 'pipe' });
+  execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', crudo, '-vf', `crop=${W}:${H}:0:0`, destino], { stdio: 'pipe' });
+
+  const [ancho, alto] = medidaPng(destino);
+  if (ancho !== W || alto !== H) {
+    throw new Error(`${nombre}: el rótulo salió ${ancho}×${alto} y tiene que ser ${W}×${H}`);
+  }
+}
+
+/** Ancho y alto de un PNG, leídos de su cabecera IHDR. */
+function medidaPng(archivo) {
+  const b = fs.readFileSync(archivo);
+  return [b.readUInt32BE(16), b.readUInt32BE(20)];
 }
 
 function musica(segundos) {
