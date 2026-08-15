@@ -37,11 +37,12 @@ const PHOTOS = [
 ];
 
 /**
- * La que abre la página —calada, en `calados/ramo-estacion.webp`— y las que
- * quedan para la tira: la misma entrega no sale dos veces en la misma pantalla.
+ * La que abre la página, calada en `calados/ramo-estacion.webp`. Sale también en
+ * la tira de abajo, con las otras tres: arriba se ve el calado sobre blanco y
+ * abajo la foto entera, así que no se lee como una repetición — y la tira son
+ * las cuatro entregas, que para eso están.
  */
 const PORTADA = PHOTOS[1];
-const TIRA = PHOTOS.filter((p) => p !== PORTADA);
 
 const CheckIcon = () => (
   <svg className="mt-0.5 h-4 w-4 shrink-0 text-rosa-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
@@ -134,11 +135,9 @@ export default function Suscripcion() {
               </p>
             </Reveal>
           </div>
-          {/* La tira va sin la foto de la cabecera: si no, la misma entrega salía
-              dos veces en la misma pantalla. Tres columnas en vez de cuatro, así
-              que además se ven más grandes. */}
-          <Stagger className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
-            {TIRA.map((ph) => (
+          {/* Las cuatro entregas, incluida la que abre la página. */}
+          <Stagger className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {PHOTOS.map((ph) => (
               <StaggerItem key={ph.src}>
                 <div className="group overflow-hidden bg-secondary">
                   <img src={ph.src} alt={ph.alt} loading="lazy" className="aspect-[3/4] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />

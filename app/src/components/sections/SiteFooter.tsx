@@ -108,9 +108,20 @@ export const SiteFooter = () => {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-ivory-100/15 pt-6 text-[12px] text-ivory-100/45 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-4 border-t border-ivory-100/15 pt-6 text-[12px] text-ivory-100/45 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Lima Flores · Todos los derechos reservados</span>
-          <span>Hecho a mano en Lima</span>
+          <div className="flex items-center gap-6">
+            <span>Hecho a mano en Lima</span>
+            {/* La puerta del panel, siempre en el pie. Va discreta —del tamaño de
+                la letra chica y en el gris del pie— porque es para la casa, no
+                para el cliente: quien no tiene clave se topa con el login. */}
+            <Link
+              to="/admin"
+              className="press rounded-pill border border-ivory-100/25 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-ivory-100/70 transition-colors hover:border-ivory-100/60 hover:text-ivory-50"
+            >
+              Panel
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
