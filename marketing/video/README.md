@@ -31,10 +31,12 @@ Tres capas y nada más:
 3. **La placa de cierre**: 2,6 s de blanco con el logotipo y el dato. Es la única
    pantalla que no es la toma.
 
-Los dos lavados —arriba y abajo— no son decoración: el rótulo está quieto y la
-toma se mueve, así que sin ellos el texto cae unas veces sobre la pared y otras
-sobre el ramo, y el logotipo se cruzaba con el que va impreso en la tarjeta del
-propio arreglo.
+**Hay un solo lavado y está abajo**, debajo del titular. No es decoración: el
+rótulo está quieto y la toma se mueve, así que sin él el texto cae unas veces
+sobre la pared y otras sobre el ramo. Arriba hubo otro, para que el logotipo se
+apoyara en un campo limpio, y se quitó: no cubría texto, solo tapaba el producto.
+La regla, corta: **un velo existe para que se lea un texto encima; si no hay
+texto, no hay velo.**
 
 **Área segura: 372 px arriba y abajo.** Es lo que tapan la UI de Instagram, el
 avatar y la caja de respuesta. Un titular que entra ahí no existe.

@@ -61,6 +61,15 @@ las produce `prep-logo.py` desde `app/public/assets/logo.png`):
 Altura entre 52 y 84 px sobre lienzo de 1080. Nunca se deforma, nunca se recolorea,
 nunca se le pone sombra.
 
+**Un velo tampoco es un sitio para apoyarlo.** Un degradado sobre la foto existe
+por una sola razón: que se lea un texto encima. Si no hay texto debajo del velo,
+el velo sobra — no está protegiendo nada, está tapando el producto, y es la misma
+banda inventada de la que habla el párrafo de arriba. Ya pasó en un video: se
+puso un lavado blanco arriba para que el logotipo cayera en un campo limpio, y lo
+único que hacía era comerse media toma. El logotipo se apoya en la foto y punto;
+si sobre esa foto no se lee, se cambia a la versión clara, no se pinta una nube
+debajo.
+
 ### 3. Nada inventado
 
 Precios, medidas, tiempos, composición y contenido salen de `db/products.seed.json`,

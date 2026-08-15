@@ -93,13 +93,12 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
 // del área segura. El texto se apoya en un velo que sube desde el borde — una
 // tarjeta con borde acá se ve como un banner pegado encima de la toma.
 const rotulo = (v) => pagina(`
-<!-- Un lavado suave arriba: el rótulo está quieto y la toma se mueve, así que
-     sin él el logotipo caía unas veces sobre la pared y otras sobre la tarjeta
-     del propio arreglo —que ya lleva el logotipo impreso— y se leían dos. -->
-<div style="position:absolute;left:0;right:0;top:0;height:${Math.round(H * 0.3)}px;
-     background:linear-gradient(to bottom, rgba(255,255,255,.82) 0%, rgba(255,255,255,.6) 55%, rgba(255,255,255,0) 100%)"></div>
+<!-- Arriba no va ningún velo. Había uno para que el logotipo se apoyara en un
+     campo limpio y era exactamente la banda inventada que la regla del logotipo
+     prohíbe: no cubría texto, solo tapaba el producto. El logotipo va directo
+     sobre la toma, y para eso se sostiene solo. -->
 <div style="position:absolute;top:${SEGURO}px;left:76px">
-  <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:74px;display:block">
+  <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:84px;display:block">
 </div>
 <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(H * 0.38)}px;
      background:linear-gradient(to top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.74) 46%, rgba(255,255,255,0) 100%)"></div>
