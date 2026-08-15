@@ -100,20 +100,26 @@ const rotulo = (v) => pagina(`
 <div style="position:absolute;top:${SEGURO}px;left:76px">
   <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:84px;display:block">
 </div>
-<!-- El velo tiene que estar opaco **donde apoya el texto**, no solo en el filo:
-     el titular vive a media altura del degradado, y con la parada fuerte pegada
-     abajo los pétalos amarillos pasaban por detrás de las letras. Por eso el
-     tramo denso llega hasta el 66 % del velo —arriba del titular— y recién ahí
-     empieza a apagarse, con 160 px de transición para que la unión no se lea. -->
-<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(H * 0.46)}px;
-     background:linear-gradient(to top, rgba(255,255,255,.97) 0%, rgba(255,255,255,.95) 48%,
-       rgba(255,255,255,.9) 66%, rgba(255,255,255,.5) 82%, rgba(255,255,255,0) 100%)"></div>
-<div style="position:absolute;left:76px;right:76px;bottom:${SEGURO}px">
-  <h1 class="d" style="font-size:${v.hlSize || 92}px">${v.headline}</h1>
-  ${v.sub ? `<p style="font-size:30px;font-weight:300;line-height:1.4;color:${C.body};margin-top:22px">${v.sub}</p>` : ''}
-  <div style="margin-top:28px;display:flex;align-items:baseline;gap:22px">
-    <span class="d" style="font-size:46px;font-weight:400">${v.price}</span>
-    <span class="mono" style="font-size:16px;color:${C.muted}">${v.footer}</span>
+<!-- El velo es una banda pegada al texto, no un degradado que sube desde el filo.
+     Cubriendo desde abajo pasaba una de dos: flojo, los pétalos se veían por
+     detrás de las letras; fuerte, se tragaba la caja del arreglo y abajo solo
+     quedaban las flores. Atado al bloque de texto tapa lo que tiene que tapar
+     —las dos líneas— y suelta lo de abajo: la base de la caja y el banco vuelven
+     a verse. Va dentro del contenedor del texto para que crezca con la copia y
+     no haya que recalcular píxeles si el titular pasa a dos líneas. -->
+<div style="position:absolute;left:0;right:0;bottom:${SEGURO}px">
+  <div style="position:absolute;left:0;right:0;top:-150px;bottom:-170px;
+       background:linear-gradient(to bottom,
+         rgba(255,255,255,0) 0, rgba(255,255,255,.93) 150px,
+         rgba(255,255,255,.93) calc(100% - 170px),
+         rgba(255,255,255,.3) calc(100% - 45px), rgba(255,255,255,.2) 100%)"></div>
+  <div style="position:relative;padding:0 76px">
+    <h1 class="d" style="font-size:${v.hlSize || 92}px">${v.headline}</h1>
+    ${v.sub ? `<p style="font-size:30px;font-weight:300;line-height:1.4;color:${C.body};margin-top:22px">${v.sub}</p>` : ''}
+    <div style="margin-top:28px;display:flex;align-items:baseline;gap:22px">
+      <span class="d" style="font-size:46px;font-weight:400">${v.price}</span>
+      <span class="mono" style="font-size:16px;color:${C.muted}">${v.footer}</span>
+    </div>
   </div>
 </div>`, 'transparent');
 

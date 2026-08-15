@@ -36,10 +36,15 @@ rótulo está quieto y la toma se mueve, así que sin él el texto cae unas vece
 sobre la pared y otras sobre el ramo. Arriba hubo otro, para que el logotipo se
 apoyara en un campo limpio, y se quitó: no cubría texto, solo tapaba el producto.
 La regla, corta: **un velo existe para que se lea un texto encima; si no hay
-texto, no hay velo.** Y la vuelta de tuerca: tiene que estar denso **donde apoya
-el texto**, no solo en el filo. El titular vive a media altura del degradado, así
-que el tramo opaco llega hasta el 66 % del velo; con la parada fuerte pegada
-abajo, los pétalos amarillos se veían por detrás de las letras.
+texto, no hay velo.** Y de ahí sale la forma que tiene: **es una banda atada al
+bloque de texto, no un degradado que sube desde el filo de abajo.** Cubriendo
+desde el filo pasaba una de dos, y las dos se probaron: flojo, los pétalos se
+veían por detrás de las letras; fuerte, se tragaba la caja del arreglo y abajo
+solo quedaban las flores. Atado al texto, tapa las dos líneas y suelta el resto —
+la base de la caja y el banco se ven.
+
+Como la banda vive dentro del contenedor del texto, crece con la copia: si el
+titular pasa a dos líneas no hay que recalcular un solo píxel.
 
 **Área segura: 372 px arriba y abajo.** Es lo que tapan la UI de Instagram, el
 avatar y la caja de respuesta. Un titular que entra ahí no existe.
