@@ -1,8 +1,12 @@
 // /api/culqi/* — pasarela de pago Culqi (https://culqi.com).
 //
-//   POST /api/culqi/charge   → cobra una tarjeta con un token de Culqi.js v4.
+//   POST /api/culqi/order    → crea la orden que Yape exige para poder abrirse.
+//   POST /api/culqi/charge   → cobra con un token de Culqi.js v4 (tarjeta o Yape).
 //
 // Flujo (la tarjeta NUNCA toca este servidor):
+//   0. Si el método es Yape, el checkout pide primero una orden acá. Culqi.js
+//      solo ofrece tarjeta si se abre sin orden; con cualquier otro método
+//      responde CCKT-400 antes de pedir siquiera el código de aprobación.
 //   1. El checkout abre el modal de Culqi (https://checkout.culqi.com/js/v4) con
 //      la LLAVE PÚBLICA. El cliente paga; Culqi maneja 3-D Secure y devuelve un
 //      token: tkn_... si pagó con tarjeta, ype_... si pagó con Yape (celular +
@@ -16,11 +20,10 @@
 //
 // La llave secreta vive SOLO en el servidor (env CULQI_SECRET_KEY en Railway).
 //
-// OJO: todo método que no sea tarjeta (Yape, banca móvil, agente, billetera)
-// exige que el checkout reciba una ORDEN ya creada — Culqi.settings({ order:
-// 'ord_...' }) — además del webhook que confirma el pago. Ese flujo sigue
-// PENDIENTE: hoy el checkout abre Yape sin orden y Culqi responde CCKT-400
-// ("Ups! Algo salió mal") antes siquiera de pedir el código de aprobación.
+// Banca móvil, agente y billetera siguen PENDIENTES: además de la orden, el
+// cliente paga después (en un banco o bodega), así que el pedido solo puede
+// darse por bueno cuando llega el webhook. Yape no — se paga en el acto y
+// devuelve token, que es el camino ya implementado.
 'use strict';
 
 const https = require('https');
@@ -129,6 +132,75 @@ async function charge(req, res) {
     return send(res, 402, { ok: false, error: culqiError(json), code: json && json.code });
   } catch (e) {
     console.error('[culqi] charge error:', e.message);
+    return send(res, 502, { ok: false, error: 'No pudimos comunicarnos con el procesador de pagos. Intenta de nuevo.' });
+  }
+}
+
+// ─── Órdenes (lo que Yape exige antes de abrir el modal) ─────────────────────
+// El Checkout v4 abierto "a secas" solo sabe cobrar con tarjeta. Para habilitar
+// Yape —y banca móvil, agente o billetera— hay que crear ANTES una orden y
+// pasársela como Culqi.settings({ order: 'ord_...' }). Sin ella el checkout
+// aborta con CCKT-400 ("Ups! Algo salió mal") sin llegar a pedir el código de
+// aprobación, así que el fallo no se parece en nada a su causa.
+//
+//   POST /api/culqi/order  { items, shipping_fee, email, name, phone }
+//     → { ok, order_id, amount }
+//
+// El monto se recalcula acá con computeAmountCents (el mismo que usa el cargo),
+// nunca se toma del cliente: la orden es lo que Culqi le muestra al comprador.
+
+// Yape topa en S/ 2000 por operación y solo acepta soles.
+const YAPE_MAX_CENTS = 200000;
+
+// Culqi exige order_number único por comercio — repetir uno hace fallar la orden.
+function newOrderNumber() {
+  return 'LF' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
+}
+
+async function createOrder(req, res) {
+  if (!SECRET()) return send(res, 503, { error: 'Pago no configurado (falta CULQI_SECRET_KEY).' });
+
+  let b;
+  try { b = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+
+  const email = typeof b.email === 'string' ? b.email.trim() : '';
+  if (!email || !email.includes('@')) return send(res, 400, { error: 'Email inválido.' });
+
+  let amount;
+  try { amount = await computeAmountCents(b); }
+  catch (e) { return send(res, 400, { error: e.message }); }
+  if (amount < 100) return send(res, 400, { error: 'El monto mínimo es S/ 1.00.' });
+  // Mejor decirlo acá que dejar que el modal falle sin explicar por qué.
+  if (amount > YAPE_MAX_CENTS) {
+    return send(res, 400, { error: 'Yape admite hasta S/ 2000 por pago. Usa tarjeta para este pedido.' });
+  }
+
+  const { first, last } = splitName(b.name);
+  try {
+    const { status, json } = await culqiPost('/v2/orders', {
+      amount,
+      currency_code: 'PEN',
+      description: culqiText('Pedido Lima Flores', 80, 'Pedido Lima Flores'),
+      order_number: newOrderNumber(),
+      client_details: {
+        first_name: culqiText(first, 50, 'Cliente'),
+        last_name: culqiText(last, 50, 'Lima Flores'),
+        email,
+        phone_number: String(b.phone || '').replace(/\D/g, '').slice(0, 15) || '999999999',
+      },
+      // Unix en SEGUNDOS y en el futuro. 24 h sobra para un pago con Yape y no
+      // arriesga rechazos por una expiración demasiado corta.
+      expiration_date: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+      confirm: false,
+    });
+    const id = json && (json.id || json.order_id);
+    if ((status === 200 || status === 201) && id) return send(res, 200, { ok: true, order_id: id, amount });
+    // Volcamos la respuesta cruda: si Culqi discute el formato de algún campo
+    // (expiration_date es el sospechoso habitual), acá queda dicho cuál.
+    console.error('[culqi] orden rechazada:', status, JSON.stringify(json));
+    return send(res, 402, { ok: false, error: culqiError(json), code: json && json.code });
+  } catch (e) {
+    console.error('[culqi] order error:', e.message);
     return send(res, 502, { ok: false, error: 'No pudimos comunicarnos con el procesador de pagos. Intenta de nuevo.' });
   }
 }
@@ -342,6 +414,7 @@ module.exports = async (req, res, parsed) => {
   const p = parsed.pathname;
   if (p === '/api/culqi/plans-status' && req.method === 'GET') return plansStatus(req, res);
   if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  if (p === '/api/culqi/order') return createOrder(req, res);
   if (p === '/api/culqi/charge') return charge(req, res);
   if (p === '/api/culqi/subscribe') return subscribe(req, res);
   if (p === '/api/culqi/webhook') return webhook(req, res, parsed);
