@@ -1,0 +1,4 @@
+# La cama de música se regenera con musica.py y pesa lo que pesa un wav.
+musica/
+# Los rótulos intermedios y su HTML: útiles para depurar, no para versionar.
+.tmp/

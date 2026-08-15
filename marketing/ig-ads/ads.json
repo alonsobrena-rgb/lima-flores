@@ -1247,6 +1247,38 @@
         "hlSize": 66
       },
       "why": "Rosas rojas sin la caja de siempre: el latón es lo que lo diferencia del resto."
+    },
+    {
+      "code": "IG-37",
+      "product": "boxsito-ramon",
+      "title": "Osito, globo y mini rosas",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "format": "4:5",
+      "placement": "Feed de Instagram · 4:5 (1080×1350)",
+      "template": "puro",
+      "photo": "boxsito-ramon-2.jpg",
+      "primaryText": "Osito con arreglo de mini rosas amarillas, naranjas y toques azules, follaje verde y un pequeño globo morado metálico.\n\nIncluye tarjeta de dedicatoria sin costo. S/180, entrega al día siguiente en Lima Metropolitana.",
+      "headline": "Osito, globo y mini rosas",
+      "description": "Boxsito Crespito · S/180",
+      "cta": "Comprar",
+      "hashtags": [
+        "#limaflores",
+        "#regalos",
+        "#cumpleaños",
+        "#deliverylima"
+      ],
+      "creative": {
+        "headline": "Osito, globo <em>y mini rosas</em>.",
+        "sub": "Amarillas y naranjas, con toques azules y follaje verde. Incluye tarjeta de dedicatoria.",
+        "price": "S/ 180",
+        "footer": "Boxsito Crespito",
+        "anchor": "top",
+        "franja": true,
+        "hlSize": 84,
+        "bg": "#DACCC7"
+      },
+      "why": "Toma de la florería, no de estudio: el arreglo sobre el banco de madera se lee como un regalo que llega a una casa. El aire de la pared de arriba es el sitio del titular."
     }
   ]
 }

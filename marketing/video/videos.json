@@ -1,0 +1,29 @@
+{
+  "campaign": {
+    "brand": "Lima Flores",
+    "handle": "@lima_flores",
+    "note": "Anuncios en video para Reels e historias (9:16). Las tomas son de la florería y viven en clips/; el texto, el precio y la composición salen de db/products.seed.json igual que en los creativos fijos. La música se sintetiza en musica.py: no es una pista de banco, así que no hay licencia que revisar."
+  },
+  "videos": [
+    {
+      "code": "VID-01",
+      "product": "boxsito-ramon",
+      "title": "Osito, globo y mini rosas",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "placement": "Reels e historias · 9:16 (1080×1920)",
+      "clip": "boxsito-ramon.mp4",
+      "headline": "Osito, globo <em>y mini rosas</em>.",
+      "sub": "Amarillas y naranjas, con toques azules y follaje verde.",
+      "price": "S/ 180",
+      "footer": "Boxsito Crespito",
+      "hlSize": 88,
+      "cierre": "Llega <em>al día siguiente.</em>",
+      "cierreSub": "Lima Metropolitana · con tarjeta de dedicatoria",
+      "primaryText": "Osito con arreglo de mini rosas amarillas, naranjas y toques azules, follaje verde y un pequeño globo morado metálico.\n\nIncluye tarjeta de dedicatoria sin costo. S/180, entrega al día siguiente en Lima Metropolitana.",
+      "cta": "Comprar",
+      "hashtags": ["#limaflores", "#regalos", "#cumpleaños", "#deliverylima"],
+      "why": "La toma se acerca hasta el detalle de las rosas y vuelve a abrir: el video hace lo que la foto no puede, que es enseñar el tamaño y el volumen del arreglo. El rótulo entra al segundo, cuando el ojo ya vio el ramo."
+    }
+  ]
+}

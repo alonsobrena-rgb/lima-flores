@@ -40,6 +40,7 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 | `IG-34` | Box Lila | Frío | 4:5 | 24 rosas importadas por S/180 |
 | `IG-35` | Box Lucy | Consideración / Retargeting 30 días | 9:16 | Seis girasoles, en caja |
 | `IG-36` | Arreglo Victoria | Frío | 4:5 | Doce rosas rojas en latón |
+| `IG-37` | Boxsito Crespito | Frío | 4:5 | Osito, globo y mini rosas |
 
 ---
 
@@ -824,6 +825,28 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 **Hashtags** #limaflores #regalosperu #nacimiento #cumpleaños #floreslima
 
 **Por qué funciona** Único del catálogo con peluche y globo: sale de la categoría floral y entra en la de regalo.
+
+### IG-37 · Osito, globo y mini rosas
+
+![Osito, globo y mini rosas](creativos/IG-37.jpg)
+
+- **Objetivo** Ventas (conversión) · **Etapa** Frío
+- **Ubicación** Feed de Instagram · 4:5 (1080×1350)
+- **Botón** Comprar
+
+**Texto principal**
+
+> Osito con arreglo de mini rosas amarillas, naranjas y toques azules, follaje verde y un pequeño globo morado metálico.
+>
+> Incluye tarjeta de dedicatoria sin costo. S/180, entrega al día siguiente en Lima Metropolitana.
+
+**Titular** Osito, globo y mini rosas
+
+**Descripción** Boxsito Crespito · S/180
+
+**Hashtags** #limaflores #regalos #cumpleaños #deliverylima
+
+**Por qué funciona** Toma de la florería, no de estudio: el arreglo sobre el banco de madera se lee como un regalo que llega a una casa. El aire de la pared de arriba es el sitio del titular.
 
 ---
 
