@@ -22,7 +22,7 @@ export const SubscriptionTeaser = () => {
         rotulo="Suscripción"
         titulo={<>Flores frescas en casa,<br />todo el <em>mes.</em></>}
         enlace={{ texto: 'Ver cómo funciona', a: '/suscripcion' }}
-        className="mb-16"
+        className="mb-11"
       />
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,42ch)_minmax(0,1fr)] lg:gap-24">

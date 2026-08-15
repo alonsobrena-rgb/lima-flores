@@ -18,7 +18,9 @@ import { Reveal } from '@/components/motion/Reveal';
  *   mismo borde izquierdo (`px-6 / sm:px-8 / lg:px-12`), así el ojo baja por una
  *   línea vertical y no por un acordeón de anchos.
  * - **El filete de 1 px separa, no una caja.** Las secciones no tienen fondo
- *   propio ni tarjeta: se separan con aire y una línea.
+ *   propio ni tarjeta: se separan con aire y una línea. El aire está medido:
+ *   `clamp(52px, 7vh, 92px)`. Era casi el doble y la página se leía vacía —
+ *   entre una sección y otra cabía una pantalla de blanco sin nada que mirar.
  * - **Un solo tamaño de título** y un solo rótulo, en la itálica y el rosa del
  *   sistema.
  */
@@ -35,7 +37,7 @@ export const Seccion = ({
 }) => (
   <section
     id={id}
-    className={`px-6 py-[clamp(76px,11vh,132px)] sm:px-8 lg:px-12 ${
+    className={`px-6 py-[clamp(52px,7vh,92px)] sm:px-8 lg:px-12 ${
       filete ? 'border-t border-border' : ''
     } ${className}`}
   >

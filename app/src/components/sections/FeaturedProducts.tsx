@@ -21,7 +21,7 @@ export const FeaturedProducts = () => (
       rotulo="El catálogo"
       titulo={<>Nuestra <em>colección de flores.</em></>}
       enlace={{ texto: 'Ver todo el catálogo', a: '/catalogo' }}
-      className="mb-16"
+      className="mb-11"
     />
 
     <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 md:gap-x-8 lg:grid-cols-4 lg:gap-x-10 lg:gap-y-16">

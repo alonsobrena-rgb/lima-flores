@@ -68,7 +68,7 @@ export const InstagramGallery = () => {
 
   return (
     <Seccion>
-        <header className="mb-16 grid gap-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-12">
+        <header className="mb-11 grid gap-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-12">
           <Reveal>
             <p className="rotulo">Síguenos</p>
             <h2 className="display mt-4 text-[clamp(2.3rem,5.4vw,4.6rem)] leading-[0.98] text-ink-900">

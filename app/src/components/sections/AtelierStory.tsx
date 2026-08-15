@@ -21,7 +21,7 @@ export const AtelierStory = () => {
       <Encabezado
         rotulo="Nosotros"
         titulo={<>Cada ramo es una <em>obra de arte</em>, hecha a mano.</>}
-        className="mb-16 max-w-[22ch] sm:max-w-none"
+        className="mb-11 max-w-[22ch] sm:max-w-none"
       />
 
       <div className="grid items-start gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">

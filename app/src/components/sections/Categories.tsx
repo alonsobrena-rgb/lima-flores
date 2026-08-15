@@ -49,7 +49,7 @@ export const Categories = () => {
         rotulo="Categorías"
         titulo={<>{word} maneras<br />de regalar <em>belleza.</em></>}
         enlace={{ texto: 'Ver todo el catálogo', a: '/catalogo' }}
-        className="mb-16"
+        className="mb-11"
       />
 
       <Stagger

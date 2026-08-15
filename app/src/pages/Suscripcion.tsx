@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 import { money } from '@/lib/cart';
-import { plans, type Plan } from '@/data/plans';
-import { Stagger, StaggerItem } from '@/components/motion/Reveal';
+import { plans, MONTHLY_PRICE, type Plan } from '@/data/plans';
+import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
+import { Seccion, Encabezado } from '@/components/sections/Seccion';
 import { attachAutocomplete, geocodeText, mapsAvailable, onMapsAuthFailure, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
@@ -66,101 +67,139 @@ export default function Suscripcion() {
   const single = visiblePlans.length === 1;
 
   return (
-    <div className="relative min-h-screen">
-      {/* Fondo: carretilla de flores en Milán (Higgsfield) con velo ivory. */}
-      <div aria-hidden className="fixed inset-0 -z-10">
-        <img src="/bg/suscripcion-milan.webp" alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-ivory-100/88 via-ivory-100/68 to-ivory-100/80" />
-        <div className="absolute inset-0 backdrop-blur-[1.5px]" />
-      </div>
-
-      <div className="relative z-10">
+    <div className="min-h-screen bg-background">
+      <div>
         <SiteHeader />
 
-        <header className="mx-auto max-w-7xl px-6 pb-12 pt-16 md:px-12 md:pt-20">
-          <div className="relative inline-block max-w-3xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-8 shadow-[0_28px_70px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-12 md:py-11">
-            <span className="text-[12px] font-medium uppercase tracking-[0.28em] text-ink-500">— Suscripción</span>
-            <h1 className="mt-3 font-display text-[2.75rem] font-light leading-[1.02] tracking-tight text-ink-900 md:text-[4rem]">
-              Flores frescas en casa, <em className="italic text-rosa-500">todo el mes.</em>
-            </h1>
-            <p className="mt-5 max-w-xl text-ink-700">Un mismo precio — <strong>S/130 al mes</strong> — y dos entregas mensuales de flores de estación, seleccionadas y armadas a mano. Pausa o cancela cuando quieras.</p>
-          </div>
-        </header>
-
-        {/* ── Flores de estación: galería de entregas reales ── */}
-        <section className="mx-auto max-w-7xl px-6 pb-4 md:px-12">
-          <div className="max-w-2xl rounded-[2px] border border-white/60 bg-ivory-50/[0.93] px-7 py-7 shadow-[0_24px_60px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg md:px-9 md:py-8">
-            <span className="text-[12px] font-medium uppercase tracking-[0.24em] text-rosa-500">Flores de estación</span>
-            <h2 className="mt-2 font-display text-[2rem] font-light leading-[1.05] tracking-tight text-ink-900 md:text-[2.75rem]">Siempre distintas, siempre de temporada.</h2>
-            <p className="mt-4 leading-relaxed text-ink-700">
-              No trabajamos con catálogos fijos: cada semana elegimos las flores que están en su <strong>mejor momento</strong> en el mercado y nuestras floristas arman cada ramo <strong>a mano</strong>. Por eso ninguna entrega es igual a la anterior — recibes lo más fresco y bonito de la estación. Estas son entregas reales de nuestras suscripciones.
+        <Seccion filete={false} className="pb-0 pt-[clamp(40px,6vh,72px)]">
+          <Encabezado
+            rotulo="Suscripción"
+            titulo={<>Flores frescas en casa, <em>todo el mes.</em></>}
+            className="mb-10"
+          />
+          {/* La entrada y los tres datos en una sola fila: el párrafo solo dejaba
+              media pantalla en blanco a su derecha. Mismo patrón que el pie del
+              hero de la portada. */}
+          <div className="grid gap-8 border-t border-border pt-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:gap-16">
+            <p className="text-[17px] leading-relaxed text-ink-700">
+              Un mismo precio — <strong className="font-medium text-ink-900">S/130 al mes</strong> —
+              y dos entregas mensuales de flores de estación, seleccionadas y armadas a
+              mano. Pausa o cancela cuando quieras.
             </p>
+            <dl className="grid grid-cols-3 gap-x-6 gap-y-5 sm:gap-x-10 lg:justify-items-end lg:text-right">
+              {[
+                { valor: money(MONTHLY_PRICE), nota: 'Al mes' },
+                { valor: 'Dos entregas', nota: 'Cada mes' },
+                { valor: 'Sin permanencia', nota: 'Pausa cuando quieras' },
+              ].map((d) => (
+                <div key={d.valor}>
+                  <dt className="display text-[15px] leading-snug text-ink-900 sm:text-[19px]">{d.valor}</dt>
+                  <dd className="mt-1 text-[9px] font-medium uppercase leading-tight tracking-[0.16em] text-ink-500 sm:mt-1.5 sm:text-[11px] sm:tracking-[0.18em]">{d.nota}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-          <Stagger className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
+        </Seccion>
+
+        {/* ── Flores de estación: galería de entregas reales ──
+            Las fotos son el argumento de esta sección: son entregas de verdad, no
+            un catálogo. Antes vivían debajo de un panel esmerilado y a un cuarto
+            de ancho; ahora ocupan la fila entera y el texto se retira al lado. */}
+        <Seccion filete={false} className="pt-[clamp(40px,6vh,72px)]">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,46ch)] lg:items-end lg:gap-16">
+            <Reveal>
+              <p className="rotulo">Flores de estación</p>
+              <h2 className="display mt-4 text-[clamp(2.1rem,4.6vw,3.6rem)] leading-[0.98] text-ink-900">
+                Siempre distintas,<br />siempre de <em>temporada.</em>
+              </h2>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <p className="text-[16px] leading-relaxed text-ink-700">
+                No trabajamos con catálogos fijos: cada semana elegimos las flores que
+                están en su <strong className="font-medium text-ink-900">mejor momento</strong> y
+                nuestras floristas arman cada ramo <strong className="font-medium text-ink-900">a mano</strong>.
+                Ninguna entrega es igual a la anterior.
+              </p>
+            </Reveal>
+          </div>
+          <Stagger className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
             {PHOTOS.map((ph) => (
               <StaggerItem key={ph.src}>
-                <div className="group relative aspect-[3/4] overflow-hidden rounded-[2px] border border-white/50 shadow-[0_18px_44px_-26px_rgba(42,38,35,0.5)]">
-                  <img src={ph.src} alt={ph.alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
+                <div className="group overflow-hidden bg-secondary">
+                  <img src={ph.src} alt={ph.alt} loading="lazy" className="aspect-[3/4] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
                 </div>
               </StaggerItem>
             ))}
           </Stagger>
-          <p className="mt-3 text-[12px] italic text-ivory-50 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">Entregas reales · flores de estación armadas a mano.</p>
-        </section>
+          <p className="mt-4 border-t border-border pt-3.5 text-[10px] font-medium uppercase tracking-[0.2em] text-ink-500">
+            Entregas reales · flores de estación armadas a mano
+          </p>
+        </Seccion>
 
         {/* ── Planes ── */}
-        <section className="mx-auto max-w-7xl px-6 pb-24 pt-12 md:px-12 md:pb-32">
-          {/* Toggle de forma de pago A/B (en panel esmerilado para legibilidad) */}
-          <div className="mx-auto mb-10 flex max-w-md flex-col items-center gap-3 rounded-2xl border border-white/55 bg-ivory-50/[0.93] px-6 py-5 text-center shadow-[0_24px_60px_-34px_rgba(42,38,35,0.5)] backdrop-blur-lg">
-            <span className="text-[12px] uppercase tracking-[0.18em] text-ink-500">¿Cómo prefieres pagar?</span>
+        <Seccion className="pb-[clamp(64px,9vh,120px)]">
+          {/* El conmutador de pago, sin el panel esmerilado que lo sostenía sobre
+              la foto: sobre blanco no hace falta nada debajo. */}
+          <div className="mb-10 flex flex-col items-start gap-3 border-b border-border pb-8 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">¿Cómo prefieres pagar?</span>
             <div className="inline-flex rounded-full border border-border bg-ivory-100 p-1">
               <button onClick={() => setModel('A')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'A' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Mes a mes</button>
               <button onClick={() => setModel('B')} className={`rounded-full px-5 py-2 text-[13px] font-medium tracking-[0.04em] transition-colors ${model === 'B' ? 'bg-rosa-500 text-ivory-50' : 'text-ink-700 hover:text-ink-900'}`}>Pago único</button>
             </div>
-            <span className="text-[12px] text-ink-600">{model === 'A' ? 'Suscripción: S/130 cada mes, sin permanencia (pausa o cancela cuando quieras).' : 'Un solo pago por todo el periodo (S/130/mes · 3, 6 o 12 meses). No es suscripción: no se renueva.'}</span>
           </div>
+          <p className="mb-10 max-w-[62ch] text-[15px] leading-relaxed text-ink-500">{model === 'A' ? 'Suscripción: S/130 cada mes, sin permanencia — pausa o cancela cuando quieras.' : 'Un solo pago por todo el periodo (S/130/mes · 3, 6 o 12 meses). No es suscripción: no se renueva.'}</p>
 
           {/* key={model}: al alternar A/B cambian las tarjetas; sin remount, los
               StaggerItem nuevos montan bajo un Stagger cuyo whileInView ya disparó
               (once) y se quedan en opacity:0 (invisibles). Remontar re-anima. */}
-          <Stagger key={model} className={single ? 'mx-auto max-w-sm' : 'mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3'}>
+          <Stagger key={model} className={single ? '' : 'grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3'}>
             {visiblePlans.map((p) => {
               const pr = priceFor(p);
               return (
                 <StaggerItem key={p.tier} className="h-full">
-                  <div className={`group relative flex h-full flex-col p-7 transition-all duration-500 hover:-translate-y-1.5 ${
-                    p.featured
-                      ? 'bg-card border border-rosa-500 shadow-[0_30px_70px_-30px_rgba(158,43,94,0.45)] md:scale-[1.03]'
-                      : 'bg-card border border-border shadow-[0_18px_50px_-28px_rgba(42,38,35,0.28)] hover:border-rosa-300'}`}>
-                    {(p.featured || p.value) && (
-                      <span className="absolute -top-3 right-6 bg-rosa-500 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-ivory-50">{p.featured ? 'Más popular' : 'Mejor valor'}</span>
-                    )}
-                    <h3 className="font-display text-2xl font-medium text-ink-900">{p.name}</h3>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-foreground/45">{p.period}</p>
-                    <p className="mt-5 font-display text-4xl text-ink-900">{pr.big}</p>
-                    <p className="mt-1 text-[12px] text-foreground/55">{pr.small}</p>
-                    {model === 'B' && (
-                      <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-rosa-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-rosa-600">
-                        Pago único · no se renueva
-                      </span>
-                    )}
-                    <p className="mt-4 font-display italic text-ink-600">{p.tagline}</p>
-                    <ul className="mt-5 flex-1 space-y-2.5 text-sm text-ink-700">
-                      {p.features.map((f) => (
-                        <li key={f} className="flex gap-2.5"><CheckIcon /><span>{f}</span></li>
-                      ))}
-                    </ul>
-                    <button onClick={() => { setOpenPlan(p); }}
-                      className={`press mt-7 flex items-center justify-center py-3.5 text-[13px] font-medium uppercase tracking-[0.16em] transition-colors ${p.featured ? 'bg-rosa-500 text-ivory-50 hover:bg-rosa-600' : 'border border-ink-900/20 text-ink-900 hover:bg-ink-900 hover:text-ivory-50'}`}>
-                      Suscribirme →
-                    </button>
+                  {/* Sin tarjeta: un filete arriba y el precio mandando. El plan
+                      destacado se marca con el filete en rosa, no con sombra,
+                      escala y una etiqueta colgando de la esquina. */}
+                  {/* Con un solo plan (mes a mes) la columna angosta dejaba media
+                      pantalla vacía a su derecha; ahí se abre en dos y lo que
+                      incluye pasa al lado, en dos columnas. Con tres planes, cada
+                      uno es una columna y manda el precio. */}
+                  <div className={`h-full border-t pt-6 ${p.featured ? 'border-rosa-500' : 'border-border'} ${single ? 'lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-20' : 'flex flex-col'}`}>
+                    <div>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="display text-[22px] leading-none text-ink-900">{p.name}</h3>
+                        {(p.featured || p.value) && (
+                          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-rosa-500">{p.featured ? 'Más popular' : 'Mejor valor'}</span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-ink-500">{p.period}</p>
+
+                      <p className="display mt-6 text-[clamp(2.4rem,3.4vw,3rem)] leading-none text-ink-900">{pr.big}</p>
+                      <p className="mt-2 text-[13px] text-ink-500">{pr.small}</p>
+                      {model === 'B' && (
+                        <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.18em] text-rosa-500">Pago único · no se renueva</p>
+                      )}
+                      <p className="display mt-5 text-[19px] leading-snug text-ink-700">{p.tagline}</p>
+                    </div>
+
+                    <div className={single ? 'mt-8 lg:mt-0' : 'flex flex-1 flex-col'}>
+                      <ul className={`mt-6 flex-1 lg:mt-0 ${single ? 'sm:grid sm:grid-cols-2 sm:gap-x-12' : ''}`}>
+                        {p.features.map((f) => (
+                          <li key={f} className="flex gap-2.5 border-t border-border py-3 text-[15px] leading-snug text-ink-700"><CheckIcon /><span>{f}</span></li>
+                        ))}
+                      </ul>
+                      <button onClick={() => { setOpenPlan(p); }}
+                        className={`press mt-7 rounded-pill py-3.5 text-[12px] font-medium uppercase tracking-[0.18em] transition-colors ${single ? 'w-full sm:w-auto sm:px-12' : 'w-full'} ${p.featured ? 'bg-rosa-500 text-white hover:bg-rosa-600' : 'border border-ivory-400 text-ink-900 hover:border-rosa-500 hover:bg-rosa-500 hover:text-white'}`}>
+                        Suscribirme →
+                      </button>
+                    </div>
                   </div>
                 </StaggerItem>
               );
             })}
           </Stagger>
-          <p className="mt-10 text-center text-[12px] uppercase tracking-[0.14em] text-ivory-50 drop-shadow-[0_1px_6px_rgba(0,0,0,0.55)]">Todas las suscripciones incluyen entrega a domicilio dentro de Lima Metropolitana.</p>
-        </section>
+          <p className="mt-12 border-t border-border pt-5 text-[10px] font-medium uppercase tracking-[0.2em] text-ink-500">Todas las suscripciones incluyen entrega a domicilio dentro de Lima Metropolitana</p>
+        </Seccion>
 
         <SiteFooter />
       </div>
