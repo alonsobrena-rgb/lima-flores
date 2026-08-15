@@ -15,8 +15,12 @@
 //      recién entonces registra el pedido en /api/order con el charge_id.
 //
 // La llave secreta vive SOLO en el servidor (env CULQI_SECRET_KEY en Railway).
-// Banca móvil, agente y billetera sí requieren el flujo de Órdenes + webhook
-// (pendiente); Yape no, va por token como la tarjeta.
+//
+// OJO: todo método que no sea tarjeta (Yape, banca móvil, agente, billetera)
+// exige que el checkout reciba una ORDEN ya creada — Culqi.settings({ order:
+// 'ord_...' }) — además del webhook que confirma el pago. Ese flujo sigue
+// PENDIENTE: hoy el checkout abre Yape sin orden y Culqi responde CCKT-400
+// ("Ups! Algo salió mal") antes siquiera de pedir el código de aprobación.
 'use strict';
 
 const https = require('https');
