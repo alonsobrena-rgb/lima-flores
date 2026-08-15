@@ -144,6 +144,18 @@ function positionPac() {
   const input = activeInput;
   const pac = lastPac();
   if (!input || !pac) return;
+  // Un desplegable SIN sugerencias no se posiciona: se le devuelve el control a
+  // Google y se le quita lo nuestro. Forzarle `position:fixed`, `z-index:999999`
+  // y un `max-height` a un contenedor vacío lo deja como una lámina invisible
+  // sobre el formulario, y el campo de dirección deja de aceptar toques — se ve
+  // como «no me permite escribir». Google ya le pone display:none cuando no hay
+  // nada que mostrar; el problema era que lo nuestro sobrevivía a ese estado.
+  if (!pac.querySelector('.pac-item')) {
+    for (const prop of ['position', 'left', 'width', 'max-width', 'top', 'bottom', 'max-height', 'overflow-y', 'z-index']) {
+      pac.style.removeProperty(prop);
+    }
+    return;
+  }
   const vv = window.visualViewport;
   const vvTop = vv ? vv.offsetTop : 0;
   const vvHeight = vv ? vv.height : window.innerHeight;
@@ -208,6 +220,11 @@ function setupGlobalDropdown() {
           }, { passive: false });
           pac.addEventListener('touchend', () => { setTimeout(() => { touchingPac = false; }, 50); }, { passive: true });
           pac.addEventListener('touchcancel', () => { touchingPac = false; }, { passive: true });
+          // Las sugerencias entran y salen del contenedor mucho después de que
+          // este se cree. Sin mirar sus hijos, la posición se calculaba durante
+          // el segundo de `chasePac` y nunca más: si la lista llegaba tarde,
+          // aparecía donde estuviera el campo un segundo antes.
+          new MutationObserver(() => positionPac()).observe(pac, { childList: true });
           positionPac();
         }
       }
