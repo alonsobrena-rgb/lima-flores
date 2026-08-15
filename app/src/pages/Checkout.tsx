@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SiteHeader } from '@/components/SiteHeader';
 import { useCart, money } from '@/lib/cart';
-import { attachAutocomplete, geocodeText, mapsAvailable, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
+import { attachAutocomplete, geocodeText, mapsAvailable, onMapsAuthFailure, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
@@ -91,6 +91,8 @@ export default function Checkout() {
     };
     try { localStorage.setItem(CHECKOUT_KEY, JSON.stringify(data)); } catch { /* storage no disponible */ }
   };
+  const [sinSugerencias, setSinSugerencias] = useState(false);
+
   useEffect(() => {
     persistCheckout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,6 +142,10 @@ export default function Checkout() {
   // Autocomplete de Google Places (con fixes móvil/tap portados del vanilla).
   // El input SIEMPRE acepta texto libre: si el usuario no elige sugerencia,
   // onSubmit geocodifica el texto (o usa el centroide del distrito).
+  // Si Google rechaza la llave (referrer no autorizado, llave inválida), las
+  // sugerencias no van a llegar nunca: la pista del campo deja de prometerlas.
+  useEffect(() => onMapsAuthFailure(() => setSinSugerencias(true)), []);
+
   useEffect(() => {
     let ac: any; let cancelled = false;
     if (!addressRef.current) return;
@@ -391,7 +397,11 @@ export default function Checkout() {
                   </div>
 
                   <div>
-                    <label className={darkLabel}>Dirección {mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
+                    <label className={darkLabel}>Dirección {mapsAvailable() && (
+                      <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">
+                        {sinSugerencias ? '· escríbela completa, con distrito' : '· elige una sugerencia o escríbela completa'}
+                      </span>
+                    )}</label>
                     <input ref={addressRef} required onBlur={persistCheckout} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
                   </div>
                   {place && (

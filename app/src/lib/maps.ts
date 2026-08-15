@@ -9,6 +9,34 @@ export const LIMA_BOUNDS = { sw: { lat: -12.50, lng: -77.25 }, ne: { lat: -11.75
 
 export const mapsAvailable = () => !!KEY;
 
+// ── Fallo de autorización de la llave ──
+// Cuando la llave no autoriza el dominio (RefererNotAllowedMapError), o está mal,
+// el script de Google **carga bien**: el error sale por consola y las sugerencias
+// simplemente no aparecen nunca. Para el visitante eso es un campo roto sin
+// explicación, y para nosotros un fallo invisible.
+//
+// `gm_authFailure` es el único aviso que Google da por código. Enganchado acá, el
+// checkout y la suscripción pueden decir «escríbela completa» en vez de prometer
+// una sugerencia que no va a llegar.
+let authFailed = false;
+const authListeners = new Set<() => void>();
+
+export const mapsAuthFailed = () => authFailed;
+
+/** Avisa cuando Google rechaza la llave. Devuelve la función para desuscribirse. */
+export function onMapsAuthFailure(fn: () => void): () => void {
+  if (authFailed) fn();
+  authListeners.add(fn);
+  return () => { authListeners.delete(fn); };
+}
+
+if (typeof window !== 'undefined') {
+  (window as any).gm_authFailure = () => {
+    authFailed = true;
+    for (const fn of authListeners) fn();
+  };
+}
+
 let sdkPromise: Promise<any> | null = null;
 
 export function loadMaps(): Promise<any> {

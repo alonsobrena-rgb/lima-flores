@@ -4,7 +4,7 @@ import { SiteFooter } from '@/components/sections/SiteFooter';
 import { money } from '@/lib/cart';
 import { plans, type Plan } from '@/data/plans';
 import { Stagger, StaggerItem } from '@/components/motion/Reveal';
-import { attachAutocomplete, geocodeText, mapsAvailable, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
+import { attachAutocomplete, geocodeText, mapsAvailable, onMapsAuthFailure, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
@@ -46,6 +46,7 @@ export default function Suscripcion() {
   const [openPlan, setOpenPlan] = useState<Plan | null>(null);
   // ¿Los planes ya están aprovisionados en Culqi? Si no, el flujo coordina por WA.
   const [ready, setReady] = useState(false);
+
   useEffect(() => {
     fetch(`${API_BASE}/api/culqi/plans-status`).then((r) => r.json()).then((d) => setReady(!!d.ready)).catch(() => setReady(false));
   }, []);
@@ -177,6 +178,11 @@ export default function Suscripcion() {
 // "de la tarjeta": el mensaje de la tarjeta y la fecha de envío (en una suscripción
 // las entregas son recurrentes, no una fecha única).
 function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Model; ready: boolean; onClose: () => void }) {
+  const [sinSugerencias, setSinSugerencias] = useState(false);
+  // Si Google rechaza la llave (referrer no autorizado, llave inválida), las
+  // sugerencias no van a llegar nunca: la pista del campo deja de prometerlas.
+  useEffect(() => onMapsAuthFailure(() => setSinSugerencias(true)), []);
+
   const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
   const [recip, setRecip] = useState({ name: '', phone: '', ref: '', apt: '' });
   const [district, setDistrict] = useState('');
@@ -362,7 +368,11 @@ function SubscribeModal({ plan, model, ready, onClose }: { plan: Plan; model: Mo
                   <div><label className={darkLabel}>Teléfono de quien recibe *</label><input type="tel" className={darkField} value={recip.phone} onChange={(e) => setRecip({ ...recip, phone: e.target.value })} placeholder="999 999 999" /></div>
                 </div>
                 <div>
-                  <label className={darkLabel}>Dirección *{mapsAvailable() && <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">· elige una sugerencia o escríbela completa</span>}</label>
+                  <label className={darkLabel}>Dirección *{mapsAvailable() && (
+                      <span className="ml-2 normal-case tracking-normal text-[#E7AFC2]">
+                        {sinSugerencias ? '· escríbela completa, con distrito' : '· elige una sugerencia o escríbela completa'}
+                      </span>
+                    )}</label>
                   <input ref={addressRef} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
                 </div>
                 {place && (
