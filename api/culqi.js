@@ -89,6 +89,40 @@ function culqiPost(pathname, bodyObj) {
   });
 }
 
+// GET a la API de Culqi con Bearer secreto. Resuelve { status, json }.
+function culqiGet(pathname) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: CULQI_HOST, path: pathname, method: 'GET',
+      headers: { 'Authorization': `Bearer ${SECRET()}`, 'Accept': 'application/json' },
+    }, (r) => {
+      let d = ''; r.on('data', (c) => (d += c));
+      r.on('end', () => { let j; try { j = JSON.parse(d); } catch { j = d; } resolve({ status: r.statusCode, json: j }); });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+// Busca un customer por email. Devuelve su id o null.
+// Nunca lanza: si la búsqueda falla, quien llama sigue con el POST de siempre —
+// preferimos intentar crearlo y que Culqi decida antes que abortar la suscripción
+// porque una consulta auxiliar no respondió.
+async function findCustomerIdByEmail(email) {
+  try {
+    const { status, json } = await culqiGet(`/v2/customers?email=${encodeURIComponent(email)}`);
+    if (status !== 200 || !json) return null;
+    const list = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+    // Comparamos el email de vuelta: el filtro de Culqi podría ser parcial y no
+    // queremos cobrarle la suscripción a la tarjeta de otra persona.
+    const hit = list.find((c) => c && String(c.email || '').toLowerCase() === email.toLowerCase());
+    return hit ? (hit.id || hit.customer_id || null) : null;
+  } catch (e) {
+    console.error('[culqi] búsqueda de customer falló:', e.message);
+    return null;
+  }
+}
+
 // computeAmountCents ahora vive en integrations/culqi/charges.js (compartido con
 // api/order.js para que la verificación del pedido use el mismo cálculo).
 
@@ -327,19 +361,35 @@ async function subscribe(req, res) {
   if (!planId) return send(res, 503, { error: 'Este plan aún no está disponible (planes no aprovisionados en Culqi).' });
 
   try {
-    // 1) Customer
-    const cust = await culqiPost('/v2/customers', {
-      first_name: culqiText(first, 50, 'Cliente'),
-      last_name: culqiText(last, 50, 'Lima Flores'),
-      email,
-      address: culqiText(b.recipient_address, 100, 'Lima'),
-      address_city: culqiText(b.recipient_district || 'Lima', 30, 'Lima'),
-      country_code: 'PE',
-      phone_number: String(b.buyer_phone).replace(/[^\d+]/g, '').slice(0, 15),
-    });
-    const customerId = cust.json && (cust.json.id || cust.json.customer_id);
-    if (!((cust.status === 200 || cust.status === 201) && customerId)) {
-      return send(res, 402, { ok: false, error: culqiError(cust.json) || 'No se pudo registrar el cliente.' });
+    // 1) Customer — reutilizando el que ya exista para ese email.
+    //
+    // Culqi no admite dos customers con el mismo correo, y este flujo tiene tres
+    // pasos: customer, tarjeta, suscripción. Creábamos el customer siempre, así
+    // que cualquier intento que fallara en el paso 2 o 3 dejaba uno huérfano y
+    // QUEMABA ese email: el reintento ya no pasaba del paso 1, con un "ya existe
+    // un usuario con ese correo" que no explicaba nada al cliente. Buscar antes
+    // de crear hace que reintentar sea inofensivo.
+    let customerId = await findCustomerIdByEmail(email);
+    if (!customerId) {
+      const cust = await culqiPost('/v2/customers', {
+        first_name: culqiText(first, 50, 'Cliente'),
+        last_name: culqiText(last, 50, 'Lima Flores'),
+        email,
+        address: culqiText(b.recipient_address, 100, 'Lima'),
+        address_city: culqiText(b.recipient_district || 'Lima', 30, 'Lima'),
+        country_code: 'PE',
+        phone_number: String(b.buyer_phone).replace(/[^\d+]/g, '').slice(0, 15),
+      });
+      customerId = cust.json && (cust.json.id || cust.json.customer_id);
+      if (!((cust.status === 200 || cust.status === 201) && customerId)) {
+        // Si la búsqueda de arriba falló (red, formato inesperado) y el customer
+        // sí existía, Culqi responde justo eso. Última oportunidad antes de
+        // devolverle el error a alguien que no puede hacer nada con él.
+        customerId = await findCustomerIdByEmail(email);
+        if (!customerId) {
+          return send(res, 402, { ok: false, error: culqiError(cust.json) || 'No se pudo registrar el cliente.' });
+        }
+      }
     }
 
     // 2) Card (a partir del token)
