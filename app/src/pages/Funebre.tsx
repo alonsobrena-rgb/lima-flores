@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/sections/SiteFooter';
 import { AddToCart } from '@/components/AddToCart';
-import { Seccion, EncabezadoFoto, enlaceTexto } from '@/components/sections/Seccion';
+import { Seccion, EncabezadoCalado, enlaceTexto } from '@/components/sections/Seccion';
 import { money, useProducts } from '@/lib/cart';
 
 // Orden de presentación pedido por la florería (coronas, lágrima y box).
@@ -46,15 +46,18 @@ export default function Funebre() {
       <SiteHeader />
 
       <Seccion filete={false} className="pb-0 pt-[clamp(40px,6vh,72px)]">
-        {/* La foto sale del propio catálogo fúnebre —si mañana cambia el orden,
-            cambia la portada sola— pero del ÚLTIMO arreglo: con uno de los
-            primeros salía dos veces en la misma pantalla, en la cabecera y
-            abriendo la grilla. */}
-        <EncabezadoFoto
+        {/* La Corona Eternidad calada: es la foto real del catálogo con el fondo
+            quitado, así que el trípode y las varas cruzan el titular como las
+            orquídeas en la portada. Va fija —no la del último producto— porque
+            el calado se hace uno a uno y esta es la silueta que mejor se lleva
+            con el texto. */}
+        <EncabezadoCalado
           rotulo="Condolencias"
           titulo={<>Acompañamos tu adiós <em>con flores.</em></>}
-          foto={list[list.length - 1]?.image || '/products/funebre-corona-eternidad.jpg'}
-          alt={list[list.length - 1]?.name || 'Corona fúnebre de Lima Flores'}
+          foto="/calados/corona-eternidad.webp"
+          alt="Corona Eternidad: corona fúnebre de liliums, gerberas, rosas y hortensias blancas sobre trípode"
+          medida="w-[58vw] max-w-[280px] lg:h-[58vh] lg:max-h-[600px] lg:w-auto"
+          hueco="pb-[40vh]"
         >
           <div className="grid gap-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:items-start lg:gap-12">
             <p className="text-[17px] leading-relaxed text-ink-700">
@@ -72,7 +75,7 @@ export default function Funebre() {
               ¿Necesitas ayuda? Escríbenos <span aria-hidden="true">→</span>
             </a>
           </div>
-        </EncabezadoFoto>
+        </EncabezadoCalado>
       </Seccion>
 
       <Seccion filete={false} className="pt-[clamp(40px,6vh,72px)]">

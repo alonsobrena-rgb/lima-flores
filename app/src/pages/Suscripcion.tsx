@@ -4,7 +4,7 @@ import { SiteFooter } from '@/components/sections/SiteFooter';
 import { money } from '@/lib/cart';
 import { plans, MONTHLY_PRICE, type Plan } from '@/data/plans';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion/Reveal';
-import { Seccion, EncabezadoFoto } from '@/components/sections/Seccion';
+import { Seccion, EncabezadoCalado } from '@/components/sections/Seccion';
 import { attachAutocomplete, geocodeText, mapsAvailable, onMapsAuthFailure, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
@@ -36,9 +36,12 @@ const PHOTOS = [
   { src: '/suscripcion/estacion-1.webp', alt: 'Ramo de estación con statice morado y flores amarillas' },
 ];
 
-/** La que abre la página y las que quedan para la tira: nunca la misma dos veces. */
-const PORTADA = PHOTOS[PHOTOS.length - 1];
-const TIRA = PHOTOS.slice(0, -1);
+/**
+ * La que abre la página —calada, en `calados/ramo-estacion.webp`— y las que
+ * quedan para la tira: la misma entrega no sale dos veces en la misma pantalla.
+ */
+const PORTADA = PHOTOS[1];
+const TIRA = PHOTOS.filter((p) => p !== PORTADA);
 
 const CheckIcon = () => (
   <svg className="mt-0.5 h-4 w-4 shrink-0 text-rosa-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
@@ -76,23 +79,25 @@ export default function Suscripcion() {
         <SiteHeader />
 
         <Seccion filete={false} className="pb-0 pt-[clamp(40px,6vh,72px)]">
-          {/* Foto de una entrega real, entrelazada con el título. */}
-          <EncabezadoFoto
+          {/* Una entrega real calada, por delante del título. */}
+          <EncabezadoCalado
             rotulo="Suscripción"
             titulo={<>Flores frescas en casa, <em>todo el mes.</em></>}
-            foto={PORTADA.src}
+            foto="/calados/ramo-estacion.webp"
             alt={PORTADA.alt}
+            medida="w-[78vw] max-w-[380px] lg:h-[46vh] lg:max-h-[460px] lg:w-auto"
+            hueco="pb-[32vh]"
           >
-          {/* La entrada y los tres datos en una sola fila: el párrafo solo dejaba
-              media pantalla en blanco a su derecha. Mismo patrón que el pie del
-              hero de la portada. */}
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,44ch)_auto] lg:gap-12">
+          {/* Párrafo arriba y los tres datos debajo, en tres columnas. Estaban
+              uno al lado del otro, pero desde que el calado ocupa la derecha el
+              texto vive en el 62 % y ahí «Sin permanencia» partía en dos. */}
+          <div className="grid gap-7">
             <p className="text-[17px] leading-relaxed text-ink-700">
               Un mismo precio — <strong className="font-medium text-ink-900">S/130 al mes</strong> —
               y dos entregas mensuales de flores de estación, seleccionadas y armadas a
               mano. Pausa o cancela cuando quieras.
             </p>
-            <dl className="grid grid-cols-3 gap-x-6 gap-y-5 sm:gap-x-10 lg:justify-items-end lg:text-right">
+            <dl className="grid grid-cols-3 gap-x-6 gap-y-5 border-t border-border pt-6 sm:gap-x-10">
               {[
                 { valor: money(MONTHLY_PRICE), nota: 'Al mes' },
                 { valor: 'Dos entregas', nota: 'Cada mes' },
@@ -105,7 +110,7 @@ export default function Suscripcion() {
               ))}
             </dl>
           </div>
-          </EncabezadoFoto>
+          </EncabezadoCalado>
         </Seccion>
 
         {/* ── Flores de estación: galería de entregas reales ──

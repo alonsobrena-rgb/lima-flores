@@ -191,7 +191,22 @@ Si es al revés, el titular sube. La regla no es «poner la foto encima»: es qu
 texto cruce la parte rala de la planta.
 
 En pantallas chicas la foto se **agranda** (hasta 190 % del ancho) en vez de
-achicarse: al reducirla, toda la masa de flores cae justo sobre las letras.
+achicarse: al reducirla, toda la masa de flores cae justo sobre las letras. Y el
+titular se escalona: una línea arriba a la izquierda, la otra abajo a la derecha,
+para que cada una caiga en un hueco distinto de la planta.
+
+El mismo movimiento abre las páginas interiores, con el producto **calado** en vez
+de la foto entera: `EncabezadoCalado` en `app/src/components/sections/Seccion.tsx`.
+Los calados se hacen con `design/calar.py` (rembg, fondo fuera) desde la foto real
+del catálogo y viven en `app/public/calados/`. Dos avisos:
+
+- **No toda foto cala.** Las tomas cenitales quedan como una mancha y las varas
+  finas de orquídea se pierden. Sirven las siluetas —una corona sobre trípode, un
+  ramo de pie—, que además dejan huecos por donde se lee el titular.
+- **El texto se deja tapar, pero no borrar.** Que el bulto muerda el final del
+  titular está bien; que se coma una línea entera, no. En escritorio el texto vive
+  en el 60 % de la izquierda y el calado cuelga del borde de arriba a la derecha
+  —anclado abajo se sale por la cabecera y aparece descabezado.
 
 ---
 

@@ -121,6 +121,12 @@ Primera pasada del sistema Florencia sobre `app/`:
   planta apoyada sobre el papel sin marco, filete de 1 px, enlaces subrayados en
   vez de píldoras— vestida con Florencia. La vitrina queda en el repo sin usar,
   como repuesto: volver es cambiar dos líneas en `Home.tsx`.
+- La misma mecánica abre las páginas interiores, con el producto **calado**:
+  `EncabezadoCalado` (en `Seccion.tsx`) para condolencias y suscripción, y a mano
+  en el catálogo. Los calados se hacen con `design/calar.py` —rembg sobre la foto
+  real, nada generado— y viven en `app/public/calados/`. Hace falta
+  `pip install rembg onnxruntime` (baja un modelo de 176 MB la primera vez), así
+  que en una sesión nueva no está instalado.
 - Una sola cabecera en todo el sitio.
 - Datos comunes en `app/src/lib/tienda.ts`: redes, contacto, medios de pago y
   la letra chica de producto. La letra chica tiene que decir lo mismo en la

@@ -90,65 +90,74 @@ export const Encabezado = ({
 );
 
 /**
- * Encabezado con foto de producto entrelazada.
+ * Encabezado con el producto calado por delante del título.
  *
- * El pedido: que las páginas interiores no abran con un bloque de texto solo,
- * sino con una foto **mezclada** con el título — como el hero, pero sin que el
- * texto quede detrás de la imagen.
+ * La misma mecánica de la portada, aplicada a las páginas interiores: **el
+ * producto pasa por delante del texto**, sin fondo y sin recuadro, apoyado sobre
+ * el blanco. Antes acá había una foto rectangular en su columna, al lado del
+ * título; lo que se pidió es lo otro — que la flor y las letras se mezclen, como
+ * en la referencia.
  *
- * Cómo se resuelve el «mezclado» sin tapar nada: la foto vive en su columna a la
- * derecha, **se sale por el borde de la página** (los `-mr` que anulan el
- * `px` de la sección) y ocupa las dos filas del texto — arranca por encima de la
- * línea del rótulo (`-mt`) y termina por debajo del filete (`-mb`). El bloque de
- * texto y la imagen comparten altura y se entrelazan en el ojo, pero nunca en el
- * mismo punto: el título se lee entero, siempre.
+ * Tres cosas la sostienen:
  *
- * En móvil no hay ancho para poner la foto al lado, así que se mete **entre el
- * título y el texto** —no debajo de todo— y también sale por el borde derecho.
- * El orden queda: título, foto, datos. La foto se ve al abrir, sin scroll, y el
- * texto se lee alrededor de ella y no antes de ella.
+ * - **El calado, no la foto.** Los archivos de `calados/` son la misma foto de
+ *   catálogo con el fondo del estudio quitado (`design/calar.py`). Sobre blanco
+ *   no hay borde ni sombra que delate el recorte, y el titular se puede leer por
+ *   los huecos del ramo.
+ * - **El texto se deja tapar, pero no borrar.** El titular sangra hasta el borde
+ *   y el calado le muerde el final; lo que no puede pasar es que una línea entera
+ *   quede debajo del bulto, así que en escritorio el texto vive en el 60 % de la
+ *   izquierda y el calado ocupa el resto.
+ * - **En móvil el calado va abajo a la derecha**, con su hueco reservado
+ *   (`pb`) para que no se le eche encima a los datos: ahí solo cruza el titular.
  *
- * El sangrado va con `-mr` y no con `w-screen`: la sección no recorta, así que
- * basta con anular su propio margen para llegar al filo del papel.
+ * En escritorio el calado **cuelga del borde de arriba** y se mide en alto, no en
+ * ancho: anclado abajo se salía por la cabecera del sitio y la corona aparecía
+ * descabezada. `medida` y `hueco` son las dos perillas —cada producto tiene su
+ * silueta, una corona sobre trípode es alta y fina y un ramo es ancho y bajo— y
+ * si las cambias, mira las dos pantallas antes de darlas por buenas.
  */
-export const EncabezadoFoto = ({
+export const EncabezadoCalado = ({
   rotulo,
   titulo,
   foto,
   alt,
+  medida = 'w-[62vw] max-w-[300px] lg:h-[56vh] lg:max-h-[560px] lg:w-auto lg:max-w-none',
+  hueco = 'pb-[38vh]',
   children,
 }: {
   rotulo: string;
   titulo: ReactNode;
   foto: string;
   alt: string;
+  medida?: string;
+  hueco?: string;
   children?: ReactNode;
 }) => (
-  <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,31%)] lg:items-start lg:gap-12">
-    <Reveal className="lg:col-start-1 lg:row-start-1">
-      <p className="rotulo">{rotulo}</p>
-      <h1 className="display mt-4 text-[clamp(2.6rem,6vw,5.2rem)] leading-[0.96] text-ink-900">
-        {titulo}
-      </h1>
-    </Reveal>
+  <div className="relative isolate">
+    {/* El hueco de abajo es el sitio del calado en móvil. */}
+    <div className={`relative lg:pb-0 ${hueco}`}>
+      {/* El titular llega hasta el 80 %: lo justo para que el calado le muerda el
+          final. Los datos de abajo se quedan en el 62 %, que ahí no puede tapar. */}
+      <Reveal className="relative z-10 lg:max-w-[80%]">
+        <p className="rotulo">{rotulo}</p>
+        <h1 className="display mt-4 text-[clamp(2.7rem,6.4vw,5.4rem)] leading-[0.95] text-ink-900">
+          {titulo}
+        </h1>
+      </Reveal>
 
-    {/* La foto sale del papel por la derecha y ocupa las dos filas del texto:
-        eso es lo que la mezcla con el título y con los datos de abajo. */}
-    <Reveal
-      delay={0.12}
-      className="-mr-6 sm:-mr-8 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:-mr-12 lg:-mb-[9vh] lg:-mt-[7vh] lg:pl-2"
-    >
-      <img
-        src={foto}
-        alt={alt}
-        loading="eager"
-        className="aspect-[5/4] w-full object-cover sm:aspect-[16/9] lg:aspect-[3/4]"
-      />
-    </Reveal>
+      {/* Por delante del titular, pegado al borde derecho del papel. */}
+      <Reveal
+        delay={0.1}
+        className="pointer-events-none absolute bottom-0 right-0 z-20 -mr-6 sm:-mr-8 lg:bottom-auto lg:top-0 lg:-mr-12"
+      >
+        <img src={foto} alt={alt} loading="eager" className={`select-none ${medida}`} />
+      </Reveal>
+    </div>
 
     {children && (
-      <Reveal delay={0.08} className="lg:col-start-1 lg:row-start-2">
-        <div className="border-t border-border pt-7">{children}</div>
+      <Reveal delay={0.08} className="relative z-10 lg:max-w-[62%]">
+        <div className="mt-8 border-t border-border pt-7 lg:mt-10">{children}</div>
       </Reveal>
     )}
   </div>

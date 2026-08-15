@@ -284,24 +284,22 @@ export default function Catalogo() {
           y las ocho categorías, que eran tres filas de píldoras, se recogen en un
           desplegable. De md para arriba se achica menos: ahí sobraba pantalla. */}
       <header className="relative z-30 mx-auto max-w-7xl px-6 pb-6 pt-7 md:px-12 md:pb-12 md:pt-24">
-        {/* Título y foto entrelazados: la foto sale del último producto de la
-            selección actual, así que cambia con el filtro y nunca miente sobre lo
-            que hay debajo — y no repite la que abre la grilla. En móvil la cabecera va sin foto — ahí lo que hace
-            falta es llegar a la grilla, no otra imagen antes de las de verdad. */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,28%)] lg:items-start lg:gap-12">
-          <div className="max-w-3xl">
+        {/* Título y producto entrelazados, como en la portada: el Florero Forti
+            calado —la foto real del catálogo sin el fondo del estudio— pasa por
+            delante del titular. En móvil la cabecera va sin imagen: ahí lo que
+            hace falta es llegar a la grilla, no otra flor antes de las de verdad. */}
+        <div className="relative">
+          <div className="relative z-10 max-w-3xl lg:max-w-[64%]">
             <span className="rotulo">El catálogo</span>
             <h1 className="display mt-2.5 text-[2rem] text-ink-900 sm:text-[2.75rem] md:mt-4 md:text-[4.5rem]">
               Flores de estación, <em>frescas y del día.</em>
             </h1>
           </div>
-          {list.length > 0 && (
-            <img
-              src={list[list.length - 1].image}
-              alt={list[list.length - 1].name}
-              className="hidden aspect-[3/4] w-full object-cover lg:-mb-[10vh] lg:-mr-12 lg:-mt-[6vh] lg:block"
-            />
-          )}
+          <img
+            src="/calados/florero-forti.webp"
+            alt="Florero Forti: ramo de girasoles, rosas blancas y eucalipto en papel verde"
+            className="pointer-events-none absolute right-0 top-0 z-20 hidden h-[34vh] max-h-[360px] w-auto select-none lg:-mr-12 lg:block"
+          />
         </div>
 
         {/* Los dos filtros en una línea, cada uno con su panel. El conteo va al
@@ -317,7 +315,10 @@ export default function Catalogo() {
             <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">Precio</span>
             <PriceDropdown value={activePrice} label={priceLabel} onSelect={setPrice} />
           </div>
-          <span className="ml-auto text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500">
+          {/* El conteo iba pegado al filo derecho y ahí es justo donde cuelga el
+              calado: se leía «…ACIONES» tapado por el ramo. Ahora va detrás de los
+              filtros, con un respiro. */}
+          <span className="ml-auto text-[11px] font-medium uppercase tracking-[0.2em] text-ink-500 lg:ml-8">
             {list.length} {list.length === 1 ? 'creación' : 'creaciones'}
           </span>
         </div>
