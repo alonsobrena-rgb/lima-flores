@@ -1,7 +1,6 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { HeroHerbario } from '@/components/sections/HeroHerbario';
 import { Marquee } from '@/components/sections/Marquee';
-import { Manifesto } from '@/components/sections/Manifesto';
 import { SignatureProduct } from '@/components/sections/SignatureProduct';
 import { FeaturedProducts } from '@/components/sections/FeaturedProducts';
 import { Categories } from '@/components/sections/Categories';
@@ -32,9 +31,13 @@ export default function Home() {
       <SiteHeader />
       <HeroHerbario />
       <Marquee />
-      <Manifesto />
-      <FeaturedProducts />
+      {/* Las categorías van pegadas al cartel: son el primer desvío del
+          visitante, y en una tira que se arrastra de lado se ve de qué es cada
+          una. Antes acá iba el manifiesto —«Hay emociones que merecen algo más
+          que un mensaje»— y era un muro de texto entre la portada y la primera
+          foto. Las fotos del catálogo, barajadas, van justo debajo. */}
       <Categories />
+      <FeaturedProducts />
       <SignatureProduct />
       <AtelierStory />
       <InstagramGallery />

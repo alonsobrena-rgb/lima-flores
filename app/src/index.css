@@ -202,6 +202,13 @@
   /* Press sutil para botones (sin bounce, marca pide quietud) */
   .press { transition: transform 0.18s cubic-bezier(0.22,1,0.36,1); }
   .press:active { transform: scale(0.975); }
+
+  /* Tira que se arrastra de lado (las categorías de la portada). La barra de
+     scroll se esconde: debajo de una fila de fotos grandes es una franja gris
+     que no aporta nada, y el borde de la tarjeta siguiente ya dice que hay más.
+     El gesto, la rueda y el teclado siguen funcionando igual. */
+  .tira-lateral { scrollbar-width: none; -ms-overflow-style: none; }
+  .tira-lateral::-webkit-scrollbar { height: 0; width: 0; }
 }
 
 /* ============================================================
