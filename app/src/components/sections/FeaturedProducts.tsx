@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import featured from '@/data/featured.json';
 import { money, useProducts } from '@/lib/cart';
+import { barajar } from '@/lib/azar';
 import { Seccion, Encabezado } from './Seccion';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const CUANTOS = 12;
+// Los que ya se llevó la tira de arriba: acá se empieza después de ellos.
+const EN_LA_TIRA = 8;
 
 /** Lo único que la ficha necesita, venga de la API o del respaldo. */
 type Ficha = { id: string; name: string; price: number; image: string; etiqueta: string };
@@ -20,39 +23,26 @@ type Ficha = { id: string; name: string; price: number; image: string; etiqueta:
  * están vivos en la tienda, así que la portada cambia sola y todo el catálogo
  * tiene turno.
  *
- * El azar se echa **una vez por visita** (`useState` con función inicial, no
- * `useMemo` a secas): barajar en cada render haría que las fotos saltaran de
- * sitio al abrir el carrito o al filtrar. Y la semilla se guarda aparte de la
- * lista porque los productos llegan de la API un instante después que el
- * primer render.
+ * El barajado es el de `lib/azar.ts`, el mismo que usa la tira de arriba: se
+ * echa una vez por visita y cada sección se lleva su tramo —la tira los primeros
+ * ocho, esta grilla los doce que siguen—, así ningún ramo sale dos veces en la
+ * misma pantalla.
  *
  * `featured.json` se queda como respaldo: si la API no responde, la sección
  * muestra la selección de siempre en vez de un hueco.
  */
 export const FeaturedProducts = () => {
   const { products } = useProducts();
-  // Entera, no el 0-1 de Math.random: el generador de abajo lleva el estado como
-  // entero y sembrarlo con un decimal deja las primeras tiradas apelotonadas.
-  const [semilla] = useState(() => Math.floor(Math.random() * 233280));
 
   const lista: Ficha[] = useMemo(() => {
     const vivos = products.filter((p) => p.active !== false && p.image);
-    if (vivos.length < CUANTOS) {
+    if (vivos.length < EN_LA_TIRA + CUANTOS) {
       return featured.slice(0, CUANTOS).map((p) => ({ ...p, etiqueta: p.category }));
     }
-    // Barajado determinista a partir de la semilla: el mismo orden mientras dure
-    // la visita, distinto en la siguiente.
-    let x = semilla;
-    const azar = () => {
-      x = (x * 9301 + 49297) % 233280;
-      return x / 233280;
-    };
-    return [...vivos]
-      .map((p) => ({ p, k: azar() }))
-      .sort((a, b) => a.k - b.k)
-      .slice(0, CUANTOS)
-      .map(({ p }) => ({ id: p.id, name: p.name, price: p.price, image: p.image, etiqueta: p.categoryLabel }));
-  }, [products, semilla]);
+    return barajar(vivos)
+      .slice(EN_LA_TIRA, EN_LA_TIRA + CUANTOS)
+      .map((p) => ({ id: p.id, name: p.name, price: p.price, image: p.image, etiqueta: p.categoryLabel }));
+  }, [products]);
 
   return (
     <Seccion id="catalogo">

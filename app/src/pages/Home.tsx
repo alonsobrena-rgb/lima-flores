@@ -4,6 +4,7 @@ import { Marquee } from '@/components/sections/Marquee';
 import { SignatureProduct } from '@/components/sections/SignatureProduct';
 import { FeaturedProducts } from '@/components/sections/FeaturedProducts';
 import { Categories } from '@/components/sections/Categories';
+import { ProductStrip } from '@/components/sections/ProductStrip';
 import { AtelierStory } from '@/components/sections/AtelierStory';
 import { InstagramGallery } from '@/components/sections/InstagramGallery';
 import { SubscriptionTeaser } from '@/components/sections/SubscriptionTeaser';
@@ -31,11 +32,14 @@ export default function Home() {
       <SiteHeader />
       <HeroHerbario />
       <Marquee />
-      {/* Las categorías van pegadas al cartel: son el primer desvío del
-          visitante, y en una tira que se arrastra de lado se ve de qué es cada
-          una. Antes acá iba el manifiesto —«Hay emociones que merecen algo más
-          que un mensaje»— y era un muro de texto entre la portada y la primera
-          foto. Las fotos del catálogo, barajadas, van justo debajo. */}
+      {/* Pegado al cartel va producto, no texto: una tira de ocho al azar que se
+          arrastra de lado, con la ficha casi del tamaño de la pantalla. Acá
+          estaba el manifiesto —«Hay emociones que merecen algo más que un
+          mensaje»— y era un muro entre la portada y la primera foto.
+          Después las categorías, en su grilla de siempre, y la colección
+          completa: los tres bloques salen del mismo barajado, así que ningún
+          ramo se repite en la misma pantalla. */}
+      <ProductStrip />
       <Categories />
       <FeaturedProducts />
       <SignatureProduct />
