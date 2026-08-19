@@ -22,10 +22,13 @@ if (USE_PG_MEM) {
 } else if (DATABASE_URL) {
   const { Pool } = require('pg');
   // Railway expone DATABASE_URL con SSL requerido. Aceptamos cert no verificado
-  // porque es comunicación intra-Railway, no internet expuesto.
+  // porque es comunicación intra-Railway, no internet expuesto. Contra un
+  // Postgres local (pruebas) se va sin SSL: uno recién instalado no lo trae, y
+  // exigirlo dejaba el modo «BD de verdad en el portátil» sin usar.
+  const local = /@(localhost|127\.0\.0\.1)[:/]/.test(DATABASE_URL);
   pool = new Pool({
     connectionString: DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: local ? false : { rejectUnauthorized: false },
     max: 5,
   });
   pool.on('error', (err) => {
@@ -269,6 +272,43 @@ CREATE TABLE IF NOT EXISTS culqi_events (
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS culqi_events_sub_idx ON culqi_events (subscription_id, created_at DESC);
+
+-- ─── Publicador de Instagram ────────────────────────────────────────────────
+-- La cola de piezas por publicar. El binario vive acá y no en disco porque
+-- Railway borra el disco en cada deploy — mismo motivo que marketing_assets.
+-- Instagram descarga el archivo por URL, así que además hay que servirlo:
+-- /api/ig/media/:id (público, sin sesión, es la única forma de que Meta lo lea).
+CREATE TABLE IF NOT EXISTS ig_queue (
+  id            TEXT PRIMARY KEY,
+  kind          TEXT NOT NULL,                       -- 'image' | 'reel'
+  origen        TEXT,                                -- código de la galería (IG-37, VID-01) o 'manual'
+  caption       TEXT NOT NULL DEFAULT '',
+  media         BYTEA NOT NULL,
+  mime          TEXT NOT NULL,
+  bytes         INT NOT NULL DEFAULT 0,           -- tamaño, guardado al encolar
+
+  scheduled_at  TIMESTAMPTZ NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'queued',      -- queued | publishing | published | failed | paused
+  ig_media_id   TEXT,
+  permalink     TEXT,
+  error         TEXT,
+  attempts      INT NOT NULL DEFAULT 0,
+  published_at  TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ig_queue_agenda_idx ON ig_queue (status, scheduled_at);
+
+-- Ajustes del publicador. Una sola fila (id='ig'). El interruptor arranca
+-- APAGADO a propósito: publicar es hacia afuera y no se enciende solo con un
+-- deploy — lo enciende una persona desde el panel.
+CREATE TABLE IF NOT EXISTS ig_settings (
+  id            TEXT PRIMARY KEY,
+  activo        BOOLEAN NOT NULL DEFAULT FALSE,
+  por_dia       INT NOT NULL DEFAULT 5,
+  horas         TEXT NOT NULL DEFAULT '9,12,15,18,21', -- hora local de Lima
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO ig_settings (id) VALUES ('ig') ON CONFLICT (id) DO NOTHING;
 `;
 
 async function migrate() {

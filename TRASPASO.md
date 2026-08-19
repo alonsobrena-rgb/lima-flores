@@ -108,6 +108,19 @@ Hoja de prueba:
 https://claude.ai/code/artifact/4c223716-2efc-456f-9bf9-694665b82904
 **Falta que el cliente diga cuáles entran.**
 
+### El publicador de Instagram
+
+Publica los creativos de `marketing/` en `@lima_flores`, cinco al día, desde
+`/admin/instagram`. La cola vive en la BD (el disco de Railway se borra en cada
+deploy), un vigía la mira cada minuto y Meta descarga el archivo desde
+`/api/ig/media/:id` — que por eso es público y necesita `PUBLIC_BASE_URL`.
+
+Para que salga algo hacen falta dos cosas: las variables (`IG_USER_ID`,
+`IG_ACCESS_TOKEN` con permiso `instagram_content_publish`, `PUBLIC_BASE_URL`) y
+**el interruptor del panel, que arranca apagado a propósito**. Un deploy no
+enciende una cuenta pública. Todo el detalle en
+`integrations/instagram/README.md`.
+
 ### La web
 
 Primera pasada del sistema Florencia sobre `app/`:

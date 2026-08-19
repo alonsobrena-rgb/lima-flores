@@ -515,6 +515,9 @@ module.exports = async (req, res, urlObj) => {
   // ── Promociones por WhatsApp ──
   if (p.startsWith('/api/admin/wa/')) return require('./admin-whatsapp')(req, res, urlObj);
 
+  // ── Publicador de Instagram ──
+  if (p.startsWith('/api/admin/ig/')) return require('./admin-ig')(req, res, urlObj);
+
   // ── Categorías del catálogo ──
   if (p === '/api/admin/categories' && req.method === 'GET')  return listCategoriesAdmin(req, res);
   if (p === '/api/admin/categories' && req.method === 'POST') return createCategory(req, res);

@@ -146,6 +146,12 @@ const server = http.createServer(async (req, res) => {
     return require('./api/instagram')(req, res, parsed);
   }
 
+  // ─── /api/ig/media/:id — el archivo que Meta descarga al publicar ───
+  // Público a propósito: Instagram baja el JPG/MP4 él mismo y no se autentica.
+  if (parsed.pathname.startsWith('/api/ig/media/')) {
+    return require('./api/ig-media')(req, res, parsed);
+  }
+
   // ─── /api/culqi/* — pasarela de pago Culqi (cobro de tarjeta) ───
   if (parsed.pathname.startsWith('/api/culqi/')) {
     return require('./api/culqi')(req, res, parsed);
@@ -246,4 +252,8 @@ server.listen(PORT, () => {
   // Vigía de franjas de entrega → avisos por Google Chat al iniciar cada horario.
   try { require('./integrations/notify/delivery-watch').start(); }
   catch (e) { console.error('[delivery-watch] no se pudo iniciar:', e.message); }
+  // Publicador de Instagram: mira la cola cada minuto. No publica nada mientras
+  // el interruptor del panel esté apagado — encenderlo es un acto de una persona.
+  try { require('./integrations/instagram/publisher').start(); }
+  catch (e) { console.error('[ig] no se pudo iniciar el publicador:', e.message); }
 });

@@ -7,14 +7,16 @@ import { AdminStudio } from '@/components/admin/AdminStudio';
 import { AdminWhatsapp } from '@/components/admin/AdminWhatsapp';
 import { AdminCreateCard } from '@/components/admin/AdminCreateCard';
 import { AdminSubscriptions } from '@/components/admin/AdminSubscriptions';
+import { AdminPublicador } from '@/components/admin/AdminPublicador';
 
-type Section = 'orders' | 'subscriptions' | 'cards' | 'products' | 'studio' | 'whatsapp';
+type Section = 'orders' | 'subscriptions' | 'cards' | 'products' | 'studio' | 'instagram' | 'whatsapp';
 const SECTIONS: { key: Section; label: string }[] = [
   { key: 'orders', label: 'Pedidos' },
   { key: 'subscriptions', label: 'Suscripciones' },
   { key: 'cards', label: 'Tarjetas' },
   { key: 'products', label: 'Productos' },
   { key: 'studio', label: 'Marketing Studio' },
+  { key: 'instagram', label: 'Instagram' },
   { key: 'whatsapp', label: 'Promociones WhatsApp' },
 ];
 
@@ -77,6 +79,7 @@ export default function Admin() {
           {section === 'cards' && <AdminCreateCard onAuthError={onAuthError} />}
           {section === 'products' && <AdminProducts onAuthError={onAuthError} />}
           {section === 'studio' && <AdminStudio onAuthError={onAuthError} />}
+          {section === 'instagram' && <AdminPublicador onAuthError={onAuthError} />}
           {section === 'whatsapp' && <AdminWhatsapp onAuthError={onAuthError} />}
         </div>
       </div>
