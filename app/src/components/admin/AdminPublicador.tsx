@@ -21,6 +21,11 @@ type Item = {
   id: string; kind: 'image' | 'reel'; origen: string | null; caption: string;
   mime: string; bytes: number; scheduled_at: string; status: string;
   permalink: string | null; error: string | null; attempts: number;
+  cuenta_id: string | null;
+};
+type Cuenta = {
+  id: string; ig_user_id: string; usuario: string | null; etiqueta: string | null;
+  token_env: string; activa: boolean; tokenPuesto: boolean;
 };
 type Estado = {
   configurado: boolean; falta: string[];
@@ -31,6 +36,7 @@ type Estado = {
     pausadas: number; proxima: string | null; publicadas24h: number;
   };
   sinCargar: number;
+  cuentas: Cuenta[];
 };
 
 const field = 'w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-rosa-500';
@@ -69,6 +75,8 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
   const [aviso, setAviso] = useState('');
   const [editando, setEditando] = useState<string | null>(null);
   const [borrador, setBorrador] = useState('');
+  const [nueva, setNueva] = useState({ igUserId: '', usuario: '', etiqueta: '', tokenEnv: 'IG_ACCESS_TOKEN' });
+  const [destino, setDestino] = useState<string>('');
 
   const fail = useCallback((e: unknown) => {
     if (e instanceof AuthError) { onAuthError(); return; }
@@ -158,6 +166,67 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
         )}
       </section>
 
+      {/* ── Cuentas ── */}
+      <section className="border border-border p-5">
+        <h3 className="font-display text-xl italic text-ink-900">Cuentas</h3>
+        <p className="mt-1 max-w-2xl text-sm text-foreground/60">
+          Puedes publicar en varias. De cada cuenta se guarda acá el id numérico que da Meta;
+          <strong className="text-ink-900"> el token no se guarda en la base de datos</strong> — la
+          fila solo dice en qué variable del servidor está. Si todas las cuentas son del mismo
+          Business de Meta, el mismo <code className="bg-black/5 px-1">IG_ACCESS_TOKEN</code> sirve
+          para todas.
+        </p>
+
+        {!!estado.cuentas.length && (
+          <ul className="mt-4 divide-y divide-border border-y border-border">
+            {estado.cuentas.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
+                <span className="font-display text-lg text-ink-900">{c.usuario || c.ig_user_id}</span>
+                {c.etiqueta && <span className="text-sm text-foreground/55">{c.etiqueta}</span>}
+                <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/45">
+                  id {c.ig_user_id} · {c.token_env}
+                </span>
+                <span className={`rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${c.tokenPuesto ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'}`}>
+                  {c.tokenPuesto ? 'token puesto' : 'falta el token'}
+                </span>
+                <span className="ml-auto flex gap-2">
+                  <button className={boton} onClick={() => accion(() => adminSend(`/api/admin/ig/cuentas/${c.id}`, 'PATCH', { activa: !c.activa }))}>
+                    {c.activa ? 'Activa' : 'Pausada'}
+                  </button>
+                  <button className={boton} onClick={() => { if (confirm(`¿Quitar ${c.usuario || c.ig_user_id}?`)) accion(() => adminSend(`/api/admin/ig/cuentas/${c.id}`, 'DELETE')); }}>Quitar</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+          <div>
+            <label className={label}>Id de Meta</label>
+            <input value={nueva.igUserId} onChange={(e) => setNueva({ ...nueva, igUserId: e.target.value })} placeholder="178414…" className={`${field} mt-1.5`} />
+          </div>
+          <div>
+            <label className={label}>Usuario</label>
+            <input value={nueva.usuario} onChange={(e) => setNueva({ ...nueva, usuario: e.target.value })} placeholder="@lima_flores" className={`${field} mt-1.5`} />
+          </div>
+          <div>
+            <label className={label}>Etiqueta</label>
+            <input value={nueva.etiqueta} onChange={(e) => setNueva({ ...nueva, etiqueta: e.target.value })} placeholder="la principal" className={`${field} mt-1.5`} />
+          </div>
+          <div>
+            <label className={label}>Variable del token</label>
+            <input value={nueva.tokenEnv} onChange={(e) => setNueva({ ...nueva, tokenEnv: e.target.value })} className={`${field} mt-1.5 font-mono text-[12px]`} />
+          </div>
+          <button
+            className="press mt-6 border border-border px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/70 hover:border-ink-900 hover:text-ink-900"
+            onClick={() => accion(async () => {
+              await adminSend('/api/admin/ig/cuentas', 'POST', nueva);
+              setNueva({ igUserId: '', usuario: '', etiqueta: '', tokenEnv: 'IG_ACCESS_TOKEN' });
+            })}
+          >Agregar</button>
+        </div>
+      </section>
+
       {/* ── Cargar la galería ── */}
       <section className="border border-border p-5">
         <h3 className="font-display text-xl italic text-ink-900">Cargar la galería</h3>
@@ -167,18 +236,31 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
           se escribió para cada uno, y los agenda a continuación de lo que ya hay. Lo que ya está en
           la cola no se vuelve a cargar.
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-end gap-3">
+          <div>
+            <label className={label}>¿A qué cuenta?</label>
+            <select value={destino} onChange={(e) => setDestino(e.target.value)} className={`${field} mt-1.5 w-auto`}>
+              <option value="">La primera activa</option>
+              {estado.cuentas.filter((c) => c.activa).map((c) => (
+                <option key={c.id} value={c.id}>{c.usuario || c.ig_user_id}</option>
+              ))}
+              <option value="__todas">Todas las activas</option>
+            </select>
+          </div>
           <button
-            disabled={!estado.sinCargar}
+            disabled={!estado.cuentas.some((c) => c.activa)}
             onClick={() => accion(async () => {
-              const r = await adminSend('/api/admin/ig/cargar-galeria', 'POST') as { encoladas: number; hasta?: string };
-              setAviso(r.encoladas ? `Encoladas ${r.encoladas} piezas, hasta el ${r.hasta ? enLima(r.hasta) : '—'}.` : 'No había nada nuevo.');
+              const cuerpo = destino === '__todas' ? { todas: true } : destino ? { cuentaId: destino } : {};
+              const r = await adminSend('/api/admin/ig/cargar-galeria', 'POST', cuerpo) as { encoladas: number; hasta?: string; mensaje?: string };
+              setAviso(r.encoladas ? `Encoladas ${r.encoladas} piezas, hasta el ${r.hasta ? enLima(r.hasta) : '—'}.` : (r.mensaje || 'No había nada nuevo.'));
             })}
             className="press bg-rosa-500 px-5 py-3 font-mono text-[12px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-40"
           >
-            Cargar {estado.sinCargar} piezas
+            Cargar la galería
           </button>
-          {!estado.sinCargar && <span className="text-sm text-foreground/50">Todo lo del repo ya está en la cola.</span>}
+          {!estado.cuentas.length
+            ? <span className="text-sm text-amber-800">Agrega una cuenta arriba para poder cargar.</span>
+            : !estado.sinCargar && <span className="text-sm text-foreground/50">La cuenta por defecto ya tiene todo el repo en cola.</span>}
         </div>
       </section>
 
@@ -205,6 +287,11 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                   <Insignia status={it.status} />
                   <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/55">
                     {it.kind === 'reel' ? 'Reel' : 'Post'} · {it.origen || 'manual'} · {Math.round(it.bytes / 1024)} kB
+                    {' · '}
+                    {(() => {
+                      const c = estado.cuentas.find((x) => x.id === it.cuenta_id);
+                      return c ? (c.usuario || c.ig_user_id) : 'cuenta por defecto';
+                    })()}
                   </span>
                   {it.permalink && (
                     <a href={it.permalink} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] uppercase tracking-[0.08em] text-rosa-500 hover:underline">Ver en Instagram →</a>

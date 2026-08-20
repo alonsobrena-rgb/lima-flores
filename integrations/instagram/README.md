@@ -17,18 +17,40 @@ día, a horas fijas, desde el panel (`/admin/instagram`).
 Instagram **no programa por API**: el Graph publica en el momento en que se le
 pide. La hora es nuestra (`agenda.js`, en hora de Lima).
 
+## Las cuentas y el token
+
+**Las cuentas se agregan desde el panel** y viven en `ig_cuentas`: el id numérico
+que da Meta, el `@` para reconocerla, y el **nombre de la variable de entorno**
+que tiene su token.
+
+**El token no se guarda en la base de datos.** El valor vive en Railway y la fila
+solo lo nombra. Una base con tokens dentro es una base que no se puede volcar, ni
+copiar a local, ni mirar en un backup — y el token de Meta abre la cuenta entera.
+
+- Si todas las cuentas están en el **mismo Business de Meta**, un solo token de
+  System User sirve para todas: se deja `IG_ACCESS_TOKEN` en las tres.
+- Si son negocios distintos, cada cuenta apunta a su variable
+  (`IG_ACCESS_TOKEN_DISENO`, etc.).
+
+Solo se aceptan nombres que empiecen por `IG_`. No es capricho: el nombre lo
+escribe quien administra el panel, y sin ese cerrojo una cuenta podría apuntar a
+`DATABASE_URL` y mandársela a Meta como token.
+
+Cada pieza de la cola lleva su cuenta. Al cargar la galería se elige una o
+**todas las activas** — cada cuenta recibe su propia copia y su propia agenda,
+porque publican en paralelo y una no tiene por qué esperar a la otra.
+
 ## Encenderlo
 
-Tres variables en el servidor:
+En el servidor:
 
 | Variable | De dónde sale |
 |---|---|
-| `IG_USER_ID` | El id numérico de la cuenta de Instagram **Business/Creator** (no el `@`) |
 | `IG_ACCESS_TOKEN` | Token de larga duración con `instagram_basic` + **`instagram_content_publish`** + `pages_read_engagement` |
 | `PUBLIC_BASE_URL` | `https://limaflores.pe` — de ahí baja Meta el archivo |
+| `IG_USER_ID` | Opcional. Es el respaldo de cuando había una sola cuenta y ninguna tabla |
 
-Las dos primeras son las mismas que ya usa la galería de la portada; lo que hay
-que sumarle al token es el permiso de publicación.
+Y en el panel, la cuenta (o las cuentas) con su id de Meta.
 
 Y después, **el interruptor del panel**. Arranca apagado y no lo enciende un
 deploy: publicar es hacia afuera y esa decisión es de una persona. Mientras está
@@ -64,7 +86,7 @@ Errores que se ven seguido:
 |---|---|
 | `publish.js` | Las llamadas al Graph: contenedor → espera (video) → publicar |
 | `publisher.js` | El vigía: una vuelta por minuto |
-| `agenda.js` | Las horas de Lima, cinco al día |
+| `agenda.js` | Las horas de Lima, cinco al día (por cuenta) |
 | `galeria.js` | Lee `marketing/ig-ads/` y `marketing/video/` con su copy |
 | `feed.js` | Nada que ver con publicar: es la galería de la portada |
 | `../../db/ig-queue-store.js` | La cola |

@@ -12,14 +12,15 @@ const db = require('./index');
 // tamaño va en su columna y no en un octet_length(media): calcularlo al listar
 // obliga a leer los blobs enteros, que es justo lo que se quiere evitar.
 const CAMPOS = `id, kind, origen, caption, mime, bytes, scheduled_at, status,
-                ig_media_id, permalink, error, attempts, published_at, created_at`;
+                ig_media_id, permalink, error, attempts, published_at, created_at,
+                cuenta_id`;
 
-async function encolar({ kind, origen, caption, media, mime, scheduledAt }) {
+async function encolar({ kind, origen, caption, media, mime, scheduledAt, cuentaId = null }) {
   const id = crypto.randomBytes(8).toString('hex');
   await db.query(
-    `INSERT INTO ig_queue (id, kind, origen, caption, media, mime, bytes, scheduled_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-    [id, kind, origen || 'manual', caption || '', media, mime, media.length, scheduledAt],
+    `INSERT INTO ig_queue (id, kind, origen, caption, media, mime, bytes, scheduled_at, cuenta_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+    [id, kind, origen || 'manual', caption || '', media, mime, media.length, scheduledAt, cuentaId],
   );
   return id;
 }
@@ -42,10 +43,17 @@ async function media(id) {
   return rows[0] || null;
 }
 
-/** Los códigos de galería ya encolados: para no cargar dos veces lo mismo. */
-async function origenesUsados() {
+/**
+ * Los códigos de galería ya encolados **para esa cuenta**.
+ *
+ * Por cuenta y no en general: la misma pieza sí puede ir a dos cuentas distintas
+ * —para eso se agregan varias—, lo que no puede es ir dos veces a la misma.
+ */
+async function origenesUsados(cuentaId = null) {
   const { rows } = await db.query(
-    `SELECT DISTINCT origen FROM ig_queue WHERE origen IS NOT NULL AND origen <> 'manual'`,
+    `SELECT DISTINCT origen FROM ig_queue
+      WHERE origen IS NOT NULL AND origen <> 'manual'
+        AND cuenta_id IS NOT DISTINCT FROM $1`, [cuentaId],
   );
   return new Set(rows.map((r) => r.origen));
 }
@@ -69,7 +77,7 @@ async function tomarVencida() {
          LIMIT 1
       )
         AND status = 'queued'
-      RETURNING id, kind, origen, caption, mime, attempts`,
+      RETURNING id, kind, origen, caption, mime, attempts, cuenta_id`,
   );
   return rows[0] || null;
 }
@@ -118,12 +126,76 @@ async function borrar(id) {
   return rowCount > 0;
 }
 
-/** La última hora ya ocupada: desde ahí se sigue agendando. */
-async function ultimaAgendada() {
+/**
+ * La última hora ya ocupada por esa cuenta: desde ahí se sigue agendando.
+ *
+ * Por cuenta: dos cuentas publican en paralelo, así que la agenda de una no
+ * tiene por qué empujar a la otra.
+ */
+async function ultimaAgendada(cuentaId = null) {
   const { rows } = await db.query(
-    `SELECT MAX(scheduled_at) AS ultima FROM ig_queue WHERE status IN ('queued','publishing','published')`,
+    `SELECT MAX(scheduled_at) AS ultima FROM ig_queue
+      WHERE status IN ('queued','publishing','published')
+        AND cuenta_id IS NOT DISTINCT FROM $1`, [cuentaId],
   );
   return rows[0] && rows[0].ultima ? new Date(rows[0].ultima) : null;
+}
+
+/* ── Cuentas ──────────────────────────────────────────────────────────────
+   El token NO vive acá: la fila guarda el nombre de la variable de entorno que
+   lo contiene. Ver integrations/instagram/publish.js → tokenDe(). */
+
+const COLS_CUENTA = 'id, ig_user_id, usuario, etiqueta, token_env, activa, created_at';
+
+async function listarCuentas() {
+  const { rows } = await db.query(`SELECT ${COLS_CUENTA} FROM ig_cuentas ORDER BY created_at ASC`);
+  return rows;
+}
+
+async function cuenta(id) {
+  if (!id) return null;
+  const { rows } = await db.query(`SELECT ${COLS_CUENTA} FROM ig_cuentas WHERE id = $1`, [id]);
+  return rows[0] || null;
+}
+
+/** La cuenta de una pieza sin cuenta asignada: la primera activa. */
+async function cuentaPorDefecto() {
+  const { rows } = await db.query(
+    `SELECT ${COLS_CUENTA} FROM ig_cuentas WHERE activa = TRUE ORDER BY created_at ASC LIMIT 1`,
+  );
+  return rows[0] || null;
+}
+
+async function crearCuenta({ igUserId, usuario, etiqueta, tokenEnv }) {
+  const id = crypto.randomBytes(6).toString('hex');
+  await db.query(
+    `INSERT INTO ig_cuentas (id, ig_user_id, usuario, etiqueta, token_env)
+     VALUES ($1,$2,$3,$4,$5)`,
+    [id, String(igUserId).trim(), usuario || null, etiqueta || null, tokenEnv || 'IG_ACCESS_TOKEN'],
+  );
+  return cuenta(id);
+}
+
+async function actualizarCuenta(id, { usuario, etiqueta, tokenEnv, activa }) {
+  const sets = []; const vals = [];
+  if (usuario !== undefined) { vals.push(usuario); sets.push(`usuario = $${vals.length}`); }
+  if (etiqueta !== undefined) { vals.push(etiqueta); sets.push(`etiqueta = $${vals.length}`); }
+  if (tokenEnv !== undefined) { vals.push(tokenEnv); sets.push(`token_env = $${vals.length}`); }
+  if (activa !== undefined) { vals.push(!!activa); sets.push(`activa = $${vals.length}`); }
+  if (!sets.length) return cuenta(id);
+  vals.push(id);
+  await db.query(`UPDATE ig_cuentas SET ${sets.join(', ')} WHERE id = $${vals.length}`, vals);
+  return cuenta(id);
+}
+
+/** Borra la cuenta. Lo que ya publicó se queda: es historia, no se toca. */
+async function borrarCuenta(id) {
+  const { rows } = await db.query(
+    `SELECT COUNT(*)::int AS n FROM ig_queue WHERE cuenta_id = $1 AND status IN ('queued','publishing','paused')`, [id],
+  );
+  if (rows[0].n) throw new Error(`Esa cuenta tiene ${rows[0].n} pieza(s) en cola. Quítalas o pásalas a otra cuenta primero.`);
+  const { rowCount } = await db.query(`DELETE FROM ig_cuentas WHERE id = $1`, [id]);
+  return rowCount > 0;
 }
 
 const COLS_AJUSTES = 'id, activo, por_dia, horas, updated_at';
@@ -160,4 +232,5 @@ module.exports = {
   encolar, listar, obtener, media, origenesUsados, tomarVencida,
   marcarPublicada, marcarFallida, actualizar, borrar, ultimaAgendada,
   ajustes, guardarAjustes, publicadasHoy,
+  listarCuentas, cuenta, cuentaPorDefecto, crearCuenta, actualizarCuenta, borrarCuenta,
 };

@@ -298,6 +298,21 @@ CREATE TABLE IF NOT EXISTS ig_queue (
 );
 CREATE INDEX IF NOT EXISTS ig_queue_agenda_idx ON ig_queue (status, scheduled_at);
 
+-- Las cuentas de Instagram donde se publica. Se agregan desde el panel; el
+-- TOKEN NO SE GUARDA ACÁ: en la fila solo va el NOMBRE de la variable de entorno
+-- que lo contiene (Railway). Una base de datos con tokens dentro es una base de
+-- datos que no se puede volcar, ni copiar a local, ni mirar en un backup.
+CREATE TABLE IF NOT EXISTS ig_cuentas (
+  id            TEXT PRIMARY KEY,
+  ig_user_id    TEXT NOT NULL,                      -- id numérico de la cuenta Business
+  usuario       TEXT,                               -- @handle, solo para reconocerla
+  etiqueta      TEXT,                               -- «la principal», «condolencias»…
+  token_env     TEXT NOT NULL DEFAULT 'IG_ACCESS_TOKEN',
+  activa        BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ig_cuentas_user_idx ON ig_cuentas (ig_user_id);
+
 -- Ajustes del publicador. Una sola fila (id='ig'). El interruptor arranca
 -- APAGADO a propósito: publicar es hacia afuera y no se enciende solo con un
 -- deploy — lo enciende una persona desde el panel.
@@ -309,6 +324,10 @@ CREATE TABLE IF NOT EXISTS ig_settings (
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 INSERT INTO ig_settings (id) VALUES ('ig') ON CONFLICT (id) DO NOTHING;
+
+-- Cada pieza sabe a qué cuenta va. Nula = la primera cuenta activa, que es lo
+-- que había antes de que hubiera varias.
+ALTER TABLE ig_queue ADD COLUMN IF NOT EXISTS cuenta_id TEXT;
 `;
 
 async function migrate() {

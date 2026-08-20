@@ -19,7 +19,6 @@ let trabajando = false;
 async function vuelta() {
   if (trabajando) return;
   if (!db.enabled) return;
-  if (!publish.configurado()) return;
 
   trabajando = true;
   try {
@@ -36,9 +35,15 @@ async function vuelta() {
     const pieza = await cola.tomarVencida();
     if (!pieza) return;
 
-    console.log(`[ig] publicando ${pieza.origen || pieza.id} (${pieza.kind}), intento ${pieza.attempts}`);
+    // La cuenta de la pieza; si no tiene, la primera activa, y si tampoco hay
+    // tabla, la cuenta suelta de las variables de entorno (como antes).
+    const cuenta = (await cola.cuenta(pieza.cuenta_id))
+      || (await cola.cuentaPorDefecto())
+      || publish.cuentaDelEntorno();
+
+    console.log(`[ig] publicando ${pieza.origen || pieza.id} (${pieza.kind}) en ${cuenta ? cuenta.usuario || cuenta.ig_user_id : '—'}, intento ${pieza.attempts}`);
     try {
-      const r = await publish.publicar(pieza);
+      const r = await publish.publicar(pieza, cuenta);
       await cola.marcarPublicada(pieza.id, r);
       console.log(`[ig] publicada ${pieza.origen || pieza.id} → ${r.permalink || r.igMediaId}`);
     } catch (e) {

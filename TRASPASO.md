@@ -115,11 +115,16 @@ Publica los creativos de `marketing/` en `@lima_flores`, cinco al día, desde
 deploy), un vigía la mira cada minuto y Meta descarga el archivo desde
 `/api/ig/media/:id` — que por eso es público y necesita `PUBLIC_BASE_URL`.
 
-Para que salga algo hacen falta dos cosas: las variables (`IG_USER_ID`,
-`IG_ACCESS_TOKEN` con permiso `instagram_content_publish`, `PUBLIC_BASE_URL`) y
-**el interruptor del panel, que arranca apagado a propósito**. Un deploy no
-enciende una cuenta pública. Todo el detalle en
-`integrations/instagram/README.md`.
+Admite **varias cuentas**: se agregan desde el panel y viven en `ig_cuentas`.
+**El token no se guarda en la base** — la fila solo dice en qué variable de
+Railway está, y solo se aceptan nombres que empiecen por `IG_`. Al cargar la
+galería se elige una cuenta o todas las activas, y cada una lleva su copia y su
+agenda.
+
+Para que salga algo hacen falta dos cosas: las variables (`IG_ACCESS_TOKEN` con
+permiso `instagram_content_publish` y `PUBLIC_BASE_URL`, que ya está) y **el
+interruptor del panel, que arranca apagado a propósito**. Un deploy no enciende
+una cuenta pública. Todo el detalle en `integrations/instagram/README.md`.
 
 ### La web
 
