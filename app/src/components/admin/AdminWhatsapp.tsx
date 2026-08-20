@@ -14,9 +14,16 @@ type Template = {
 type Campaign = {
   id: string; name: string | null; template_id: string; template_name?: string;
   status: string; total: number; sent: number; failed: number; created_at: string;
+  directo?: boolean;
 };
 type CampaignMsg = { id: string; phone: string; status: string; error: string | null; contact_name: string | null };
 type CampaignDetail = Campaign & { messages: CampaignMsg[] };
+type Conexion = {
+  phoneNumberId: string; wabaId: string; appId: string; tokenEnv: string;
+  numero: string; etiqueta: string; tokenPuesto: boolean;
+};
+type Estado = { conexion: Conexion; configurado: boolean; falta: string[]; puedeCrearPlantillas: boolean };
+type Prueba = { ok: boolean; error?: string; aviso?: string; numero?: string | null; nombre?: string | null; waba?: string | null; calidad?: string | null };
 
 // Clases compartidas (mismo lenguaje visual que AdminStudio).
 const field = 'mt-1.5 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-rosa-500';
@@ -33,22 +40,175 @@ function StatusBadge({ status }: { status: string }) {
   return <span className={`inline-block rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${cls}`}>{status}</span>;
 }
 
-type Sub = 'contacts' | 'templates' | 'campaigns';
+type Sub = 'conexion' | 'contacts' | 'templates' | 'campaigns';
 
 export function AdminWhatsapp({ onAuthError }: { onAuthError: () => void }) {
   const [sub, setSub] = useState<Sub>('contacts');
+  const [estado, setEstado] = useState<Estado | null>(null);
   const fail = useCallback((e: unknown) => { if (e instanceof AuthError) { onAuthError(); return true; } return false; }, [onAuthError]);
+
+  // Sin número conectado no se puede enviar nada: la primera pestaña que se abre
+  // es la que hay que resolver.
+  const cargarEstado = useCallback(async () => {
+    try { return (await adminGet('/api/admin/wa/estado')) as Estado; }
+    catch (e) { fail(e); return null; }
+  }, [fail]);
+  useEffect(() => {
+    let vivo = true;
+    cargarEstado().then((d) => {
+      if (!vivo || !d) return;
+      setEstado(d);
+      if (!d.configurado) setSub('conexion');
+    });
+    return () => { vivo = false; };
+  }, [cargarEstado]);
 
   return (
     <div>
       <div className="mb-6 flex flex-wrap gap-2">
-        {([['contacts', 'Contactos'], ['templates', 'Plantillas'], ['campaigns', 'Campañas']] as [Sub, string][]).map(([k, l]) => (
-          <button key={k} onClick={() => setSub(k)} className={seg(sub === k) + ' rounded-sm'}>{l}</button>
+        {([['conexion', 'Conexión'], ['contacts', 'Contactos'], ['templates', 'Plantillas'], ['campaigns', 'Campañas']] as [Sub, string][]).map(([k, l]) => (
+          <button key={k} onClick={() => setSub(k)} className={seg(sub === k) + ' rounded-sm'}>
+            {l}{k === 'conexion' && estado && !estado.configurado ? ' ·' : ''}
+          </button>
         ))}
       </div>
+      {estado && !estado.configurado && sub !== 'conexion' && (
+        <p className="mb-4 bg-amber-100 px-3 py-2.5 text-sm text-amber-900">
+          WhatsApp todavía no está conectado: falta {estado.falta.join(', ')}. Se arregla en <strong>Conexión</strong>.
+        </p>
+      )}
+      {sub === 'conexion' && <Conexion fail={fail} onSaved={(d) => setEstado(d)} />}
       {sub === 'contacts' && <Contacts fail={fail} />}
       {sub === 'templates' && <Templates fail={fail} />}
       {sub === 'campaigns' && <Campaigns fail={fail} />}
+    </div>
+  );
+}
+
+// ─── Conexión ─────────────────────────────────────────────────────────────────
+// El número emisor y de qué variable de Railway sale el token. Por defecto es la
+// misma de Instagram (IG_ACCESS_TOKEN): si las dos cuentas cuelgan del mismo
+// Business de Meta, un solo token de System User sirve para las dos.
+function Conexion({ fail, onSaved }: { fail: (e: unknown) => boolean; onSaved: (e: Estado) => void }) {
+  const [estado, setEstado] = useState<Estado | null>(null);
+  const [form, setForm] = useState<Conexion | null>(null);
+  const [err, setErr] = useState('');
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [prueba, setPrueba] = useState<Prueba | null>(null);
+
+  const load = useCallback(async () => {
+    try { const d = (await adminGet('/api/admin/wa/estado')) as Estado; setEstado(d); setForm(d.conexion); }
+    catch (e) { if (!fail(e)) setErr((e as Error).message); }
+  }, [fail]);
+  useEffect(() => { load(); }, [load]);
+
+  if (!form || !estado) return <p className="py-10 text-center italic text-foreground/40">Cargando…</p>;
+  const set = (k: keyof Conexion) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
+
+  const guardar = async () => {
+    setErr(''); setNote(''); setPrueba(null); setBusy(true);
+    try {
+      const d = await adminSend('/api/admin/wa/conexion', 'POST', {
+        phoneNumberId: form.phoneNumberId, wabaId: form.wabaId, appId: form.appId,
+        tokenEnv: form.tokenEnv, numero: form.numero, etiqueta: form.etiqueta,
+      });
+      const nuevo = (await adminGet('/api/admin/wa/estado')) as Estado;
+      setEstado(nuevo); setForm(nuevo.conexion); onSaved(nuevo);
+      setNote(d.aviso || 'Conexión guardada.');
+    } catch (e) { if (!fail(e)) setErr((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  const probar = async () => {
+    setErr(''); setNote(''); setPrueba(null); setBusy(true);
+    try { setPrueba(await adminSend('/api/admin/wa/conexion/probar', 'POST')); }
+    catch (e) { if (!fail(e)) setPrueba({ ok: false, error: (e as Error).message }); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,460px)_1fr]">
+      <div className="space-y-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">El número que envía</p>
+
+        <div>
+          <label className={label}>ID del número de WhatsApp</label>
+          <input value={form.phoneNumberId} onChange={set('phoneNumberId')} className={field + ' font-mono'} placeholder="1234567890123456" />
+          <p className="mt-1 text-[11px] text-foreground/45">WhatsApp Manager → API Setup → <em>Phone number ID</em>. Son solo dígitos, no el +51.</p>
+        </div>
+
+        <div>
+          <label className={label}>ID de la cuenta de WhatsApp Business (WABA)</label>
+          <input value={form.wabaId} onChange={set('wabaId')} className={field + ' font-mono'} placeholder="1234567890123456" />
+          <p className="mt-1 text-[11px] text-foreground/45">De ahí cuelgan las plantillas: sin esto no se pueden crear ni sincronizar.</p>
+        </div>
+
+        <div>
+          <label className={label}>ID de la app de Meta (opcional)</label>
+          <input value={form.appId} onChange={set('appId')} className={field + ' font-mono'} placeholder="1234567890123456" />
+          <p className="mt-1 text-[11px] text-foreground/45">Solo hace falta para subir la <strong>foto</strong> del encabezado al crear una plantilla.</p>
+        </div>
+
+        <div>
+          <label className={label}>Variable del token</label>
+          <input value={form.tokenEnv} onChange={(e) => setForm({ ...form, tokenEnv: e.target.value.toUpperCase() })} className={field + ' font-mono'} placeholder="IG_ACCESS_TOKEN" />
+          <p className="mt-1 text-[11px] leading-relaxed text-foreground/45">
+            El token <strong>no se guarda en la base</strong>: acá va el nombre de la variable de Railway que lo contiene.
+            Por defecto es <span className="font-mono">IG_ACCESS_TOKEN</span>, el mismo de Instagram. Tiene que empezar por <span className="font-mono">IG_</span> o <span className="font-mono">WA_</span>.
+          </p>
+          <p className={`mt-1.5 font-mono text-[11px] ${estado.conexion.tokenPuesto ? 'text-green-700' : 'text-red-700'}`}>
+            {estado.conexion.tokenPuesto ? `✓ ${estado.conexion.tokenEnv} está puesta en el servidor` : `✕ ${estado.conexion.tokenEnv} no está puesta en el servidor`}
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <div className="flex-1"><label className={label}>Número (solo para reconocerlo)</label><input value={form.numero} onChange={set('numero')} className={field} placeholder="+51 987 654 321" /></div>
+          <div className="flex-1"><label className={label}>Etiqueta</label><input value={form.etiqueta} onChange={set('etiqueta')} className={field} placeholder="el de la tienda" /></div>
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={guardar} disabled={busy} className="flex-1 bg-ink-900 py-3 font-mono text-[12px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">{busy ? 'Guardando…' : 'Guardar conexión'}</button>
+          <button onClick={probar} disabled={busy} className="border border-rosa-500 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.1em] text-rosa-600 hover:bg-rosa-500 hover:text-ivory-50 disabled:opacity-50">Probar</button>
+        </div>
+        {note && <p className="bg-green-100 px-3 py-2.5 text-sm text-green-800">{note}</p>}
+        {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
+        {prueba && (
+          prueba.ok
+            ? <div className="bg-green-100 px-3 py-2.5 text-sm text-green-800">
+                <p>✓ Meta contesta con ese token.</p>
+                <p className="mt-1 font-mono text-[12px]">{prueba.numero || '—'} · {prueba.nombre || 'sin nombre verificado'}{prueba.calidad ? ` · calidad ${prueba.calidad}` : ''}</p>
+                {prueba.waba && <p className="mt-0.5 font-mono text-[12px]">WABA: {prueba.waba}</p>}
+                {prueba.aviso && <p className="mt-1 text-amber-900">{prueba.aviso}</p>}
+              </div>
+            : <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">✕ {prueba.error}</p>
+        )}
+      </div>
+
+      <div className="space-y-4 border border-border bg-surface/40 p-5 text-[13px] leading-relaxed text-foreground/70">
+        <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">El mismo token que Instagram</p>
+        <p>
+          WhatsApp e Instagram viven los dos en el Graph de Meta. Si el número y la cuenta de Instagram
+          cuelgan del <strong>mismo Business</strong>, el token de System User que ya publica en Instagram
+          sirve también acá: se deja <span className="font-mono">IG_ACCESS_TOKEN</span> y no hay que
+          agregar ninguna variable nueva.
+        </p>
+        <p>
+          Lo que <strong>no</strong> se hereda son los permisos. Al token le hacen falta además
+          <span className="font-mono"> whatsapp_business_messaging</span> y
+          <span className="font-mono"> whatsapp_business_management</span>; se agregan en
+          <em> Business Settings → System Users</em> y se regenera el token. Por eso está el botón
+          <strong> Probar</strong>: pregunta a Meta antes de que falle el primer envío.
+        </p>
+        <p>
+          Si el número está en otro Business, crea su propio token, ponlo en Railway con un nombre que
+          empiece por <span className="font-mono">WA_</span> y escríbelo arriba.
+        </p>
+        <p className="border-t border-border pt-3 text-foreground/55">
+          Meta solo deja enviar <strong>plantillas aprobadas</strong> y solo a quien dio su
+          consentimiento. La primera vez, una plantilla nueva tarda de minutos a horas en aprobarse.
+        </p>
+      </div>
     </div>
   );
 }
@@ -73,16 +233,31 @@ function parseContactsText(text: string): { name: string; phone: string }[] {
 function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [counts, setCounts] = useState<Counts>({ total: 0, active: 0 });
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templateId, setTemplateId] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [paste, setPaste] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
+  // Envío suelto: cuál se está enviando y cómo salió cada uno.
+  const [enviando, setEnviando] = useState<string | null>(null);
+  const [resultado, setResultado] = useState<Record<string, { ok: boolean; msg: string }>>({});
+  // Edición en la propia fila.
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
 
   const load = useCallback(async () => {
-    try { const d = await adminGet('/api/admin/wa/contacts'); setContacts(d.contacts || []); setCounts(d.counts || { total: 0, active: 0 }); }
-    catch (e) { if (!fail(e)) setErr((e as Error).message); }
+    try {
+      const [c, t] = await Promise.all([
+        adminGet('/api/admin/wa/contacts'),
+        adminGet('/api/admin/wa/templates'),
+      ]);
+      setContacts(c.contacts || []); setCounts(c.counts || { total: 0, active: 0 });
+      setTemplates((t.templates || []).filter((x: Template) => x.status === 'APPROVED'));
+    } catch (e) { if (!fail(e)) setErr((e as Error).message); }
   }, [fail]);
   useEffect(() => { load(); }, [load]);
 
@@ -115,6 +290,31 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
     catch (e) { if (!fail(e)) setErr((e as Error).message); }
   };
 
+  const abrirEdicion = (c: Contact) => { setEditId(c.id); setEditName(c.name || ''); setEditPhone(c.phone); };
+  const guardarEdicion = async (id: string) => {
+    setErr('');
+    try {
+      await adminSend('/api/admin/wa/contacts/' + id, 'PATCH', { name: editName.trim(), phone: editPhone.trim() });
+      setEditId(null); await load();
+    } catch (e) { if (!fail(e)) setErr((e as Error).message); }
+  };
+
+  const tpl = templates.find((t) => t.id === templateId);
+  // Enviar es hacia afuera y no se deshace: se confirma con nombre y número a la vista.
+  const enviar = async (c: Contact) => {
+    if (!templateId) { setErr('Elige primero la plantilla que quieres enviar.'); return; }
+    const quien = c.name ? `${c.name} (${c.phone})` : c.phone;
+    if (!window.confirm(`Enviar la plantilla «${tpl?.name}» a ${quien}?`)) return;
+    setErr(''); setEnviando(c.id);
+    setResultado((r) => { const n = { ...r }; delete n[c.id]; return n; });
+    try {
+      await adminSend('/api/admin/wa/contacts/' + c.id + '/enviar', 'POST', { templateId });
+      setResultado((r) => ({ ...r, [c.id]: { ok: true, msg: 'Enviado' } }));
+    } catch (e) {
+      if (!fail(e)) setResultado((r) => ({ ...r, [c.id]: { ok: false, msg: (e as Error).message } }));
+    } finally { setEnviando(null); }
+  };
+
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
       {/* Alta + importación */}
@@ -123,7 +323,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">Agregar contacto</p>
           <div className="mt-2 space-y-2">
             <div><label className={label}>Nombre</label><input value={name} onChange={(e) => setName(e.target.value)} className={field} placeholder="Ana Pérez" /></div>
-            <div><label className={label}>Teléfono</label><input value={phone} onChange={(e) => setPhone(e.target.value)} className={field} placeholder="987654321 (se normaliza a +51…)" /></div>
+            <div><label className={label}>Teléfono</label><input value={phone} onChange={(e) => setPhone(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }} className={field} placeholder="987654321 (se normaliza a +51…)" /></div>
             <button onClick={add} disabled={busy} className="w-full bg-ink-900 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">Agregar</button>
           </div>
         </div>
@@ -142,26 +342,71 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
         {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
       </div>
 
-      {/* Tabla */}
+      {/* Tabla + envío suelto */}
       <div>
-        <p className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{counts.total} contacto(s) · {counts.active} activos</p>
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{counts.total} contacto(s) · {counts.active} activos</p>
+          <div className="min-w-[240px]">
+            <label className={label}>Plantilla para enviar</label>
+            {templates.length
+              ? <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={field}>
+                  <option value="">— elegir —</option>
+                  {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              : <p className="mt-1.5 text-[12px] text-foreground/55">No hay plantillas aprobadas. Crea una en <strong>Plantillas</strong>.</p>}
+          </div>
+        </div>
+
+        {tpl && (
+          <div className="mb-3 flex items-start gap-3 border border-border bg-surface/40 p-3">
+            {tpl.has_header && <img src={apiUrl('/api/admin/wa/templates/' + tpl.id + '/header')} alt="" className="h-14 w-14 flex-shrink-0 rounded-sm object-cover" />}
+            <p className="line-clamp-3 text-[12px] leading-snug text-foreground/65">{tpl.body_text?.replace(/\{\{1\}\}/g, 'nombre del contacto')}</p>
+          </div>
+        )}
+
         <div className="max-h-[560px] overflow-y-auto border border-border">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-surface text-left text-[11px] uppercase tracking-[0.08em] text-foreground/50">
               <tr><th className="px-3 py-2 font-medium">Nombre</th><th className="px-3 py-2 font-medium">Teléfono</th><th className="px-3 py-2"></th></tr>
             </thead>
             <tbody>
-              {contacts.map((c) => (
-                <tr key={c.id} className="border-t border-border">
-                  <td className="px-3 py-2 text-ink-800">{c.name || <span className="text-foreground/40">—</span>}</td>
-                  <td className="px-3 py-2 font-mono text-[13px] text-ink-800">{c.phone}</td>
-                  <td className="px-3 py-2 text-right"><button onClick={() => del(c.id)} className="font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-red-700">Eliminar</button></td>
-                </tr>
-              ))}
+              {contacts.map((c) => {
+                const r = resultado[c.id];
+                return editId === c.id ? (
+                  <tr key={c.id} className="border-t border-border bg-ivory-100">
+                    <td className="px-3 py-2"><input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full border border-border bg-background px-2 py-1 text-sm outline-none focus:border-rosa-500" /></td>
+                    <td className="px-3 py-2"><input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full border border-border bg-background px-2 py-1 font-mono text-[13px] outline-none focus:border-rosa-500" /></td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right">
+                      <button onClick={() => guardarEdicion(c.id)} className="font-mono text-[10px] uppercase tracking-[0.08em] text-rosa-600 hover:text-rosa-500">Guardar</button>
+                      <button onClick={() => setEditId(null)} className="ml-3 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-ink-900">Cancelar</button>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={c.id} className="border-t border-border">
+                    <td className="px-3 py-2 text-ink-800">
+                      {c.name || <span className="text-foreground/40">—</span>}
+                      {r && <span className={`ml-2 font-mono text-[10px] uppercase tracking-[0.08em] ${r.ok ? 'text-green-700' : 'text-red-700'}`}>{r.ok ? '✓ enviado' : '✕ ' + r.msg}</span>}
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[13px] text-ink-800">{c.phone}</td>
+                    <td className="whitespace-nowrap px-3 py-2 text-right">
+                      <button onClick={() => enviar(c)} disabled={!templateId || enviando === c.id}
+                        className="border border-rosa-500 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-rosa-600 hover:bg-rosa-500 hover:text-ivory-50 disabled:cursor-not-allowed disabled:opacity-35">
+                        {enviando === c.id ? 'Enviando…' : 'Enviar'}
+                      </button>
+                      <button onClick={() => abrirEdicion(c)} className="ml-3 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-ink-900">Editar</button>
+                      <button onClick={() => del(c.id)} className="ml-3 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-red-700">Eliminar</button>
+                    </td>
+                  </tr>
+                );
+              })}
               {!contacts.length && <tr><td colSpan={3} className="px-3 py-10 text-center italic text-foreground/40">Aún no hay contactos.</td></tr>}
             </tbody>
           </table>
         </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-foreground/45">
+          <strong>Enviar</strong> manda la plantilla elegida a ese contacto en el momento, con su nombre puesto en <span className="font-mono">{'{{1}}'}</span>.
+          Para mandarla a varios a la vez, usa <strong>Campañas</strong>.
+        </p>
       </div>
     </div>
   );
@@ -493,7 +738,7 @@ function Campaigns({ fail }: { fail: (e: unknown) => boolean }) {
             <div key={c.id} className="flex items-center justify-between gap-3 border border-border px-3 py-2.5">
               <div className="min-w-0">
                 <p className="truncate text-sm text-ink-900">{c.name || c.template_name || c.id}</p>
-                <p className="font-mono text-[11px] text-foreground/50">{new Date(c.created_at).toLocaleString('es-PE')} · {c.template_name}</p>
+                <p className="font-mono text-[11px] text-foreground/50">{new Date(c.created_at).toLocaleString('es-PE')} · {c.template_name}{c.directo ? ' · envío directo' : ''}</p>
               </div>
               <div className="flex items-center gap-3 text-right">
                 <span className="font-mono text-[12px] text-foreground/60">✓ {c.sent} · ✕ {c.failed} / {c.total}</span>

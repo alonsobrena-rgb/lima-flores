@@ -214,6 +214,28 @@ CREATE TABLE IF NOT EXISTS wa_messages (
 );
 CREATE INDEX IF NOT EXISTS wa_messages_campaign_idx ON wa_messages (campaign_id, created_at);
 
+-- La conexión con el número de WhatsApp (Cloud API). Una sola fila (id='wa'),
+-- igual que ig_settings. Se configura desde el panel y **el token NO vive acá**:
+-- la fila solo guarda el NOMBRE de la variable de entorno que lo contiene, que
+-- por defecto es la misma de Instagram (IG_ACCESS_TOKEN). Si las dos cuentas
+-- están en el mismo Business de Meta, un token de System User sirve para las dos.
+CREATE TABLE IF NOT EXISTS wa_conexion (
+  id              TEXT PRIMARY KEY,                    -- siempre 'wa'
+  phone_number_id TEXT,                                -- el ID del número emisor (Cloud API)
+  waba_id         TEXT,                                -- id de la WhatsApp Business Account
+  app_id          TEXT,                                -- app de Meta (subir la foto del header)
+  token_env       TEXT NOT NULL DEFAULT 'IG_ACCESS_TOKEN',
+  numero          TEXT,                                -- +51…, solo para reconocerlo
+  etiqueta        TEXT,
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO wa_conexion (id) VALUES ('wa') ON CONFLICT (id) DO NOTHING;
+
+-- Un envío suelto (una plantilla a un contacto, desde la lista) también se
+-- guarda como campaña de uno: así el historial no tiene dos formas de contar lo
+-- mismo. La marca sirve para distinguirlo en el panel.
+ALTER TABLE wa_campaigns ADD COLUMN IF NOT EXISTS directo BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- ─── Suscripciones recurrentes (Culqi) ──────────────────────────────────────
 -- Una fila por suscripción activa de flores. id = sxn_ de Culqi. Culqi cobra
 -- automáticamente cada periodo; los eventos llegan por webhook (culqi_events).

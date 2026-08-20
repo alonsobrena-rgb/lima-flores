@@ -126,6 +126,34 @@ permiso `instagram_content_publish` y `PUBLIC_BASE_URL`, que ya está) y **el
 interruptor del panel, que arranca apagado a propósito**. Un deploy no enciende
 una cuenta pública. Todo el detalle en `integrations/instagram/README.md`.
 
+### Promociones por WhatsApp
+
+Manda plantillas de Meta a los clientes desde `/admin/whatsapp`. Cuatro pestañas:
+**Conexión**, **Contactos**, **Plantillas** y **Campañas**.
+
+- **El token es el mismo de Instagram.** Por defecto la conexión apunta a
+  `IG_ACCESS_TOKEN`: si el número de WhatsApp y la cuenta de IG cuelgan del mismo
+  Business de Meta, no hay que agregar ninguna variable nueva. Al token sí hay
+  que **agregarle los permisos** `whatsapp_business_messaging` y
+  `whatsapp_business_management` y regenerarlo — los de Instagram no alcanzan. El
+  botón **Probar** le pregunta a Meta antes de que falle el primer envío.
+- **El ID de WhatsApp se conecta desde el panel**, no por variables: el id del
+  número, el de la WABA y el de la app viven en `wa_conexion`. **El token no está
+  en la base** —solo el nombre de la variable de Railway que lo contiene, y solo
+  se aceptan nombres que empiecen por `IG_` o `WA_`—, mismo criterio que
+  `ig_cuentas`.
+- **Contactos**: nombre + teléfono, uno por uno o pegando/subiendo un CSV. Se
+  normalizan a E.164 (nueve dígitos → `+51…`), se pueden editar y borrar.
+- **Enviar una plantilla a uno solo**: se elige la plantilla arriba de la tabla y
+  cada fila tiene su botón **Enviar**, con confirmación. Sale en el momento, con
+  el nombre del contacto en `{{1}}`, y queda en el historial marcado como envío
+  directo. Para varios a la vez, **Campañas**.
+- Meta solo deja enviar **plantillas aprobadas** y a quien dio su consentimiento.
+  Una plantilla nueva tarda de minutos a horas; el estado se refresca con
+  *Sincronizar*.
+
+Todo el detalle en `integrations/whatsapp/README.md`.
+
 ### La web
 
 Primera pasada del sistema Florencia sobre `app/`:

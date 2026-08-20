@@ -1,6 +1,8 @@
 // db/whatsapp-store.js — acceso a datos de "Promociones por WhatsApp".
-// Tablas: wa_contacts, wa_templates, wa_campaigns, wa_messages.
+// Tablas: wa_conexion, wa_contacts, wa_templates, wa_campaigns, wa_messages.
 // El binario del header de cada plantilla vive en BYTEA (Railway borra el disco).
+// El TOKEN NO VIVE ACÁ: wa_conexion solo guarda el nombre de la variable de
+// entorno que lo contiene. Ver integrations/whatsapp/client.js → tokenDe().
 'use strict';
 
 const crypto = require('crypto');
@@ -20,6 +22,38 @@ function normalizePhone(raw) {
   if (s.length === 9) return '+51' + s;          // celular PE sin código
   if (s.length === 11 && s.startsWith('51')) return '+' + s; // 51 + 9 dígitos
   return '+' + s;
+}
+
+// ─── Conexión con el número de WhatsApp ─────────────────────────────────────
+// Una sola fila (id='wa'). Lo que se guarda son ids públicos de Meta y el
+// NOMBRE de la variable del token, nunca el token.
+const COLS_CONEXION = 'phone_number_id, waba_id, app_id, token_env, numero, etiqueta, updated_at';
+
+async function conexion() {
+  const { rows } = await db.query(`SELECT ${COLS_CONEXION} FROM wa_conexion WHERE id = 'wa'`);
+  if (rows.length) return rows[0];
+  // Primer arranque tras la migración: la fila se crea sola en el esquema, pero
+  // si alguien la borró no vale la pena reventar — se devuelve vacía.
+  return { phone_number_id: null, waba_id: null, app_id: null, token_env: 'IG_ACCESS_TOKEN', numero: null, etiqueta: null };
+}
+
+async function guardarConexion({ phoneNumberId, wabaId, appId, tokenEnv, numero, etiqueta }) {
+  const sets = [];
+  const vals = [];
+  const set = (col, val) => { vals.push(val); sets.push(`${col} = $${vals.length}`); };
+  if (phoneNumberId !== undefined) set('phone_number_id', String(phoneNumberId || '').trim() || null);
+  if (wabaId !== undefined) set('waba_id', String(wabaId || '').trim() || null);
+  if (appId !== undefined) set('app_id', String(appId || '').trim() || null);
+  if (tokenEnv !== undefined) set('token_env', String(tokenEnv || 'IG_ACCESS_TOKEN').trim());
+  if (numero !== undefined) set('numero', String(numero || '').trim() || null);
+  if (etiqueta !== undefined) set('etiqueta', String(etiqueta || '').trim() || null);
+  if (!sets.length) return conexion();
+  sets.push('updated_at = NOW()');
+  await db.query(
+    `INSERT INTO wa_conexion (id) VALUES ('wa') ON CONFLICT (id) DO NOTHING`
+  );
+  await db.query(`UPDATE wa_conexion SET ${sets.join(', ')} WHERE id = 'wa'`, vals);
+  return conexion();
 }
 
 // ─── Contactos ──────────────────────────────────────────────────────────────
@@ -70,6 +104,35 @@ async function importContacts(list) {
     } catch { skipped++; }
   }
   return { added, skipped };
+}
+
+async function getContact(id) {
+  const { rows } = await db.query(
+    `SELECT id, name, phone, opted_out FROM wa_contacts WHERE id = $1`, [id]
+  );
+  return rows[0] || null;
+}
+
+// Renombrar / cambiar el teléfono de un contacto ya guardado.
+async function updateContact(id, { name, phone, optedOut }) {
+  const sets = [];
+  const vals = [];
+  const set = (col, val) => { vals.push(val); sets.push(`${col} = $${vals.length}`); };
+  if (name !== undefined) set('name', String(name || '').trim() || null);
+  if (phone !== undefined) {
+    const norm = normalizePhone(phone);
+    if (!norm || norm.replace(/\D/g, '').length < 8) throw new Error('Teléfono inválido.');
+    set('phone', norm);
+    set('phone_raw', String(phone || ''));
+  }
+  if (optedOut !== undefined) set('opted_out', !!optedOut);
+  if (!sets.length) return getContact(id);
+  vals.push(id);
+  const { rows } = await db.query(
+    `UPDATE wa_contacts SET ${sets.join(', ')} WHERE id = $${vals.length}
+     RETURNING id, name, phone, opted_out, created_at`, vals
+  );
+  return rows[0] || null;
 }
 
 async function deleteContact(id) {
@@ -157,12 +220,12 @@ async function updateTemplateStatus({ name, language, metaId, status, reason }) 
 }
 
 // ─── Campañas + mensajes ──────────────────────────────────────────────────────
-async function createCampaign({ name, templateId, total }) {
+async function createCampaign({ name, templateId, total, directo = false }) {
   const id = newId();
   await db.query(
-    `INSERT INTO wa_campaigns (id, name, template_id, total, status)
-     VALUES ($1,$2,$3,$4,'sending')`,
-    [id, name || null, templateId, total || 0]
+    `INSERT INTO wa_campaigns (id, name, template_id, total, status, directo)
+     VALUES ($1,$2,$3,$4,'sending',$5)`,
+    [id, name || null, templateId, total || 0, !!directo]
   );
   return id;
 }
@@ -221,8 +284,11 @@ async function getCampaign(id) {
 
 module.exports = {
   normalizePhone,
+  // conexión
+  conexion, guardarConexion,
   // contactos
-  listContacts, countContacts, addContact, importContacts, deleteContact, getContacts,
+  listContacts, countContacts, addContact, importContacts, getContact, updateContact,
+  deleteContact, getContacts,
   // plantillas
   createTemplate, getTemplateMeta, listTemplates, getTemplateFull, getTemplateHeader,
   updateTemplateStatus,
