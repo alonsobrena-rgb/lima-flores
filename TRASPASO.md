@@ -1,31 +1,53 @@
 # Traspaso — dónde está el proyecto
 
 Resumen para retomar en una sesión nueva. Todo lo que sigue está en `main`,
-subido, con el árbol limpio.
+subido, con el árbol limpio, y desplegado — Railway construye desde `main` en
+cada push.
+
+Última sesión (21/08): se conectó WhatsApp al mismo token de Instagram, se armó
+la interfaz de contactos con envío suelto, y el admin se arregló para el
+teléfono. Lo que sigue está en **Lo que queda pendiente → punto 0**, y para eso
+hace falta abrir `graph.facebook.com` en la política de red del entorno.
 
 ---
 
-## Antes de empezar: la sesión nueva necesita dos cosas
+## Antes de empezar: lo que hay que abrir en el entorno
 
-Se quiere generar imágenes con Higgsfield. Hacen falta **las dos**, y ninguna
-aplica a una sesión ya abierta — las variables se inyectan al arrancar el
-contenedor, así que hay que abrir sesión **después** de configurarlas.
+Dos integraciones necesitan salir a internet y **el gateway las bloquea por
+defecto**. Ni la política de red ni las variables aplican a una sesión ya
+abierta: las dos se inyectan al arrancar el contenedor, así que se configuran
+primero y **después** se abre la sesión.
 
-1. **Permitir el dominio en la política de red del entorno**
-   (`claude.ai/code` → entorno). Sin esto la llamada muere antes de
-   autenticarse: probado, el gateway responde
-   `403 to CONNECT · platform.higgsfield.ai:443`.
-   Doc: https://code.claude.com/docs/en/claude-code-on-the-web
-2. **Las variables**, con estos nombres exactos — son los que leen los seis
-   scripts de `integrations/higgsfield/`:
-   - `HF_API_KEY`
-   - `HF_API_SECRET`
+Se permiten dominios en `claude.ai/code` → entorno → política de red.
+Doc: https://code.claude.com/docs/en/claude-code-on-the-web
 
-Para verificar en la sesión nueva, antes de gastar créditos:
+### 1. Meta (WhatsApp + Instagram) — **es lo que está bloqueando ahora**
+
+Para que la sesión pueda crear plantillas de WhatsApp por su cuenta hace falta
+permitir **`graph.facebook.com`**. Probado el 21/08: el token ya está puesto en
+el entorno (`IG_ACCESS_TOKEN`, 202 caracteres) pero la llamada muere antes de
+autenticarse —
+
+```
+connect_rejected · gateway answered 403 to CONNECT · graph.facebook.com:443
+```
+
+El token **no hace falta pedirlo de nuevo**; el dominio sí.
+
+### 2. Higgsfield (imágenes generadas)
+
+Permitir `platform.higgsfield.ai` y definir, con estos nombres exactos —son los
+que leen los seis scripts de `integrations/higgsfield/`—:
+
+- `HF_API_KEY`
+- `HF_API_SECRET`
+
+### Verificar, antes de gastar nada
 
 ```sh
-curl -sS --max-time 20 "$HTTPS_PROXY/__agentproxy/status" | head -20   # ¿hay rechazos?
-node integrations/higgsfield/probe.js                                   # ¿autentica?
+curl -sS --max-time 20 "$HTTPS_PROXY/__agentproxy/status" | head -30   # ¿hay rechazos?
+env | grep -oE '^(IG|WA|HF)_[A-Z0-9_]*' | sort                          # ¿están los nombres? (nunca los valores)
+node integrations/higgsfield/probe.js                                   # ¿autentica Higgsfield?
 ```
 
 ---
@@ -154,7 +176,14 @@ Manda plantillas de Meta a los clientes desde `/admin/whatsapp`. Cuatro pestaña
   Una plantilla nueva tarda de minutos a horas; el estado se refresca con
   *Sincronizar*.
 
-Todo el detalle en `integrations/whatsapp/README.md`.
+**Está desplegado y funcionando en producción**, pero **sin conectar todavía**:
+faltan el ID del número y el de la WABA, que se ponen en la pestaña *Conexión*.
+Hasta que eso pase, crear plantillas y enviar responden 503 con el motivo, y el
+panel avisa arriba qué falta.
+
+El copy del primer envío —BOX SIMONA— ya está escrito y con sus fuentes citadas
+en `marketing/whatsapp/box-simona.md`. Todo el detalle de la integración, en
+`integrations/whatsapp/README.md`.
 
 ### La web
 
@@ -180,6 +209,23 @@ Primera pasada del sistema Florencia sobre `app/`:
   la letra chica de producto. La letra chica tiene que decir lo mismo en la
   ficha, el pie y el checkout.
 
+### El panel de admin en el teléfono
+
+El admin se usa desde el celular y no entraba. Las siete secciones vivían en una
+tira horizontal que se apretaba hasta ser ilegible; ahora, por debajo de `lg`,
+la navegación es un **cajón lateral** (la barra dice en qué sección estás y el
+botón lo abre) y de `lg` para arriba siguen las pestañas de siempre. El corte es
+`lg` y no `md` porque las siete pestañas piden unos 940 px: en una tablet de 768
+se salían de la pantalla.
+
+**La navegación va pegada al borde superior**, así se alcanza desde cualquier
+punto del scroll sin volver al principio de una lista larga.
+
+De paso se cerraron dos desbordes horizontales que hacían que la página se
+pudiera arrastrar de lado: la tira de estados de Pedidos y, en Productos, el
+buscador con sus dos botones. Comprobado a 360, 390, 640, 768, 1024, 1100 y
+1280 px que `scrollWidth == clientWidth` en todos.
+
 ### Los seis puntos pedidos
 
 | | |
@@ -196,6 +242,70 @@ Las dos categorías nuevas no tienen productos: en portada la tarjeta dice
 ---
 
 ## Lo que queda pendiente
+
+### 0. Lo primero: dejar lista la plantilla del BOX SIMONA
+
+Es lo que quedó a medias y para lo que se abre la sesión nueva. El copy ya está
+escrito y con sus fuentes citadas en **`marketing/whatsapp/box-simona.md`** —
+no hay que volver a redactarlo.
+
+El encargo del cliente es explícito: **la plantilla la crea la sesión, no él.**
+Orden de trabajo:
+
+1. Comprobar que `graph.facebook.com` ya está permitido (ver la sección de
+   arriba). Si sigue bloqueado, no se puede hacer nada de esto: decirlo y parar.
+2. Con `IG_ACCESS_TOKEN`, preguntar a Meta qué abre ese token —**los permisos de
+   Instagram no alcanzan**, hacen falta `whatsapp_business_messaging` y
+   `whatsapp_business_management`:
+   ```sh
+   # scopes del token, sin imprimir el token
+   curl -sS "https://graph.facebook.com/v21.0/debug_token?input_token=$IG_ACCESS_TOKEN&access_token=$IG_ACCESS_TOKEN" \
+     | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; print(d.get("type"), d.get("app_id"), d.get("scopes"))'
+   ```
+3. Sacar de Meta el **ID del número** y el **ID de la WABA**:
+   `/me/businesses` → `/{business}/owned_whatsapp_business_accounts` →
+   `/{waba}/phone_numbers`. Con el token alcanza; no hace falta el panel.
+4. **Crear la plantilla** con el cuerpo de `box-simona.md`:
+   `POST /{waba}/message_templates`. Esto sí se puede hacer con el token solo.
+5. Pasar esos dos ids a la pestaña *Conexión* del panel. **Acá hace falta el
+   cliente**: guardar la conexión es `POST /api/admin/wa/conexion`, que va detrás
+   del login del admin, y la sesión no tiene esas credenciales (viven en Railway
+   como `ADMIN_USER` / `ADMIN_PASS` y **no deben pedirse ni copiarse acá**). Son
+   dos campos: se le pasan los ids ya averiguados y los pega él en 30 segundos.
+   Sin eso el panel no puede enviar, aunque la plantilla ya exista en Meta.
+6. Avisarle que Meta revisa la plantilla (de minutos a horas) y que hasta que
+   quede `APPROVED` no se puede enviar; el estado se refresca con *Sincronizar*
+   —leer antes el punto 0b, que ahí hay un agujero.
+
+**Ojo con la foto del encabezado:** la del catálogo es vertical y WhatsApp la
+mostraría cortada. Hay que preparar una horizontal con el producto entero antes
+de usarla — está explicado al final de `box-simona.md`. Una plantilla de solo
+texto se puede crear ya mismo; con foto, primero la foto.
+
+### 0b. Agujero conocido: sincronizar no da de alta plantillas
+
+Si la plantilla se crea **directo contra Meta** (no por `POST
+/api/admin/wa/templates`), **no aparece en el panel**, y por lo tanto no se
+puede enviar desde ahí. La causa está localizada:
+`db/whatsapp-store.js → updateTemplateStatus()` es un `UPDATE ... WHERE name AND
+language` pelado — refresca el estado de las que ya existen localmente y no
+inserta las que no.
+
+Arreglo, si se toma ese camino: pedirle a Meta también `components` en
+`listTemplates()` (`integrations/whatsapp/client.js`) y convertir esa función en
+un upsert, sacando de los componentes el `body_text`, el `header_kind` y los
+botones.
+
+Queda un cabo suelto aunque se haga: **una plantilla con foto adoptada desde
+Meta no trae los bytes de la foto**, y `runCampaign()` los necesita para subir el
+`media id` en cada envío. Dos salidas — guardar la foto en la fila con un
+endpoint nuevo, o enviar el encabezado por `link` público (Meta acepta
+`image: { link }`, y las fotos de producto ya son públicas en
+`limaflores.pe/products/…`). **Lo más simple es no meterse en esto**: crear la
+plantilla por la API del panel, que ya deja la fila y los bytes en su sitio de
+una sola pasada.
+
+### El resto
 
 1. **Faltan los puntos 2 y 3** de la lista del cliente — nunca llegaron, saltó
    del 1 al 4. Hay que pedírselos.
@@ -241,3 +351,20 @@ Las dos categorías nuevas no tienen productos: en portada la tarjeta dice
   (`server.js:99`), en memoria: un redeploy lo limpia.
 - `claudeusercontent.com` está bloqueado por el proxy, así que las vistas
   previas de Claude Design no se pueden capturar desde acá.
+- **`limaflores.pe` también está bloqueado por el proxy**: la web en producción
+  no se puede abrir desde la sesión. Para mirar la interfaz hay que levantarla
+  local — `PG_MEM=1` monta un Postgres en memoria y no hace falta base de datos:
+  ```sh
+  npm i --no-save pg-mem puppeteer-core
+  cd app && npm ci && npm run build && cd ..
+  PG_MEM=1 ADMIN_USER=demo ADMIN_PASS=demo1234 \
+    ADMIN_SESSION_SECRET=cualquiercosalarga PORT=8099 node server.js &
+  ```
+  Y las capturas, con el Chromium del sistema:
+  `puppeteer-core` + `executablePath: '/opt/pw-browsers/chromium'`. Así se revisó
+  el admin en móvil. `pg-mem` **no** está en `package.json` a propósito: sumarlo
+  engorda el build de Railway por un script de prueba.
+- El estado del deploy se mira con el MCP de Railway (`list-deployments`,
+  `get-logs`): proyecto **Lima Flores**, servicio `lima-flores`, que despliega
+  desde **`main`**. Un push a otra rama no llega a producción — ya pasó: se
+  perdió un rato buscando por qué el panel no tenía los cambios.
