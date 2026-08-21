@@ -41,12 +41,16 @@ ids a mano — son ids públicos de Meta, no secretos:
 node marketing/whatsapp/crear.js --waba=<id de la WABA> --app=<id de la app>
 ```
 
-### Si Meta responde que no encuentra la WABA
+### `assigned_whatsapp_business_accounts` vacío no significa nada
 
-Puede que la cuenta no esté asignada al System User del token:
-`GET /me/assigned_whatsapp_business_accounts` devolvía `{"data":[]}` cuando se
-escribió esto. Se arregla en *Business Settings → System Users → Add Assets →
-WhatsApp Accounts*, dando acceso completo a la WABA.
+Anotado porque costó una vuelta entera: `GET /me/assigned_whatsapp_business_accounts`
+devuelve `{"data":[]}` con este token, y de ahí se concluyó —mal— que la WABA no
+estaba asignada al System User y que no se podía crear nada.
+
+Es falso. El token abre la WABA sin problema: `GET /{waba}/message_templates`
+lista y `POST` crea. Ese edge queda vacío por cómo está montado el Business, no
+porque falte el acceso. **La prueba que vale es pedirle algo a la WABA**, no
+mirar la lista de asignaciones — para eso está `crear.js --estado`.
 
 ## Lo que se revisa antes de llamar a Meta
 
