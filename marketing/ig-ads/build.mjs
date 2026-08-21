@@ -658,8 +658,189 @@ const cifra = (a, ph, w, h) => {
 </div>`;
 };
 
+/* ── tres formatos que llevan la dirección ───────────────────────────────
+   Los doce de arriba venden el producto y se callan dónde está. En el feed el
+   enlace vive en el pie del anuncio, fuera de la imagen; en un post orgánico
+   de Instagram el pie ni siquiera es clicable. Si la pieza no dice la
+   dirección, quien la quiere tiene que buscarla — y no la busca. */
+
+// La dirección se arma con la ruta real del sitio: `/producto/:id` de
+// app/src/App.tsx, con el `id` del catálogo. Ojo, no es la que traen los
+// `landing` viejos de ads.json (`/producto.html?id=…`): esa lleva extensión,
+// así que el servidor no la manda al fallback del React y responde 404.
+const LINK_BASE = 'limaflores.pe/producto/';
+
+// El catálogo, para comprobar los slugs. Un link mal escrito no se nota al
+// mirar el JPEG —se ve perfecto— sino cuando alguien lo teclea y cae en la
+// home. Se valida antes de rendir y el build revienta, que es la única forma
+// de que no llegue impreso a un anuncio pagado.
+const CATALOGO = new Set(
+  JSON.parse(fs.readFileSync(path.join(ROOT, 'db/products.seed.json'), 'utf8')).map((p) => p.id),
+);
+
+// El único texto de la casa que NO usa `.mono`. El rótulo del sistema fuerza
+// mayúsculas y la ruta sí distingue: el React resuelve /producto/:id
+// comparando `p.id === id`, así que LIMAFLORES.PE/PRODUCTO/FLORERO-FORTI no
+// abre nada. Va en minúsculas y el slug en peso 500, para que se lea de un
+// vistazo dónde termina el dominio y empieza el producto.
+const lineaLink = (a, onDark) => `<span
+  style="font-family:'Jost',sans-serif;font-weight:300;text-transform:none;
+         letter-spacing:.015em;font-size:${a.creative.linkSize || 25}px;
+         color:${onDark ? 'rgba(255,255,255,.72)' : C.muted};white-space:nowrap"
+  >${LINK_BASE}<span style="font-weight:500;color:${onDark ? '#fff' : C.ink}">${a.link}</span></span>`;
+
+// EN · Enlace: foto a sangre y, al pie, el titular y la dirección tecleable.
+// Es `puro` con una pregunta más: no «qué es esto» sino «dónde lo compro».
+const enlace = (a, ph, w, h) => {
+  const tall = h === 1920;
+  const onDark = a.creative.tone === 'light';
+  const fg = onDark ? '#fff' : C.ink;
+  const mut = onDark ? 'rgba(255,255,255,.78)' : C.body;
+  const m = 76;
+  return `
+<div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
+  ${img(a, ph)}
+  <!-- El velo existe para que se lea el pie, y por eso llega justo hasta donde
+       empieza el pie. A sangre por los tres lados que toca, sin canto propio. -->
+  <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.56)}px;
+       background:${velo('to top', onDark ? '10,7,6' : rgb(C.fondo), onDark ? .84 : .97)}"></div>
+  <div style="position:absolute;top:${tall ? 272 : 64}px;left:${m}px">${logo(74, onDark)}</div>
+  <!-- Rótulo, titular, bajada, filete y dirección en un mismo flujo anclado
+       abajo: con la dirección anclada por su cuenta, un titular de tres líneas
+       se le monta encima. -->
+  <div style="position:absolute;left:${m}px;right:${m}px;bottom:${tall ? 372 : 74}px;color:${fg}">
+    <span class="mono" style="display:block;font-size:17px;color:${onDark ? '#F0BFCB' : C.rosa}">${a.creative.eyebrow}</span>
+    <h1 class="d" style="font-size:${a.creative.hlSize || (tall ? 96 : 86)}px;margin-top:18px">${a.creative.headline}</h1>
+    ${a.creative.sub
+      ? `<p style="font-size:${tall ? 28 : 26}px;font-weight:300;line-height:1.4;color:${mut};
+           margin-top:18px;max-width:${tall ? 860 : 800}px">${a.creative.sub}</p>`
+      : ''}
+    <div class="rule" style="margin-top:30px;background:${onDark ? 'rgba(255,255,255,.3)' : C.line}"></div>
+    <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:baseline;gap:26px">
+      ${lineaLink(a, onDark)}
+      <span class="d" style="font-size:44px;font-weight:400;color:${fg}">${a.creative.price}</span>
+    </div>
+  </div>
+</div>`;
+};
+
+// FI · Ficha: los datos del producto como campos, con su rótulo y su valor.
+// Las otras doce afirman una cosa; ésta afirma cuatro, y cada una se puede
+// citar de `db/products.seed.json`. Para quien ya está decidiendo y lo que le
+// falta es saber qué le llega exactamente. `split` también lista, pero son
+// argumentos sobre un panel de tinta; acá son campos sobre la página.
+const ficha = (a, ph, w, h) => {
+  const m = 76;
+  const fotoH = a.creative.fotoH || Math.round(h * 0.53);
+  const filaY = a.creative.filaY || 13;
+  const valorSize = a.creative.valorSize || 21;
+  const pieBottom = h === 1920 ? 372 : 58;
+  // La tabla cuelga de la foto y crece hacia abajo; el pie está anclado abajo.
+  // Los dos flujos no se ven venir: con la banda a 640 en 1:1, «Una tacita de
+  // expreso» le quedó montado encima a la dirección y el JPEG salió igual, sin
+  // una queja. Se estima el alto acá y se avisa, que es cuando todavía se puede
+  // quitar un campo o bajar la banda.
+  const altoTabla = 30 + 18 + 12 + (a.creative.hlSize || 58)
+    + (a.creative.tablaTop || 24)
+    + a.creative.campos.length * (2 * filaY + Math.round(valorSize * 1.3) + 1);
+  const pieTop = h - pieBottom - 46;
+  if (fotoH + altoTabla > pieTop - 16) {
+    console.warn(`  ! ${a.code}: la tabla llega a ${fotoH + altoTabla}px y el pie arranca en ${pieTop}px`
+      + ` — se van a pisar. Baja \`fotoH\`, quita un campo o pasa la pieza a 4:5.`);
+  }
+  return `
+<div style="position:absolute;inset:0;background:${C.fondo}">
+  <!-- La banda es mucho más ancha que alta, así que la foto entra a sangre con
+       la toma original: contenida dejaría dos franjas de relleno a los lados. -->
+  <div style="position:absolute;left:0;right:0;top:0;height:${fotoH}px;background:${ph.bg};overflow:hidden">
+    ${img(a, ph, true)}
+    <div style="position:absolute;inset:0;pointer-events:none;
+         background:${veloEsquina('8% 5%', rgb(C.fondo), .82, '48% 34%')}"></div>
+    <div style="position:absolute;top:${h === 1920 ? 64 : 46}px;left:${m}px">${logo(64)}</div>
+  </div>
+  <!-- Rótulo, nombre y tabla cuelgan del borde de la foto; el pie va anclado
+       abajo. Los dos flujos no se tocan: la tabla crece hacia abajo y el pie
+       está fijo, así que una fila de más se ve enseguida en el render. -->
+  <div style="position:absolute;left:${m}px;right:${m}px;top:${fotoH + 30}px">
+    <span class="mono" style="display:block;font-size:14px;color:${C.rosa}">${a.creative.eyebrow}</span>
+    <h1 class="d" style="font-size:${a.creative.hlSize || 58}px;margin-top:12px">${a.creative.headline}</h1>
+    <div style="margin-top:${a.creative.tablaTop || 24}px;border-top:1px solid ${C.line}">
+      ${a.creative.campos
+        .map(
+          ([k, v]) => `<div style="display:flex;justify-content:space-between;align-items:baseline;
+             gap:28px;padding:${filaY}px 0;border-bottom:1px solid ${C.line}">
+          <span class="mono" style="font-size:13px;color:${C.muted};flex:none">${k}</span>
+          <span style="font-size:${valorSize}px;font-weight:300;line-height:1.3;
+                color:${C.body};text-align:right">${v}</span></div>`,
+        )
+        .join('')}
+    </div>
+  </div>
+  <div style="position:absolute;left:${m}px;right:${m}px;bottom:${pieBottom}px;
+              display:flex;justify-content:space-between;align-items:baseline;gap:26px">
+    ${lineaLink(a)}
+    <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
+  </div>
+</div>`;
+};
+
+// DO · Doble: dos tomas del mismo producto, lado a lado. `tira` pone tres
+// productos distintos y contesta «cuál elijo»; ésta pone el mismo dos veces y
+// contesta otra cosa — «cómo se ve de verdad», que es la duda que frena una
+// compra por foto única. Casi todo el catálogo tiene segunda toma y ninguna
+// plantilla la estaba usando.
+const doble = (a, ph, w, h) => {
+  const ph2 = foto(a.creative.foto2);
+  // Los paneles son angostos —media pieza— así que mandan el alto: pasado cierto
+  // punto una toma cuadrada ya no cabe y `cover` le come media caja. 0.56 del
+  // lienzo es lo que aguanta un cuadrado entrando contenido sin letterbox feo.
+  const panelH = a.creative.panelH || Math.round(h * (h === 1920 ? 0.53 : 0.56));
+  const col = Math.floor(w / 2);
+  const m = 78;
+  // Repite la regla de `img()` en vez de llamarlo: `img()` lee el encuadre del
+  // anuncio, y acá hay dos fotos con el suyo. Una recortada entra contenida
+  // sobre su propio fondo medido; una intacta llena el panel.
+  const panel = (p, fit, pos) => `<img src="${p.uri}" class="shot"
+    style="object-fit:${p.recortada ? 'contain' : fit || 'cover'};object-position:${pos || '50% 50%'}">`;
+  return `
+<div style="position:absolute;inset:0;background:${C.fondo}">
+  <!-- Las dos sangran hasta el borde de arriba. En 9:16 dejar los 250 px que
+       tapa Instagram en blanco parte la pieza con un canto recto de lado a
+       lado y se lee como si el anuncio estuviera cortado. -->
+  <div style="position:absolute;left:0;top:0;width:${col}px;height:${panelH}px;
+              background:${ph.bg};overflow:hidden">
+    ${panel(ph, a.creative.fit, a.creative.position)}
+  </div>
+  <div style="position:absolute;left:${col}px;right:0;top:0;height:${panelH}px;
+              background:${ph2.bg};overflow:hidden">
+    ${panel(ph2, a.creative.fit2, a.creative.position2)}
+  </div>
+  <!-- El filete es la juntura, no un marco: un solo píxel, y sólo entre los dos
+       paneles. Sin él, dos fondos de estudio casi iguales se funden y el
+       díptico parece una foto sola mal encuadrada. -->
+  <div style="position:absolute;left:${col}px;top:0;width:1px;height:${panelH}px;background:${C.line}"></div>
+  <!-- El logotipo se apoya en el panel de estudio, que es el que tiene aire
+       arriba. Abajo no cabe: el pie ya lleva filete, dirección, precio y rótulo. -->
+  <div style="position:absolute;top:${a.creative.logoY || 40}px;left:${m - 18}px">${logo(62)}</div>
+  <div style="position:absolute;left:${m}px;right:${m}px;bottom:${h === 1920 ? 372 : 56}px">
+    <span class="mono" style="display:block;font-size:17px;color:${C.rosa}">${a.creative.eyebrow}</span>
+    <h1 class="d" style="font-size:${a.creative.hlSize || 78}px;margin-top:16px">${a.creative.headline}</h1>
+    ${a.creative.sub
+      ? `<p style="font-size:26px;font-weight:300;line-height:1.4;color:${C.body};
+           margin-top:16px;max-width:900px">${a.creative.sub}</p>`
+      : ''}
+    <div class="rule" style="margin-top:26px"></div>
+    <div style="margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:24px">
+      ${lineaLink(a)}
+      <span class="d" style="font-size:42px;font-weight:400">${a.creative.price}</span>
+    </div>
+    <span class="mono" style="display:block;margin-top:20px;font-size:14px;color:${C.muted}">${a.creative.footer}</span>
+  </div>
+</div>`;
+};
+
 const TEMPLATES = { editorial, split, quote, story, puro, sello, cuadro, titular, postal,
-  vitrina, tira, cifra };
+  vitrina, tira, cifra, enlace, ficha, doble };
 const FORMATS = { '4:5': [1080, 1350], '1:1': [1080, 1080], '9:16': [1080, 1920] };
 
 /* ──────────────────────────────  render  ─────────────────────────────── */
@@ -938,6 +1119,17 @@ const main = async () => {
   const salida = banco ? path.join(HERE, 'pruebas') : OUT;
   const ads = solo.length ? data.ads.filter((a) => solo.includes(a.code)) : data.ads;
   if (solo.length && !ads.length) throw new Error(`no existe ninguna de: ${solo.join(', ')}`);
+
+  // Las plantillas que imprimen la dirección la sacan de `link`, y un slug que
+  // no existe se ve perfecto en el JPEG: no falla hasta que alguien lo teclea.
+  // Se comprueba contra el catálogo antes de rendir nada.
+  for (const ad of ads) {
+    const pide = ['enlace', 'ficha', 'doble'].includes(ad.template);
+    if (pide && !ad.link) throw new Error(`${ad.code}: la plantilla \`${ad.template}\` imprime la dirección y falta \`link\``);
+    if (ad.link && !CATALOGO.has(ad.link)) {
+      throw new Error(`${ad.code}: /producto/${ad.link} no existe en db/products.seed.json`);
+    }
+  }
   const chrome = findChromium();
   const fonts = await fontCss();
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-ads-'));
