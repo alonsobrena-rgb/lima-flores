@@ -65,6 +65,16 @@ Mientras falte algo, la sección WhatsApp del admin funciona en modo
 lectura/edición de contactos, avisa arriba qué falta, y crear plantillas o enviar
 responde un error claro (503) en vez de fallar.
 
+## Los números y su código de país
+
+Al cargar un contacto se elige el código de país en un desplegable, y viene
+puesto en **+51 (Perú)**, que es casi toda la lista. Lo que el número traiga
+escrito manda sobre esa elección: un `+` o un `00` adelante se respetan tal cual,
+así que un CSV que ya viene en formato internacional entra bien sin tocar nada.
+El código elegido también se aplica al lote que se importa.
+
+Todo se guarda en E.164 (`+51987654321`), que es lo único que acepta Meta.
+
 ## Mandar una plantilla a un contacto
 
 En **Contactos**: se elige arriba la plantilla aprobada, y cada fila tiene su

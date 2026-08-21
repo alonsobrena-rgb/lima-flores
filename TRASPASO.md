@@ -143,7 +143,9 @@ Manda plantillas de Meta a los clientes desde `/admin/whatsapp`. Cuatro pestaña
   se aceptan nombres que empiecen por `IG_` o `WA_`—, mismo criterio que
   `ig_cuentas`.
 - **Contactos**: nombre + teléfono, uno por uno o pegando/subiendo un CSV. Se
-  normalizan a E.164 (nueve dígitos → `+51…`), se pueden editar y borrar.
+  normalizan a E.164 con el **código de país que se elige en el desplegable**,
+  que arranca en **+51** porque es casi toda la lista; un número escrito con `+`
+  o `00` manda sobre esa elección. Se pueden editar y borrar.
 - **Enviar una plantilla a uno solo**: se elige la plantilla arriba de la tabla y
   cada fila tiene su botón **Enviar**, con confirmación. Sale en el momento, con
   el nombre del contacto en `{{1}}`, y queda en el historial marcado como envío
