@@ -162,8 +162,9 @@ async function uploadResumable(conexion, { buffer, mime, filename = 'header' }) 
 // ─── Crear plantilla en Meta ─────────────────────────────────────────────────
 // headerHandle: opcional (handle del resumable upload, para header tipo imagen).
 // bodyText: usa {{1}} para el nombre. bodyExample: valor de muestra para {{1}}.
+// footerText: opcional, el pie en gris chico. Meta lo corta en 60 caracteres.
 // buttons: array opcional [{type:'URL'|'QUICK_REPLY'|'PHONE_NUMBER', text, url?, phone_number?}].
-async function createTemplate(conexion, { name, language = 'es', category = 'MARKETING', bodyText, bodyExample, headerHandle, buttons }) {
+async function createTemplate(conexion, { name, language = 'es', category = 'MARKETING', bodyText, bodyExample, headerHandle, footerText, buttons }) {
   const cfg = config(conexion);
   const components = [];
   if (headerHandle) {
@@ -174,6 +175,15 @@ async function createTemplate(conexion, { name, language = 'es', category = 'MAR
     body.example = { body_text: [[bodyExample || 'Ana']] };
   }
   components.push(body);
+  // El orden importa: Meta espera HEADER, BODY, FOOTER, BUTTONS. Mandado en
+  // otro orden responde un 100 sin decir cuál de los componentes le molestó.
+  if (footerText) {
+    const pie = String(footerText).trim();
+    if (pie.length > 60) {
+      throw new Error(`El pie tiene ${pie.length} caracteres y Meta acepta 60: «${pie}».`);
+    }
+    components.push({ type: 'FOOTER', text: pie });
+  }
   if (Array.isArray(buttons) && buttons.length) {
     components.push({ type: 'BUTTONS', buttons });
   }

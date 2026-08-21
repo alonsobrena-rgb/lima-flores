@@ -1,0 +1,38 @@
+{
+  "box_chococafe": {
+    "fondo": "#DCE1E3",
+    "foto": "box-chococafe.jpg",
+    "foto_en_lienzo": [
+      590,
+      628
+    ],
+    "lienzo": [
+      1200,
+      628
+    ]
+  },
+  "boxsito_crespito": {
+    "fondo": "#D5DADD",
+    "foto": "boxsito-ramon.jpg",
+    "foto_en_lienzo": [
+      469,
+      628
+    ],
+    "lienzo": [
+      1200,
+      628
+    ]
+  },
+  "florero_forti": {
+    "fondo": "#E5E8EB",
+    "foto": "florero-forti.jpg",
+    "foto_en_lienzo": [
+      585,
+      628
+    ],
+    "lienzo": [
+      1200,
+      628
+    ]
+  }
+}
