@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { apiUrl, adminGet, AuthError } from '@/lib/admin-api';
 import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminProducts } from '@/components/admin/AdminProducts';
@@ -8,6 +10,8 @@ import { AdminWhatsapp } from '@/components/admin/AdminWhatsapp';
 import { AdminCreateCard } from '@/components/admin/AdminCreateCard';
 import { AdminSubscriptions } from '@/components/admin/AdminSubscriptions';
 import { AdminPublicador } from '@/components/admin/AdminPublicador';
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 type Section = 'orders' | 'subscriptions' | 'cards' | 'products' | 'studio' | 'instagram' | 'whatsapp';
 const SECTIONS: { key: Section; label: string }[] = [
@@ -28,10 +32,26 @@ export default function Admin() {
   const { section: sectionParam } = useParams();
   const navigate = useNavigate();
   const section: Section = SECTIONS.find((s) => s.key === sectionParam)?.key ?? 'orders';
+  const actual = SECTIONS.find((s) => s.key === section) ?? SECTIONS[0];
   useEffect(() => {
     if (!SECTIONS.some((s) => s.key === sectionParam)) navigate('/admin/orders', { replace: true });
   }, [sectionParam, navigate]);
   const goto = (key: Section) => navigate('/admin/' + key);
+
+  // En el móvil las siete secciones no entran en una tira: se apretaban una
+  // contra otra hasta quedar ilegibles. Ahí la navegación pasa a un cajón
+  // lateral; de `md` para arriba siguen siendo pestañas, que es lo cómodo con
+  // sitio de sobra.
+  const [menu, setMenu] = useState(false);
+  useEffect(() => {
+    if (!menu) return;
+    const cerrar = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false); };
+    window.addEventListener('keydown', cerrar);
+    // Con el cajón abierto, el panel de atrás no se arrastra.
+    const previo = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', cerrar); document.body.style.overflow = previo; };
+  }, [menu]);
 
   // Sesión: una llamada barata a /api/admin/me al montar.
   const checkSession = useCallback(async () => {
@@ -56,15 +76,15 @@ export default function Admin() {
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-6 py-8 md:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="font-display text-4xl font-medium italic text-ink-900">Admin · <span className="text-rosa-500">Lima Flores</span></h1>
+          <h1 className="font-display text-3xl font-medium italic text-ink-900 md:text-4xl">Admin · <span className="text-rosa-500">Lima Flores</span></h1>
           <div className="flex items-center gap-3">
             <a href="https://logistics.cabify.com/parcels?group=all&history=actives" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/55 hover:text-foreground">Dashboard Cabify →</a>
             <button onClick={logout} className="border border-border px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">Salir</button>
           </div>
         </div>
 
-        {/* Navegación de secciones */}
-        <div className="mt-6 flex gap-2 border-b border-border">
+        {/* Navegación de secciones — pestañas en escritorio */}
+        <div className="mt-6 hidden gap-2 border-b border-border md:flex">
           {SECTIONS.map((s) => (
             <button key={s.key} onClick={() => goto(s.key)}
               className={`-mb-px border-b-2 px-4 py-3 font-mono text-[12px] uppercase tracking-[0.1em] transition-colors ${section === s.key ? 'border-rosa-500 text-ink-900' : 'border-transparent text-foreground/45 hover:text-ink-900'}`}>
@@ -72,6 +92,51 @@ export default function Admin() {
             </button>
           ))}
         </div>
+
+        {/* …y en móvil, la sección actual con el botón que abre el cajón */}
+        <button onClick={() => setMenu(true)} aria-label="Abrir menú de secciones" aria-expanded={menu}
+          className="mt-6 flex w-full items-center justify-between border border-border px-4 py-3 md:hidden">
+          <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-ink-900">{actual.label}</span>
+          <svg className="h-5 w-5 text-foreground/55" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="14" y2="17" />
+          </svg>
+        </button>
+
+        {createPortal(
+          <AnimatePresence>
+            {menu && (
+              <div className="fixed inset-0 z-[120] md:hidden">
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  onClick={() => setMenu(false)} className="absolute inset-0 bg-ink-900/45 backdrop-blur-sm"
+                />
+                <motion.nav
+                  initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ duration: 0.32, ease: EASE }}
+                  className="absolute left-0 top-0 flex h-full w-[80%] max-w-[320px] flex-col bg-background px-6 py-6 shadow-2xl"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-foreground/50">Secciones</p>
+                    <button onClick={() => setMenu(false)} aria-label="Cerrar menú" className="text-foreground/55 hover:text-foreground">
+                      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+                    </button>
+                  </div>
+
+                  <div className="mt-6 flex flex-col overflow-y-auto">
+                    {SECTIONS.map((s) => (
+                      <button key={s.key} onClick={() => { goto(s.key); setMenu(false); }}
+                        className={`border-l-2 border-b border-b-border/60 py-3.5 pl-4 text-left font-mono text-[12px] uppercase tracking-[0.1em] transition-colors ${section === s.key ? 'border-l-rosa-500 text-rosa-600' : 'border-l-transparent text-foreground/60'}`}>
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="mt-auto pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-foreground/40">Lima Flores · Admin</p>
+                </motion.nav>
+              </div>
+            )}
+          </AnimatePresence>,
+          document.body,
+        )}
 
         <div className="mt-7">
           {section === 'orders' && <AdminOrders onAuthError={onAuthError} />}

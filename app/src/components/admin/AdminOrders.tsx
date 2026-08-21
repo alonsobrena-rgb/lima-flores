@@ -62,10 +62,12 @@ export function AdminOrders({ onAuthError }: { onAuthError: () => void }) {
     <>
       <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{meta}</p>
 
-      <div className="mt-5 flex gap-1 border-b border-border">
+      {/* En el móvil los cuatro estados no entran de largo: la tira se arrastra
+          en vez de cortarse contra el borde. Con sitio de sobra no se nota. */}
+      <div className="mt-5 flex gap-1 overflow-x-auto border-b border-border">
         {STATUSES.map((s) => (
           <button key={s.key} onClick={() => setStatus(s.key)}
-            className={`border-b-2 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${status === s.key ? 'border-rosa-500 text-ink-900' : 'border-transparent text-foreground/50 hover:text-ink-900'}`}>
+            className={`shrink-0 whitespace-nowrap border-b-2 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${status === s.key ? 'border-rosa-500 text-ink-900' : 'border-transparent text-foreground/50 hover:text-ink-900'}`}>
             {s.label}
           </button>
         ))}
