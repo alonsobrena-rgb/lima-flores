@@ -83,11 +83,16 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Navegación de secciones — pestañas en escritorio */}
-        <div className="mt-6 hidden gap-2 border-b border-border md:flex">
+        {/* La navegación queda pegada arriba: en una lista larga de pedidos, el
+            menú se iba con el scroll y había que volver hasta el principio para
+            cambiar de sección. El fondo es sólido para que el contenido no se
+            transparente por debajo al pasar. */}
+        <div className="sticky top-0 z-40 -mx-6 mt-4 bg-background px-6 pb-1 pt-2 md:-mx-8 md:px-8 lg:mt-6 lg:pt-3">
+        {/* Pestañas en escritorio */}
+        <div className="hidden gap-2 overflow-x-auto border-b border-border lg:flex">
           {SECTIONS.map((s) => (
             <button key={s.key} onClick={() => goto(s.key)}
-              className={`-mb-px border-b-2 px-4 py-3 font-mono text-[12px] uppercase tracking-[0.1em] transition-colors ${section === s.key ? 'border-rosa-500 text-ink-900' : 'border-transparent text-foreground/45 hover:text-ink-900'}`}>
+              className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-4 py-3 font-mono text-[12px] uppercase tracking-[0.1em] transition-colors ${section === s.key ? 'border-rosa-500 text-ink-900' : 'border-transparent text-foreground/45 hover:text-ink-900'}`}>
               {s.label}
             </button>
           ))}
@@ -95,17 +100,19 @@ export default function Admin() {
 
         {/* …y en móvil, la sección actual con el botón que abre el cajón */}
         <button onClick={() => setMenu(true)} aria-label="Abrir menú de secciones" aria-expanded={menu}
-          className="mt-6 flex w-full items-center justify-between border border-border px-4 py-3 md:hidden">
+          className="flex w-full items-center justify-between border border-border bg-background px-4 py-3 lg:hidden">
           <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-ink-900">{actual.label}</span>
           <svg className="h-5 w-5 text-foreground/55" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
             <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="14" y2="17" />
           </svg>
         </button>
 
+        </div>
+
         {createPortal(
           <AnimatePresence>
             {menu && (
-              <div className="fixed inset-0 z-[120] md:hidden">
+              <div className="fixed inset-0 z-[120] lg:hidden">
                 <motion.div
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   onClick={() => setMenu(false)} className="absolute inset-0 bg-ink-900/45 backdrop-blur-sm"

@@ -73,9 +73,11 @@ export function AdminProducts({ onAuthError }: { onAuthError: () => void }) {
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{meta}</p>
-        <div className="flex items-center gap-2.5">
+        {/* En el móvil el buscador y los dos botones no entran de largo y se
+            salían de la pantalla: el buscador toma su propia línea. */}
+        <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar…"
-            className="w-48 border border-border bg-background px-3 py-2 text-sm outline-none focus:border-rosa-500" />
+            className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-rosa-500 sm:w-48" />
           <button onClick={() => setShowCats(true)} className="border border-border px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-900 hover:border-rosa-500 hover:text-rosa-500">Categorías</button>
           <button onClick={startNew} className="bg-rosa-500 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-600">+ Nuevo</button>
         </div>
