@@ -5,10 +5,20 @@
 //   node marketing/whatsapp/crear.js florero_forti
 //   node marketing/whatsapp/crear.js --revisar  # solo valida, no llama a Meta
 //   node marketing/whatsapp/crear.js --estado   # qué dice Meta de las que ya están
+//   node marketing/whatsapp/crear.js --waba=123 --app=456   # ids a mano
 //
 // Reusa `integrations/whatsapp/client.js`, que es el mismo cliente que usa el
-// panel: la conexión sale de la tabla `wa_conexion` o, si no hay base, de las
-// variables de entorno (WA_WABA_ID, WA_APP_ID y el token IG_ACCESS_TOKEN).
+// panel. De dónde salen los ids, en este orden:
+//
+//   1. los que se pasen por `--waba=` / `--app=` / `--phone=`;
+//   2. la fila `wa_conexion`, que es donde los deja el panel del admin;
+//   3. las variables de entorno WA_WABA_ID, WA_APP_ID, WA_PHONE_NUMBER_ID.
+//
+// El orden importa porque quien configura esto usa el panel, no Railway: la
+// primera versión de este script solo miraba el entorno y por eso decía que
+// faltaba todo aunque estuviera puesto. El token sí sale siempre del entorno
+// (IG_ACCESS_TOKEN), que es la regla de la casa: en la base va el nombre de la
+// variable, nunca el valor.
 //
 // Todo lo que se puede comprobar sin llamar a Meta se comprueba antes. Una
 // plantilla rechazada no es gratis: cuenta contra la calidad de la WABA y hay
@@ -60,6 +70,43 @@ function revisar(t) {
   return malo;
 }
 
+/** Un `--clave=valor` de la línea de comandos. */
+function flag(args, nombre) {
+  const hit = args.find((a) => a.startsWith(`--${nombre}=`));
+  return hit ? hit.slice(nombre.length + 3).trim() : '';
+}
+
+/**
+ * La fila de conexión. La base solo se toca si hay DATABASE_URL: sin eso,
+ * `db/index.js` deshabilita la persistencia y requerirlo revienta al primer
+ * query. Si la base no está a mano, se sigue con el entorno y los flags.
+ */
+async function cargarConexion(args) {
+  const manual = {
+    waba_id: flag(args, 'waba'),
+    app_id: flag(args, 'app'),
+    phone_number_id: flag(args, 'phone'),
+  };
+  const puestos = Object.entries(manual).filter(([, v]) => v);
+
+  let fila = null;
+  if (process.env.DATABASE_URL) {
+    try {
+      fila = await require('../../db/whatsapp-store').conexion();
+    } catch (e) {
+      console.error(`  · no pude leer wa_conexion (${e.message}); sigo con el entorno.`);
+    }
+  }
+
+  if (!fila && !puestos.length) return null;
+  const cx = Object.assign({}, fila);
+  for (const [k, v] of puestos) cx[k] = v;
+  cx._origen = puestos.length
+    ? (fila ? 'panel + línea de comandos' : 'línea de comandos')
+    : 'panel (wa_conexion)';
+  return cx;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const soloRevisar = args.includes('--revisar');
@@ -90,9 +137,13 @@ async function main() {
     return;
   }
 
-  // 2. La conexión. Sin base de datos, sale de las variables de entorno.
-  const conexion = null;
+  // 2. La conexión: panel primero, entorno después, y lo que diga la línea de
+  //    comandos por encima de las dos.
+  const conexion = await cargarConexion(args);
   const cfg = wa.config(conexion);
+  console.log(`\n  conexión  WABA ${cfg.wabaId || '—'}  ·  app ${cfg.appId || '—'}`
+    + `  ·  número ${cfg.phoneNumberId || '—'}  ·  token ${cfg.tokenEnv}${cfg.token ? '' : ' (no está en el entorno)'}`
+    + `  ·  origen ${conexion && conexion._origen ? conexion._origen : 'entorno'}`);
   if (estado) {
     if (!cfg.wabaId) throw new Error('Falta el ID de la WABA (WA_WABA_ID o la conexión del panel).');
     const enMeta = await wa.listTemplates(conexion);
@@ -105,11 +156,12 @@ async function main() {
 
   if (!wa.canCreateTemplates(conexion)) {
     const falta = wa.faltantes(conexion);
-    if (!cfg.appId) falta.push('el ID de la app de Meta (WA_APP_ID), que hace falta para subir la cabecera');
+    if (!cfg.appId) falta.push('el ID de la app de Meta, que hace falta para subir la cabecera');
     throw new Error(
       `No se puede crear todavía. Falta: ${falta.join(', ')}.\n`
-      + 'Los ids salen de WhatsApp Manager → API Setup. Además, la WABA tiene que estar\n'
-      + 'asignada al System User del token en Business Settings → System Users → Add Assets.',
+      + 'Si ya están puestos en el panel del admin, este script necesita DATABASE_URL para\n'
+      + 'leer esa fila: córrelo con `railway run node marketing/whatsapp/crear.js`, o pásale\n'
+      + 'los ids a mano con --waba= y --app= (son ids públicos de Meta, no secretos).',
     );
   }
 

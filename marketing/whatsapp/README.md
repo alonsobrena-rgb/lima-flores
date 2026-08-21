@@ -19,23 +19,34 @@ node marketing/whatsapp/crear.js --estado   # en qué van
 El copy y los datos están en `plantillas.json`; los tres cuerpos usan `{{1}}`
 para el nombre del contacto.
 
-## Qué falta para poder mandarlas
+## De dónde saca los ids
 
-`crear.js` valida todo lo local y **hoy se detiene ahí**, porque la conexión con
-Meta no está completa:
+En este orden, y el orden importa: quien configura esto usa el panel, no
+Railway. La primera versión del script solo miraba el entorno, así que decía
+que faltaba todo aunque estuviera bien puesto en el panel.
 
-- **La WABA no está asignada al System User del token.** El token
-  (`IG_ACCESS_TOKEN`) sí trae `whatsapp_business_management`, pero
-  `GET /me/assigned_whatsapp_business_accounts` responde `{"data":[]}` — la
-  llamada funciona, y no hay ninguna cuenta asignada. Se arregla en *Business
-  Settings → System Users → Add Assets → WhatsApp Accounts*.
-- **Faltan los tres ids**: el del número, el de la WABA y el de la app de Meta
-  (este último solo para subir la foto del encabezado). Salen de *WhatsApp
-  Manager → API Setup* y se ponen en el panel (*Admin → Promociones WhatsApp →
-  Conexión*) o como `WA_PHONE_NUMBER_ID`, `WA_WABA_ID` y `WA_APP_ID`.
+1. `--waba=` / `--app=` / `--phone=` en la línea de comandos;
+2. la fila `wa_conexion`, que es donde los deja *Admin → Promociones WhatsApp →
+   Conexión* — **requiere `DATABASE_URL`**, o sea correrlo con
+   `railway run node marketing/whatsapp/crear.js`;
+3. las variables `WA_WABA_ID`, `WA_APP_ID`, `WA_PHONE_NUMBER_ID`.
 
-Con eso puesto, `node marketing/whatsapp/crear.js` sube las tres cabeceras y
-crea las plantillas sin tocar nada más.
+El token es la excepción: sale siempre del entorno (`IG_ACCESS_TOKEN`), porque
+en la base va el **nombre** de la variable, nunca el valor.
+
+Corriéndolo desde una máquina sin acceso a la base, basta con pasarle los dos
+ids a mano — son ids públicos de Meta, no secretos:
+
+```sh
+node marketing/whatsapp/crear.js --waba=<id de la WABA> --app=<id de la app>
+```
+
+### Si Meta responde que no encuentra la WABA
+
+Puede que la cuenta no esté asignada al System User del token:
+`GET /me/assigned_whatsapp_business_accounts` devolvía `{"data":[]}` cuando se
+escribió esto. Se arregla en *Business Settings → System Users → Add Assets →
+WhatsApp Accounts*, dando acceso completo a la WABA.
 
 ## Lo que se revisa antes de llamar a Meta
 
