@@ -58,13 +58,22 @@ horas (`app/src/lib/delivery.ts`). Hasta que se decida cuál es la verdad,
 
 ## La foto del encabezado
 
+Lista: **`marketing/whatsapp/encabezados/box-simona.jpg`** (1600 × 838, 1.91:1,
+90 KB) — el formato que muestra WhatsApp.
+
 `app/public/products/box-simona.jpg` es una toma real, sobre blanco, con el
 producto entero: se ve el box y la tarjeta de dedicatoria, así que respalda dos
-de las afirmaciones. Sirve.
+de las afirmaciones. Pero es vertical (1707 × 2560) y en un encabezado apaisado
+WhatsApp cortaría el box o las rosas.
 
-**Pero es vertical (1707 × 2560) y WhatsApp muestra el encabezado apaisado**, así
-que va a recortar el box o las rosas. Antes de usarla hay que preparar una
-versión horizontal con el producto completo sobre blanco — lo mismo que hace
-`marketing/ig-ads/fotos/prep-fotos.py`: `contain` sobre un lienzo del color de
-fondo medido, nunca un recorte que corte el producto. Ver la regla 1 de
-`.claude/skills/piezas-graficas/SKILL.md`.
+La versión apaisada la genera `prep-encabezado.py` con el mismo método de los
+anuncios —regla 1 de `.claude/skills/piezas-graficas/SKILL.md`—: recorta hasta el
+producto, mide el color del fondo (`#FDFDFD`) y lo mete con `contain` sobre un
+lienzo de ese mismo color. El producto entra completo y no se ve ninguna costura.
+
+```sh
+python3 marketing/whatsapp/prep-encabezado.py box-simona.jpg
+```
+
+Revisada de a una: el box, las rosas y la tarjeta están enteros, sin marco y sin
+corte.

@@ -24,23 +24,22 @@ Doc: https://code.claude.com/docs/en/claude-code-on-the-web
 ### 1. Meta (WhatsApp + Instagram) — **es lo que está bloqueando ahora**
 
 Para que la sesión pueda crear plantillas de WhatsApp por su cuenta hace falta
-permitir **`graph.facebook.com`**. Probado el 21/08: el token ya está puesto en
-el entorno (`IG_ACCESS_TOKEN`, 202 caracteres) pero la llamada muere antes de
-autenticarse —
+permitir **`graph.facebook.com`**. Probado el 21/08 y **vuelto a probar el 21/08
+en una sesión nueva: sigue igual**. El token ya está puesto en el entorno
+(`IG_ACCESS_TOKEN`) pero la llamada muere antes de autenticarse —
 
 ```
 connect_rejected · gateway answered 403 to CONNECT · graph.facebook.com:443
 ```
 
-El token **no hace falta pedirlo de nuevo**; el dominio sí.
+El token **no hace falta pedirlo de nuevo**; el dominio sí. Y hay que abrirlo en
+la política de red **antes** de abrir la sesión: una sesión ya abierta no lo ve.
 
 ### 2. Higgsfield (imágenes generadas)
 
-Permitir `platform.higgsfield.ai` y definir, con estos nombres exactos —son los
-que leen los seis scripts de `integrations/higgsfield/`—:
-
-- `HF_API_KEY`
-- `HF_API_SECRET`
+`HF_API_KEY` y `HF_API_SECRET` **ya están definidas** en el entorno (comprobado
+el 21/08; son los nombres que leen los seis scripts de
+`integrations/higgsfield/`). Falta solo permitir `platform.higgsfield.ai`.
 
 ### Verificar, antes de gastar nada
 
@@ -277,10 +276,12 @@ Orden de trabajo:
    quede `APPROVED` no se puede enviar; el estado se refresca con *Sincronizar*
    —leer antes el punto 0b, que ahí hay un agujero.
 
-**Ojo con la foto del encabezado:** la del catálogo es vertical y WhatsApp la
-mostraría cortada. Hay que preparar una horizontal con el producto entero antes
-de usarla — está explicado al final de `box-simona.md`. Una plantilla de solo
-texto se puede crear ya mismo; con foto, primero la foto.
+**La foto del encabezado ya está lista**, que era el otro pendiente de este
+punto: `marketing/whatsapp/encabezados/box-simona.jpg`, 1600 × 838 (1.91:1), el
+producto entero sobre su propio blanco medido. La genera
+`marketing/whatsapp/prep-encabezado.py` con el método de los anuncios. Ya no hay
+que elegir entre plantilla de solo texto o con foto: se puede crear con foto en
+cuanto se abra el dominio.
 
 ### 0b. Agujero conocido: sincronizar no da de alta plantillas
 
