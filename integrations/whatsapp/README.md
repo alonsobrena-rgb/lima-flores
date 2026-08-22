@@ -88,5 +88,15 @@ a la vez está la pestaña **Campañas**.
 - Solo se pueden enviar **plantillas aprobadas** a usuarios con **opt-in**.
 - Las plantillas de marketing pasan por revisión de Meta (minutos a horas);
   usa el botón *Sincronizar* para refrescar el estado.
+- **Sincronizar también importa.** Lo creado fuera del panel —desde WhatsApp
+  Manager, o desde `marketing/whatsapp/crear.js`— no está en la tabla local, y
+  antes el sync solo hacía un `UPDATE`: no encontraba fila, no tocaba nada y
+  respondía `synced: N` como si hubiera ido bien, así que esas plantillas nunca
+  aparecían en el panel aunque estuvieran aprobadas. Ahora las inserta.
+- De una plantilla importada **falta la foto del encabezado**: Meta devuelve la
+  estructura pero no el binario de la imagen. Se ve en el panel y se le puede
+  mirar el estado, pero al intentar enviarla el envío falla con ese motivo. Para
+  poder mandarla hay que volver a crearla desde el panel, que es donde se guarda
+  la foto para re-subirla en cada campaña.
 - La foto del header se re-envía en cada mensaje: la plataforma la sube una vez
   por campaña y reutiliza ese `media id`.

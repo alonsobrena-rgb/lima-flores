@@ -198,9 +198,29 @@ async function listTemplates(conexion) {
   const cfg = config(conexion);
   const json = await graphJson(
     cfg, 'GET',
-    `/${cfg.wabaId}/message_templates?fields=name,status,id,category,language,rejected_reason&limit=200`
+    `/${cfg.wabaId}/message_templates?fields=name,status,id,category,language,rejected_reason,components&limit=200`
   );
   return Array.isArray(json.data) ? json.data : [];
+}
+
+// Los `components` que devuelve Meta, traducidos a las columnas de wa_templates.
+// Hace falta para las plantillas que no nacieron en el panel: de Meta llega la
+// estructura, y de ahí salen el cuerpo, si el header es imagen y los botones.
+// Lo que Meta NO devuelve es el binario de la foto del header, así que esa se
+// queda sin guardar y hay que volver a subirla antes de poder enviar.
+function parseComponents(components) {
+  const out = { bodyText: null, footerText: null, headerKind: 'none', buttons: null };
+  for (const c of Array.isArray(components) ? components : []) {
+    const tipo = String(c && c.type || '').toUpperCase();
+    if (tipo === 'BODY') out.bodyText = c.text || null;
+    else if (tipo === 'FOOTER') out.footerText = c.text || null;
+    else if (tipo === 'HEADER') {
+      out.headerKind = String(c.format || '').toUpperCase() === 'IMAGE' ? 'image' : 'none';
+    } else if (tipo === 'BUTTONS') {
+      out.buttons = Array.isArray(c.buttons) && c.buttons.length ? c.buttons : null;
+    }
+  }
+  return out;
 }
 
 // ─── Subir media al número (devuelve media id para el header al enviar) ───────
@@ -247,5 +267,5 @@ async function sendTemplate(conexion, { to, templateName, language = 'es', heade
 module.exports = {
   ENV_VALIDA, TOKEN_ENV_POR_DEFECTO,
   config, tokenDe, faltantes, isConfigured, canCreateTemplates, probar,
-  uploadResumable, createTemplate, listTemplates, uploadMedia, sendTemplate,
+  uploadResumable, createTemplate, listTemplates, parseComponents, uploadMedia, sendTemplate,
 };

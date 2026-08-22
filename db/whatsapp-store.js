@@ -232,6 +232,52 @@ async function updateTemplateStatus({ name, language, metaId, status, reason }) 
   );
 }
 
+/**
+ * Mete en la tabla lo que Meta tiene y acá no está. Devuelve 'importada' o
+ * 'actualizada'.
+ *
+ * Antes el sync era solo el UPDATE de arriba, y un UPDATE que no encuentra
+ * fila no falla: toca cero filas y sigue. Resultado: toda plantilla creada
+ * fuera del panel —desde WhatsApp Manager, o desde marketing/whatsapp/crear.js—
+ * era invisible en el admin, y «Sincronizar» respondía `synced: 7` como si
+ * hubiera funcionado. Por eso ahora inserta.
+ *
+ * Al actualizar solo se pisa el estado. El cuerpo, el tipo de header y los
+ * botones se rellenan únicamente si estaban vacíos, porque la fila local es la
+ * que tiene el binario de la foto y el texto tal cual se escribió: lo que
+ * guardó el panel manda sobre lo que devuelve Meta.
+ */
+async function upsertTemplateDesdeMeta({ name, language, metaId, status, reason, category, bodyText, headerKind, buttons }) {
+  const idioma = language || 'es';
+  const botones = buttons ? JSON.stringify(buttons) : null;
+  const { rows } = await db.query(
+    `SELECT id FROM wa_templates WHERE name = $1 AND language = $2`, [name, idioma]
+  );
+  if (rows.length) {
+    await db.query(
+      `UPDATE wa_templates
+          SET status = $1, rejected_reason = $2, meta_id = COALESCE($3, meta_id),
+              body_text = COALESCE(body_text, $4),
+              buttons = COALESCE(buttons, $5::jsonb)
+        WHERE name = $6 AND language = $7`,
+      [status, reason || null, metaId || null, bodyText || null, botones, name, idioma]
+    );
+    return 'actualizada';
+  }
+  const id = newId();
+  await db.query(
+    `INSERT INTO wa_templates
+       (id, meta_id, name, language, category, status, body_text, header_kind,
+        buttons, rejected_reason)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`,
+    [
+      id, metaId || null, name, idioma, category || 'MARKETING', status || 'PENDING',
+      bodyText || null, headerKind || 'none', botones, reason || null,
+    ]
+  );
+  return 'importada';
+}
+
 // ─── Campañas + mensajes ──────────────────────────────────────────────────────
 async function createCampaign({ name, templateId, total, directo = false }) {
   const id = newId();
@@ -304,7 +350,7 @@ module.exports = {
   deleteContact, getContacts,
   // plantillas
   createTemplate, getTemplateMeta, listTemplates, getTemplateFull, getTemplateHeader,
-  updateTemplateStatus,
+  updateTemplateStatus, upsertTemplateDesdeMeta,
   // campañas
   createCampaign, queueMessages, markMessage, bumpCampaign, finishCampaign,
   listCampaigns, getCampaign,

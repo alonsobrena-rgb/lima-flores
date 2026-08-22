@@ -264,12 +264,20 @@ async function syncTemplates(req, res) {
   if (!wa.isConfigured(cx)) return send(res, 503, { error: faltaMsg(cx) });
   try {
     const remote = await wa.listTemplates(cx);
+    // Importa además de actualizar: lo creado desde WhatsApp Manager o desde
+    // marketing/whatsapp/crear.js nunca pasó por acá, y antes quedaba invisible
+    // en el panel aunque estuviera aprobado en Meta.
+    let importadas = 0;
     for (const t of remote) {
-      await waStore.updateTemplateStatus({
-        name: t.name, language: t.language, metaId: t.id, status: t.status, reason: t.rejected_reason,
+      const c = wa.parseComponents(t.components);
+      const r = await waStore.upsertTemplateDesdeMeta({
+        name: t.name, language: t.language, metaId: t.id, status: t.status,
+        reason: t.rejected_reason, category: t.category,
+        bodyText: c.bodyText, headerKind: c.headerKind, buttons: c.buttons,
       });
+      if (r === 'importada') importadas++;
     }
-    return send(res, 200, { templates: await waStore.listTemplates(), synced: remote.length });
+    return send(res, 200, { templates: await waStore.listTemplates(), synced: remote.length, importadas });
   } catch (e) { return send(res, 502, { error: 'No se pudo sincronizar con Meta: ' + e.message }); }
 }
 
@@ -290,6 +298,19 @@ async function runCampaign(campaignId, templateId, cx) {
   const camp = await waStore.getCampaign(campaignId);
   if (!template || !camp) return;
   const hasVar = /\{\{1\}\}/.test(template.body_text || '');
+
+  // Meta no devuelve el binario de la foto del header, así que una plantilla
+  // importada con `sync` tiene `header_kind = 'image'` y `header_image` vacío.
+  // Sin esto se enviaba sin cabecera y Meta contestaba un error de componentes
+  // que no dice nada de dónde está el problema real.
+  if (template.header_kind === 'image' && !template.header_image) {
+    const falta = 'Esta plantilla se creó fuera del panel, así que su foto de cabecera no está guardada acá'
+      + ' (Meta no la devuelve). Vuelve a crearla desde el panel para poder enviarla.';
+    for (const m of camp.messages) await waStore.markMessage(m.id, { status: 'failed', error: falta });
+    await waStore.bumpCampaign(campaignId, { failed: camp.messages.length });
+    await waStore.finishCampaign(campaignId, 'failed');
+    return;
+  }
 
   let headerMediaId = null;
   if (template.header_kind === 'image' && template.header_image) {
