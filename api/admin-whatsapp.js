@@ -251,6 +251,11 @@ async function listTemplates(req, res) {
   catch (e) { return send(res, 500, { error: e.message }); }
 }
 
+// Meta manda `rejected_reason: 'NONE'` cuando la plantilla no fue rechazada.
+// Guardado tal cual, el panel lo pintaba en rojo debajo de cada plantilla como
+// si todas tuvieran un problema. Sin motivo real, se guarda NULL.
+const motivoReal = (r) => (r && String(r).toUpperCase() !== 'NONE' ? r : null);
+
 async function syncTemplates(req, res) {
   const cx = await waStore.conexion();
   if (!wa.isConfigured(cx)) return send(res, 503, { error: faltaMsg(cx) });
@@ -272,7 +277,7 @@ async function syncTemplates(req, res) {
       }
       const r = await waStore.upsertTemplateDesdeMeta({
         name: t.name, language: t.language, metaId: t.id, status: t.status,
-        reason: t.rejected_reason, category: t.category,
+        reason: motivoReal(t.rejected_reason), category: t.category,
         bodyText: c.bodyText, headerKind: c.headerKind, buttons: c.buttons,
         headerImage: foto ? foto.buffer : null, headerMime: foto ? foto.mime : null,
       });
