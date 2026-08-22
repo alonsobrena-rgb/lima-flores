@@ -247,7 +247,7 @@ async function updateTemplateStatus({ name, language, metaId, status, reason }) 
  * que tiene el binario de la foto y el texto tal cual se escribió: lo que
  * guardó el panel manda sobre lo que devuelve Meta.
  */
-async function upsertTemplateDesdeMeta({ name, language, metaId, status, reason, category, bodyText, headerKind, buttons }) {
+async function upsertTemplateDesdeMeta({ name, language, metaId, status, reason, category, bodyText, headerKind, buttons, headerImage, headerMime }) {
   const idioma = language || 'es';
   const botones = buttons ? JSON.stringify(buttons) : null;
   const { rows } = await db.query(
@@ -258,9 +258,12 @@ async function upsertTemplateDesdeMeta({ name, language, metaId, status, reason,
       `UPDATE wa_templates
           SET status = $1, rejected_reason = $2, meta_id = COALESCE($3, meta_id),
               body_text = COALESCE(body_text, $4),
-              buttons = COALESCE(buttons, $5::jsonb)
-        WHERE name = $6 AND language = $7`,
-      [status, reason || null, metaId || null, bodyText || null, botones, name, idioma]
+              buttons = COALESCE(buttons, $5::jsonb),
+              header_image = COALESCE(header_image, $6),
+              header_mime = COALESCE(header_mime, $7)
+        WHERE name = $8 AND language = $9`,
+      [status, reason || null, metaId || null, bodyText || null, botones,
+       headerImage || null, headerMime || null, name, idioma]
     );
     return 'actualizada';
   }
@@ -268,14 +271,25 @@ async function upsertTemplateDesdeMeta({ name, language, metaId, status, reason,
   await db.query(
     `INSERT INTO wa_templates
        (id, meta_id, name, language, category, status, body_text, header_kind,
-        buttons, rejected_reason)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`,
+        header_image, header_mime, buttons, rejected_reason)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12)`,
     [
       id, metaId || null, name, idioma, category || 'MARKETING', status || 'PENDING',
-      bodyText || null, headerKind || 'none', botones, reason || null,
+      bodyText || null, headerKind || 'none', headerImage || null, headerMime || null,
+      botones, reason || null,
     ]
   );
   return 'importada';
+}
+
+/** ¿Hay que bajarle la foto de muestra a esta plantilla? Evita re-descargar en
+ *  cada sync las que ya la tienen guardada. */
+async function faltaHeader(name, language) {
+  const { rows } = await db.query(
+    `SELECT (header_image IS NULL) AS falta FROM wa_templates WHERE name = $1 AND language = $2`,
+    [name, language || 'es']
+  );
+  return rows.length ? !!rows[0].falta : true;   // no está en la tabla → hay que traerla
 }
 
 // ─── Campañas + mensajes ──────────────────────────────────────────────────────
@@ -350,7 +364,7 @@ module.exports = {
   deleteContact, getContacts,
   // plantillas
   createTemplate, getTemplateMeta, listTemplates, getTemplateFull, getTemplateHeader,
-  updateTemplateStatus, upsertTemplateDesdeMeta,
+  updateTemplateStatus, upsertTemplateDesdeMeta, faltaHeader,
   // campañas
   createCampaign, queueMessages, markMessage, bumpCampaign, finishCampaign,
   listCampaigns, getCampaign,
