@@ -267,17 +267,26 @@ async function syncTemplates(req, res) {
     // Importa además de actualizar: lo creado desde WhatsApp Manager o desde
     // marketing/whatsapp/crear.js nunca pasó por acá, y antes quedaba invisible
     // en el panel aunque estuviera aprobado en Meta.
-    let importadas = 0;
+    let importadas = 0, conFoto = 0;
     for (const t of remote) {
       const c = wa.parseComponents(t.components);
+      // La foto solo se baja si acá no la tenemos: la URL de muestra viene
+      // firmada y caduca, así que se guarda el binario, no el enlace. Si la
+      // descarga falla la plantilla entra igual, solo que sin poder enviarse.
+      let foto = null;
+      if (c.headerKind === 'image' && c.headerUrl && await waStore.faltaHeader(t.name, t.language)) {
+        foto = await wa.fetchHeaderSample(c.headerUrl);
+        if (foto) conFoto++;
+      }
       const r = await waStore.upsertTemplateDesdeMeta({
         name: t.name, language: t.language, metaId: t.id, status: t.status,
         reason: t.rejected_reason, category: t.category,
         bodyText: c.bodyText, headerKind: c.headerKind, buttons: c.buttons,
+        headerImage: foto ? foto.buffer : null, headerMime: foto ? foto.mime : null,
       });
       if (r === 'importada') importadas++;
     }
-    return send(res, 200, { templates: await waStore.listTemplates(), synced: remote.length, importadas });
+    return send(res, 200, { templates: await waStore.listTemplates(), synced: remote.length, importadas, conFoto });
   } catch (e) { return send(res, 502, { error: 'No se pudo sincronizar con Meta: ' + e.message }); }
 }
 
@@ -299,13 +308,13 @@ async function runCampaign(campaignId, templateId, cx) {
   if (!template || !camp) return;
   const hasVar = /\{\{1\}\}/.test(template.body_text || '');
 
-  // Meta no devuelve el binario de la foto del header, así que una plantilla
-  // importada con `sync` tiene `header_kind = 'image'` y `header_image` vacío.
-  // Sin esto se enviaba sin cabecera y Meta contestaba un error de componentes
-  // que no dice nada de dónde está el problema real.
+  // Red de seguridad. El sync baja la foto de muestra de Meta, así que esto no
+  // debería pasar; pasa si esa descarga falló (URL caducada, red) y la fila
+  // quedó con header de imagen y sin binario. Sin esto se enviaba sin cabecera
+  // y Meta contestaba un error de componentes que no apunta al problema real.
   if (template.header_kind === 'image' && !template.header_image) {
-    const falta = 'Esta plantilla se creó fuera del panel, así que su foto de cabecera no está guardada acá'
-      + ' (Meta no la devuelve). Vuelve a crearla desde el panel para poder enviarla.';
+    const falta = 'Esta plantilla tiene cabecera de imagen y su foto no está guardada acá.'
+      + ' Dale a «Sincronizar estados» para que se baje de Meta, o vuelve a crearla desde el panel.';
     for (const m of camp.messages) await waStore.markMessage(m.id, { status: 'failed', error: falta });
     await waStore.bumpCampaign(campaignId, { failed: camp.messages.length });
     await waStore.finishCampaign(campaignId, 'failed');

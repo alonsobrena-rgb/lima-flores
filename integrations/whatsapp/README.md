@@ -93,10 +93,14 @@ a la vez está la pestaña **Campañas**.
   antes el sync solo hacía un `UPDATE`: no encontraba fila, no tocaba nada y
   respondía `synced: N` como si hubiera ido bien, así que esas plantillas nunca
   aparecían en el panel aunque estuvieran aprobadas. Ahora las inserta.
-- De una plantilla importada **falta la foto del encabezado**: Meta devuelve la
-  estructura pero no el binario de la imagen. Se ve en el panel y se le puede
-  mirar el estado, pero al intentar enviarla el envío falla con ese motivo. Para
-  poder mandarla hay que volver a crearla desde el panel, que es donde se guarda
-  la foto para re-subirla en cada campaña.
+- **La foto del encabezado también se recupera.** Al leer una plantilla, Meta
+  pone en `example.header_handle` una URL de `scontent.whatsapp.net` al JPEG de
+  muestra, y se descarga sin token. El sync la baja y guarda el binario, así que
+  una plantilla importada queda lista para enviar como cualquier otra. La URL va
+  firmada y caduca: se guarda la imagen, nunca el enlace. Solo se descarga si la
+  fila no tenía foto, para no repetir la bajada en cada sincronización.
+- Una plantilla creada desde el panel **no se pisa**. Al sincronizar solo se
+  actualiza su estado; el texto, los botones y la foto que guardó el panel se
+  quedan como estaban, porque esa fila es la que tiene el binario bueno.
 - La foto del header se re-envía en cada mensaje: la plataforma la sube una vez
   por campaña y reutiliza ese `media id`.

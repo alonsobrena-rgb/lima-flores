@@ -206,21 +206,43 @@ async function listTemplates(conexion) {
 // Los `components` que devuelve Meta, traducidos a las columnas de wa_templates.
 // Hace falta para las plantillas que no nacieron en el panel: de Meta llega la
 // estructura, y de ahí salen el cuerpo, si el header es imagen y los botones.
-// Lo que Meta NO devuelve es el binario de la foto del header, así que esa se
-// queda sin guardar y hay que volver a subirla antes de poder enviar.
+//
+// `headerUrl` merece una nota. Al CREAR una plantilla, `example.header_handle`
+// es el handle opaco que devolvió el resumable upload. Al LEERLA, Meta pone en
+// ese mismo campo una URL de scontent.whatsapp.net al JPEG de muestra, y esa
+// URL se descarga sin token. O sea que la foto de una plantilla ajena sí se
+// puede recuperar. Va firmada y caduca, así que se baja en el momento del sync
+// y se guarda el binario; no sirve de nada guardar la URL.
 function parseComponents(components) {
-  const out = { bodyText: null, footerText: null, headerKind: 'none', buttons: null };
+  const out = { bodyText: null, footerText: null, headerKind: 'none', headerUrl: null, buttons: null };
   for (const c of Array.isArray(components) ? components : []) {
     const tipo = String(c && c.type || '').toUpperCase();
     if (tipo === 'BODY') out.bodyText = c.text || null;
     else if (tipo === 'FOOTER') out.footerText = c.text || null;
     else if (tipo === 'HEADER') {
       out.headerKind = String(c.format || '').toUpperCase() === 'IMAGE' ? 'image' : 'none';
+      const h = c.example && Array.isArray(c.example.header_handle) ? c.example.header_handle[0] : null;
+      if (typeof h === 'string' && /^https?:\/\//.test(h)) out.headerUrl = h;
     } else if (tipo === 'BUTTONS') {
       out.buttons = Array.isArray(c.buttons) && c.buttons.length ? c.buttons : null;
     }
   }
   return out;
+}
+
+// Baja el JPEG de muestra del header. Devuelve null si algo falla: que no se
+// pueda recuperar la foto no es motivo para que el sync entero se caiga.
+const HEADER_MAX = 5 * 1024 * 1024;
+async function fetchHeaderSample(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const mime = res.headers.get('content-type') || 'image/jpeg';
+    if (!/^image\//.test(mime)) return null;
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (!buffer.length || buffer.length > HEADER_MAX) return null;
+    return { buffer, mime };
+  } catch { return null; }
 }
 
 // ─── Subir media al número (devuelve media id para el header al enviar) ───────
@@ -267,5 +289,5 @@ async function sendTemplate(conexion, { to, templateName, language = 'es', heade
 module.exports = {
   ENV_VALIDA, TOKEN_ENV_POR_DEFECTO,
   config, tokenDe, faltantes, isConfigured, canCreateTemplates, probar,
-  uploadResumable, createTemplate, listTemplates, parseComponents, uploadMedia, sendTemplate,
+  uploadResumable, createTemplate, listTemplates, parseComponents, fetchHeaderSample, uploadMedia, sendTemplate,
 };
