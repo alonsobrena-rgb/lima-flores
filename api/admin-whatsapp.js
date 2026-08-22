@@ -7,9 +7,9 @@
 //   POST   /api/admin/wa/conexion/probar     → le pregunta a Meta si ese token abre ese número
 // Contactos:
 //   GET    /api/admin/wa/contacts            → lista + conteo
-//   POST   /api/admin/wa/contacts            → alta individual { name, phone, countryCode }
-//   PATCH  /api/admin/wa/contacts/:id        → { name, phone, optedOut, countryCode }
-//   POST   /api/admin/wa/contacts/import     → bulk { contacts: [{name, phone}], countryCode }
+//   POST   /api/admin/wa/contacts            → alta individual { name, phone }
+//   PATCH  /api/admin/wa/contacts/:id        → { name, phone, optedOut }
+//   POST   /api/admin/wa/contacts/import     → bulk { contacts: [{name, phone}] }
 //   POST   /api/admin/wa/contacts/:id/enviar → una plantilla a ese contacto, ahora
 //   DELETE /api/admin/wa/contacts/:id
 // Plantillas:
@@ -51,13 +51,6 @@ function slugTemplateName(s) {
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
     .slice(0, 60) || 'plantilla';
-}
-
-// El código de país que eligió quien carga el contacto. Solo dígitos, y si
-// llega cualquier cosa se cae a Perú, que es el de casi todos.
-function codigoPais(v) {
-  const cc = String(v == null ? '' : v).replace(/\D/g, '');
-  return cc && cc.length <= 4 ? cc : undefined;
 }
 
 // Lo que falta, en una frase para mostrar tal cual en el panel.
@@ -147,7 +140,7 @@ async function listContacts(req, res) {
 async function addContact(req, res) {
   let body; try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
   if (!body.phone) return send(res, 400, { error: 'Falta el teléfono.' });
-  try { return send(res, 201, await waStore.addContact({ name: body.name, phone: body.phone, countryCode: codigoPais(body.countryCode) })); }
+  try { return send(res, 201, await waStore.addContact({ name: body.name, phone: body.phone })); }
   catch (e) { return send(res, 400, { error: e.message }); }
 }
 
@@ -156,7 +149,6 @@ async function patchContact(req, res, id) {
   try {
     const c = await waStore.updateContact(id, {
       name: body.name, phone: body.phone, optedOut: body.optedOut,
-      countryCode: codigoPais(body.countryCode),
     });
     return c ? send(res, 200, c) : send(res, 404, { error: 'No existe ese contacto.' });
   } catch (e) {
@@ -169,7 +161,7 @@ async function importContacts(req, res) {
   let body; try { body = await readJsonBody(req, 4 * 1024 * 1024); } catch (e) { return send(res, 400, { error: e.message }); }
   const list = Array.isArray(body.contacts) ? body.contacts : [];
   if (!list.length) return send(res, 400, { error: 'No hay contactos para importar.' });
-  try { return send(res, 200, await waStore.importContacts(list, codigoPais(body.countryCode))); }
+  try { return send(res, 200, await waStore.importContacts(list)); }
   catch (e) { return send(res, 500, { error: e.message }); }
 }
 

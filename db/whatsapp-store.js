@@ -13,26 +13,29 @@ const newId = () => crypto.randomBytes(8).toString('hex');
 // ─── Normalización de teléfono a E.164 ──────────────────────────────────────
 // Limpia espacios/guiones/paréntesis y deja el número en formato +<código><nº>.
 //
-// El código de país lo elige quien carga el contacto —Perú (51) por defecto,
-// que es la enorme mayoría—, pero lo que el número traiga escrito manda sobre
-// esa elección: un `+` o un `00` adelante se respetan tal cual. Antes se asumía
-// Perú siempre, así que un celular chileno de nueve dígitos entraba como
-// peruano sin avisar.
-const PAIS_POR_DEFECTO = '51'; // Perú
+// Una sola regla, sin desplegable de países: si el número viene con `+`, manda
+// lo que está escrito; si no, es peruano y se le pone +51. Había un selector de
+// código de país en el panel y se quitó — la lista es de Lima y elegir el país
+// en cada alta era un paso que nadie usaba y que se podía equivocar.
+//
+// El `00` se sigue respetando porque es el prefijo internacional escrito a la
+// vieja usanza: `0051…` es alguien marcando fuera del país, y tratarlo como
+// número local lo dejaría en +510051…
+const PERU = '51';
 
-function normalizePhone(raw, codigoPais = PAIS_POR_DEFECTO) {
+function normalizePhone(raw) {
   if (!raw) return '';
   let s = String(raw).trim().replace(/[\s\-().]/g, '');
   if (s.startsWith('00')) s = '+' + s.slice(2);
   if (s.startsWith('+')) return '+' + s.slice(1).replace(/\D/g, '');
   s = s.replace(/\D/g, '');
   if (!s) return '';
-  const cc = String(codigoPais || PAIS_POR_DEFECTO).replace(/\D/g, '') || PAIS_POR_DEFECTO;
-  // Si ya viene con el código adelante (51987654321), no se duplica. El margen
-  // de cinco dígitos evita confundir un número nacional que empieza igual que
-  // su propio código con uno que ya lo trae.
-  if (s.startsWith(cc) && s.length > cc.length + 5) return '+' + s;
-  return '+' + cc + s;
+  // Si ya viene con el 51 adelante y sin `+` (51987654321), no se duplica. El
+  // margen de cinco dígitos evita confundir un número nacional que empiece por
+  // 51 con uno que ya trae el código; los celulares peruanos empiezan por 9,
+  // así que en la práctica no se cruzan.
+  if (s.startsWith(PERU) && s.length > PERU.length + 5) return '+' + s;
+  return '+' + PERU + s;
 }
 
 // ─── Conexión con el número de WhatsApp ─────────────────────────────────────
@@ -84,8 +87,8 @@ async function countContacts() {
   return rows[0] || { total: 0, active: 0 };
 }
 
-async function addContact({ name, phone, countryCode }) {
-  const norm = normalizePhone(phone, countryCode);
+async function addContact({ name, phone }) {
+  const norm = normalizePhone(phone);
   if (!norm || norm.replace(/\D/g, '').length < 8) throw new Error('Teléfono inválido.');
   const id = newId();
   const { rows } = await db.query(
@@ -101,10 +104,10 @@ async function addContact({ name, phone, countryCode }) {
 // Bulk import. Devuelve { added, skipped }. Dedupe por teléfono (ON CONFLICT).
 // El código de país es el mismo para todo el lote: cada fila puede saltárselo
 // escribiendo el suyo con +.
-async function importContacts(list, countryCode) {
+async function importContacts(list) {
   let added = 0, skipped = 0;
   for (const row of Array.isArray(list) ? list : []) {
-    const norm = normalizePhone(row && row.phone, countryCode);
+    const norm = normalizePhone(row && row.phone);
     if (!norm || norm.replace(/\D/g, '').length < 8) { skipped++; continue; }
     try {
       await db.query(
@@ -127,13 +130,13 @@ async function getContact(id) {
 }
 
 // Renombrar / cambiar el teléfono de un contacto ya guardado.
-async function updateContact(id, { name, phone, optedOut, countryCode }) {
+async function updateContact(id, { name, phone, optedOut }) {
   const sets = [];
   const vals = [];
   const set = (col, val) => { vals.push(val); sets.push(`${col} = $${vals.length}`); };
   if (name !== undefined) set('name', String(name || '').trim() || null);
   if (phone !== undefined) {
-    const norm = normalizePhone(phone, countryCode);
+    const norm = normalizePhone(phone);
     if (!norm || norm.replace(/\D/g, '').length < 8) throw new Error('Teléfono inválido.');
     set('phone', norm);
     set('phone_raw', String(phone || ''));
@@ -356,7 +359,7 @@ async function getCampaign(id) {
 }
 
 module.exports = {
-  normalizePhone, PAIS_POR_DEFECTO,
+  normalizePhone, PERU,
   // conexión
   conexion, guardarConexion,
   // contactos

@@ -25,28 +25,10 @@ type Conexion = {
 type Estado = { conexion: Conexion; configurado: boolean; falta: string[]; puedeCrearPlantillas: boolean };
 type Prueba = { ok: boolean; error?: string; aviso?: string; numero?: string | null; nombre?: string | null; waba?: string | null; calidad?: string | null };
 
-// Los códigos de país que se ofrecen al cargar un contacto. Perú va primero y es
-// el que viene puesto: es la enorme mayoría de la lista. El resto son los
-// destinos que aparecen de verdad —vecinos, la diáspora— y no las 200 banderas
-// del mundo, que solo harían más largo el desplegable.
-const PAISES: { cc: string; nombre: string }[] = [
-  { cc: '51', nombre: 'Perú' },
-  { cc: '54', nombre: 'Argentina' },
-  { cc: '591', nombre: 'Bolivia' },
-  { cc: '55', nombre: 'Brasil' },
-  { cc: '1', nombre: 'Canadá / EE. UU.' },
-  { cc: '56', nombre: 'Chile' },
-  { cc: '57', nombre: 'Colombia' },
-  { cc: '506', nombre: 'Costa Rica' },
-  { cc: '593', nombre: 'Ecuador' },
-  { cc: '34', nombre: 'España' },
-  { cc: '52', nombre: 'México' },
-  { cc: '507', nombre: 'Panamá' },
-  { cc: '595', nombre: 'Paraguay' },
-  { cc: '598', nombre: 'Uruguay' },
-  { cc: '58', nombre: 'Venezuela' },
-];
-const CC_POR_DEFECTO = '51';
+// Los contactos son de Lima. El número se guarda tal cual si viene con `+`, y
+// si no se le pone el +51 — antes había un desplegable de países acá y se
+// quitó: era un paso más en cada alta, siempre en Perú, y uno que se podía
+// dejar mal puesto sin notarlo. La regla vive en db/whatsapp-store.js.
 
 // Clases compartidas (mismo lenguaje visual que AdminStudio).
 const field = 'mt-1.5 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-rosa-500';
@@ -260,7 +242,6 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const [templateId, setTemplateId] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [cc, setCc] = useState(CC_POR_DEFECTO);
   const [paste, setPaste] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -288,7 +269,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const add = async () => {
     if (!phone.trim()) { setErr('Ingresa un teléfono.'); return; }
     setErr(''); setBusy(true);
-    try { await adminSend('/api/admin/wa/contacts', 'POST', { name: name.trim(), phone: phone.trim(), countryCode: cc }); setName(''); setPhone(''); await load(); }
+    try { await adminSend('/api/admin/wa/contacts', 'POST', { name: name.trim(), phone: phone.trim() }); setName(''); setPhone(''); await load(); }
     catch (e) { if (!fail(e)) setErr((e as Error).message); }
     finally { setBusy(false); }
   };
@@ -297,7 +278,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const importPasted = async () => {
     if (!parsed.length) return;
     setErr(''); setBusy(true); setNote('');
-    try { const r = await adminSend('/api/admin/wa/contacts/import', 'POST', { contacts: parsed, countryCode: cc }); setNote(`Importados ${r.added} · omitidos ${r.skipped}`); setPaste(''); await load(); }
+    try { const r = await adminSend('/api/admin/wa/contacts/import', 'POST', { contacts: parsed }); setNote(`Importados ${r.added} · omitidos ${r.skipped}`); setPaste(''); await load(); }
     catch (e) { if (!fail(e)) setErr((e as Error).message); }
     finally { setBusy(false); }
   };
@@ -318,7 +299,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const guardarEdicion = async (id: string) => {
     setErr('');
     try {
-      await adminSend('/api/admin/wa/contacts/' + id, 'PATCH', { name: editName.trim(), phone: editPhone.trim(), countryCode: cc });
+      await adminSend('/api/admin/wa/contacts/' + id, 'PATCH', { name: editName.trim(), phone: editPhone.trim() });
       setEditId(null); await load();
     } catch (e) { if (!fail(e)) setErr((e as Error).message); }
   };
@@ -349,16 +330,10 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
             <div><label className={label}>Nombre</label><input value={name} onChange={(e) => setName(e.target.value)} className={field} placeholder="Ana Pérez" /></div>
             <div>
               <label className={label}>Teléfono</label>
-              <div className="mt-1.5 flex">
-                <select value={cc} onChange={(e) => setCc(e.target.value)} title="Código de país"
-                  className="w-[124px] border border-border bg-background px-2 py-2.5 font-mono text-[13px] outline-none focus:border-rosa-500">
-                  {PAISES.map((p) => <option key={p.cc} value={p.cc}>+{p.cc} · {p.nombre}</option>)}
-                </select>
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
-                  className="-ml-px w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-rosa-500"
-                  placeholder="987654321" />
-              </div>
-              <p className="mt-1 text-[11px] text-foreground/45">Queda como <span className="font-mono">+{cc}…</span>. Si escribes el número con <span className="font-mono">+</span> adelante, manda lo que escribiste.</p>
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
+                className="mt-1.5 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-rosa-500"
+                placeholder="987654321" />
+              <p className="mt-1 text-[11px] text-foreground/45">Queda como <span className="font-mono">+51…</span>. Si escribes el número con <span className="font-mono">+</span> adelante, manda lo que escribiste.</p>
             </div>
             <button onClick={add} disabled={busy} className="w-full bg-ink-900 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">Agregar</button>
           </div>
@@ -368,7 +343,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">Importar en lote</p>
           <p className="mt-1 text-[12px] leading-relaxed text-foreground/55">
             Sube un CSV o pega filas <span className="font-mono">nombre, teléfono</span> (una por línea).
-            Los que no traigan <span className="font-mono">+</span> entran como <span className="font-mono">+{cc}</span>.
+            Los que no traigan <span className="font-mono">+</span> entran como <span className="font-mono">+51</span>.
           </p>
           <label className="mt-2 inline-block cursor-pointer border border-border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">
             Elegir CSV…<input type="file" accept=".csv,text/csv,text/plain" onChange={onFile} className="hidden" />
