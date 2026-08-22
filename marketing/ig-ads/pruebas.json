@@ -1,5 +1,5 @@
 {
-  "_": "Banco de pruebas de formatos. NO es la campaña: acá se mira una plantilla nueva antes de que exista un solo anuncio con ella. Se rinde con `node build.mjs --pruebas` y sale en pruebas/. Los textos son reales (catálogo y checkout), para que la prueba diga la verdad sobre cómo se comporta el formato con el copy de verdad.",
+  "_": "Banco de pruebas de formatos. NO es la campaña: acá se mira una plantilla nueva antes de que exista un solo anuncio con ella. Se rinde con `node build.mjs --pruebas` y sale en pruebas/. Los textos son reales (catálogo y checkout), para que la prueba diga la verdad sobre cómo se comporta el formato con el copy de verdad. Las tres últimas (enlace, ficha, doble) imprimen la dirección del producto en la propia pieza: llevan `link` con el id del catálogo y el build lo valida contra db/products.seed.json antes de rendir.",
   "products": [],
   "ads": [
     {
@@ -127,6 +127,122 @@
         "footer": "Eliges el día y la hora",
         "fit": "cover",
         "position": "50% 0%"
+      }
+    },
+    {
+      "code": "PR-enlace-1",
+      "template": "enlace",
+      "format": "4:5",
+      "photo": "florero-forti.jpg",
+      "link": "florero-forti",
+      "title": "Enlace · Florero Forti",
+      "objective": "Ventas (conversión)",
+      "funnel": "Frío",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "cta": "Comprar",
+      "destino": "https://limaflores.pe/producto/florero-forti",
+      "primaryText": "Seis girasoles, y alrededor mini rosas amarillas y blancas, pompones amarillos y margaritas con follaje verde.\n\nNo tenemos stock: cuando pides, alguien mira lo que llegó fresco esa mañana y te lo arma a mano en el atelier de Miraflores.\n\nEliges el día y la hora. Entrega en Lima Metropolitana.\n\nlimaflores.pe/producto/florero-forti",
+      "headline": "Seis girasoles y cuatro flores más",
+      "description": "Florero Forti · S/210",
+      "hashtags": [
+        "#limaflores",
+        "#girasoles",
+        "#floreslima",
+        "#deliverylima"
+      ],
+      "why": "La dirección va impresa en la pieza. En frío la mayoría no toca el anuncio pero sí recuerda un dominio corto, y en un post orgánico el pie de Instagram no es clicable: si la dirección no está en la imagen, no está.",
+      "creative": {
+        "eyebrow": "Arreglos · Florero Forti",
+        "headline": "Seis girasoles y <em>cuatro flores más</em>",
+        "sub": "Mini rosas amarillas y blancas, pompones amarillos y margaritas, con follaje verde.",
+        "price": "S/ 210",
+        "hlSize": 80,
+        "fit": "contain",
+        "position": "50% 0%"
+      }
+    },
+    {
+      "code": "PR-ficha-1",
+      "template": "ficha",
+      "format": "4:5",
+      "photo": "box-chococafe.jpg",
+      "link": "box-chococafe",
+      "title": "Ficha · Box Chococafé",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 14 días",
+      "placement": "Feed y Explorar de Instagram · 4:5 (1080×1350)",
+      "cta": "Comprar",
+      "destino": "https://limaflores.pe/producto/box-chococafe",
+      "primaryText": "No es solo el arreglo.\n\nMini rosas con follaje verde, café de especialidad de 250 g, chocolate al 70 % con arándanos y una tacita de expreso, todo en la misma caja.\n\nEliges el día y la hora. Entrega en Lima Metropolitana.\n\nlimaflores.pe/producto/box-chococafe",
+      "headline": "Todo lo que trae la caja",
+      "description": "Box Chococafé · S/220",
+      "hashtags": [
+        "#limaflores",
+        "#cafedeespecialidad",
+        "#regalosperu",
+        "#deliverylima"
+      ],
+      "why": "Cuatro campos, cada uno citable de la ficha del catálogo. En consideración la duda no es si gusta sino qué llega exactamente por S/220: la tabla la contesta sin que haya que abrir la página.",
+      "creative": {
+        "eyebrow": "Arreglos · Box Chococafé",
+        "headline": "Todo lo que <em>trae la caja</em>",
+        "price": "S/ 220",
+        "campos": [
+          [
+            "Flores",
+            "Mini rosas con follaje verde"
+          ],
+          [
+            "Café",
+            "De especialidad · 250 g"
+          ],
+          [
+            "Chocolate",
+            "Al 70 % con arándanos"
+          ],
+          [
+            "Vajilla",
+            "Una tacita de expreso"
+          ]
+        ],
+        "fotoH": 780,
+        "position": "50% 26%"
+      }
+    },
+    {
+      "code": "PR-doble-1",
+      "template": "doble",
+      "format": "1:1",
+      "photo": "boxsito-ramon.jpg",
+      "link": "boxsito-ramon",
+      "title": "Doble · Boxsito Crespito",
+      "objective": "Ventas (conversión)",
+      "funnel": "Consideración / Retargeting 14 días",
+      "placement": "Feed de Instagram · 1:1 (1080×1080)",
+      "cta": "Comprar",
+      "destino": "https://limaflores.pe/producto/boxsito-ramon",
+      "primaryText": "El mismo arreglo, fotografiado dos veces: sobre fondo blanco y sobre una mesa.\n\nOsito con mini rosas amarillas y naranjas, toques azules, follaje verde y un pequeño globo morado metálico.\n\nEliges el día y la hora. Entrega en Lima Metropolitana.\n\nlimaflores.pe/producto/boxsito-ramon",
+      "headline": "El mismo arreglo, dos veces",
+      "description": "Boxsito Crespito · S/180",
+      "hashtags": [
+        "#limaflores",
+        "#regalosperu",
+        "#floreslima",
+        "#deliverylima"
+      ],
+      "why": "Una sola foto de estudio se lee como render y deja la duda de si lo que llega se parece. Dos tomas del mismo arreglo la cierran sin afirmar nada: el catálogo ya tenía la segunda y ninguna plantilla la usaba.",
+      "creative": {
+        "eyebrow": "Arreglos · Boxsito Crespito",
+        "headline": "El mismo arreglo, <em>dos veces</em>",
+        "sub": "Osito con mini rosas amarillas y naranjas, toques azules, follaje verde y un globo morado metálico.",
+        "price": "S/ 180",
+        "footer": "Entrega en Lima Metropolitana",
+        "foto2": "boxsito-ramon-2.jpg",
+        "hlSize": 62,
+        "fit": "cover",
+        "position": "50% 50%",
+        "fit2": "cover",
+        "position2": "50% 48%"
       }
     }
   ]

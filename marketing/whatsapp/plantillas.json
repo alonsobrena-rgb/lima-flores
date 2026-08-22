@@ -1,0 +1,66 @@
+{
+  "_": "Plantillas de mensaje de WhatsApp para mandar a revisión de Meta. Cada afirmación del cuerpo sale de `fuentes`, igual que la galería de anuncios: si un dato no está ahí, no se escribe. La cabecera se prepara con cabeceras.py y se envía con crear.mjs. Límites de Meta: cuerpo 1024, pie 60, texto de botón 25, nombre en minúsculas con guiones bajos.",
+  "idioma": "es",
+  "ejemplo_nombre": "Ana",
+  "base": "https://limaflores.pe/producto/",
+  "plantillas": [
+    {
+      "name": "florero_forti",
+      "category": "MARKETING",
+      "producto": "florero-forti",
+      "nombreProducto": "Florero Forti",
+      "precio": 210,
+      "photo": "florero-forti.jpg",
+      "body": "Hola {{1}}, el Florero Forti lleva 6 girasoles con mini rosas amarillas y blancas, pompones amarillos y margaritas, todo con follaje verde.\n\nS/ 210 · Armado a mano, con tarjeta de dedicatoria sin costo.\n\nEntrega a domicilio en Lima Metropolitana, desde el día siguiente.",
+      "footer": "Lima Flores · Atelier en Miraflores",
+      "boton": "Ver el producto",
+      "fuentes": [
+        ["6 girasoles, mini rosas amarillas y blancas, pompones amarillos y margaritas, follaje verde", "db/products.seed.json → florero-forti (description)"],
+        ["S/ 210", "db/products.seed.json → florero-forti (price)"],
+        ["Armado a mano", "app/src/lib/tienda.ts → PROMESAS: «Armado a mano con flores frescas de la semana»"],
+        ["Tarjeta de dedicatoria sin costo", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Entrega a domicilio en Lima Metropolitana", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Desde el día siguiente", "app/src/pages/Checkout.tsx:192 → minDate = hoy + 1"]
+      ]
+    },
+    {
+      "name": "box_chococafe",
+      "category": "MARKETING",
+      "producto": "box-chococafe",
+      "nombreProducto": "Box Chococafé",
+      "precio": 220,
+      "photo": "box-chococafe.jpg",
+      "body": "Hola {{1}}, el Box Chococafé junta mini rosas con follaje verde, café de especialidad de 250 g, chocolate al 70 % con arándanos y una tacita de expreso, en una sola caja.\n\nS/ 220 · Con tarjeta de dedicatoria sin costo.\n\nEntrega a domicilio en Lima Metropolitana, desde el día siguiente.",
+      "footer": "Lima Flores · Atelier en Miraflores",
+      "boton": "Ver el producto",
+      "fuentes": [
+        ["Mini rosas con follaje, café de especialidad 250 g, chocolate al 70 % con arándanos, una tacita de expreso", "db/products.seed.json → box-chococafe (description)"],
+        ["S/ 220", "db/products.seed.json → box-chococafe (price)"],
+        ["Tarjeta de dedicatoria sin costo", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Entrega a domicilio en Lima Metropolitana", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Desde el día siguiente", "app/src/pages/Checkout.tsx:192 → minDate = hoy + 1"]
+      ],
+      "nota": "La ficha del catálogo dice «toques azules» y en la foto no se ven; el cuerpo los omite, igual que hace IG-19."
+    },
+    {
+      "name": "boxsito_crespito",
+      "category": "MARKETING",
+      "producto": "boxsito-ramon",
+      "nombreProducto": "Boxsito Crespito",
+      "precio": 180,
+      "photo": "boxsito-ramon.jpg",
+      "body": "Hola {{1}}, el Boxsito Crespito viene con un osito, mini rosas amarillas y naranjas, toques azules, follaje verde y un pequeño globo morado metálico.\n\nS/ 180 · Con tarjeta de dedicatoria sin costo.\n\nEntrega a domicilio en Lima Metropolitana, desde el día siguiente.",
+      "footer": "Lima Flores · Atelier en Miraflores",
+      "boton": "Ver el producto",
+      "fuentes": [
+        ["Osito, mini rosas amarillas y naranjas, toques azules, follaje verde, globo morado metálico", "db/products.seed.json → boxsito-ramon (description)"],
+        ["S/ 180", "db/products.seed.json → boxsito-ramon (price)"],
+        ["Tarjeta de dedicatoria sin costo", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Entrega a domicilio en Lima Metropolitana", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Desde el día siguiente", "app/src/pages/Checkout.tsx:192 → minDate = hoy + 1"]
+      ],
+      "nota": "El id del catálogo es `boxsito-ramon` aunque el producto se llame Crespito. El enlace usa el id, que es lo que resuelve /producto/:id."
+    }
+  ],
+  "sin_franja": "Ninguna plantilla escribe la franja horaria. PROMESAS promete «una franja de 30 minutos con 24 horas de anticipación» y el checkout da tres franjas de cuatro horas (app/src/lib/delivery.ts). Hasta que se decida cuál es la verdad, «desde el día siguiente» es lo único seguro. Pendiente 4 de TRASPASO.md."
+}
