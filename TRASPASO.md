@@ -282,28 +282,31 @@ mostraría cortada. Hay que preparar una horizontal con el producto entero antes
 de usarla — está explicado al final de `box-simona.md`. Una plantilla de solo
 texto se puede crear ya mismo; con foto, primero la foto.
 
-### 0b. Agujero conocido: sincronizar no da de alta plantillas
+### 0b. RESUELTO: sincronizar ya da de alta plantillas
 
-Si la plantilla se crea **directo contra Meta** (no por `POST
-/api/admin/wa/templates`), **no aparece en el panel**, y por lo tanto no se
-puede enviar desde ahí. La causa está localizada:
-`db/whatsapp-store.js → updateTemplateStatus()` es un `UPDATE ... WHERE name AND
-language` pelado — refresca el estado de las que ya existen localmente y no
-inserta las que no.
+Estaba: una plantilla creada directo contra Meta no aparecía en el panel, porque
+`updateTemplateStatus()` era un `UPDATE ... WHERE name AND language` pelado y un
+UPDATE que no encuentra fila no falla — tocaba cero filas y el endpoint
+respondía `synced: N` como si hubiera ido bien.
 
-Arreglo, si se toma ese camino: pedirle a Meta también `components` en
-`listTemplates()` (`integrations/whatsapp/client.js`) y convertir esa función en
-un upsert, sacando de los componentes el `body_text`, el `header_kind` y los
-botones.
+Hecho: `listTemplates()` pide también `components`, `parseComponents()` los
+traduce, y `upsertTemplateDesdeMeta()` inserta lo que falta. Al actualizar solo
+se pisa el estado; el texto, los botones y la foto que guardó el panel se
+quedan, porque esa fila es la que tiene el binario bueno.
 
-Queda un cabo suelto aunque se haga: **una plantilla con foto adoptada desde
-Meta no trae los bytes de la foto**, y `runCampaign()` los necesita para subir el
-`media id` en cada envío. Dos salidas — guardar la foto en la fila con un
-endpoint nuevo, o enviar el encabezado por `link` público (Meta acepta
-`image: { link }`, y las fotos de producto ya son públicas en
-`limaflores.pe/products/…`). **Lo más simple es no meterse en esto**: crear la
-plantilla por la API del panel, que ya deja la fila y los bytes en su sitio de
-una sola pasada.
+**El «cabo suelto» de la foto no existía.** Este documento daba por hecho que una
+plantilla adoptada desde Meta no trae los bytes de la imagen, y proponía o un
+endpoint nuevo para subirla o mandar el header por `link` público. Ninguna de las
+dos hace falta: al **leer** una plantilla, Meta pone en `example.header_handle`
+—donde al crearla iba el handle opaco del resumable upload— una URL de
+`scontent.whatsapp.net` al JPEG de muestra, y esa URL se descarga sin token.
+Comprobado contra la WABA: bajan las cinco plantillas con header de imagen, con
+el tamaño exacto que se subió. El sync baja esa foto y guarda el binario, así que
+una plantilla importada se envía como cualquier otra. La URL va firmada y caduca:
+se guarda la imagen, nunca el enlace, y solo se baja si la fila no la tenía.
+
+Si esa descarga fallara, la plantilla entra igual y el envío avisa qué falta en
+vez de dejar que Meta conteste un error de componentes que no apunta a nada.
 
 ### El resto
 
