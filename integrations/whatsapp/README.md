@@ -65,13 +65,26 @@ Mientras falte algo, la sección WhatsApp del admin funciona en modo
 lectura/edición de contactos, avisa arriba qué falta, y crear plantillas o enviar
 responde un error claro (503) en vez de fallar.
 
-## Los números y su código de país
+## Los números
 
-Al cargar un contacto se elige el código de país en un desplegable, y viene
-puesto en **+51 (Perú)**, que es casi toda la lista. Lo que el número traiga
-escrito manda sobre esa elección: un `+` o un `00` adelante se respetan tal cual,
-así que un CSV que ya viene en formato internacional entra bien sin tocar nada.
-El código elegido también se aplica al lote que se importa.
+Una sola regla, sin desplegable de países: **si el número empieza con `+`, se
+guarda tal cual; si no, se le pone el +51 de Perú.** Vale igual para el alta
+individual y para el lote que se importa, así que un CSV que ya viene en formato
+internacional entra bien sin tocar nada.
+
+Había un selector de código de país y se quitó: la lista es de Lima, elegir el
+país en cada alta era un paso que nadie cambiaba, y era uno que se podía dejar
+mal puesto sin notarlo.
+
+Dos detalles de `normalizePhone()` (`db/whatsapp-store.js`) que no son evidentes:
+
+- El `00` se sigue respetando, porque es el prefijo internacional escrito a la
+  vieja usanza: `0056912345678` es un chileno, y tratarlo como local lo dejaría
+  en `+510056912345678`.
+- Un número que ya trae el 51 delante pero sin `+` (`51987654321`) no se duplica.
+  El margen de cinco dígitos evita confundirlo con un número nacional que empiece
+  por 51; los celulares peruanos empiezan por 9, así que en la práctica no se
+  cruzan.
 
 Todo se guarda en E.164 (`+51987654321`), que es lo único que acepta Meta.
 
