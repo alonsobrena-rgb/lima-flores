@@ -42,7 +42,7 @@ function StatusBadge({ status }: { status: string }) {
     : s === 'REJECTED' || s === 'FAILED'
       ? 'bg-red-100 text-red-800'
       : 'bg-amber-100 text-amber-800';
-  return <span className={`inline-block rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${cls}`}>{status}</span>;
+  return <span className={`inline-block flex-shrink-0 whitespace-nowrap rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${cls}`}>{status}</span>;
 }
 
 type Sub = 'conexion' | 'contacts' | 'templates' | 'campaigns';
@@ -323,7 +323,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
       {/* Alta + importación */}
-      <div className="space-y-7">
+      <div className="min-w-0 space-y-7">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">Agregar contacto</p>
           <div className="mt-2 space-y-2">
@@ -357,10 +357,10 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
       </div>
 
       {/* Tabla + envío suelto */}
-      <div>
+      <div className="min-w-0">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{counts.total} contacto(s) · {counts.active} activos</p>
-          <div className="min-w-[240px]">
+          <div className="w-full sm:w-auto sm:min-w-[240px]">
             <label className={label}>Plantilla para enviar</label>
             {templates.length
               ? <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={field}>
@@ -378,8 +378,15 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
           </div>
         )}
 
-        <div className="max-h-[560px] overflow-y-auto border border-border">
-          <table className="w-full text-sm">
+        {/* overflow-auto, no solo -y: la tabla lleva celdas whitespace-nowrap con
+            tres botones por fila, así que su min-content no baja de ~400px. Con el
+            scroll solo vertical ese ancho empujaba el documento y aparecía una
+            barra horizontal en toda la página. */}
+        <div className="max-h-[560px] overflow-auto border border-border">
+          {/* Ancho mínimo para que, al desplazarse dentro de su caja, las columnas
+              no se aplasten: sin esto el nombre se partía en cuatro líneas mientras
+              los botones quedaban cortados. */}
+          <table className="w-full min-w-[420px] text-sm">
             <thead className="sticky top-0 bg-surface text-left text-[11px] uppercase tracking-[0.08em] text-foreground/50">
               <tr><th className="px-3 py-2 font-medium">Nombre</th><th className="px-3 py-2 font-medium">Teléfono</th><th className="px-3 py-2"></th></tr>
             </thead>
@@ -397,7 +404,7 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
                   </tr>
                 ) : (
                   <tr key={c.id} className="border-t border-border">
-                    <td className="px-3 py-2 text-ink-800">
+                    <td className="min-w-[130px] px-3 py-2 text-ink-800">
                       {c.name || <span className="text-foreground/40">—</span>}
                       {r && <span className={`ml-2 font-mono text-[10px] uppercase tracking-[0.08em] ${r.ok ? 'text-green-700' : 'text-red-700'}`}>{r.ok ? '✓ enviado' : '✕ ' + r.msg}</span>}
                     </td>
@@ -463,17 +470,18 @@ function Templates({ fail }: { fail: (e: unknown) => boolean }) {
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {templates.map((t) => (
-          <div key={t.id} className="flex gap-3 border border-border p-3">
+          <div key={t.id} className="flex min-w-0 gap-3 border border-border p-3">
             {t.has_header
               ? <img src={apiUrl('/api/admin/wa/templates/' + t.id + '/header')} alt="" className="h-20 w-20 flex-shrink-0 rounded-sm object-cover" />
               : <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-sm bg-ivory-200 text-[10px] text-foreground/40">sin foto</div>}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <p className="truncate font-mono text-[12px] text-ink-900">{t.name}</p>
+                <p className="min-w-0 truncate font-mono text-[12px] text-ink-900">{t.name}</p>
                 <StatusBadge status={t.status} />
               </div>
               <p className="mt-1 line-clamp-3 text-[12px] leading-snug text-foreground/60">{t.body_text}</p>
-              {t.rejected_reason && <p className="mt-1 text-[11px] text-red-700">{t.rejected_reason}</p>}
+              {t.rejected_reason && t.rejected_reason.toUpperCase() !== 'NONE'
+                && <p className="mt-1 break-words text-[11px] text-red-700">{t.rejected_reason}</p>}
             </div>
           </div>
         ))}
