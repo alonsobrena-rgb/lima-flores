@@ -12,6 +12,7 @@ const enabled = !!DATABASE_URL || USE_PG_MEM;
 
 let pool = null;
 let migrated = false;
+let migrando = null;   // la migración en vuelo, compartida entre quienes lleguen a la vez
 
 if (USE_PG_MEM) {
   const { newDb } = require('pg-mem');
@@ -386,11 +387,21 @@ CREATE TABLE IF NOT EXISTS wa_agenda_ajustes (
 INSERT INTO wa_agenda_ajustes (id) VALUES ('wa') ON CONFLICT (id) DO NOTHING;
 `;
 
+// Ojo con la concurrencia: `migrated` solo se marca al TERMINAR, así que dos
+// llamadas simultáneas —el primer request y los vigías que arrancan con el
+// servidor— pasaban las dos el `if` y corrían el esquema entero a la vez.
+// Postgres las cruzaba en el mismo CREATE/ALTER y una moría con «deadlock
+// detected»; se vio en producción al añadir el tercer vigía. Ahora se comparte
+// la promesa en vuelo: quien llega segundo espera, no repite. Si falla, se
+// suelta para que el siguiente pueda reintentar.
 async function migrate() {
   if (!enabled || migrated) return;
-  await pool.query(SCHEMA);
-  migrated = true;
-  console.log('[db] schema OK');
+  if (!migrando) {
+    migrando = pool.query(SCHEMA)
+      .then(() => { migrated = true; console.log('[db] schema OK'); })
+      .finally(() => { migrando = null; });
+  }
+  return migrando;
 }
 
 async function query(text, params) {
