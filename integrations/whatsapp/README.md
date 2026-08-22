@@ -96,6 +96,43 @@ mensaje sale en el momento, con el nombre del contacto puesto en `{{1}}`, y qued
 en el historial de **Campañas** marcado como envío directo. Para mandarla a varios
 a la vez está la pestaña **Campañas**.
 
+## Programadas: «el día N de cada mes a tal hora»
+
+La pestaña **Programadas** guarda reglas: un día del mes, una hora, una
+plantilla aprobada. A esa hora el vigía crea una campaña a todos los contactos
+activos, con la misma maquinaria que un envío manual.
+
+- **El día y la hora son de Lima.** El servidor corre en UTC, así que una regla
+  «día 2 a las 10:00» guardada tal cual se dispararía a las 5 de la mañana. La
+  conversión vive en `integrations/whatsapp/agenda.js`, y el offset sale de
+  `Intl`, no cableado a −5.
+- **Si el mes no llega a ese día, sale el último.** Un 31 en febrero se manda el
+  28 (o el 29). Saltárselo dejaría media docena de meses en silencio.
+- **Repetir**: todos los meses, o una sola vez.
+- **El interruptor arranca apagado**, igual que el del publicador de Instagram y
+  por lo mismo: mandar marketing es hacia afuera y no se enciende con un deploy.
+  Se puede dejar todo programado y encenderlo después.
+
+### Lo que evita que se mande dos veces, o a destiempo
+
+- `marca_disparada` guarda la ocurrencia ya mandada (`'YYYY-MM-DD HH:MM'` de
+  Lima). El vigía mira cada minuto: sin esa marca, una regla saldría sesenta
+  veces en una hora. Se sella **antes** de enviar, para que un fallo a mitad de
+  campaña no la repita entera en la vuelta siguiente.
+- Esa marca se sella **también al crear o al editar** la regla, con la última
+  ocurrencia ya pasada. Sin eso, programar «día 2 a las 10:00» un día 2 a las
+  10:05 mandaría la campaña en el acto.
+- Ojo con la consecuencia: para saber si una regla de **una sola vez** ya salió,
+  lo que vale es `ultimo_envio`, no la marca — la marca la tiene desde que
+  nació. Mirando la marca, esas reglas nacían diciendo «ya se mandó» y no
+  llegaban a mandarse nunca.
+- **Ventana de gracia de una hora.** Si el servidor estuvo caído, al volver no
+  se manda lo que tocaba hace tres horas: un mensaje de marketing a destiempo es
+  peor que uno no enviado, y una ráfaga de campañas atrasadas al arrancar sería
+  peor todavía.
+- Una regla por vuelta. Dos que coincidan en el mismo minuto salen en minutos
+  distintos, para no chocar con los límites de Meta.
+
 ## Notas de cumplimiento (Meta)
 
 - Solo se pueden enviar **plantillas aprobadas** a usuarios con **opt-in**.

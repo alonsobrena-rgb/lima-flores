@@ -45,7 +45,15 @@ function StatusBadge({ status }: { status: string }) {
   return <span className={`inline-block flex-shrink-0 whitespace-nowrap rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${cls}`}>{status}</span>;
 }
 
-type Sub = 'conexion' | 'contacts' | 'templates' | 'campaigns';
+type Programada = {
+  id: string; template_id: string; template_name?: string; template_status?: string;
+  dia: number; hora: number; minuto: number; repetir: 'mensual' | 'una_vez';
+  activa: boolean; etiqueta: string | null; marca_disparada: string | null;
+  ultimo_envio: string | null; ultima_campana: string | null; proximo: string | null;
+};
+type AgendaAjustes = { activo: boolean; updated_at: string | null };
+
+type Sub = 'conexion' | 'contacts' | 'templates' | 'programadas' | 'campaigns';
 
 export function AdminWhatsapp({ onAuthError }: { onAuthError: () => void }) {
   const [sub, setSub] = useState<Sub>('contacts');
@@ -71,7 +79,7 @@ export function AdminWhatsapp({ onAuthError }: { onAuthError: () => void }) {
   return (
     <div>
       <div className="mb-6 flex flex-wrap gap-2">
-        {([['conexion', 'Conexión'], ['contacts', 'Contactos'], ['templates', 'Plantillas'], ['campaigns', 'Campañas']] as [Sub, string][]).map(([k, l]) => (
+        {([['conexion', 'Conexión'], ['contacts', 'Contactos'], ['templates', 'Plantillas'], ['programadas', 'Programadas'], ['campaigns', 'Campañas']] as [Sub, string][]).map(([k, l]) => (
           <button key={k} onClick={() => setSub(k)} className={seg(sub === k) + ' rounded-sm'}>
             {l}{k === 'conexion' && estado && !estado.configurado ? ' ·' : ''}
           </button>
@@ -85,6 +93,7 @@ export function AdminWhatsapp({ onAuthError }: { onAuthError: () => void }) {
       {sub === 'conexion' && <Conexion fail={fail} onSaved={(d) => setEstado(d)} />}
       {sub === 'contacts' && <Contacts fail={fail} />}
       {sub === 'templates' && <Templates fail={fail} />}
+      {sub === 'programadas' && <Programadas fail={fail} />}
       {sub === 'campaigns' && <Campaigns fail={fail} />}
     </div>
   );
@@ -626,6 +635,191 @@ function StudioPicker({ fail, onPick }: { fail: (e: unknown) => boolean; onPick:
             </div>
           : <p className="text-[11px] text-foreground/45">Este producto no tiene imágenes IA generadas en el Studio.</p>
       )}
+    </div>
+  );
+}
+
+// ─── Programadas ──────────────────────────────────────────────────────────────
+// Reglas del tipo «el día 2 de cada mes, a las 10:00, esta plantilla». El día y
+// la hora son de Lima; el cálculo del próximo envío lo hace el servidor y acá
+// solo se pinta, para que no haya dos relojes que puedan discrepar.
+const DIAS = Array.from({ length: 31 }, (_, i) => i + 1);
+
+const fechaLima = (iso: string) => new Date(iso).toLocaleString('es-PE', {
+  timeZone: 'America/Lima', weekday: 'short', day: '2-digit', month: 'short',
+  hour: '2-digit', minute: '2-digit', hour12: false,
+});
+
+const hhmm = (h: number, m: number) => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+function Programadas({ fail }: { fail: (e: unknown) => boolean }) {
+  const [reglas, setReglas] = useState<Programada[]>([]);
+  const [ajustes, setAjustes] = useState<AgendaAjustes>({ activo: false, updated_at: null });
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const [dia, setDia] = useState(1);
+  const [hora, setHora] = useState('09:00');
+  const [templateId, setTemplateId] = useState('');
+  const [repetir, setRepetir] = useState<'mensual' | 'una_vez'>('mensual');
+  const [etiqueta, setEtiqueta] = useState('');
+
+  const load = useCallback(async () => {
+    try {
+      const [a, t] = await Promise.all([
+        adminGet('/api/admin/wa/programadas'),
+        adminGet('/api/admin/wa/templates'),
+      ]);
+      setReglas(a.programadas || []);
+      setAjustes(a.ajustes || { activo: false, updated_at: null });
+      setTemplates((t.templates || []).filter((x: Template) => x.status === 'APPROVED'));
+    } catch (e) { if (!fail(e)) setErr((e as Error).message); }
+  }, [fail]);
+  useEffect(() => { load(); }, [load]);
+
+  const conmutarAgenda = async (activo: boolean) => {
+    setErr(''); setBusy(true);
+    try { const d = await adminSend('/api/admin/wa/agenda', 'POST', { activo }); setAjustes(d.ajustes); }
+    catch (e) { if (!fail(e)) setErr((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  const agregar = async () => {
+    setErr(''); setBusy(true);
+    const [h, m] = hora.split(':').map(Number);
+    try {
+      await adminSend('/api/admin/wa/programadas', 'POST', {
+        templateId, dia, hora: h, minuto: m, repetir, etiqueta: etiqueta.trim(),
+      });
+      setEtiqueta(''); await load();
+    } catch (e) { if (!fail(e)) setErr((e as Error).message); }
+    finally { setBusy(false); }
+  };
+
+  const conmutarRegla = async (r: Programada) => {
+    try { await adminSend('/api/admin/wa/programadas/' + r.id, 'PATCH', { activa: !r.activa }); await load(); }
+    catch (e) { if (!fail(e)) setErr((e as Error).message); }
+  };
+
+  const borrar = async (r: Programada) => {
+    if (!confirm(`¿Quitar la programación del día ${r.dia} a las ${hhmm(r.hora, r.minuto)}?`)) return;
+    try { await adminSend('/api/admin/wa/programadas/' + r.id, 'DELETE'); await load(); }
+    catch (e) { if (!fail(e)) setErr((e as Error).message); }
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
+      <div className="min-w-0 space-y-7">
+        {/* El interruptor va arriba del todo: mientras esté apagado, nada de lo
+            que se configure abajo se manda. */}
+        <div className={`border p-4 ${ajustes.activo ? 'border-green-300 bg-green-50' : 'border-amber-300 bg-amber-50'}`}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/60">Envío automático</p>
+              <p className="mt-1 text-[13px] text-foreground/70">
+                {ajustes.activo
+                  ? 'Encendido. Las reglas de abajo se mandan solas a su hora.'
+                  : 'Apagado. Puedes dejar todo programado; no se manda nada hasta que lo enciendas.'}
+              </p>
+            </div>
+            <button onClick={() => conmutarAgenda(!ajustes.activo)} disabled={busy}
+              className={`flex-shrink-0 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] ${ajustes.activo ? 'bg-ink-900 text-ivory-50' : 'bg-rosa-500 text-ivory-50'} disabled:opacity-50`}>
+              {ajustes.activo ? 'Apagar' : 'Encender'}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">Programar un envío</p>
+          <div className="mt-2 space-y-2">
+            <div className="flex gap-2">
+              <div className="min-w-0 flex-1">
+                <label className={label}>Día del mes</label>
+                <select value={dia} onChange={(e) => setDia(Number(e.target.value))} className={field}>
+                  {DIAS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div className="min-w-0 flex-1">
+                <label className={label}>Hora</label>
+                <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className={field} />
+              </div>
+            </div>
+            <div>
+              <label className={label}>Plantilla</label>
+              {templates.length
+                ? <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={field}>
+                    <option value="">— elegir —</option>
+                    {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                : <p className="mt-1.5 text-[12px] text-foreground/55">No hay plantillas aprobadas. Crea una en <strong>Plantillas</strong>.</p>}
+            </div>
+            <div>
+              <label className={label}>Repetir</label>
+              <select value={repetir} onChange={(e) => setRepetir(e.target.value as 'mensual' | 'una_vez')} className={field}>
+                <option value="mensual">Todos los meses</option>
+                <option value="una_vez">Una sola vez</option>
+              </select>
+            </div>
+            <div>
+              <label className={label}>Nombre (opcional)</label>
+              <input value={etiqueta} onChange={(e) => setEtiqueta(e.target.value)} className={field} placeholder="Recordatorio de fin de mes" />
+            </div>
+            <button onClick={agregar} disabled={busy || !templateId}
+              className="w-full bg-ink-900 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">
+              Programar
+            </button>
+            <p className="text-[11px] leading-relaxed text-foreground/45">
+              Hora de Lima. Se manda a todos los contactos activos. Si el mes no llega a ese día
+              —un 31 en febrero— sale el último día del mes.
+            </p>
+          </div>
+        </div>
+
+        {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
+      </div>
+
+      <div className="min-w-0">
+        <p className="mb-3 font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">
+          {reglas.length} programación(es)
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {reglas.map((r) => (
+            <div key={r.id} className={`flex min-w-0 flex-col gap-2 border p-3 ${r.activa ? 'border-border' : 'border-dashed border-border bg-ivory-100'}`}>
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="min-w-0 truncate font-mono text-[13px] text-ink-900">
+                  Día {r.dia} · {hhmm(r.hora, r.minuto)}
+                </p>
+                <span className={`flex-shrink-0 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.08em] ${r.activa ? 'text-green-700' : 'text-foreground/40'}`}>
+                  {r.activa ? 'activa' : 'pausada'}
+                </span>
+              </div>
+              {r.etiqueta && <p className="min-w-0 truncate text-[12px] text-foreground/70">{r.etiqueta}</p>}
+              <p className="min-w-0 truncate font-mono text-[11px] text-foreground/45">{r.template_name}</p>
+              <p className="text-[11px] text-foreground/55">
+                {r.repetir === 'una_vez' ? 'Una sola vez' : 'Todos los meses'}
+                {r.proximo ? <> · próximo <strong className="font-normal text-ink-800">{fechaLima(r.proximo)}</strong></> : ' · ya se mandó'}
+              </p>
+              {r.ultimo_envio && (
+                <p className="text-[11px] text-foreground/40">Último: {fechaLima(r.ultimo_envio)}</p>
+              )}
+              <div className="mt-auto flex flex-wrap gap-3 pt-1">
+                <button onClick={() => conmutarRegla(r)} className="font-mono text-[10px] uppercase tracking-[0.08em] text-rosa-600 hover:text-rosa-500">
+                  {r.activa ? 'Pausar' : 'Activar'}
+                </button>
+                <button onClick={() => borrar(r)} className="font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-red-700">
+                  Quitar
+                </button>
+              </div>
+            </div>
+          ))}
+          {!reglas.length && (
+            <p className="col-span-full py-10 text-center italic text-foreground/40">
+              Nada programado todavía.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

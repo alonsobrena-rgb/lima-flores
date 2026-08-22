@@ -256,4 +256,8 @@ server.listen(PORT, () => {
   // el interruptor del panel esté apagado — encenderlo es un acto de una persona.
   try { require('./integrations/instagram/publisher').start(); }
   catch (e) { console.error('[ig] no se pudo iniciar el publicador:', e.message); }
+  // Agenda de WhatsApp: las reglas «el día N de cada mes a tal hora». Mismo
+  // criterio que arriba — con el interruptor apagado no manda nada.
+  try { require('./integrations/whatsapp/vigia').start(); }
+  catch (e) { console.error('[wa] no se pudo iniciar la agenda:', e.message); }
 });

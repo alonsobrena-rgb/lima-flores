@@ -358,7 +358,110 @@ async function getCampaign(id) {
   return { ...rows[0], messages: msgs };
 }
 
+// ─── Agenda: reglas «el día N de cada mes a tal hora» ─────────────────────────
+// El día y la hora se guardan como números en HORA DE LIMA; convertirlos a un
+// instante es cosa de integrations/whatsapp/agenda.js. Guardar aquí una fecha
+// ya calculada sería peor: al cambiar la hora de una regla habría que
+// recalcularla, y bastaría un despiste para dejar la fila mintiendo.
+
+async function ajustesAgenda() {
+  const { rows } = await db.query(`SELECT activo, updated_at FROM wa_agenda_ajustes WHERE id = 'wa'`);
+  return rows[0] || { activo: false, updated_at: null };
+}
+
+async function guardarAjustesAgenda({ activo }) {
+  await db.query(`INSERT INTO wa_agenda_ajustes (id) VALUES ('wa') ON CONFLICT (id) DO NOTHING`);
+  await db.query(
+    `UPDATE wa_agenda_ajustes SET activo = $1, updated_at = NOW() WHERE id = 'wa'`, [!!activo]
+  );
+  return ajustesAgenda();
+}
+
+const COLS_PROG = `p.id, p.template_id, p.dia, p.hora, p.minuto, p.repetir, p.activa,
+                   p.etiqueta, p.marca_disparada, p.ultimo_envio, p.ultima_campana, p.created_at`;
+
+async function listProgramadas() {
+  const { rows } = await db.query(
+    `SELECT ${COLS_PROG}, t.name AS template_name, t.status AS template_status
+       FROM wa_programadas p LEFT JOIN wa_templates t ON t.id = p.template_id
+      ORDER BY p.dia, p.hora, p.minuto`
+  );
+  return rows;
+}
+
+async function getProgramada(id) {
+  const { rows } = await db.query(
+    `SELECT ${COLS_PROG}, t.name AS template_name, t.status AS template_status
+       FROM wa_programadas p LEFT JOIN wa_templates t ON t.id = p.template_id
+      WHERE p.id = $1`, [id]
+  );
+  return rows[0] || null;
+}
+
+/**
+ * `marcaInicial` es la ocurrencia que YA pasó cuando se crea la regla. Sin eso,
+ * programar «el día 2 a las 10:00» un día 2 a las 10:05 dispararía la campaña
+ * en el acto, que no es lo que nadie espera al pulsar Guardar.
+ */
+async function crearProgramada({ templateId, dia, hora, minuto, repetir, etiqueta, activa, marcaInicial }) {
+  const id = newId();
+  await db.query(
+    `INSERT INTO wa_programadas (id, template_id, dia, hora, minuto, repetir, activa, etiqueta, marca_disparada)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+    [id, templateId, dia, hora, minuto || 0, repetir || 'mensual',
+     activa === undefined ? true : !!activa, etiqueta || null, marcaInicial || null]
+  );
+  return getProgramada(id);
+}
+
+async function actualizarProgramada(id, campos) {
+  const sets = [], vals = [];
+  const set = (col, val) => { vals.push(val); sets.push(`${col} = $${vals.length}`); };
+  if (campos.templateId !== undefined) set('template_id', campos.templateId);
+  if (campos.dia !== undefined) set('dia', campos.dia);
+  if (campos.hora !== undefined) set('hora', campos.hora);
+  if (campos.minuto !== undefined) set('minuto', campos.minuto);
+  if (campos.repetir !== undefined) set('repetir', campos.repetir);
+  if (campos.activa !== undefined) set('activa', !!campos.activa);
+  if (campos.etiqueta !== undefined) set('etiqueta', campos.etiqueta || null);
+  if (campos.marcaInicial !== undefined) set('marca_disparada', campos.marcaInicial);
+  if (!sets.length) return getProgramada(id);
+  vals.push(id);
+  await db.query(`UPDATE wa_programadas SET ${sets.join(', ')} WHERE id = $${vals.length}`, vals);
+  return getProgramada(id);
+}
+
+async function borrarProgramada(id) {
+  await db.query(`DELETE FROM wa_programadas WHERE id = $1`, [id]);
+}
+
+/** Lo que el vigía necesita mirar: solo las encendidas y con plantilla aprobada. */
+async function programadasParaDisparar() {
+  const { rows } = await db.query(
+    `SELECT ${COLS_PROG}, t.name AS template_name, t.status AS template_status
+       FROM wa_programadas p JOIN wa_templates t ON t.id = p.template_id
+      WHERE p.activa = TRUE AND t.status = 'APPROVED'
+      ORDER BY p.dia, p.hora, p.minuto`
+  );
+  return rows;
+}
+
+/** Se sella la ocurrencia ANTES de mandar, para no repetirla si algo revienta. */
+async function sellarProgramada(id, marca) {
+  await db.query(
+    `UPDATE wa_programadas SET marca_disparada = $1, ultimo_envio = NOW() WHERE id = $2`,
+    [marca, id]
+  );
+}
+
+async function anotarCampanaProgramada(id, campanaId) {
+  await db.query(`UPDATE wa_programadas SET ultima_campana = $1 WHERE id = $2`, [campanaId, id]);
+}
+
 module.exports = {
+  ajustesAgenda, guardarAjustesAgenda, listProgramadas, getProgramada,
+  crearProgramada, actualizarProgramada, borrarProgramada,
+  programadasParaDisparar, sellarProgramada, anotarCampanaProgramada,
   normalizePhone, PERU,
   // conexión
   conexion, guardarConexion,

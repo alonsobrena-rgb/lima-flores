@@ -25,6 +25,8 @@
 
 const waStore = require('../db/whatsapp-store');
 const wa = require('../integrations/whatsapp/client');
+const campanas = require('../integrations/whatsapp/campanas');
+const agenda = require('../integrations/whatsapp/agenda');
 const studioStore = require('./../db/studio-store');
 const products = require('../db/products-store');
 
@@ -299,52 +301,6 @@ async function templateHeader(req, res, id) {
 // ─── Envíos ──────────────────────────────────────────────────────────────────
 // Sube el header una vez y envía a cada contacto de la campaña. Lo usan tanto la
 // campaña (en segundo plano) como el envío suelto a un contacto (esperando).
-async function runCampaign(campaignId, templateId, cx) {
-  const template = await waStore.getTemplateFull(templateId);
-  const camp = await waStore.getCampaign(campaignId);
-  if (!template || !camp) return;
-  const hasVar = /\{\{1\}\}/.test(template.body_text || '');
-
-  // Red de seguridad. El sync baja la foto de muestra de Meta, así que esto no
-  // debería pasar; pasa si esa descarga falló (URL caducada, red) y la fila
-  // quedó con header de imagen y sin binario. Sin esto se enviaba sin cabecera
-  // y Meta contestaba un error de componentes que no apunta al problema real.
-  if (template.header_kind === 'image' && !template.header_image) {
-    const falta = 'Esta plantilla tiene cabecera de imagen y su foto no está guardada acá.'
-      + ' Dale a «Sincronizar estados» para que se baje de Meta, o vuelve a crearla desde el panel.';
-    for (const m of camp.messages) await waStore.markMessage(m.id, { status: 'failed', error: falta });
-    await waStore.bumpCampaign(campaignId, { failed: camp.messages.length });
-    await waStore.finishCampaign(campaignId, 'failed');
-    return;
-  }
-
-  let headerMediaId = null;
-  if (template.header_kind === 'image' && template.header_image) {
-    try { headerMediaId = await wa.uploadMedia(cx, { buffer: template.header_image, mime: template.header_mime || 'image/jpeg', filename: template.name }); }
-    catch (e) {
-      for (const m of camp.messages) await waStore.markMessage(m.id, { status: 'failed', error: 'Header: ' + e.message });
-      await waStore.bumpCampaign(campaignId, { failed: camp.messages.length });
-      await waStore.finishCampaign(campaignId, 'failed');
-      return;
-    }
-  }
-
-  for (const m of camp.messages) {
-    try {
-      const r = await wa.sendTemplate(cx, {
-        to: m.phone, templateName: template.name, language: template.language,
-        headerMediaId, bodyParams: hasVar ? [m.contact_name || 'cliente'] : [],
-      });
-      await waStore.markMessage(m.id, { status: 'sent', waId: r.id });
-      await waStore.bumpCampaign(campaignId, { sent: 1 });
-    } catch (e) {
-      await waStore.markMessage(m.id, { status: 'failed', error: e.message });
-      await waStore.bumpCampaign(campaignId, { failed: 1 });
-    }
-    if (camp.messages.length > 1) await sleep(300); // ritmo suave para no toparse con rate limits
-  }
-  await waStore.finishCampaign(campaignId, 'done');
-}
 
 // Una plantilla a un contacto, ahora mismo. Se espera el resultado (es un solo
 // mensaje) para poder decir en el panel si salió o por qué no.
@@ -371,7 +327,7 @@ async function enviarAContacto(req, res, contactId) {
     await waStore.queueMessages(campaignId, [contacto]);
   } catch (e) { return send(res, 500, { error: e.message }); }
 
-  await runCampaign(campaignId, template.id, cx);
+  await campanas.ejecutarCampana(campaignId, template.id, cx);
   const camp = await waStore.getCampaign(campaignId);
   const msg = camp && camp.messages && camp.messages[0];
   if (msg && msg.status === 'sent') return send(res, 200, { ok: true, campaignId, phone: msg.phone });
@@ -399,7 +355,7 @@ async function createCampaign(req, res) {
     await waStore.queueMessages(campaignId, contacts);
   } catch (e) { return send(res, 500, { error: e.message }); }
 
-  setImmediate(() => runCampaign(campaignId, template.id, cx).catch((e) => console.error('[wa] campaign error:', e.message)));
+  setImmediate(() => campanas.ejecutarCampana(campaignId, template.id, cx).catch((e) => console.error('[wa] campaign error:', e.message)));
   return send(res, 202, { campaignId, total: contacts.length, status: 'sending' });
 }
 
@@ -413,6 +369,104 @@ async function getCampaign(req, res, id) {
     const c = await waStore.getCampaign(id);
     return c ? send(res, 200, c) : send(res, 404, { error: 'No existe esa campaña.' });
   } catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+// ─── Agenda: «el día N de cada mes a tal hora, esta plantilla» ────────────────
+
+const entero = (v, min, max, porDefecto) => {
+  const n = Math.trunc(Number(v));
+  return Number.isFinite(n) && n >= min && n <= max ? n : porDefecto;
+};
+
+/**
+ * La regla, más el próximo envío ya calculado. Se calcula al vuelo y no se
+ * guarda: una fecha guardada se queda vieja en cuanto alguien cambia la hora.
+ */
+function conProximo(regla) {
+  const prox = agenda.proximaOcurrencia(regla, new Date());
+  return { ...regla, proximo: prox ? prox.toISOString() : null };
+}
+
+/**
+ * La marca de la ocurrencia que ya pasó, para sellarla al crear o al editar.
+ * Sin esto, guardar «día 2 a las 10:00» un día 2 a las 10:05 mandaría la
+ * campaña en el acto.
+ */
+const marcaYaPasada = (regla) => agenda.marcaDe(agenda.ocurrenciaVencida(regla, new Date()));
+
+async function listProgramadas(req, res) {
+  try {
+    const [ajustes, reglas] = await Promise.all([waStore.ajustesAgenda(), waStore.listProgramadas()]);
+    return send(res, 200, { ajustes, programadas: reglas.map(conProximo), zona: agenda.TZ });
+  } catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+async function guardarAgendaAjustes(req, res) {
+  let body; try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+  try { return send(res, 200, { ajustes: await waStore.guardarAjustesAgenda({ activo: !!body.activo }) }); }
+  catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+async function crearProgramada(req, res) {
+  let body; try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+  const dia = entero(body.dia, 1, 31, 0);
+  if (!dia) return send(res, 400, { error: 'El día del mes tiene que ser un número del 1 al 31.' });
+  if (!body.templateId) return send(res, 400, { error: 'Elige una plantilla.' });
+
+  const t = await waStore.getTemplateMeta(body.templateId);
+  if (!t) return send(res, 404, { error: 'La plantilla no existe.' });
+  if (t.status !== 'APPROVED') {
+    return send(res, 409, { error: `La plantilla está "${t.status}". Solo se pueden programar plantillas APPROVED.` });
+  }
+
+  const regla = {
+    templateId: t.id, dia,
+    hora: entero(body.hora, 0, 23, 9),
+    minuto: entero(body.minuto, 0, 59, 0),
+    repetir: body.repetir === 'una_vez' ? 'una_vez' : 'mensual',
+    activa: body.activa === undefined ? true : !!body.activa,
+    etiqueta: (body.etiqueta || '').trim() || null,
+  };
+  regla.marcaInicial = marcaYaPasada(regla);
+  try { return send(res, 201, conProximo(await waStore.crearProgramada(regla))); }
+  catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+async function patchProgramada(req, res, id) {
+  let body; try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+  const actual = await waStore.getProgramada(id);
+  if (!actual) return send(res, 404, { error: 'Esa programación no existe.' });
+
+  const campos = {};
+  if (body.dia !== undefined) {
+    const d = entero(body.dia, 1, 31, 0);
+    if (!d) return send(res, 400, { error: 'El día del mes tiene que ser un número del 1 al 31.' });
+    campos.dia = d;
+  }
+  if (body.hora !== undefined) campos.hora = entero(body.hora, 0, 23, actual.hora);
+  if (body.minuto !== undefined) campos.minuto = entero(body.minuto, 0, 59, actual.minuto);
+  if (body.repetir !== undefined) campos.repetir = body.repetir === 'una_vez' ? 'una_vez' : 'mensual';
+  if (body.activa !== undefined) campos.activa = !!body.activa;
+  if (body.etiqueta !== undefined) campos.etiqueta = (body.etiqueta || '').trim() || null;
+  if (body.templateId !== undefined) {
+    const t = await waStore.getTemplateMeta(body.templateId);
+    if (!t) return send(res, 404, { error: 'La plantilla no existe.' });
+    if (t.status !== 'APPROVED') return send(res, 409, { error: `La plantilla está "${t.status}".` });
+    campos.templateId = t.id;
+  }
+
+  // Si cambió el cuándo, se vuelve a sellar la ocurrencia pasada: mover una
+  // regla a una hora que ya pasó hoy no debe disparar la campaña en el acto.
+  if (campos.dia !== undefined || campos.hora !== undefined || campos.minuto !== undefined) {
+    campos.marcaInicial = marcaYaPasada({ ...actual, ...campos });
+  }
+  try { return send(res, 200, conProximo(await waStore.actualizarProgramada(id, campos))); }
+  catch (e) { return send(res, 500, { error: e.message }); }
+}
+
+async function borrarProgramada(req, res, id) {
+  try { await waStore.borrarProgramada(id); return send(res, 200, { ok: true }); }
+  catch (e) { return send(res, 500, { error: e.message }); }
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -440,6 +494,14 @@ module.exports = async (req, res, urlObj) => {
   if (p === '/api/admin/wa/templates/sync' && req.method === 'POST') return syncTemplates(req, res);
   const hm = p.match(/^\/api\/admin\/wa\/templates\/([A-Za-z0-9_-]+)\/header$/);
   if (hm && req.method === 'GET') return templateHeader(req, res, hm[1]);
+
+  // Agenda (programadas)
+  if (p === '/api/admin/wa/programadas' && req.method === 'GET')  return listProgramadas(req, res);
+  if (p === '/api/admin/wa/programadas' && req.method === 'POST') return crearProgramada(req, res);
+  if (p === '/api/admin/wa/agenda' && req.method === 'POST') return guardarAgendaAjustes(req, res);
+  const pm = p.match(/^\/api\/admin\/wa\/programadas\/([A-Za-z0-9_-]+)$/);
+  if (pm && req.method === 'PATCH')  return patchProgramada(req, res, pm[1]);
+  if (pm && req.method === 'DELETE') return borrarProgramada(req, res, pm[1]);
 
   // Campañas
   if (p === '/api/admin/wa/campaigns' && req.method === 'GET')  return listCampaigns(req, res);

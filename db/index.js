@@ -350,6 +350,40 @@ INSERT INTO ig_settings (id) VALUES ('ig') ON CONFLICT (id) DO NOTHING;
 -- Cada pieza sabe a qué cuenta va. Nula = la primera cuenta activa, que es lo
 -- que había antes de que hubiera varias.
 ALTER TABLE ig_queue ADD COLUMN IF NOT EXISTS cuenta_id TEXT;
+
+-- ─── Agenda de WhatsApp ──────────────────────────────────────────────────────
+-- Reglas del tipo «el día 2 de cada mes, a las 10:00, manda tal plantilla».
+-- El día y la hora son SIEMPRE hora de Lima; el servidor corre en UTC y la
+-- conversion se hace al calcular la ocurrencia (integrations/whatsapp/agenda.js).
+--
+-- La columna marca_disparada guarda la ocurrencia que ya se mandó, con el
+-- formato 'YYYY-MM-DD HH:MM' en hora de Lima. Es lo que impide que una regla se
+-- dispare dos veces: el worker mira cada minuto, así que sin esa marca mandaría
+-- la misma campaña sesenta veces en una hora.
+CREATE TABLE IF NOT EXISTS wa_programadas (
+  id              TEXT PRIMARY KEY,
+  template_id     TEXT NOT NULL,
+  dia             INT NOT NULL,                     -- 1..31 (hora de Lima)
+  hora            INT NOT NULL DEFAULT 9,           -- 0..23
+  minuto          INT NOT NULL DEFAULT 0,           -- 0..59
+  repetir         TEXT NOT NULL DEFAULT 'mensual',  -- 'mensual' | 'una_vez'
+  activa          BOOLEAN NOT NULL DEFAULT TRUE,
+  etiqueta        TEXT,
+  marca_disparada TEXT,
+  ultimo_envio    TIMESTAMPTZ,
+  ultima_campana  TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Interruptor de la agenda. Una sola fila (id='wa'). Arranca APAGADO por la
+-- misma razón que el de Instagram: mandar un WhatsApp de marketing es hacia
+-- afuera y no se enciende solo con un deploy — lo enciende una persona.
+CREATE TABLE IF NOT EXISTS wa_agenda_ajustes (
+  id         TEXT PRIMARY KEY,
+  activo     BOOLEAN NOT NULL DEFAULT FALSE,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO wa_agenda_ajustes (id) VALUES ('wa') ON CONFLICT (id) DO NOTHING;
 `;
 
 async function migrate() {
