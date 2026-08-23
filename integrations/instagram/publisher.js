@@ -60,8 +60,15 @@ async function vuelta() {
 function start() {
   if (timer) return;
   if (!db.enabled) { console.log('[ig] sin BD — publicador desactivado'); return; }
-  const falta = publish.faltantes();
-  if (falta.length) console.log(`[ig] publicador en espera: falta ${falta.join(', ')}`);
+  // Con la cuenta del panel, no con las variables sueltas: si no, el arranque
+  // dice «falta una cuenta de Instagram» aunque esté agregada y activa. Va
+  // suelto porque `start()` no espera a nadie — es una línea de registro.
+  cola.cuentaPorDefecto()
+    .then((c) => {
+      const falta = publish.faltantes(c);
+      if (falta.length) console.log(`[ig] publicador en espera: falta ${falta.join(', ')}`);
+    })
+    .catch(() => { /* sin base todavía: el vigía lo vuelve a mirar en cada vuelta */ });
   timer = setInterval(() => { vuelta().catch(() => {}); }, CADA_MS);
   timer.unref?.();
   console.log('[ig] publicador iniciado (revisa la cola cada minuto)');

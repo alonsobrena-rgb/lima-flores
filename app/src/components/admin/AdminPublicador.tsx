@@ -29,6 +29,8 @@ type Cuenta = {
 };
 type Estado = {
   configurado: boolean; falta: string[];
+  // Hay cuentas agregadas pero ninguna activa: falta activarla, no agregarla.
+  cuentaPausada: boolean;
   ajustes: { activo: boolean; porDia: number; horas: string };
   cupo: { usado: number; tope: number } | null;
   resumen: {
@@ -167,13 +169,39 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
           </button>
         </div>
 
+        {/* Una cuenta pausada no es una cuenta que falta. Mandaba a agregar
+            otra —con el id y el token ya puestos— cuando lo único que había que
+            hacer era activarla, así que se dice eso y se ofrece el botón acá
+            mismo, que es donde se lee el problema. */}
         {!estado.configurado && (
-          <p className="mt-4 bg-amber-100 px-3 py-2.5 text-sm text-amber-900">
-            Falta configurar en el servidor: <strong>{estado.falta.join(', ')}</strong>. Sin eso la cola
-            se llena pero no sale nada. IG_USER_ID e IG_ACCESS_TOKEN salen de la cuenta de Instagram
-            Business conectada a la página de Facebook; el token necesita el permiso
-            <code className="mx-1 break-all bg-black/5 px-1">instagram_content_publish</code>.
-          </p>
+          <div className="mt-4 bg-amber-100 px-3 py-2.5 text-sm text-amber-900">
+            {estado.cuentaPausada ? (
+              <>
+                <p>
+                  Hay una cuenta agregada, pero está <strong>pausada</strong>: el publicador no
+                  la usa hasta activarla. Falta <strong>{estado.falta.join(', ')}</strong>.
+                </p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  {estado.cuentas.filter((c) => !c.activa).map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => accion(() => adminSend(`/api/admin/ig/cuentas/${c.id}`, 'PATCH', { activa: true }))}
+                      className="press border border-amber-900/30 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] hover:border-amber-900"
+                    >
+                      Activar {c.usuario || c.ig_user_id}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p>
+                Falta configurar en el servidor: <strong>{estado.falta.join(', ')}</strong>. Sin eso la cola
+                se llena pero no sale nada. IG_USER_ID e IG_ACCESS_TOKEN salen de la cuenta de Instagram
+                Business conectada a la página de Facebook; el token necesita el permiso
+                <code className="mx-1 break-all bg-black/5 px-1">instagram_content_publish</code>.
+              </p>
+            )}
+          </div>
         )}
 
         {/* ── El ritmo: cuántas al día y a qué horas ──
@@ -276,9 +304,16 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                 <span className={`rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${c.tokenPuesto ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'}`}>
                   {c.tokenPuesto ? 'token puesto' : 'falta el token'}
                 </span>
+                {/* El estado es una insignia y el botón dice lo que hace. Antes
+                    el botón mostraba el estado —«Pausada»— y se leía como si
+                    fuera a pausar: la cuenta terminaba apagada sin querer y el
+                    aviso de arriba decía que faltaba una cuenta. */}
+                <span className={`rounded-sm px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] ${c.activa ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700'}`}>
+                  {c.activa ? 'activa' : 'pausada'}
+                </span>
                 <span className="ml-auto flex gap-2">
                   <button className={boton} onClick={() => accion(() => adminSend(`/api/admin/ig/cuentas/${c.id}`, 'PATCH', { activa: !c.activa }))}>
-                    {c.activa ? 'Activa' : 'Pausada'}
+                    {c.activa ? 'Pausar' : 'Activar'}
                   </button>
                   <button className={boton} onClick={() => { if (confirm(`¿Quitar ${c.usuario || c.ig_user_id}?`)) accion(() => adminSend(`/api/admin/ig/cuentas/${c.id}`, 'DELETE')); }}>Quitar</button>
                 </span>
