@@ -58,13 +58,27 @@ horas (`app/src/lib/delivery.ts`). Hasta que se decida cuál es la verdad,
 
 ## La foto del encabezado
 
-`app/public/products/box-simona.jpg` es una toma real, sobre blanco, con el
-producto entero: se ve el box y la tarjeta de dedicatoria, así que respalda dos
-de las afirmaciones. Sirve.
+**Ya está lista:** `marketing/whatsapp/encabezados/box-simona.jpg`, 1125 × 600,
+que es el tamaño que Meta recomienda para un encabezado de imagen. Se sube tal
+cual desde el panel al crear la plantilla.
 
-**Pero es vertical (1707 × 2560) y WhatsApp muestra el encabezado apaisado**, así
-que va a recortar el box o las rosas. Antes de usarla hay que preparar una
-versión horizontal con el producto completo sobre blanco — lo mismo que hace
-`marketing/ig-ads/fotos/prep-fotos.py`: `contain` sobre un lienzo del color de
-fondo medido, nunca un recorte que corte el producto. Ver la regla 1 de
-`.claude/skills/piezas-graficas/SKILL.md`.
+La toma de catálogo (`app/public/products/box-simona.jpg`) es real, sobre blanco
+y con el producto entero: se ven el box y la tarjeta de dedicatoria, así que
+respalda dos de las afirmaciones de la tabla. Pero es **vertical (1707 × 2560)**
+y WhatsApp muestra el encabezado apaisado, así que metida ahí de cualquier manera
+el recorte se comía el box o las rosas.
+
+La prepara `marketing/whatsapp/prep-encabezado.py`, que aplica la regla 1 del
+skill de piezas gráficas reutilizando la detección del pipeline de anuncios: mide
+el fondo de la toma (`#FDFDFD`), recorta hasta el producto y lo apoya con
+`contain` sobre un lienzo de **ese mismo color medido**. El producto entra
+entero, ocupa todo el alto y no se ve ninguna costura, porque el lienzo es del
+color que ya tenía la foto.
+
+```sh
+python3 marketing/whatsapp/prep-encabezado.py box-simona.jpg
+```
+
+No lleva logotipo encima ni hace falta: la caligrafía ya está en el box y en la
+tarjeta dentro de la foto real, y WhatsApp muestra el nombre del negocio arriba
+del mensaje.
