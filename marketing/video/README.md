@@ -10,6 +10,12 @@ node marketing/video/build.mjs VID-01     # solo ese
 python3 marketing/video/musica.py 14      # rehacer la cama de música, 14 s
 ```
 
+El resultado sale también en la galería del cliente
+(`limaflores.pe/galeria`), en la ficha del producto que le toca. Ahí es lo único
+que no va embebido en la página: el MP4 se sirve por su propia URL
+(`/galeria/VID-01.mp4`), así que si se despliega la galería hay que desplegar
+`creativos/` con ella.
+
 | | |
 |---|---|
 | `clips/` | Las tomas de la florería, tal como llegan |

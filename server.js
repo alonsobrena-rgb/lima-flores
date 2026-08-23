@@ -197,6 +197,46 @@ const server = http.createServer(async (req, res) => {
     return fs.createReadStream(fp).pipe(res);
   }
 
+  // ─── /galeria/VID-01.mp4 — el video de la galería ───
+  // El mp4 no va embebido en la página: son 7 MB, y en base64 se vuelven 10 que
+  // hay que bajar enteros antes de ver la primera pieza. Se sirve aparte, desde
+  // donde ya vive (`marketing/video/creativos/`), sin copiarlo a `app/public`.
+  //
+  // Con soporte de Range, que no es opcional: sin él, Safari y iOS se niegan a
+  // reproducir y el `<video>` se queda en negro.
+  const mp4 = /^\/galeria\/(VID-\d+)\.mp4$/.exec(parsed.pathname);
+  if (mp4) {
+    const fp = path.join(__dirname, 'marketing/video/creativos', `${mp4[1]}.mp4`);
+    let stat;
+    try { stat = fs.statSync(fp); } catch { stat = null; }
+    if (!stat) return send(res, 404, 'Ese video no está generado.');
+
+    const cabeceras = {
+      'Content-Type': 'video/mp4',
+      'Accept-Ranges': 'bytes',
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Cache-Control': 'public, max-age=3600',
+    };
+    const pedido = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (!pedido) {
+      res.writeHead(200, { ...cabeceras, 'Content-Length': stat.size });
+      return fs.createReadStream(fp).pipe(res);
+    }
+    // Un rango abierto por la izquierda («-500») son los últimos 500 bytes.
+    const desde = pedido[1] ? Number(pedido[1]) : Math.max(0, stat.size - Number(pedido[2] || 0));
+    const hasta = pedido[1] && pedido[2] ? Math.min(Number(pedido[2]), stat.size - 1) : stat.size - 1;
+    if (!(desde >= 0 && desde <= hasta && hasta < stat.size)) {
+      res.writeHead(416, { 'Content-Range': `bytes */${stat.size}` });
+      return res.end();
+    }
+    res.writeHead(206, {
+      ...cabeceras,
+      'Content-Range': `bytes ${desde}-${hasta}/${stat.size}`,
+      'Content-Length': hasta - desde + 1,
+    });
+    return fs.createReadStream(fp, { start: desde, end: hasta }).pipe(res);
+  }
+
   // ─── /api/config — keys públicas (legacy) ───
   // La tienda React no lo usa: Vite hornea VITE_GOOGLE_MAPS_KEY en el build. Se
   // deja como red de seguridad por si algún cliente viejo todavía lo llama.

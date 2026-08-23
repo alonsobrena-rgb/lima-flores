@@ -1089,6 +1089,12 @@ function writeDeck({ campaign, products, ads }) {
   L.push('python3 marketing/ig-ads/galeria.py # rearma galeria.html');
   L.push('```');
   L.push('');
+  L.push('La galería lleva también el carril de video (`marketing/video/`, `videos.json`). El MP4');
+  L.push('es lo único que no va embebido: son 7 MB que en base64 se vuelven 10 y habría que bajarlos');
+  L.push('enteros antes de ver la primera pieza. Va por su propia URL —`/galeria/VID-01.mp4`, que');
+  L.push('`server.js` sirve con soporte de Range porque sin eso iOS no reproduce— así que ese');
+  L.push('archivo tiene que estar desplegado junto a la página.');
+  L.push('');
   L.push('La galería se sirve en **`limaflores.pe/galeria`** — una URL que se puede mandar,');
   L.push('sin login. Va con `noindex`, así que no la encuentra Google: es para compartirla,');
   L.push('no para posicionarla. La sirve `server.js` leyendo `galeria.html` tal cual, así que');

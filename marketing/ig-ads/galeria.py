@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Arma la galería de la campaña para mandarla al cliente.
 
-Sale de `ads.json` y de los JPEG que deja `build.mjs`: el copy que se pega en el
-administrador de anuncios y el que se ve en el creativo son el mismo dato, así
-no se desincronizan.
+Sale de `ads.json` y de los JPEG que deja `build.mjs` —y de `videos.json` con
+los MP4 de `marketing/video/`—: el copy que se pega en el administrador de
+anuncios y el que se ve en la pieza son el mismo dato, así no se desincronizan.
+
+El video no se embebe. Son 7 MB, que en base64 se vuelven 10 y hay que bajarlos
+enteros antes de ver la primera pieza; va por su URL (`/galeria/VID-01.mp4`, la
+sirve `server.js` con soporte de Range) y la página se queda liviana. Es la
+única cosa que la galería no trae adentro, y por eso el archivo tiene que estar
+desplegado junto a ella.
 
 La página va vestida con el sistema Florencia — los mismos tokens que visten los
 creativos — porque acá no se está comparando marcas: se está mostrando una.
@@ -77,6 +83,7 @@ h1{font-size:clamp(38px,5.6vw,62px);margin:0 0 20px;max-width:20ch}
 .pieza{border:1px solid var(--linea);border-radius:8px;overflow:hidden;
   display:flex;flex-direction:column;background:var(--blanco)}
 .pieza .arte{background:var(--alt)}
+.pieza .arte video{display:block;width:100%%;height:auto;aspect-ratio:9/16;background:#000}
 .pieza .ficha{padding:20px 22px 24px;display:flex;flex-direction:column;gap:10px;flex:1}
 .cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .cod{font-size:12px;font-weight:500;letter-spacing:.16em;color:var(--rosa)}
@@ -112,14 +119,39 @@ th{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--tenu
 """
 
 
+SIN_ETIQUETAS = re.compile(r'<[^>]+>')
+
+VIDEOS = os.path.join(RAIZ, 'marketing/video')
+
+
+def ficha(codigo, formato, titulo, filas, a):
+    """El pie de una pieza. Es el mismo para una foto y para un video: cambia el
+    arte de arriba y qué se lista en `filas`, no la estructura."""
+    datos = ''.join(f'\n            <p class="dato"><b>{k}</b> {v}</p>' for k, v in filas)
+    return f"""
+          <div class="ficha">
+            <div class="cab"><span class="cod">{codigo}</span>
+              <span class="fmt">{formato}</span></div>
+            <h3>{titulo}</h3>{datos}
+            <p class="copia">{a['primaryText'].strip()}</p>
+            <p class="dato"><b>Botón</b> {a['cta']} · <b>Etapa</b> {a['funnel']}</p>
+            <p class="tags">{' '.join(a['hashtags'])}</p>
+            <p class="porque">{a['why']}</p>
+          </div>"""
+
+
 def main():
     datos = json.load(open(os.path.join(HERE, 'ads.json'), encoding='utf-8'))
     productos, anuncios = datos['products'], datos['ads']
+    videos = json.load(open(os.path.join(VIDEOS, 'videos.json'), encoding='utf-8'))['videos']
 
     faltan = [a['code'] for a in anuncios
               if not os.path.exists(os.path.join(HERE, 'creativos', f"{a['code']}.jpg"))]
+    faltan += [v['code'] for v in videos
+               if not os.path.exists(os.path.join(VIDEOS, 'creativos', f"{v['code']}.mp4"))]
     if faltan:
-        sys.exit(f'faltan creativos ({", ".join(faltan)}): corre node build.mjs')
+        sys.exit(f'faltan piezas ({", ".join(faltan)}): corre node build.mjs'
+                 ' — y node marketing/video/build.mjs si falta un VID')
 
     bloques = []
     for p in productos:
@@ -130,17 +162,28 @@ def main():
         <article class="pieza">
           <div class="arte"><img src="{jpg(os.path.join(HERE, 'creativos', a['code'] + '.jpg'), 640)}"
             alt="{a['title']}"></div>
-          <div class="ficha">
-            <div class="cab"><span class="cod">{a['code']}</span>
-              <span class="fmt">{fmt} · {a['template']}</span></div>
-            <h3>{a['title']}</h3>
-            <p class="dato"><b>Titular</b> {a['headline']}</p>
-            <p class="dato"><b>Descripción</b> {a['description']}</p>
-            <p class="copia">{a['primaryText'].strip()}</p>
-            <p class="dato"><b>Botón</b> {a['cta']} · <b>Etapa</b> {a['funnel']}</p>
-            <p class="tags">{' '.join(a['hashtags'])}</p>
-            <p class="porque">{a['why']}</p>
+          {ficha(a['code'], f"{fmt} · {a['template']}", a['title'],
+                 [('Titular', a['headline']), ('Descripción', a['description'])], a)}
+        </article>""")
+        # El #t=0.5 no es un adorno: sin poster, Chrome deja el recuadro en negro
+        # hasta que alguien le da a play. Pidiendo medio segundo, el navegador
+        # busca ese cuadro y lo pinta — y medio segundo adentro el rótulo todavía
+        # no entró, así que lo que se ve es la toma.
+        #
+        # El aspect-ratio del CSS tampoco sobra: hasta que llegan los metadatos,
+        # un <video> mide 300x150, así que sin él la tarjeta nace achatada y da
+        # un salto cuando el video carga.
+        for v in (x for x in videos if x['product'] == p['id']):
+            piezas.append(f"""
+        <article class="pieza">
+          <div class="arte">
+            <video controls playsinline preload="metadata"
+              src="/galeria/{v['code']}.mp4#t=0.5"></video>
           </div>
+          {ficha(v['code'], '9:16 · video', v['title'],
+                 [('Rótulo', SIN_ETIQUETAS.sub('', v['sub'])),
+                  ('Cierre', SIN_ETIQUETAS.sub('', v['cierre']) + ' ' + v['cierreSub']),
+                  ('Descripción', f"{v['footer']} · {v['price']}")], v)}
         </article>""")
         bloques.append(f"""
   <section class="prod"><div class="wrap">
@@ -172,7 +215,7 @@ def main():
 <header class="tapa"><div class="wrap">
   <img class="marca" src="{D.imagen('logo.png', 420)}" alt="Lima Flores">
   <p class="rot">Campaña de Instagram</p>
-  <h1 class="d">{len(anuncios)} piezas, <em>un solo sistema</em></h1>
+  <h1 class="d">{len(anuncios) + len(videos)} piezas, <em>un solo sistema</em></h1>
   <p>Todas las piezas se visten con el sistema de diseño de la tienda: los mismos
   colores medidos en el ramo del logotipo, la misma Cormorant Garamond en itálica
   para los titulares y la misma Jost para todo lo demás. El generador lee los
@@ -181,7 +224,8 @@ def main():
   afirmación del texto sale de una fuente del proyecto — la tabla del final dice
   cuál.</p>
   <div class="cifras">
-    <div class="cifra"><b>{len(anuncios)}</b><span>Piezas</span></div>
+    <div class="cifra"><b>{len(anuncios)}</b><span>Piezas fijas</span></div>
+    <div class="cifra"><b>{len(videos)}</b><span>{'Video' if len(videos) == 1 else 'Videos'}</span></div>
     <div class="cifra"><b>{len(productos)}</b><span>Productos</span></div>
     <div class="cifra"><b>9</b><span>Formatos</span></div>
     <div class="cifra"><b>0</b><span>Imágenes de IA</span></div>
@@ -215,7 +259,7 @@ def main():
     destino = os.path.join(HERE, 'galeria.html')
     open(destino, 'w', encoding='utf-8').write(html)
     print(f'  ✓ galeria.html   {round(os.path.getsize(destino) / 1024)} KB'
-          f'   {len(anuncios)} piezas')
+          f'   {len(anuncios)} piezas + {len(videos)} video(s)')
 
 
 if __name__ == '__main__':

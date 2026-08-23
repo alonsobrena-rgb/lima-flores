@@ -7,6 +7,12 @@ node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
 python3 marketing/ig-ads/galeria.py # rearma galeria.html
 ```
 
+La galería lleva también el carril de video (`marketing/video/`, `videos.json`). El MP4
+es lo único que no va embebido: son 7 MB que en base64 se vuelven 10 y habría que bajarlos
+enteros antes de ver la primera pieza. Va por su propia URL —`/galeria/VID-01.mp4`, que
+`server.js` sirve con soporte de Range porque sin eso iOS no reproduce— así que ese
+archivo tiene que estar desplegado junto a la página.
+
 La galería se sirve en **`limaflores.pe/galeria`** — una URL que se puede mandar,
 sin login. Va con `noindex`, así que no la encuentra Google: es para compartirla,
 no para posicionarla. La sirve `server.js` leyendo `galeria.html` tal cual, así que
