@@ -885,7 +885,13 @@ function writeDeck({ campaign, products, ads }) {
   L.push('');
   L.push('```');
   L.push('node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README');
+  L.push('python3 marketing/ig-ads/galeria.py # rearma galeria.html');
   L.push('```');
+  L.push('');
+  L.push('La galería se sirve en **`limaflores.pe/galeria`** — una URL que se puede mandar,');
+  L.push('sin login. Va con `noindex`, así que no la encuentra Google: es para compartirla,');
+  L.push('no para posicionarla. La sirve `server.js` leyendo `galeria.html` tal cual, así que');
+  L.push('para actualizarla hay que rearmarla con `galeria.py` y volver a desplegar.');
   L.push('');
   L.push('| Anuncio | Producto | Etapa | Formato | Titular |');
   L.push('| --- | --- | --- | --- | --- |');

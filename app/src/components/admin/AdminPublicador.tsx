@@ -278,8 +278,13 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                      video en negro hasta que alguien le da al play, y la cola se
                      ve como una fila de cuadros grises. Con el fragmento salta
                      al primer fotograma y hace de portada. */
-                  ? <video src={apiUrl(`/api/ig/media/${it.id}#t=0.1`)} className="aspect-[4/5] w-full bg-secondary object-cover" muted playsInline preload="metadata" />
-                  : <img src={apiUrl(`/api/ig/media/${it.id}`)} alt="" className="aspect-[4/5] w-full bg-secondary object-cover" />}
+                  /* `object-contain`, no `-cover`: la cola lleva piezas 4:5, 1:1 y
+                     9:16, y con `cover` dentro de una caja 4:5 a las cuadradas se
+                     les comía los lados y a las verticales la mitad. La caja se
+                     queda para que la lista no baile; lo que cambia es que la
+                     pieza entra entera dentro de ella. */
+                  ? <video src={apiUrl(`/api/ig/media/${it.id}#t=0.1`)} className="aspect-[4/5] w-full bg-secondary object-contain" muted playsInline preload="metadata" />
+                  : <img src={apiUrl(`/api/ig/media/${it.id}`)} alt="" className="aspect-[4/5] w-full bg-secondary object-contain" />}
               </a>
 
               <div className="min-w-0">

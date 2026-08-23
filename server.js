@@ -171,6 +171,32 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
+  // ─── /galeria — la campaña de Instagram, en una URL que se puede mandar ───
+  // Es el mismo galeria.html que arma `marketing/ig-ads/galeria.py`: una página
+  // autocontenida, con los JPEG y las fuentes embebidos, así que no depende de
+  // la base ni de que el resto del sitio esté sano.
+  //
+  // Va antes del estático y del fallback del React a propósito: `/galeria` no
+  // tiene extensión, así que el fallback se la comería y devolvería la tienda.
+  //
+  // Y va con noindex: es para mandarla por mensaje a quien tenga que verla, no
+  // para que Google la indexe y compita con las fichas de producto.
+  if (parsed.pathname === '/galeria' || parsed.pathname === '/galeria/') {
+    const fp = path.join(__dirname, 'marketing/ig-ads/galeria.html');
+    let stat;
+    try { stat = fs.statSync(fp); } catch { stat = null; }
+    if (!stat) {
+      return send(res, 404, 'La galería todavía no está generada: corre marketing/ig-ads/galeria.py');
+    }
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Length': stat.size,
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Cache-Control': 'public, max-age=300',
+    });
+    return fs.createReadStream(fp).pipe(res);
+  }
+
   // ─── /api/config — keys públicas (legacy) ───
   // La tienda React no lo usa: Vite hornea VITE_GOOGLE_MAPS_KEY en el build. Se
   // deja como red de seguridad por si algún cliente viejo todavía lo llama.
