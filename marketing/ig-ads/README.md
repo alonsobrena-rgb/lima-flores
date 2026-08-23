@@ -1211,11 +1211,20 @@ era de 18 niveles en el lado derecho. Con `"alas": true` el relleno sale de la p
 cada ala estira su franja de borde, el degradado sigue fila por fila y la unión no existe.
 Es el mismo hallazgo que `marketing/whatsapp/cabeceras.py`.
 
-Las alas son opt-in y no automáticas por dos razones. El `contain` de las fotos recortadas
-no las necesita: `prep-fotos.py` deja el borde de la foto en el mismo color que midió, y el
-relleno plano le calza exacto. Y solo saben rellenar a los costados — si el hueco queda
-arriba y abajo se verían partidas por el medio. Eso último tampoco queda a la buena fe: la
-sonda lo detecta y revienta el build (es lo que le pasaría a IG-09).
+Hay que decir por dónde queda el hueco, porque cada ala estira un borde distinto:
+`"alas": true` para los costados y `"alas": "v"` para arriba y abajo, que es el caso de
+IG-26 — ahí el hueco se leía como una franja blanca al tope. No se puede adivinar desde
+Node, porque depende de la caja que da la plantilla, pero tampoco queda a la buena fe: la
+sonda compara lo declarado contra lo que midió el navegador y revienta el build si no
+coinciden. El `contain` de las fotos ya recortadas no lleva alas y no le hacen falta:
+`prep-fotos.py` deja el borde de la foto en el mismo color que midió.
+
+**Y `sangra`, para cuando el borde de la foto no es fondo.** `tulipanes-de-amor` termina
+en la mesa: al entrar entera, ese degradado caía justo contra el relleno de abajo y se
+leía como una línea recta cruzando la pieza, detrás del titular de IG-13. `"sangra": 4`
+recorta un 4% por lado *después* de encajar la foto — se lleva la mesa y no toca el ramo,
+que empieza al 6% de la altura. Vale para la foto y para las alas, así que las dos siguen
+mostrando el mismo borde.
 
 ### El mejor velo es el que no está
 

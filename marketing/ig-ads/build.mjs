@@ -216,15 +216,17 @@ body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sa
 .rule{height:1px;background:${C.line}}
 .shot{width:100%;height:100%;object-fit:cover;display:block}
 /* Las alas de un contain — ver img(). Cada una estira la franja de borde de la
-   propia foto: 6000% de ancho anclado al filo muestra 1/60 de la imagen
-   ocupando el ala entera. El degradado del ciclorama sigue fila por fila y la
-   union no existe, porque el ala arranca con los mismos pixeles que el borde.
+   propia foto: 6000% anclado al filo muestra 1/60 de la imagen ocupando el ala
+   entera. El degradado del ciclorama sigue fila por fila y la union no existe,
+   porque el ala arranca con los mismos pixeles que el borde. Van de a dos, cada
+   una de la mitad, y se juntan en el centro — que con contain siempre queda
+   tapado por la foto, este el hueco a los lados o arriba y abajo. La geometria
+   va en linea porque depende del eje; aca solo queda lo comun.
    Ojo con el orden de pintado: un elemento posicionado pinta ENCIMA del
    contenido en flujo aunque vaya antes en el HTML, asi que las dos alas
    tapaban la foto entera. Se arregla posicionando tambien la foto — no con un
    z-index negativo, que la mandaba detras del fondo de la ventana. */
-.ala{position:absolute;top:0;bottom:0;width:50%;background-repeat:no-repeat;
-  background-size:6000% 100%}
+.ala{position:absolute;background-repeat:no-repeat}
 </style>${body}
 <!-- La sonda de la regla 1 (ver revisaRecorte): mide cuánto se come el cover
      de cada foto y lo deja en el título, que es lo que lee --dump-dom. No
@@ -241,11 +243,17 @@ body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sa
       return {x:+(1-b.width/(im.naturalWidth*s)).toFixed(4),
               y:+(1-b.height/(im.naturalHeight*s)).toFixed(4),caja,foto};
     }
-    if(fit==='contain'&&im.previousElementSibling&&im.previousElementSibling.className==='ala'){
-      // Las alas solo saben rellenar a los costados. Si el hueco quedó arriba y
-      // abajo, se avisa: ahí las dos se verían partidas por el medio.
+    const ala=im.previousElementSibling;
+    if(fit==='contain'&&ala&&ala.className==='ala'){
+      // Cada ala estira un borde distinto, así que el eje declarado tiene que
+      // coincidir con el lado por donde quedó el hueco. Si no, se ven partidas
+      // por el medio. Se compara lo declarado (el ala ocupa medio ancho o media
+      // altura) contra el hueco que midió el navegador.
       const s=Math.min(b.width/im.naturalWidth,b.height/im.naturalHeight);
-      return {x:0,y:0,caja,foto,alasMal:im.naturalHeight*s<b.height-1};
+      const r=ala.getBoundingClientRect();
+      const eje=r.width<b.width*0.9?'h':'v';
+      const hueco=im.naturalWidth*s<b.width-1?'h':(im.naturalHeight*s<b.height-1?'v':null);
+      return {x:0,y:0,caja,foto,alas:eje,hueco};
     }
     return null;
   }).filter(Boolean);
@@ -258,8 +266,6 @@ body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sa
 // alto: ahí conviene la toma original a sangre, porque el recorte vertical
 // entraría contenido y se vería diminuto.
 const img = (a, ph, banda) => {
-  // Recortada → contain, para no volver a cortar lo que ya está justo.
-  // Intacta → cover, que es lo que quieren los macros y las de ambiente.
   const fit = ph.recortada && !banda ? 'contain' : (a.creative.fit || 'cover');
   // La toma original solo tiene sentido en una franja que va a sangre. Si el
   // anuncio pide `contain` para que el producto entre entero, conviene la
@@ -268,25 +274,49 @@ const img = (a, ph, banda) => {
   const usaOrig = banda && ph.recortada && fit === 'cover';
   const pos = a.creative.position || '50% 50%';
   const src = usaOrig ? ph.uriOrig : ph.uri;
-  const conAlas = fit === 'contain' && a.creative.alas === true;
-  const foto = `<img src="${src}" class="shot"
-       style="object-fit:${fit};object-position:${pos}${conAlas ? ';position:relative' : ''}">`;
-  // `alas: true` rellena los costados con la propia foto en vez del color medido.
-  // Hace falta cuando la foto entera entra en una ventana de otra proporción y
-  // su fondo es un ciclorama en degradado: contra un relleno plano el filo se ve
-  // como el recuadro que prohíbe la regla 2 — en IG-25 el salto era de 18
-  // niveles en el lado derecho. Es el mismo truco de cabeceras.py.
+
+  // `sangra` recorta un % por lado DESPUÉS de encajar la foto. Está para las
+  // tomas cuyo borde no es fondo: `tulipanes-de-amor` termina en la mesa, y al
+  // entrar entera esa mesa caía justo contra el relleno de abajo y se leía como
+  // una línea recta cruzando la pieza. Un 4% se lleva la mesa y no toca el ramo,
+  // que empieza al 6% de la altura.
+  const sg = Number(a.creative.sangra) || 0;
+  const crecida = 100 + 2 * sg;
+
+  // `alas` rellena el hueco del contain con la propia foto en vez del color
+  // medido. Hace falta cuando el fondo de la toma es un ciclorama en degradado:
+  // contra un relleno plano el filo se ve como el recuadro que prohíbe la regla
+  // 2 — en IG-25 el salto era de 18 niveles a la derecha, y en IG-26 el hueco de
+  // arriba se leía como una franja blanca. Es el truco de cabeceras.py.
   //
-  // Es opt-in, no automático, por dos razones. El `contain` de las recortadas no
-  // lo necesita (prep-fotos.py deja el borde de la foto en el color que midió, y
-  // el relleno plano le calza exacto), y las alas solo saben rellenar a los
-  // costados: si el hueco queda arriba y abajo se verían partidas por el medio.
-  // Eso último no queda a la buena fe — lo comprueba la sonda y revienta el
-  // build (le pasaría a IG-09).
+  // Hay que decir por dónde queda el hueco, porque cada ala estira un borde
+  // distinto: `true` (o 'h') para los costados, 'v' para arriba y abajo. No se
+  // puede adivinar desde acá —depende de la caja que da la plantilla— pero
+  // tampoco queda a la buena fe: la sonda compara lo declarado contra lo que
+  // midió el navegador y revienta el build si no coinciden.
+  //
+  // El contain automático de las fotos recortadas no lleva alas y no le hacen
+  // falta: prep-fotos.py deja el borde de la foto en el mismo color que midió.
+  const eje = a.creative.alas === 'v' ? 'v' : (a.creative.alas ? 'h' : null);
+  const conAlas = fit === 'contain' && !!eje;
+
+  const caja = conAlas || sg
+    ? `;position:absolute;left:${-sg}%;top:${-sg}%;width:${crecida}%;height:${crecida}%`
+    : '';
+  const foto = `<img src="${src}" class="shot"
+       style="object-fit:${fit};object-position:${pos}${caja}">`;
   if (!conAlas) return foto;
-  return `<div class="ala" style="left:0;background-image:url(${src});background-position:0% 50%"></div>
-    <div class="ala" style="right:0;background-image:url(${src});background-position:100% 50%"></div>
-    ${foto}`;
+
+  const ala = (lado) => {
+    const geo = eje === 'h'
+      ? `top:0;bottom:0;width:50%;${lado ? 'right' : 'left'}:0`
+      : `left:0;right:0;height:50%;${lado ? 'bottom' : 'top'}:0`;
+    const tam = eje === 'h' ? `6000% ${crecida}%` : `${crecida}% 6000%`;
+    const anc = eje === 'h' ? `${lado * 100}% 50%` : `50% ${lado * 100}%`;
+    return `<div class="ala" style="${geo};background-image:url(${src});`
+      + `background-size:${tam};background-position:${anc}"></div>`;
+  };
+  return `${ala(0)}${ala(1)}${foto}`;
 };
 
 // A · Editorial: foto grande, titular abajo. Para público frío.
@@ -984,12 +1014,14 @@ function recorteDe(dom) {
 function revisaRecorte(ad, dom, sinDeclarar) {
   const partes = recorteDe(dom);
   if (!partes) return;
-  if (partes.some((p) => p.alasMal)) {
-    throw new Error(
-      `${ad.code}: el hueco del contain quedó arriba y abajo, y las alas solo rellenan a los costados.\n`
-      + '  Ahí se verían partidas por el medio. Esa foto entra a sangre en esta ventana: quita el\n'
-      + '  "fit": "contain" y elige el encuadre con "position".',
-    );
+  const mal = partes.find((p) => p.alas && p.alas !== p.hueco);
+  if (mal) {
+    throw new Error(mal.hueco
+      ? `${ad.code}: las alas están declaradas ${mal.alas === 'h' ? 'a los costados' : 'arriba y abajo'} `
+        + `y el hueco del contain quedó ${mal.hueco === 'h' ? 'a los costados' : 'arriba y abajo'}.\n`
+        + `  Así se ven partidas por el medio. Pon "alas": ${mal.hueco === 'v' ? '"v"' : 'true'} en su creative.`
+      : `${ad.code}: la foto llena la ventana justa (${mal.caja.join('×')}), así que el contain no deja hueco.\n`
+        + '  Las alas no pintan nada: quítalas.');
   }
   const peor = partes.reduce((a, p) => Math.max(a, p.x, p.y), 0);
   if (peor <= TOLERA) return;
@@ -1264,11 +1296,20 @@ function writeDeck({ campaign, products, ads }) {
   L.push('cada ala estira su franja de borde, el degradado sigue fila por fila y la unión no existe.');
   L.push('Es el mismo hallazgo que `marketing/whatsapp/cabeceras.py`.');
   L.push('');
-  L.push('Las alas son opt-in y no automáticas por dos razones. El `contain` de las fotos recortadas');
-  L.push('no las necesita: `prep-fotos.py` deja el borde de la foto en el mismo color que midió, y el');
-  L.push('relleno plano le calza exacto. Y solo saben rellenar a los costados — si el hueco queda');
-  L.push('arriba y abajo se verían partidas por el medio. Eso último tampoco queda a la buena fe: la');
-  L.push('sonda lo detecta y revienta el build (es lo que le pasaría a IG-09).');
+  L.push('Hay que decir por dónde queda el hueco, porque cada ala estira un borde distinto:');
+  L.push('`"alas": true` para los costados y `"alas": "v"` para arriba y abajo, que es el caso de');
+  L.push('IG-26 — ahí el hueco se leía como una franja blanca al tope. No se puede adivinar desde');
+  L.push('Node, porque depende de la caja que da la plantilla, pero tampoco queda a la buena fe: la');
+  L.push('sonda compara lo declarado contra lo que midió el navegador y revienta el build si no');
+  L.push('coinciden. El `contain` de las fotos ya recortadas no lleva alas y no le hacen falta:');
+  L.push('`prep-fotos.py` deja el borde de la foto en el mismo color que midió.');
+  L.push('');
+  L.push('**Y `sangra`, para cuando el borde de la foto no es fondo.** `tulipanes-de-amor` termina');
+  L.push('en la mesa: al entrar entera, ese degradado caía justo contra el relleno de abajo y se');
+  L.push('leía como una línea recta cruzando la pieza, detrás del titular de IG-13. `"sangra": 4`');
+  L.push('recorta un 4% por lado *después* de encajar la foto — se lleva la mesa y no toca el ramo,');
+  L.push('que empieza al 6% de la altura. Vale para la foto y para las alas, así que las dos siguen');
+  L.push('mostrando el mismo borde.');
   L.push('');
   L.push('### El mejor velo es el que no está');
   L.push('');

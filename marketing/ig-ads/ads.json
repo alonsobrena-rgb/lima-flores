@@ -523,7 +523,8 @@
         "position": "50% 52%",
         "hlSize": 108,
         "franja": true,
-        "alas": true
+        "alas": true,
+        "sangra": 4
       },
       "why": "La foto ya tiene el aire arriba: el texto se apoya en el fondo crema sin recuadros ni velos. Es el formato más limpio del set y el que mejor pasa por publicación orgánica."
     },
@@ -946,7 +947,8 @@
         "pill": "S/ 176 · Ver el box",
         "hlSize": 96,
         "fit": "contain",
-        "position": "50% 100%"
+        "position": "50% 100%",
+        "alas": "v"
       },
       "why": "Ticket bajo en historia: el formato vertical con botón es el que mejor cierra en retargeting."
     },

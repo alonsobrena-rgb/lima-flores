@@ -76,10 +76,21 @@ regla 2 — en IG-25 el salto era de 18 niveles en el lado derecho. Con
 borde, el degradado sigue fila por fila y la unión no existe. Es el mismo
 hallazgo que ya tenía anotado `marketing/whatsapp/cabeceras.py`.
 
-Son opt-in a propósito. El `contain` de una foto ya recortada no las necesita
-—`prep-fotos.py` deja el borde en el mismo color que midió— y solo saben
-rellenar a los costados: si el hueco queda arriba y abajo se verían partidas por
-el medio. Eso también lo detecta la sonda y revienta el build.
+Hay que decirle por dónde queda el hueco, porque cada ala estira un borde
+distinto: `"alas": true` para los costados, `"alas": "v"` para arriba y abajo
+(el caso de IG-26, donde el hueco se leía como una franja blanca al tope). No se
+adivina —depende de la caja que da la plantilla— pero tampoco queda a la buena
+fe: la sonda compara lo declarado contra lo que midió el navegador y revienta el
+build si no coinciden. El `contain` de una foto ya recortada no las necesita:
+`prep-fotos.py` deja el borde en el mismo color que midió.
+
+**Y hay un tercer caso: que el borde de la foto no sea fondo.**
+`tulipanes-de-amor` termina en la mesa, y al entrar entera ese degradado caía
+justo contra el relleno de abajo y se leía como una línea recta cruzando la
+pieza, detrás del titular de IG-13. Para eso está `"sangra": 4` — recorta un 4%
+por lado *después* de encajar la foto, se lleva la mesa y no toca el ramo, que
+empieza al 6% de la altura. Se aplica a la foto y a las alas, así que las dos
+siguen mostrando el mismo borde.
 
 Un detalle que se paga caro si se olvida: cuando el anuncio pide `contain` en una
 franja, conviene la foto **recortada**, no la original. Misma imagen, menos
