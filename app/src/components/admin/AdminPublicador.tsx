@@ -70,6 +70,16 @@ function Insignia({ status }: { status: string }) {
 export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
   const [estado, setEstado] = useState<Estado | null>(null);
   const [cola, setCola] = useState<Item[]>([]);
+  const [copiado, setCopiado] = useState(false);
+  // Se arma con el origen del navegador para que valga igual en producción y
+  // levantándolo en local, sin cablear el dominio.
+  const urlGaleria = (typeof window !== 'undefined' ? window.location.origin : 'https://limaflores.pe') + '/galeria';
+  const copiarGaleria = async () => {
+    try { await navigator.clipboard.writeText(urlGaleria); }
+    catch { /* sin permiso de portapapeles: el enlace igual se puede copiar a mano */ }
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 1800);
+  };
   const [cargando, setCargando] = useState(true);
   const [err, setErr] = useState('');
   const [aviso, setAviso] = useState('');
@@ -141,7 +151,7 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
             Falta configurar en el servidor: <strong>{estado.falta.join(', ')}</strong>. Sin eso la cola
             se llena pero no sale nada. IG_USER_ID e IG_ACCESS_TOKEN salen de la cuenta de Instagram
             Business conectada a la página de Facebook; el token necesita el permiso
-            <code className="mx-1 bg-black/5 px-1">instagram_content_publish</code>.
+            <code className="mx-1 break-all bg-black/5 px-1">instagram_content_publish</code>.
           </p>
         )}
 
@@ -236,6 +246,28 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
           se escribió para cada uno, y los agenda a continuación de lo que ya hay. Lo que ya está en
           la cola no se vuelve a cargar.
         </p>
+
+        {/* El enlace público de la misma galería, para poder mandarlo sin salir
+            del panel. No lleva login y va con noindex; se sirve en server.js
+            leyendo marketing/ig-ads/galeria.html. */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border border-border bg-surface/40 px-3 py-2.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/45">
+            Galería pública
+          </span>
+          <a href={urlGaleria} target="_blank" rel="noopener noreferrer"
+            className="min-w-0 break-all font-mono text-[12px] text-rosa-600 underline decoration-rosa-500/40 underline-offset-2 hover:text-rosa-500">
+            {urlGaleria.replace(/^https?:\/\//, '')}
+          </a>
+          <button onClick={copiarGaleria}
+            className="press flex-shrink-0 border border-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">
+            {copiado ? '✓ copiado' : 'Copiar'}
+          </button>
+          <span className="w-full text-[11px] text-foreground/45">
+            Se puede mandar a quien sea: no pide contraseña. Lleva <code className="bg-black/5 px-1">noindex</code>,
+            así que no sale en Google. Para actualizarla hay que rearmarla con{' '}
+            <code className="bg-black/5 px-1">galeria.py</code> y desplegar.
+          </span>
+        </div>
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <div>
             <label className={label}>¿A qué cuenta?</label>
