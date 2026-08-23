@@ -303,7 +303,7 @@ CREATE INDEX IF NOT EXISTS culqi_events_sub_idx ON culqi_events (subscription_id
 -- /api/ig/media/:id (público, sin sesión, es la única forma de que Meta lo lea).
 CREATE TABLE IF NOT EXISTS ig_queue (
   id            TEXT PRIMARY KEY,
-  kind          TEXT NOT NULL,                       -- 'image' | 'reel'
+  kind          TEXT NOT NULL,                       -- 'image' (feed) | 'story' | 'reel'
   origen        TEXT,                                -- código de la galería (IG-37, VID-01) o 'manual'
   caption       TEXT NOT NULL DEFAULT '',
   media         BYTEA NOT NULL,
