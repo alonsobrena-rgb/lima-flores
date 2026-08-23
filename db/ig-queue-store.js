@@ -127,6 +127,37 @@ async function borrar(id) {
 }
 
 /**
+ * Adelanta a ahora las `cuantas` piezas en cola que van primero.
+ *
+ * No publica: mueve la hora y deja que el vigía las tome, que es lo mismo que
+ * hace `publicar-ya` con una sola pieza. Por eso sigue respetando el
+ * interruptor y el tope diario — adelantar no es una puerta de atrás para
+ * publicar con el publicador apagado.
+ *
+ * Solo toca las `queued`: una pausada está pausada a propósito y una fallida
+ * espera a que alguien mire el error.
+ *
+ * `cuentaId` nulo significa **todas las cuentas**, no «las piezas sin cuenta»;
+ * por eso el filtro va con `$2::text IS NULL` y no con `IS NOT DISTINCT FROM`.
+ */
+async function adelantar(cuantas, cuentaId = null) {
+  const n = Math.max(1, Math.min(25, Number(cuantas) || 1));
+  const { rows } = await db.query(
+    `UPDATE ig_queue SET scheduled_at = NOW()
+      WHERE id IN (
+        SELECT id FROM ig_queue
+         WHERE status = 'queued'
+           AND ($2::text IS NULL OR cuenta_id = $2)
+         ORDER BY scheduled_at ASC
+         LIMIT $1
+      )
+      RETURNING id, kind, origen, cuenta_id`,
+    [n, cuentaId],
+  );
+  return rows;
+}
+
+/**
  * La última hora ya ocupada por esa cuenta: desde ahí se sigue agendando.
  *
  * Por cuenta: dos cuentas publican en paralelo, así que la agenda de una no
@@ -231,6 +262,6 @@ async function publicadasHoy() {
 module.exports = {
   encolar, listar, obtener, media, origenesUsados, tomarVencida,
   marcarPublicada, marcarFallida, actualizar, borrar, ultimaAgendada,
-  ajustes, guardarAjustes, publicadasHoy,
+  ajustes, guardarAjustes, publicadasHoy, adelantar,
   listarCuentas, cuenta, cuentaPorDefecto, crearCuenta, actualizarCuenta, borrarCuenta,
 };

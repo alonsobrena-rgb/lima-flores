@@ -9,6 +9,7 @@
 //   GET    /api/admin/ig/cola                   → la cola completa (sin binarios)
 //   POST   /api/admin/ig/cargar-galeria         → encola los creativos del repo que falten
 //   POST   /api/admin/ig/ajustes                → { activo, porDia, horas }
+//   POST   /api/admin/ig/publicar-ahora         → { cuantas, cuentaId } adelanta las N siguientes
 //   PATCH  /api/admin/ig/cola/:id               → { caption, scheduledAt, status }
 //   POST   /api/admin/ig/cola/:id/publicar-ya   → la adelanta a ahora mismo
 //   DELETE /api/admin/ig/cola/:id               → la saca de la cola
@@ -129,21 +130,104 @@ async function crearCuenta(req, res) {
   }
 }
 
+/** «9, 12,15» → '9,12,15'. Devuelve null si hay algo que no es una hora. */
+function limpiarHoras(txt) {
+  const partes = String(txt).split(',').map((h) => h.trim()).filter((h) => h !== '');
+  if (!partes.length) return null;
+  const horas = partes.map(Number);
+  if (horas.some((h) => !Number.isInteger(h) || h < 0 || h > 23)) return null;
+  return [...new Set(horas)].sort((x, y) => x - y).join(',');
+}
+
 async function guardarAjustes(req, res) {
   let body;
   try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+
+  // El store recorta al rango en silencio; acá se rechaza, porque el que manda
+  // 40 quiere 40 y merece saber que no se puede, no quedarse con 25.
+  if (body.porDia !== undefined) {
+    const n = Number(body.porDia);
+    if (!Number.isInteger(n) || n < 1 || n > 25) {
+      return send(res, 400, { error: 'Las publicaciones al día van de 1 a 25.' });
+    }
+  }
+  if (body.horas !== undefined) {
+    const limpias = limpiarHoras(body.horas);
+    if (!limpias) {
+      return send(res, 400, { error: 'Las horas son números de 0 a 23 separados por comas, p. ej. 9,12,15,18,21.' });
+    }
+    body.horas = limpias;
+  }
+
   const a = await cola.guardarAjustes({
     activo: body.activo,
     porDia: body.porDia,
     horas: body.horas,
   });
+
+  const avisos = [];
   // Encender sin tener las llaves puestas no publica nada: mejor decirlo acá que
   // dejar al usuario mirando una cola que no avanza.
+  if (a.activo && !publish.configurado()) {
+    avisos.push(`Encendido, pero no va a publicar: falta ${publish.faltantes().join(', ')} en el servidor.`);
+  }
+  // `agenda.parseHoras` **recorta** la lista al número elegido: pedir 8 al día
+  // con cinco horas en la lista sigue dando cinco. Sin este aviso el selector
+  // miente, que es peor que no tenerlo.
+  const efectivas = agenda.parseHoras(a.horas, a.por_dia).length;
+  if (efectivas < a.por_dia) {
+    avisos.push(`Elegiste ${a.por_dia} al día, pero la lista solo tiene ${efectivas} hora(s): van a salir ${efectivas}. Agrega horas para llegar a ${a.por_dia}.`);
+  }
+
   return send(res, 200, {
     ajustes: { activo: a.activo, porDia: a.por_dia, horas: a.horas },
-    aviso: a.activo && !publish.configurado()
-      ? `Encendido, pero no va a publicar: falta ${publish.faltantes().join(', ')} en el servidor.`
-      : null,
+    aviso: avisos.length ? avisos.join(' ') : null,
+  });
+}
+
+/**
+ * Adelanta a ahora las N piezas que van primero en la cola.
+ *
+ * Es `publicar-ya` en tanda, y a propósito por el mismo camino: mueve la hora y
+ * el vigía las toma en su vuelta. No publica de inmediato ni saltea el
+ * interruptor — si está apagado, no sale nada y se dice acá mismo.
+ */
+async function publicarAhora(req, res) {
+  let body;
+  try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+
+  const n = Number(body.cuantas);
+  if (!Number.isInteger(n) || n < 1 || n > 25) {
+    return send(res, 400, { error: 'Se pueden adelantar entre 1 y 25 piezas a la vez.' });
+  }
+  const cuentaId = body.cuentaId ? String(body.cuentaId) : null;
+  if (cuentaId && !(await cola.cuenta(cuentaId))) return send(res, 404, { error: 'esa cuenta no existe' });
+
+  const filas = await cola.adelantar(n, cuentaId);
+  if (!filas.length) return send(res, 200, { adelantadas: 0, aviso: 'No hay piezas en cola para adelantar.' });
+
+  // Todo lo que puede hacer que lo adelantado no salga, dicho antes de que la
+  // persona se quede mirando una cola que no avanza.
+  const ajustes = await cola.ajustes();
+  const peros = [];
+  if (!ajustes.activo) peros.push('el publicador está apagado y no va a salir nada hasta que lo enciendas');
+  const tope = (ajustes.por_dia || 5) * 2;
+  const hoy = await cola.publicadasHoy();
+  if (hoy + filas.length > tope) {
+    peros.push(`el tope propio son ${tope} en 24 h y ya van ${hoy}, así que el resto espera`);
+  }
+  const cupo = await publish.cupoRestante(cuentaId ? await cola.cuenta(cuentaId) : await cola.cuentaPorDefecto());
+  if (cupo && cupo.usado + filas.length > cupo.tope) {
+    peros.push(`Meta permite ${cupo.tope} cada 24 h y ya van ${cupo.usado}`);
+  }
+
+  return send(res, 200, {
+    adelantadas: filas.length,
+    piezas: filas.map((f) => f.origen || f.id),
+    // El vigía publica una por vuelta y la vuelta es de un minuto: con esto la
+    // pantalla puede decir cuánto va a tardar la tanda en salir entera.
+    minutos: filas.length,
+    aviso: peros.length ? `Adelantadas ${filas.length}, pero ${peros.join('; ')}.` : null,
   });
 }
 
@@ -181,6 +265,7 @@ module.exports = async (req, res, urlObj) => {
   if (p === '/api/admin/ig/cola' && req.method === 'GET') return send(res, 200, { cola: await cola.listar({}) });
   if (p === '/api/admin/ig/cargar-galeria' && req.method === 'POST') return cargarGaleria(req, res);
   if (p === '/api/admin/ig/ajustes' && req.method === 'POST') return guardarAjustes(req, res);
+  if (p === '/api/admin/ig/publicar-ahora' && req.method === 'POST') return publicarAhora(req, res);
 
   const m = p.match(/^\/api\/admin\/ig\/cola\/([a-f0-9]{6,32})(?:\/(publicar-ya))?$/);
   if (m) {
