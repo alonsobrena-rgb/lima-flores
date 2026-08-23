@@ -321,6 +321,12 @@ CREATE TABLE IF NOT EXISTS ig_queue (
 );
 CREATE INDEX IF NOT EXISTS ig_queue_agenda_idx ON ig_queue (status, scheduled_at);
 
+-- Marca si alguien reescribió el caption desde el panel. La usa el
+-- resincronizado: al volver a leer una pieza del repo se reemplaza el binario
+-- siempre, pero el texto solo si nadie lo tocó a mano. Sin esta columna, apretar
+-- «volver a leer del repo» borraba en silencio un caption editado.
+ALTER TABLE ig_queue ADD COLUMN IF NOT EXISTS caption_editado BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Las cuentas de Instagram donde se publica. Se agregan desde el panel; el
 -- TOKEN NO SE GUARDA ACÁ: en la fila solo va el NOMBRE de la variable de entorno
 -- que lo contiene (Railway). Una base de datos con tokens dentro es una base de

@@ -31,18 +31,21 @@ function leerJson(archivo) {
 }
 
 /**
- * Qué hay disponible para encolar, con el archivo ya leído.
- * `saltar` es el conjunto de códigos que ya están en la cola.
+ * Todas las piezas del repo, por código. Es la fuente única: la galería pública
+ * (`marketing/ig-ads/galeria.py`) arma su página con estos mismos archivos, así
+ * que lo que se ve en `limaflores.pe/galeria` y lo que se encola es lo mismo.
+ *
+ * El binario se lee cada vez a propósito, sin cachear: `resincronizar` existe
+ * justamente para volver a leerlo después de un deploy que rehízo una pieza.
  */
-function disponibles({ saltar = new Set() } = {}) {
-  const salida = [];
+function porCodigo() {
+  const mapa = new Map();
 
   const ads = leerJson(path.join(ADS, 'ads.json'));
   for (const a of (ads && ads.ads) || []) {
-    if (saltar.has(a.code)) continue;
     const archivo = path.join(ADS, 'creativos', `${a.code}.jpg`);
     if (!fs.existsSync(archivo)) continue;
-    salida.push({
+    mapa.set(a.code, {
       origen: a.code,
       kind: 'image',
       mime: 'image/jpeg',
@@ -54,10 +57,9 @@ function disponibles({ saltar = new Set() } = {}) {
 
   const videos = leerJson(path.join(VIDEO, 'videos.json'));
   for (const v of (videos && videos.videos) || []) {
-    if (saltar.has(v.code)) continue;
     const archivo = path.join(VIDEO, 'creativos', `${v.code}.mp4`);
     if (!fs.existsSync(archivo)) continue;
-    salida.push({
+    mapa.set(v.code, {
       origen: v.code,
       kind: 'reel',
       mime: 'video/mp4',
@@ -67,9 +69,18 @@ function disponibles({ saltar = new Set() } = {}) {
     });
   }
 
+  return mapa;
+}
+
+/**
+ * Qué hay disponible para encolar.
+ * `saltar` es el conjunto de códigos que ya están en la cola.
+ */
+function disponibles({ saltar = new Set() } = {}) {
+  const salida = [...porCodigo().values()].filter((p) => !saltar.has(p.origen));
   // Los reels primero: rinden más que un post fijo y son los que menos hay.
   salida.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'reel' ? -1 : 1));
   return salida;
 }
 
-module.exports = { disponibles, caption };
+module.exports = { disponibles, porCodigo, caption };

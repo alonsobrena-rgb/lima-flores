@@ -13,7 +13,7 @@ const db = require('./index');
 // obliga a leer los blobs enteros, que es justo lo que se quiere evitar.
 const CAMPOS = `id, kind, origen, caption, mime, bytes, scheduled_at, status,
                 ig_media_id, permalink, error, attempts, published_at, created_at,
-                cuenta_id`;
+                cuenta_id, caption_editado`;
 
 async function encolar({ kind, origen, caption, media, mime, scheduledAt, cuentaId = null }) {
   const id = crypto.randomBytes(8).toString('hex');
@@ -112,13 +112,54 @@ async function marcarFallida(id, error, { intentos }) {
 async function actualizar(id, { caption, scheduledAt, status }) {
   const sets = [];
   const vals = [];
-  if (caption !== undefined) { vals.push(caption); sets.push(`caption = $${vals.length}`); }
+  // Editar el caption a mano lo marca: el resincronizado respeta ese texto y no
+  // lo pisa con el del repo.
+  if (caption !== undefined) { vals.push(caption); sets.push(`caption = $${vals.length}`, 'caption_editado = TRUE'); }
   if (scheduledAt !== undefined) { vals.push(scheduledAt); sets.push(`scheduled_at = $${vals.length}`); }
   if (status !== undefined) { vals.push(status); sets.push(`status = $${vals.length}`, `error = NULL`); }
   if (!sets.length) return obtener(id);
   vals.push(id);
   await db.query(`UPDATE ig_queue SET ${sets.join(', ')} WHERE id = $${vals.length}`, vals);
   return obtener(id);
+}
+
+/**
+ * Las piezas de la cola que salieron del repo y todavía se pueden tocar.
+ *
+ * Con el binario incluido, porque el resincronizado compara: fuera quedan las ya
+ * publicadas —su archivo es historia y su post en Meta ya salió— y las que están
+ * publicándose en este momento, que es la fila que el vigía tiene tomada.
+ */
+async function pendientesDelRepo() {
+  const { rows } = await db.query(
+    `SELECT id, origen, caption, caption_editado, mime, media
+       FROM ig_queue
+      WHERE origen IS NOT NULL AND origen <> 'manual'
+        AND status IN ('queued', 'paused', 'failed')
+      ORDER BY scheduled_at ASC`,
+  );
+  return rows;
+}
+
+/**
+ * Reemplaza el archivo (y opcionalmente el texto) de una pieza en cola.
+ *
+ * El `status IN (...)` del WHERE es el mismo candado que `tomarVencida`: si el
+ * vigía se llevó la fila entre el SELECT y este UPDATE, acá se lleva cero filas
+ * y la pieza sale publicada con el archivo que ya tenía. Cambiarle el binario a
+ * algo que Meta está descargando en ese instante es la forma de que el reel
+ * quede a medias.
+ */
+async function reemplazarMedia(id, { media, mime, caption }) {
+  const sets = ['media = $1', 'mime = $2', 'bytes = $3'];
+  const vals = [media, mime, media.length];
+  if (caption !== undefined) { vals.push(caption); sets.push(`caption = $${vals.length}`); }
+  vals.push(id);
+  const { rowCount } = await db.query(
+    `UPDATE ig_queue SET ${sets.join(', ')}
+      WHERE id = $${vals.length} AND status IN ('queued', 'paused', 'failed')`, vals,
+  );
+  return rowCount > 0;
 }
 
 async function borrar(id) {
@@ -260,6 +301,7 @@ async function publicadasHoy() {
 }
 
 module.exports = {
+  pendientesDelRepo, reemplazarMedia,
   encolar, listar, obtener, media, origenesUsados, tomarVencida,
   marcarPublicada, marcarFallida, actualizar, borrar, ultimaAgendada,
   ajustes, guardarAjustes, publicadasHoy, adelantar,

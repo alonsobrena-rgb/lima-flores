@@ -406,6 +406,36 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
             ? <span className="text-sm text-amber-800">Agrega una cuenta arriba para poder cargar.</span>
             : !estado.sinCargar && <span className="text-sm text-foreground/50">La cuenta por defecto ya tiene todo el repo en cola.</span>}
         </div>
+
+        {/* La cola guarda una COPIA del archivo, no una referencia — así una
+            pieza programada para el jueves sobrevive a los deploys del
+            miércoles. El precio es que rehacer un creativo no basta: la galería
+            pública cambia con el deploy y la cola se queda con la foto vieja.
+            Esto vuelve a leerlas. */}
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
+          <button
+            onClick={() => accion(async () => {
+              const r = await adminSend('/api/admin/ig/resincronizar', 'POST') as {
+                revisadas: number; archivos: number; captions: number; codigos: string[]; huerfanas: string[];
+              };
+              const partes: string[] = [];
+              if (r.archivos) partes.push(`${r.archivos} archivo(s)`);
+              if (r.captions) partes.push(`${r.captions} caption(s)`);
+              const huerf = r.huerfanas.length ? ` Sin pareja en el repo: ${r.huerfanas.join(', ')}.` : '';
+              setAviso(partes.length
+                ? `Actualizadas ${partes.join(' y ')} — ${r.codigos.join(', ')}.${huerf}`
+                : `Revisadas ${r.revisadas}: la cola ya estaba igual que el repo.${huerf}`);
+            })}
+            className="press border border-border px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/70 hover:border-ink-900 hover:text-ink-900"
+          >
+            Volver a leer del repo
+          </button>
+          <span className="max-w-xl text-[12.5px] leading-snug text-foreground/50">
+            Reemplaza el archivo de lo que ya está en cola por el que hay ahora en el repo, para que
+            el panel y la galería pública muestren exactamente lo mismo. No toca lo ya publicado, ni
+            los captions que se hayan editado a mano acá.
+          </span>
+        </div>
       </section>
 
       {/* ── La cola ── */}

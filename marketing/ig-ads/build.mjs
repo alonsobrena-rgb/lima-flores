@@ -13,6 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -1415,6 +1416,7 @@ const main = async () => {
   const fonts = await fontCss();
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-ads-'));
   const sinDeclarar = [];
+  const distintas = [];
   fs.mkdirSync(salida, { recursive: true });
 
   for (const ad of ads) {
@@ -1422,6 +1424,7 @@ const main = async () => {
     const html = path.join(tmp, `${ad.code}.html`);
     const png = path.join(tmp, `${ad.code}.png`);
     const jpg = path.join(salida, `${ad.code}.jpg`);
+    const antes = fs.existsSync(jpg) ? crypto.createHash('sha256').update(fs.readFileSync(jpg)).digest('hex') : null;
 
     fs.writeFileSync(html, base(fonts, w, h, TEMPLATES[ad.template](ad, foto(ad.photo), w, h)));
     // `--screenshot` y `--dump-dom` conviven en la misma corrida: el PNG se
@@ -1439,6 +1442,9 @@ const main = async () => {
       fs.copyFileSync(png, final);
       console.warn(`  ! ${ad.code}: no pude reencodear a JPEG, dejo el PNG.`);
     }
+    if (final === jpg && antes !== crypto.createHash('sha256').update(fs.readFileSync(jpg)).digest('hex')) {
+      distintas.push(ad.code);
+    }
     const kb = Math.round(fs.statSync(final).size / 1024);
     console.log(`  ✓ ${ad.code}  ${w}×${h}  ${path.basename(final)}  ${kb} KB  — ${ad.title}`);
   }
@@ -1447,6 +1453,20 @@ const main = async () => {
   reventaRecortes(sinDeclarar);
   if (!solo.length && !banco) writeDeck(data);
   console.log(`\n${ads.length} creativos en ${path.relative(ROOT, salida)}/`);
+
+  // La galería pública lleva los JPEG embebidos, o sea que es una copia y no se
+  // entera de esto. El panel de admin sí lee los archivos, así que si nadie
+  // rearma la galería las dos vistas dejan de mostrar lo mismo — justo lo que se
+  // pidió evitar. No se rearma sola (es Python, y puede no estar), pero se avisa.
+  //
+  // Se compara el CONTENIDO, no la fecha: el build reescribe los JPEG en cada
+  // corrida, así que por fecha el aviso saltaría siempre y a la tercera vez ya
+  // nadie lo lee. Los creativos son deterministas — rehacer sin tocar nada da el
+  // mismo byte — de modo que esta lista solo trae lo que de verdad cambió.
+  if (!banco && distintas.length && fs.existsSync(path.join(HERE, 'galeria.html'))) {
+    console.log(`  ! cambiaron ${distintas.join(', ')} — rearma la galería:`
+      + ' `python3 marketing/ig-ads/galeria.py`');
+  }
 };
 
 main().catch((err) => {

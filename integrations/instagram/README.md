@@ -17,6 +17,38 @@ día, a horas fijas, desde el panel (`/admin/instagram`).
 Instagram **no programa por API**: el Graph publica en el momento en que se le
 pide. La hora es nuestra (`agenda.js`, en hora de Lima).
 
+## La cola guarda una copia, no una referencia
+
+Y por eso hay un botón de **«Volver a leer del repo»** en el panel
+(`POST /api/admin/ig/resincronizar`).
+
+Al encolar IG-25 se copia el JPEG **de ese momento**. Es lo correcto para
+publicar —el punto 1 de arriba— y además una pieza subida a mano no está en
+ningún repo. El precio es que rehacer un creativo no alcanza: la galería pública
+cambia con el deploy y la cola se queda con la foto vieja. Pasó exactamente eso;
+el panel seguía enseñando el VID-01 con la raya que ya se había arreglado.
+
+El resincronizado vuelve a leer del repo lo que ya está en cola. Las reglas:
+
+- **Compara por SHA-256, no por tamaño.** Un JPEG reencodeado puede pesar igual
+  y ser otro.
+- **No toca lo ya publicado ni lo que se está publicando.** El archivo de una
+  pieza publicada es historia, y cambiarle el binario a algo que Meta está
+  descargando en ese instante es la forma de que el reel quede a medias. El
+  `status IN ('queued','paused','failed')` del `UPDATE` es el mismo candado que
+  usa `tomarVencida`.
+- **El archivo se reemplaza siempre; el caption solo si nadie lo editó a mano.**
+  Para eso está `ig_queue.caption_editado`, que se enciende cuando el panel
+  manda un caption. Sin esa columna, apretar el botón borraba en silencio un
+  texto escrito por una persona.
+- **Una pieza que ya no está en el repo se deja quieta** y se informa: puede ser
+  un anuncio retirado que todavía se quiere publicar.
+
+Las dos vistas salen del mismo sitio: `integrations/instagram/galeria.js`
+(`porCodigo()`) y `marketing/ig-ads/galeria.py` leen los mismos archivos, y
+`galeria.py` revienta si alguna pieza de `ads.json` no cae en ningún producto —
+sin eso, se perdería en la galería y seguiría encolándose en el panel.
+
 ## Las cuentas y el token
 
 **Las cuentas se agregan desde el panel** y viven en `ig_cuentas`: el id numérico

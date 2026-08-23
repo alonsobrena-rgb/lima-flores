@@ -8,12 +8,15 @@
 //   GET    /api/admin/ig/estado                 → configuración, interruptor, cupo, resumen
 //   GET    /api/admin/ig/cola                   → la cola completa (sin binarios)
 //   POST   /api/admin/ig/cargar-galeria         → encola los creativos del repo que falten
+//   POST   /api/admin/ig/resincronizar          → relee del repo lo que ya está en cola
 //   POST   /api/admin/ig/ajustes                → { activo, porDia, horas }
 //   POST   /api/admin/ig/publicar-ahora         → { cuantas, cuentaId } adelanta las N siguientes
 //   PATCH  /api/admin/ig/cola/:id               → { caption, scheduledAt, status }
 //   POST   /api/admin/ig/cola/:id/publicar-ya   → la adelanta a ahora mismo
 //   DELETE /api/admin/ig/cola/:id               → la saca de la cola
 'use strict';
+
+const crypto = require('crypto');
 
 const cola = require('../db/ig-queue-store');
 const publish = require('../integrations/instagram/publish');
@@ -137,6 +140,59 @@ async function cargarGaleria(req, res) {
     desde: resultado.find((r) => r.desde)?.desde || null,
     hasta: resultado.reduce((h, r) => (r.hasta && (!h || r.hasta > h) ? r.hasta : h), null),
     mensaje: total ? null : 'La galería ya está toda en la cola de esas cuentas.',
+  });
+}
+
+/**
+ * Vuelve a leer del repo las piezas que ya están en cola.
+ *
+ * La cola guarda una COPIA del binario, no una referencia: cuando se encoló
+ * IG-25 se copió el JPEG de ese momento. Eso es lo correcto para publicar —una
+ * pieza programada para el jueves tiene que sobrevivir a los deploys del
+ * miércoles, y una subida a mano no está en ningún repo— pero significa que
+ * rehacer un creativo NO alcanza: la galería pública cambia con el deploy y la
+ * cola se queda con la foto vieja. Fue exactamente eso: el panel seguía
+ * mostrando el VID-01 con la raya que ya se había arreglado.
+ *
+ * Acá se cierra el círculo. Se comparan por SHA-256, no por tamaño: un JPEG
+ * reencodeado puede pesar lo mismo y ser otro.
+ */
+async function resincronizar(req, res) {
+  const repo = galeria.porCodigo();
+  const filas = await cola.pendientesDelRepo();
+
+  const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
+  const cambiadas = [];
+  const textos = [];
+  const huerfanas = [];
+
+  for (const fila of filas) {
+    const pieza = repo.get(fila.origen);
+    // Una pieza que ya no está en el repo se deja como está: puede ser un
+    // anuncio retirado que todavía se quiere publicar. Se informa y se decide
+    // desde el panel, que para eso está el botón de quitar.
+    if (!pieza) { huerfanas.push(fila.origen); continue; }
+
+    const distintoArchivo = sha(fila.media) !== sha(pieza.media);
+    const distintoTexto = !fila.caption_editado && fila.caption !== pieza.caption;
+    if (!distintoArchivo && !distintoTexto) continue;
+
+    const ok = await cola.reemplazarMedia(fila.id, {
+      media: pieza.media,
+      mime: pieza.mime,
+      caption: distintoTexto ? pieza.caption : undefined,
+    });
+    if (!ok) continue;                       // el vigía se la llevó a publicar
+    if (distintoArchivo) cambiadas.push(fila.origen);
+    if (distintoTexto) textos.push(fila.origen);
+  }
+
+  return send(res, 200, {
+    revisadas: filas.length,
+    archivos: cambiadas.length,
+    captions: textos.length,
+    codigos: [...new Set([...cambiadas, ...textos])].sort(),
+    huerfanas: [...new Set(huerfanas)].sort(),
   });
 }
 
@@ -298,6 +354,7 @@ module.exports = async (req, res, urlObj) => {
   }
   if (p === '/api/admin/ig/cola' && req.method === 'GET') return send(res, 200, { cola: await cola.listar({}) });
   if (p === '/api/admin/ig/cargar-galeria' && req.method === 'POST') return cargarGaleria(req, res);
+  if (p === '/api/admin/ig/resincronizar' && req.method === 'POST') return resincronizar(req, res);
   if (p === '/api/admin/ig/ajustes' && req.method === 'POST') return guardarAjustes(req, res);
   if (p === '/api/admin/ig/publicar-ahora' && req.method === 'POST') return publicarAhora(req, res);
 

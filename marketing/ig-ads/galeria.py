@@ -195,6 +195,17 @@ def main():
     <div class="piezas">{''.join(piezas)}</div>
   </div></section>""")
 
+    # La galería agrupa por producto, así que una pieza cuyo `product` no esté en
+    # `products` no cae en ningún bloque y desaparece sin decir nada. El panel de
+    # admin la encolaría igual —lee `ads.json` en plano— y las dos vistas dejarían
+    # de mostrar lo mismo. Si eso pasa, mejor que reviente acá.
+    puestas = sum(len([x for x in anuncios if x['product'] == p['id']])
+                  + len([x for x in videos if x['product'] == p['id']]) for p in productos)
+    if puestas != len(anuncios) + len(videos):
+        ids = {p['id'] for p in productos}
+        sueltas = [x['code'] for x in anuncios + videos if x['product'] not in ids]
+        sys.exit(f'estas piezas no caen en ningún producto y se perderían: {", ".join(sueltas)}')
+
     filas = ''.join(f'<tr><td>{a}</td><td>{b}</td></tr>' for a, b in [
         ('«Eliges el día y la hora»', '<code>app/src/pages/Checkout.tsx</code> — la fecha mínima es mañana; franjas en <code>lib/delivery.ts</code>'),
         ('«Entrega en Lima Metropolitana»', 'landing'),
