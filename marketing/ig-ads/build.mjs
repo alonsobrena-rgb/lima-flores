@@ -215,7 +215,42 @@ body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sa
   letter-spacing:.22em}
 .rule{height:1px;background:${C.line}}
 .shot{width:100%;height:100%;object-fit:cover;display:block}
-</style>${body}`;
+/* Las alas de un contain — ver img(). Cada una estira la franja de borde de la
+   propia foto: 6000% de ancho anclado al filo muestra 1/60 de la imagen
+   ocupando el ala entera. El degradado del ciclorama sigue fila por fila y la
+   union no existe, porque el ala arranca con los mismos pixeles que el borde.
+   Ojo con el orden de pintado: un elemento posicionado pinta ENCIMA del
+   contenido en flujo aunque vaya antes en el HTML, asi que las dos alas
+   tapaban la foto entera. Se arregla posicionando tambien la foto — no con un
+   z-index negativo, que la mandaba detras del fondo de la ventana. */
+.ala{position:absolute;top:0;bottom:0;width:50%;background-repeat:no-repeat;
+  background-size:6000% 100%}
+</style>${body}
+<!-- La sonda de la regla 1 (ver revisaRecorte): mide cuánto se come el cover
+     de cada foto y lo deja en el título, que es lo que lee --dump-dom. No
+     pinta nada, así que viaja en la misma pieza que se fotografía. -->
+<script>addEventListener('load',()=>{
+  const r=[...document.querySelectorAll('img.shot')].map((im)=>{
+    const b=im.getBoundingClientRect();
+    if(!im.naturalWidth) return null;
+    const fit=getComputedStyle(im).objectFit;
+    const caja=[Math.round(b.width),Math.round(b.height)];
+    const foto=[im.naturalWidth,im.naturalHeight];
+    if(fit==='cover'){
+      const s=Math.max(b.width/im.naturalWidth,b.height/im.naturalHeight);
+      return {x:+(1-b.width/(im.naturalWidth*s)).toFixed(4),
+              y:+(1-b.height/(im.naturalHeight*s)).toFixed(4),caja,foto};
+    }
+    if(fit==='contain'&&im.previousElementSibling&&im.previousElementSibling.className==='ala'){
+      // Las alas solo saben rellenar a los costados. Si el hueco quedó arriba y
+      // abajo, se avisa: ahí las dos se verían partidas por el medio.
+      const s=Math.min(b.width/im.naturalWidth,b.height/im.naturalHeight);
+      return {x:0,y:0,caja,foto,alasMal:im.naturalHeight*s<b.height-1};
+    }
+    return null;
+  }).filter(Boolean);
+  document.title='RECORTE'+JSON.stringify(r);
+});</script>`;
 
 // Geometría absoluta a propósito: con flex, un titular de una línea más rompía
 // el encuadre y el precio se salía del lienzo sin que el render avisara.
@@ -225,11 +260,33 @@ body{position:relative;background:${C.fondo};font-family:'Jost',-apple-system,sa
 const img = (a, ph, banda) => {
   // Recortada → contain, para no volver a cortar lo que ya está justo.
   // Intacta → cover, que es lo que quieren los macros y las de ambiente.
-  const usaOrig = banda && ph.recortada;
   const fit = ph.recortada && !banda ? 'contain' : (a.creative.fit || 'cover');
+  // La toma original solo tiene sentido en una franja que va a sangre. Si el
+  // anuncio pide `contain` para que el producto entre entero, conviene la
+  // recortada: misma foto, menos ciclorama, y por lo tanto producto más grande
+  // dentro de la misma caja (en IG-35, 682px de ancho en vez de 521).
+  const usaOrig = banda && ph.recortada && fit === 'cover';
   const pos = a.creative.position || '50% 50%';
-  return `<img src="${usaOrig ? ph.uriOrig : ph.uri}" class="shot"
-       style="object-fit:${fit};object-position:${pos}">`;
+  const src = usaOrig ? ph.uriOrig : ph.uri;
+  const conAlas = fit === 'contain' && a.creative.alas === true;
+  const foto = `<img src="${src}" class="shot"
+       style="object-fit:${fit};object-position:${pos}${conAlas ? ';position:relative' : ''}">`;
+  // `alas: true` rellena los costados con la propia foto en vez del color medido.
+  // Hace falta cuando la foto entera entra en una ventana de otra proporción y
+  // su fondo es un ciclorama en degradado: contra un relleno plano el filo se ve
+  // como el recuadro que prohíbe la regla 2 — en IG-25 el salto era de 18
+  // niveles en el lado derecho. Es el mismo truco de cabeceras.py.
+  //
+  // Es opt-in, no automático, por dos razones. El `contain` de las recortadas no
+  // lo necesita (prep-fotos.py deja el borde de la foto en el color que midió, y
+  // el relleno plano le calza exacto), y las alas solo saben rellenar a los
+  // costados: si el hueco queda arriba y abajo se verían partidas por el medio.
+  // Eso último no queda a la buena fe — lo comprueba la sonda y revienta el
+  // build (le pasaría a IG-09).
+  if (!conAlas) return foto;
+  return `<div class="ala" style="left:0;background-image:url(${src});background-position:0% 50%"></div>
+    <div class="ala" style="right:0;background-image:url(${src});background-position:100% 50%"></div>
+    ${foto}`;
 };
 
 // A · Editorial: foto grande, titular abajo. Para público frío.
@@ -900,6 +957,63 @@ const FORMATS = { '4:5': [1080, 1350], '1:1': [1080, 1080], '9:16': [1080, 1920]
 
 /* ──────────────────────────────  render  ─────────────────────────────── */
 
+// Regla 1 de la casa —el producto entero— comprobada por el navegador y no de
+// memoria. `cover` recorta por definición. Está bien cuando el encuadre ES la
+// foto (un macro, una toma de ambiente) y está mal cuando la foto es un objeto
+// sobre ciclorama: ahí `cover` le come un pedazo al producto y el JPEG sale
+// impecable igual. Fue IG-25, con la maceta cortada al ras de la ventana.
+//
+// Cuánto recorta no se puede adivinar desde Node: depende de la caja que le da
+// la plantilla, y esa solo la sabe el navegador. Así que lo mide él, con la
+// misma pieza que se va a fotografiar — la sonda viaja en `base()` y el número
+// sale por el título, en la misma pasada del `--screenshot`. Gratis.
+const TOLERA = 0.04;   // hasta un 4% es aire del ciclorama, no producto
+
+function recorteDe(dom) {
+  const m = dom.match(/<title>RECORTE(\[.*?\])<\/title>/s);
+  if (!m) return null;                       // sin sonda: no se inventa un veredicto
+  try { return JSON.parse(m[1]); } catch { return null; }
+}
+
+/**
+ * Anota la pieza si recorta el producto sin haberlo declarado. No revienta en el
+ * acto: se juntan todas y se revientan juntas al final. Un anuncio por corrida
+ * son diez corridas para enterarse de diez problemas, y además el JPEG ya está
+ * en disco, que es justamente lo que hay que mirar para decidir cada caso.
+ */
+function revisaRecorte(ad, dom, sinDeclarar) {
+  const partes = recorteDe(dom);
+  if (!partes) return;
+  if (partes.some((p) => p.alasMal)) {
+    throw new Error(
+      `${ad.code}: el hueco del contain quedó arriba y abajo, y las alas solo rellenan a los costados.\n`
+      + '  Ahí se verían partidas por el medio. Esa foto entra a sangre en esta ventana: quita el\n'
+      + '  "fit": "contain" y elige el encuadre con "position".',
+    );
+  }
+  const peor = partes.reduce((a, p) => Math.max(a, p.x, p.y), 0);
+  if (peor <= TOLERA) return;
+  const pct = Math.round(peor * 100);
+  if (ad.creative.recorte) console.log(`      recorta ${pct}% a propósito — ${ad.creative.recorte}`);
+  else {
+    const p = partes.find((q) => Math.max(q.x, q.y) === peor);
+    sinDeclarar.push(`${ad.code} · ${ad.photo} ${p.foto.join('×')} en ventana ${p.caja.join('×')} · se come el ${pct}%`);
+  }
+}
+
+function reventaRecortes(sinDeclarar) {
+  if (!sinDeclarar.length) return;
+  throw new Error(
+    `El cover se come un pedazo de estas piezas y el producto puede salir cortado:\n`
+    + sinDeclarar.map((x) => `  ${x}`).join('\n')
+    + '\n\nDos salidas, una por pieza:\n'
+    + '  · Foto de un objeto sobre ciclorama → "fit": "contain" en su creative. La ventana ya\n'
+    + '    está pintada del color medido del fondo, así que no se ve ninguna costura.\n'
+    + '  · Recorte a propósito (un macro, una toma de ambiente) → el motivo en creative.recorte.\n'
+    + 'Los JPEG quedaron escritos: míralos antes de decidir cuál es cuál.',
+  );
+}
+
 // Chromium solo escribe PNG, y su viewport headless es unos 78px más bajo que el
 // --window-size que le pides: por eso renderizamos con holgura y recortamos aquí
 // al lienzo exacto, en la misma pasada que reencoda a JPEG.
@@ -1125,6 +1239,37 @@ function writeDeck({ campaign, products, ads }) {
   L.push('anterior y sobrevivió al paso a blanco total, así que al pie de IG-05, IG-08 e IG-19 había');
   L.push('una banda amarillenta. Ahora el velo saca su color del token, no de un rgb escrito a mano.');
   L.push('');
+  L.push('### El producto entero lo comprueba el navegador');
+  L.push('');
+  L.push('`cover` recorta por definición. Está bien cuando el encuadre ES la foto —un macro, una');
+  L.push('toma de ambiente— y está mal cuando la foto es un objeto sobre ciclorama: ahí se come un');
+  L.push('pedazo del producto y el JPEG sale impecable igual. Se fue así IG-25, con la maceta');
+  L.push('cortada al ras de la ventana, y con ella catorce piezas más que nadie había mirado de');
+  L.push('cerca: la base del ramo, el filo de la caja, el borde del florero.');
+  L.push('');
+  L.push('Cuánto recorta no se puede adivinar desde Node, porque depende de la caja que le da la');
+  L.push('plantilla. Así que lo mide el navegador, con la misma pieza que se va a fotografiar: una');
+  L.push('sonda en `base()` compara el tamaño natural de la foto contra su caja y deja el número en');
+  L.push('el título, que vuelve por `--dump-dom` en la misma corrida del `--screenshot`. Sale gratis.');
+  L.push('Pasado el 4%, el build **revienta** y nombra las piezas. Dos salidas, una por pieza:');
+  L.push('');
+  L.push('- **`"fit": "contain"`** si la foto es un objeto sobre fondo. Entra entera.');
+  L.push('- **`creative.recorte`** con el motivo, si el recorte es a propósito. Queda escrito en el');
+  L.push('  anuncio, que es donde se puede volver a leer dentro de seis meses.');
+  L.push('');
+  L.push('**Las alas.** Un `contain` deja dos franjas vacías a los lados, y pintarlas del color');
+  L.push('medido no alcanza: el ciclorama de estas tomas es un degradado, así que contra un relleno');
+  L.push('plano el filo de la foto se ve como el recuadro que prohíbe la regla 2 — en IG-25 el salto');
+  L.push('era de 18 niveles en el lado derecho. Con `"alas": true` el relleno sale de la propia foto:');
+  L.push('cada ala estira su franja de borde, el degradado sigue fila por fila y la unión no existe.');
+  L.push('Es el mismo hallazgo que `marketing/whatsapp/cabeceras.py`.');
+  L.push('');
+  L.push('Las alas son opt-in y no automáticas por dos razones. El `contain` de las fotos recortadas');
+  L.push('no las necesita: `prep-fotos.py` deja el borde de la foto en el mismo color que midió, y el');
+  L.push('relleno plano le calza exacto. Y solo saben rellenar a los costados — si el hueco queda');
+  L.push('arriba y abajo se verían partidas por el medio. Eso último tampoco queda a la buena fe: la');
+  L.push('sonda lo detecta y revienta el build (es lo que le pasaría a IG-09).');
+  L.push('');
   L.push('### El mejor velo es el que no está');
   L.push('');
   L.push('La otra mitad de la regla: un velo existe para que se lea un texto encima. Si debajo no');
@@ -1222,6 +1367,7 @@ const main = async () => {
   const chrome = findChromium();
   const fonts = await fontCss();
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ig-ads-'));
+  const sinDeclarar = [];
   fs.mkdirSync(salida, { recursive: true });
 
   for (const ad of ads) {
@@ -1231,11 +1377,14 @@ const main = async () => {
     const jpg = path.join(salida, `${ad.code}.jpg`);
 
     fs.writeFileSync(html, base(fonts, w, h, TEMPLATES[ad.template](ad, foto(ad.photo), w, h)));
-    execFileSync(chrome, [
+    // `--screenshot` y `--dump-dom` conviven en la misma corrida: el PNG se
+    // escribe igual y de yapa vuelve el DOM con la medida de la sonda.
+    const dom = execFileSync(chrome, [
       '--headless=new', '--no-sandbox', '--disable-gpu', '--hide-scrollbars',
       '--force-device-scale-factor=1', '--virtual-time-budget=8000',
-      `--window-size=${w},${h + 200}`, `--screenshot=${png}`, `file://${html}`,
-    ]);
+      `--window-size=${w},${h + 200}`, `--screenshot=${png}`, '--dump-dom', `file://${html}`,
+    ], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+    revisaRecorte(ad, dom, sinDeclarar);
 
     let final = jpg;
     if (!toJpeg(chrome, png, jpg, tmp, w, h)) {
@@ -1248,6 +1397,7 @@ const main = async () => {
   }
 
   fs.rmSync(tmp, { recursive: true, force: true });
+  reventaRecortes(sinDeclarar);
   if (!solo.length && !banco) writeDeck(data);
   console.log(`\n${ads.length} creativos en ${path.relative(ROOT, salida)}/`);
 };

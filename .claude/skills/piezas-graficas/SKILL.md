@@ -10,7 +10,7 @@ Cada regla de acá salió de un error que ya se cometió. Romperlas es repetirlo
 ## Antes que nada: ¿pieza o plantilla?
 
 La campaña **no se diseña pieza por pieza**. `marketing/ig-ads/` es una fábrica:
-32 creativos salen de `ads.json` (datos + copy) renderizados por `build.mjs` con
+33 creativos salen de `ads.json` (datos + copy) renderizados por `build.mjs` con
 Chromium. Antes de dibujar nada, decide cuál de los dos encargos es:
 
 | El encargo | Lo que se hace |
@@ -23,7 +23,7 @@ Una plantilla se revisa una vez y rinde para siempre; una pieza suelta hay que
 revisarla cada vez. **Ante la duda, plantilla.**
 
 ```sh
-node marketing/ig-ads/build.mjs                 # los 32 + README
+node marketing/ig-ads/build.mjs                 # los 33 + README
 node marketing/ig-ads/build.mjs IG-22 IG-30     # solo esos, para iterar
 node marketing/ig-ads/build.mjs --pruebas       # el carril de plantillas sin aprobar
 python3 marketing/ig-ads/galeria.py             # la galería para el cliente
@@ -48,6 +48,44 @@ Cómo lo resuelve el pipeline, y por qué:
 - La tira de tres productos recorta **siempre**, aunque gane poco, para que las
   tres fotos vecinas entren del mismo tamaño.
 
+**`cover` recorta por definición, y eso no se juzga de memoria.** Está bien
+cuando el encuadre ES la foto —un macro, una toma de ambiente— y está mal cuando
+la foto es un objeto sobre ciclorama: ahí se lleva un pedazo del producto y el
+JPEG sale impecable igual. Así se fue IG-25 con la maceta cortada al ras de la
+ventana, y con ella catorce piezas más que nadie había mirado de cerca: la base
+del ramo, el filo de la caja, el borde del florero.
+
+`build.mjs` ya no permite que vuelva a pasar en silencio. Una sonda en `base()`
+le pregunta al navegador cuánto se come el `cover` de cada foto —el número
+vuelve por `--dump-dom` en la misma corrida del `--screenshot`, gratis— y pasado
+el 4% el build **revienta** y nombra las piezas. Dos salidas, una por pieza:
+
+| La foto es | Qué se pone en `creative` |
+|---|---|
+| Un objeto sobre fondo de estudio | `"fit": "contain"` — y casi siempre `"alas": true` |
+| Un macro o una toma de ambiente donde el recorte es el punto | `"recorte": "<el motivo>"` |
+
+El motivo se escribe, no se piensa: queda en `ads.json`, que es donde se puede
+volver a leer dentro de seis meses.
+
+**Las alas.** Un `contain` deja dos franjas vacías a los lados, y pintarlas del
+color medido **no alcanza**: el ciclorama de estas tomas es un degradado, así que
+contra un relleno plano el filo de la foto se ve como el recuadro que prohíbe la
+regla 2 — en IG-25 el salto era de 18 niveles en el lado derecho. Con
+`"alas": true` el relleno sale de la propia foto: cada ala estira su franja de
+borde, el degradado sigue fila por fila y la unión no existe. Es el mismo
+hallazgo que ya tenía anotado `marketing/whatsapp/cabeceras.py`.
+
+Son opt-in a propósito. El `contain` de una foto ya recortada no las necesita
+—`prep-fotos.py` deja el borde en el mismo color que midió— y solo saben
+rellenar a los costados: si el hueco queda arriba y abajo se verían partidas por
+el medio. Eso también lo detecta la sonda y revienta el build.
+
+Un detalle que se paga caro si se olvida: cuando el anuncio pide `contain` en una
+franja, conviene la foto **recortada**, no la original. Misma imagen, menos
+ciclorama, producto más grande dentro de la misma caja — en IG-35, 682 px de
+ancho en vez de 521.
+
 ### 2. El logotipo es intocable
 
 Va **directo sobre la foto**, nunca dentro de una plaquita, un recuadro o una
@@ -69,6 +107,33 @@ puso un lavado blanco arriba para que el logotipo cayera en un campo limpio, y l
 único que hacía era comerse media toma. El logotipo se apoya en la foto y punto;
 si sobre esa foto no se lee, se cambia a la versión clara, no se pinta una nube
 debajo.
+
+**Y hay una vuelta más, que costó una ronda de correcciones del cliente: un velo
+puesto donde la foto YA es vacío tampoco protege nada.** `cuadro` arrastraba un
+degradado radial en la esquina superior derecha, y en las tres tomas que usan esa
+plantilla la esquina era fondo de estudio: no aclaraba nada que hiciera falta
+aclarar, y a cambio lavaba el globo morado de IG-30 y el respaldo del sofá de
+IG-16. Se veía como una nube blanca encima del producto, que es exactamente como
+lo describió el cliente.
+
+**El orden correcto es al revés del instinto.** Primero se busca dónde la foto ya
+está vacía, y ahí se pone el texto; el velo es el último recurso, para cuando no
+hay vacío en ninguna parte. Y ese vacío **se mide, no se mira**: se simula el
+encuadre (`cover` + `object-position`) sobre la foto y se saca la luminancia del
+5% más oscuro de la caja donde iría el texto. Lo que dieron las cuatro piezas:
+
+| | Dónde acabó el texto | Lo que dijo la medición |
+|---|---|---|
+| `IG-22` | columna derecha | 231 — fondo de estudio puro |
+| `IG-30` | columna derecha | 174; el globo pasa por debajo del bloque |
+| `IG-16` | franja al tope | a la derecha, el brazo de madera de la silla: 68, casi negro |
+| `IG-11` | columna abajo a la izquierda | centrada no había vacío; al ras izquierdo aparece uno de 585 × 225 en 239 |
+
+Dos cosas que salieron de ahí y sirven siempre: **si la foto no deja hueco donde
+va el texto, mueve el encuadre antes que pintar un velo** (IG-11 pasó a
+`position: 0% 50%` y el titular entró entero sobre el ciclorama), y **si el hueco
+es ancho y bajo, acuesta el bloque en una línea** en vez de apilarlo (en IG-16
+apilarlo metía el logotipo sobre el celofán).
 
 ### 3. Nada inventado
 
@@ -94,6 +159,20 @@ mientras las piezas salían cortadas y con marcos.
 Abrir el JPEG y comprobar, en este orden: ¿el producto está entero? ¿el logo se
 lee sobre lo que tiene debajo? ¿el texto entra en el área segura? ¿lo que afirma
 se puede citar?
+
+**Una hoja de contactos no sustituye mirar la pieza.** A 330 px de ancho catorce
+recortes pasaron por buenos, y al abrirlos uno por uno la base del ramo estaba
+cortada en casi todos. La hoja sirve para decidir a cuáles hay que entrar, no
+para aprobar.
+
+**Cuando la duda es «¿esto corta producto o solo fondo?», hay una prueba que no
+se equivoca y no necesita ojo.** No hace falta encontrar el recuadro del producto
+en toda la foto —eso falla con un ciclorama en degradado, ya se intentó tres
+veces—: basta mirar **la franja que el recorte deja fuera** y preguntar qué
+proporción de esos píxeles no es fondo. Es una prueba local, sobre la tira
+descartada, y es la que separó IG-07 (0,1%: se va ciclorama) de IG-19 (66%: se va
+la caja). Ojo con leerla sola: una sombra o el filo de la mesa también dan alto,
+así que decide a cuál pieza abrir, no si está bien.
 
 ## Formatos y área segura
 

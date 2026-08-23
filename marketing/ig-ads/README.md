@@ -1186,6 +1186,37 @@ De paso apareció otro: el marfil `251,248,241` del velo de las citas era de la 
 anterior y sobrevivió al paso a blanco total, así que al pie de IG-05, IG-08 e IG-19 había
 una banda amarillenta. Ahora el velo saca su color del token, no de un rgb escrito a mano.
 
+### El producto entero lo comprueba el navegador
+
+`cover` recorta por definición. Está bien cuando el encuadre ES la foto —un macro, una
+toma de ambiente— y está mal cuando la foto es un objeto sobre ciclorama: ahí se come un
+pedazo del producto y el JPEG sale impecable igual. Se fue así IG-25, con la maceta
+cortada al ras de la ventana, y con ella catorce piezas más que nadie había mirado de
+cerca: la base del ramo, el filo de la caja, el borde del florero.
+
+Cuánto recorta no se puede adivinar desde Node, porque depende de la caja que le da la
+plantilla. Así que lo mide el navegador, con la misma pieza que se va a fotografiar: una
+sonda en `base()` compara el tamaño natural de la foto contra su caja y deja el número en
+el título, que vuelve por `--dump-dom` en la misma corrida del `--screenshot`. Sale gratis.
+Pasado el 4%, el build **revienta** y nombra las piezas. Dos salidas, una por pieza:
+
+- **`"fit": "contain"`** si la foto es un objeto sobre fondo. Entra entera.
+- **`creative.recorte`** con el motivo, si el recorte es a propósito. Queda escrito en el
+  anuncio, que es donde se puede volver a leer dentro de seis meses.
+
+**Las alas.** Un `contain` deja dos franjas vacías a los lados, y pintarlas del color
+medido no alcanza: el ciclorama de estas tomas es un degradado, así que contra un relleno
+plano el filo de la foto se ve como el recuadro que prohíbe la regla 2 — en IG-25 el salto
+era de 18 niveles en el lado derecho. Con `"alas": true` el relleno sale de la propia foto:
+cada ala estira su franja de borde, el degradado sigue fila por fila y la unión no existe.
+Es el mismo hallazgo que `marketing/whatsapp/cabeceras.py`.
+
+Las alas son opt-in y no automáticas por dos razones. El `contain` de las fotos recortadas
+no las necesita: `prep-fotos.py` deja el borde de la foto en el mismo color que midió, y el
+relleno plano le calza exacto. Y solo saben rellenar a los costados — si el hueco queda
+arriba y abajo se verían partidas por el medio. Eso último tampoco queda a la buena fe: la
+sonda lo detecta y revienta el build (es lo que le pasaría a IG-09).
+
 ### El mejor velo es el que no está
 
 La otra mitad de la regla: un velo existe para que se lea un texto encima. Si debajo no

@@ -328,7 +328,8 @@
         "price": "S/ 160",
         "footer": "Armado a mano en Miraflores",
         "fit": "cover",
-        "position": "50% 45%"
+        "position": "50% 45%",
+        "recorte": "La franja que se va es ciclorama: el ramo entra entero. Comprobado midiendo la tira recortada de la toma original."
       },
       "why": "Gancho negativo contra el default de la categoría. Alto CTR en frío porque contradice lo que la gente iba a hacer igual."
     },
@@ -358,8 +359,9 @@
         "meta": "Miraflores · desde 2017",
         "price": "S/ 160",
         "footer": "Ramo Sofía · hecho a mano",
-        "fit": "cover",
-        "position": "50% 40%"
+        "fit": "contain",
+        "position": "50% 40%",
+        "alas": true
       },
       "why": "Anuncio de marca para alimentar los públicos de retargeting de IG-07 e IG-09 a CPM bajo. Es el manifiesto del propio sitio, sin cambiarle una palabra."
     },
@@ -420,7 +422,8 @@
         "tone": "light",
         "fit": "cover",
         "position": "50% 46%",
-        "hlSize": 112
+        "hlSize": 112,
+        "recorte": "Macro: el encuadre ES la foto. Se vende el detalle de la flor, no el arreglo completo — para eso está IG-12."
       },
       "why": "Foto a sangre y una sola frase: en el feed compite con imagen, no con texto. El macro del arreglo es lo más fuerte que tiene el catálogo."
     },
@@ -453,7 +456,8 @@
         "position": "0% 50%",
         "hlSize": 60,
         "zona": "izq",
-        "hlAncho": 320
+        "hlAncho": 320,
+        "recorte": "Macro, igual que IG-10."
       },
       "why": "El sello de precio hace el trabajo del texto: quien ya vio el producto necesita el número, no otro párrafo. La medida en el sello responde la pregunta real, que es el tamaño."
     },
@@ -483,7 +487,8 @@
         "footer": "Arreglo Rossie",
         "fit": "cover",
         "position": "50% 40%",
-        "hlSize": 124
+        "hlSize": 124,
+        "recorte": "Macro en franja: la misma toma de IG-10 y IG-11, recortada a propósito."
       },
       "why": "Invierte la jerarquía: el texto es el creativo y la foto entra como franja. Rompe el patrón visual de las otras historias en el mismo feed."
     },
@@ -514,10 +519,11 @@
         "price": "S/ 195",
         "footer": "Tulipanes de amor",
         "tone": "dark",
-        "fit": "cover",
+        "fit": "contain",
         "position": "50% 52%",
         "hlSize": 108,
-        "franja": true
+        "franja": true,
+        "alas": true
       },
       "why": "La foto ya tiene el aire arriba: el texto se apoya en el fondo crema sin recuadros ni velos. Es el formato más limpio del set y el que mejor pasa por publicación orgánica."
     },
@@ -546,9 +552,10 @@
         "sub": "Flores frescas los lunes, miércoles y viernes. Lo disponible es lo de esta semana.",
         "price": "S/ 195",
         "footer": "Tulipanes de amor",
-        "fit": "cover",
+        "fit": "contain",
         "hlSize": 64,
-        "position": "50% 40%"
+        "position": "50% 40%",
+        "alas": true
       },
       "why": "Es el manifiesto de la propia landing, sin cambiarle una palabra. Explica por qué el catálogo cambia y convierte esa limitación en argumento."
     },
@@ -577,11 +584,12 @@
         "price": "S/ 195",
         "footer": "Tulipanes de amor",
         "tone": "dark",
-        "fit": "cover",
+        "fit": "contain",
         "position": "50% 50%",
         "hlSize": 84,
         "anchor": "top",
-        "franja": true
+        "franja": true,
+        "alas": true
       },
       "why": "Mismo formato limpio que IG-13 en vertical, para medir si el gancho del color rinde igual en historias que en feed sin cambiar nada más."
     },
@@ -643,9 +651,10 @@
         "headline": "Para la amiga <em>que se mudó</em>",
         "price": "S/ 180",
         "footer": "Ramo Luana · hecho a mano",
-        "fit": "cover",
+        "fit": "contain",
         "position": "40% 46%",
-        "hlSize": 118
+        "hlSize": 118,
+        "alas": true
       },
       "why": "Nombra una ocasión chica y concreta en vez de una fecha del calendario: vende en los diez meses del año en que no hay campaña."
     },
@@ -673,9 +682,10 @@
         "sub": "Naranja, morado y verde. Hecho a mano en Miraflores.",
         "price": "S/ 180",
         "footer": "Ramo Luana",
-        "fit": "cover",
+        "fit": "contain",
         "position": "50% 50%",
-        "hlSize": 66
+        "hlSize": 66,
+        "alas": true
       },
       "why": "El marco de postal separa el producto del fondo del feed y da aire: funciona bien cuando la foto es de celular y no aguanta ir a sangre en vertical."
     },
@@ -707,8 +717,9 @@
         "price": "S/ 220",
         "footer": "Caja de madera",
         "hlSize": 70,
-        "fit": "cover",
-        "position": "50% 46%"
+        "fit": "contain",
+        "position": "50% 46%",
+        "alas": true
       },
       "why": "No compite con otras flores: compite con el regalo que la persona iba a comprar en vez de flores."
     },
@@ -903,8 +914,9 @@
         "price": "S/ 200",
         "footer": "Orquídea Rosado Vintage",
         "hlSize": 68,
-        "fit": "cover",
-        "position": "50% 46%"
+        "fit": "contain",
+        "position": "50% 46%",
+        "alas": true
       },
       "why": "Formato postal: la orquídea se vende como objeto de decoración, no como ramo."
     },
@@ -964,8 +976,9 @@
         "price": "S/ 195",
         "footer": "Florero de 10 tulipanes",
         "hlSize": 118,
-        "fit": "cover",
-        "position": "50% 44%"
+        "fit": "contain",
+        "position": "50% 44%",
+        "alas": true
       },
       "why": "Los tulipanes son el producto con más color del catálogo: en historia, el creativo se ve desde lejos."
     },
@@ -1127,8 +1140,9 @@
         "price": "S/ 210",
         "footer": "Florero Forti",
         "hlSize": 98,
-        "fit": "cover",
-        "position": "50% 26%"
+        "fit": "contain",
+        "position": "50% 26%",
+        "alas": true
       },
       "why": "Los girasoles son lo más visible del catálogo: en el feed frenan el pulgar solos."
     },
@@ -1159,7 +1173,8 @@
         "pill": "S/ 210 · Ver el arreglo",
         "hlSize": 92,
         "position": "50% 8%",
-        "fit": "cover"
+        "fit": "contain",
+        "alas": true
       },
       "why": "El color a elegir es el gancho, igual que en los tulipanes, pero en arreglo con globo."
     },
@@ -1218,7 +1233,9 @@
         "headline": "Girasoles <em>en caja</em>",
         "price": "S/ 210",
         "footer": "Box Lucy",
-        "hlSize": 122
+        "hlSize": 122,
+        "fit": "contain",
+        "alas": true
       },
       "why": "Mismo girasol que el Forti pero en caja: se vende la comodidad, no la flor."
     },
@@ -1279,7 +1296,9 @@
         "anchor": "top",
         "franja": true,
         "hlSize": 84,
-        "bg": "#DACCC7"
+        "bg": "#DACCC7",
+        "fit": "contain",
+        "alas": true
       },
       "why": "Toma de la florería, no de estudio: el arreglo sobre el banco de madera se lee como un regalo que llega a una casa. El aire de la pared de arriba es el sitio del titular."
     }
