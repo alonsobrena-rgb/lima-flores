@@ -4,7 +4,13 @@
 
 ```
 node marketing/ig-ads/build.mjs     # regenera los 9 creativos y este README
+python3 marketing/ig-ads/galeria.py # rearma galeria.html
 ```
+
+La galería se sirve en **`limaflores.pe/galeria`** — una URL que se puede mandar,
+sin login. Va con `noindex`, así que no la encuentra Google: es para compartirla,
+no para posicionarla. La sirve `server.js` leyendo `galeria.html` tal cual, así que
+para actualizarla hay que rearmarla con `galeria.py` y volver a desplegar.
 
 | Anuncio | Producto | Etapa | Formato | Titular |
 | --- | --- | --- | --- | --- |
@@ -1179,6 +1185,34 @@ existe es el del lienzo.
 De paso apareció otro: el marfil `251,248,241` del velo de las citas era de la paleta
 anterior y sobrevivió al paso a blanco total, así que al pie de IG-05, IG-08 e IG-19 había
 una banda amarillenta. Ahora el velo saca su color del token, no de un rgb escrito a mano.
+
+### El mejor velo es el que no está
+
+La otra mitad de la regla: un velo existe para que se lea un texto encima. Si debajo no
+hay texto, no está protegiendo nada — está tapando el producto. `cuadro` arrastraba un
+velo radial en la esquina superior derecha que cubría media pieza, y en las tres tomas que
+usan la plantilla esa esquina ya era fondo de estudio: no aclaraba nada y sí lavaba el
+globo morado de IG-30 y el respaldo del sofá de IG-16. Se fue entero.
+
+Sin velo, el texto ya no puede caer siempre en el mismo sitio, así que dónde cae pasó a
+ser un dato del anuncio (`zona`) y se decide midiendo la foto ya encuadrada, no a ojo:
+
+| Anuncio | Dónde va el texto | Lo que dice la foto |
+| --- | --- | --- |
+| `IG-22` | columna derecha (por defecto) | el 5% más oscuro de esa caja está en 231 de luminancia: fondo de estudio puro |
+| `IG-30` | columna derecha | 174; el globo pasa por debajo del bloque, no por dentro |
+| `IG-16` | franja al tope (`zona: banda`) | a la derecha está el brazo de madera de la silla, en 68 — casi negro. El único vacío es el respaldo del sofá: ancho y bajo, así que el bloque se acuesta en una línea |
+| `IG-11` | columna abajo a la izquierda (`zona: izq`, en `sello`) | centrada no había vacío; al ras izquierdo aparece uno de 585 × 225 en 239 uniforme |
+
+IG-11 era el caso extremo: el velo tapaba el 62% de la pieza para sostener un titular a
+todo el ancho, y de paso dejaba las rosas de abajo detrás de una niebla. Cambiando el
+encuadre a `0% 50%` el titular cabe entero sobre el fondo del estudio y ninguna flor queda
+debajo de nada. El velo de `sello` sigue existiendo para IG-23 e IG-34, donde bajo el
+titular hay maceta y caja y sí hace falta.
+
+En IG-16 el logotipo queda sobre tela y no sobre blanco. Es lo mejor que da la toma: la
+mancha más clara y más plana de esa franja está justo ahí (media 227), medida barriendo
+la franja entera con una caja del tamaño del grupo.
 
 Para agregar un anuncio basta con otra entrada en `ads.json`: la plantilla, la foto del
 catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` —

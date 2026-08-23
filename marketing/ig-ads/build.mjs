@@ -387,6 +387,19 @@ const puro = (a, ph, w, h) => {
 };
 
 // S2 · Sello: foto a sangre y un sello de precio, como la etiqueta de una tienda.
+//
+// `zona` decide dónde vive el pie de texto, y con eso si hace falta velo:
+//
+//   'ancho' (por defecto) — bloque a todo el ancho, con el velo al pie. Es lo
+//             que necesitan IG-23 e IG-34: debajo del titular hay maceta y caja,
+//             no vacío, así que ahí el velo sí está protegiendo texto.
+//   'izq'   — columna angosta abajo a la izquierda, SIN velo. Para las tomas
+//             que ya traen su propio vacío. En IG-11 el velo cubría el 62% de
+//             la pieza para sostener un titular a todo el ancho, y de paso
+//             dejaba las rosas de abajo detrás de una niebla. Encuadrando la
+//             foto al ras izquierdo aparece un vacío de estudio de 585 × 225
+//             (luminancia 239 uniforme, medida): el titular cabe entero ahí y
+//             ninguna flor queda tapada.
 const sello = (a, ph, w, h) => {
   // Con `tone:'light'` el degradado es oscuro y el texto blanco; sobre fotos de
   // fondo claro se invierte, porque un velo negro ahí se ve como un parche.
@@ -394,44 +407,86 @@ const sello = (a, ph, w, h) => {
   const fg = onDark ? '#fff' : C.ink;
   const mut = onDark ? 'rgba(255,255,255,.8)' : C.body;
   const tinte = onDark ? '10,7,6' : rgb(C.fondo);
+  const izq = a.creative.zona === 'izq';
   return `
 <div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden;--em:${onDark ? '#F0BFCB' : C.rosa}">
   ${img(a, ph)}
-  <div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.62)}px;
-       background:${velo('to top', tinte, onDark ? .8 : .95)}"></div>
+  ${izq ? '' : `<div style="position:absolute;left:0;right:0;bottom:0;height:${Math.round(h * 0.62)}px;
+       background:${velo('to top', tinte, onDark ? .8 : .95)}"></div>`}
   <div style="position:absolute;top:${h === 1920 ? 300 : 74}px;right:74px;width:244px;height:244px;
               background:${C.rosa};border-radius:50%;color:#fff;
               display:flex;flex-direction:column;align-items:center;justify-content:center">
     <span class="d" style="font-size:64px;font-weight:400;line-height:1">${a.creative.price}</span>
     <span class="mono" style="font-size:12px;color:rgba(255,255,255,.78);margin-top:12px">${a.creative.seal}</span>
   </div>
+  ${izq ? `
+  <!-- El titular lleva ancho máximo propio: el vacío es una cuña que se abre
+       hacia abajo, así que las líneas de arriba tienen que ser las cortas. -->
+  <div style="position:absolute;left:72px;bottom:${h === 1920 ? 372 : 46}px;color:${fg}">
+    <h1 class="d" style="font-size:${a.creative.hlSize || 96}px;max-width:${a.creative.hlAncho || 300}px">${a.creative.headline}</h1>
+    <span class="mono" style="display:block;font-size:15px;color:${mut};margin-top:24px">${a.creative.footer}</span>
+    <div style="margin-top:22px">${logo(52, onDark)}</div>
+  </div>` : `
   <div style="position:absolute;left:76px;right:76px;bottom:${h === 1920 ? 372 : 76}px;color:${fg}">
     <h1 class="d" style="font-size:${a.creative.hlSize || 96}px">${a.creative.headline}</h1>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:28px">
       <span class="mono" style="font-size:15px;color:${mut}">${a.creative.footer}</span>
       ${logo(72, onDark)}
     </div>
-  </div>
+  </div>`}
 </div>`;
 };
 
 // C2 · Cuadro 1:1: la foto ocupa el lienzo y el texto se apoya en el vacío que
 // la propia foto deja a un costado.
-const cuadro = (a, ph) => `
-<div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden">
-  ${img(a, ph)}
-  <div style="position:absolute;inset:0;pointer-events:none;
-       background:${veloEsquina('88% 2%', '255,255,255', .97)}"></div>
+//
+// Sin velo, a propósito. Había uno radial anclado en la esquina superior
+// derecha y era la nube blanca que se veía tapando el producto: en estas tomas
+// esa esquina ya es fondo de estudio, así que el velo no aclaraba nada que
+// hiciera falta aclarar — lo único que lograba era lavar el globo de IG-30 y el
+// respaldo del sofá de IG-16. Regla 6: si el texto ya cae sobre vacío, el velo
+// sobra y solo está tapando foto.
+//
+// A cambio, dónde cae el texto deja de ser fijo, porque el vacío no está en el
+// mismo sitio en las tres. `zona`:
+//
+//   'der'   — columna a la derecha, alineada a la derecha. Es el vacío de las
+//             tomas de estudio: medido sobre la foto ya encuadrada, el 5%
+//             más oscuro de esa caja da 231 de luminancia en IG-22 y 174 en
+//             IG-30 (el globo pasa cerca, pero por debajo del texto).
+//   'banda' — franja al tope, alineada a la izquierda. Para las tomas de
+//             ambiente, que no dejan columna: en IG-16 la derecha es el brazo
+//             de madera de la silla (p5 68, casi negro) y el único vacío real
+//             es el respaldo del sofá — ancho, claro y bajo.
+const cuadro = (a, ph) => {
+  const precio = `<span class="d" style="font-size:40px;font-weight:400">${a.creative.price}</span>`;
+  const cuerpo = a.creative.zona === 'banda' ? `
+  <!-- Franja: todo en una línea, porque el vacío de las tomas de ambiente es
+       ancho y bajo. Corta en 820px, que es donde arranca el brazo de madera de
+       la silla en IG-16; y no baja de 170px, que es donde sube la punta del
+       papel. Apilar el precio debajo del titular lo metía sobre el celofán. -->
+  <div style="position:absolute;top:48px;left:56px;right:260px;
+              display:flex;justify-content:space-between;align-items:center;gap:40px">
+    <div style="min-width:0">
+      ${a.creative.eyebrow ? `<span class="mono" style="display:block;font-size:15px;color:${C.muted};margin-bottom:14px">${a.creative.eyebrow}</span>` : ''}
+      <h1 class="d" style="font-size:${a.creative.hlSize || 52}px">${a.creative.headline}</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;flex:none">${logo(58)}${precio}</div>
+  </div>` : `
   <div style="position:absolute;top:62px;right:58px;left:498px;text-align:right">
     <span class="mono" style="font-size:15px;color:${C.muted}">${a.creative.eyebrow}</span>
-    <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:20px">${a.creative.headline}</h1>
-    <div style="height:1px;background:${C.line};margin:24px 0 0;margin-left:auto;width:180px"></div>
+    <h1 class="d" style="font-size:${a.creative.hlSize || 60}px;margin-top:${a.creative.eyebrow ? 20 : 0}px">${a.creative.headline}</h1>
+    <div style="height:1px;background:${C.line};margin:24px 0 0 auto;width:180px"></div>
     <div style="margin-top:22px;display:flex;justify-content:flex-end;align-items:center;gap:20px">
-      ${logo(52)}
-      <span class="d" style="font-size:40px;font-weight:400">${a.creative.price}</span>
+      ${logo(52)}${precio}
     </div>
-  </div>
+  </div>`;
+  return `
+<div style="position:absolute;inset:0;background:${ph.bg};overflow:hidden">
+  ${img(a, ph)}
+  ${cuerpo}
 </div>`;
+};
 
 // T · Titular: aquí manda la tipografía y la foto entra como una franja al pie.
 const titular = (a, ph, w, h) => {
@@ -1069,6 +1124,34 @@ function writeDeck({ campaign, products, ads }) {
   L.push('De paso apareció otro: el marfil `251,248,241` del velo de las citas era de la paleta');
   L.push('anterior y sobrevivió al paso a blanco total, así que al pie de IG-05, IG-08 e IG-19 había');
   L.push('una banda amarillenta. Ahora el velo saca su color del token, no de un rgb escrito a mano.');
+  L.push('');
+  L.push('### El mejor velo es el que no está');
+  L.push('');
+  L.push('La otra mitad de la regla: un velo existe para que se lea un texto encima. Si debajo no');
+  L.push('hay texto, no está protegiendo nada — está tapando el producto. `cuadro` arrastraba un');
+  L.push('velo radial en la esquina superior derecha que cubría media pieza, y en las tres tomas que');
+  L.push('usan la plantilla esa esquina ya era fondo de estudio: no aclaraba nada y sí lavaba el');
+  L.push('globo morado de IG-30 y el respaldo del sofá de IG-16. Se fue entero.');
+  L.push('');
+  L.push('Sin velo, el texto ya no puede caer siempre en el mismo sitio, así que dónde cae pasó a');
+  L.push('ser un dato del anuncio (`zona`) y se decide midiendo la foto ya encuadrada, no a ojo:');
+  L.push('');
+  L.push('| Anuncio | Dónde va el texto | Lo que dice la foto |');
+  L.push('| --- | --- | --- |');
+  L.push('| `IG-22` | columna derecha (por defecto) | el 5% más oscuro de esa caja está en 231 de luminancia: fondo de estudio puro |');
+  L.push('| `IG-30` | columna derecha | 174; el globo pasa por debajo del bloque, no por dentro |');
+  L.push('| `IG-16` | franja al tope (`zona: banda`) | a la derecha está el brazo de madera de la silla, en 68 — casi negro. El único vacío es el respaldo del sofá: ancho y bajo, así que el bloque se acuesta en una línea |');
+  L.push('| `IG-11` | columna abajo a la izquierda (`zona: izq`, en `sello`) | centrada no había vacío; al ras izquierdo aparece uno de 585 × 225 en 239 uniforme |');
+  L.push('');
+  L.push('IG-11 era el caso extremo: el velo tapaba el 62% de la pieza para sostener un titular a');
+  L.push('todo el ancho, y de paso dejaba las rosas de abajo detrás de una niebla. Cambiando el');
+  L.push('encuadre a `0% 50%` el titular cabe entero sobre el fondo del estudio y ninguna flor queda');
+  L.push('debajo de nada. El velo de `sello` sigue existiendo para IG-23 e IG-34, donde bajo el');
+  L.push('titular hay maceta y caja y sí hace falta.');
+  L.push('');
+  L.push('En IG-16 el logotipo queda sobre tela y no sobre blanco. Es lo mejor que da la toma: la');
+  L.push('mancha más clara y más plana de esa franja está justo ahí (media 227), medida barriendo');
+  L.push('la franja entera con una caja del tamaño del grupo.');
   L.push('');
   L.push('Para agregar un anuncio basta con otra entrada en `ads.json`: la plantilla, la foto del');
   L.push('catálogo y el encuadre (`fit`, `position`). El formato sale del campo `format` —');

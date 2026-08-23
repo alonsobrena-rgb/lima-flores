@@ -445,13 +445,15 @@
         "#regalosperu"
       ],
       "creative": {
-        "headline": "Ocupa la <em>mesa entera</em>",
+        "headline": "Ocupa la<br><em>mesa entera</em>",
         "price": "S/ 245",
         "seal": "30 × 50 cm",
         "footer": "Arreglo Rossie · florero de vidrio",
         "fit": "cover",
-        "position": "50% 62%",
-        "hlSize": 92
+        "position": "0% 50%",
+        "hlSize": 60,
+        "zona": "izq",
+        "hlAncho": 320
       },
       "why": "El sello de precio hace el trabajo del texto: quien ya vio el producto necesita el número, no otro párrafo. La medida en el sello responde la pregunta real, que es el tamaño."
     },
@@ -611,7 +613,8 @@
         "price": "S/ 180",
         "fit": "cover",
         "position": "50% 50%",
-        "hlSize": 50
+        "hlSize": 52,
+        "zona": "banda"
       },
       "why": "La foto está tomada en una sala y no en un fondo blanco: en el feed no parece anuncio, que es justo lo que conviene en público frío amplio."
     },
