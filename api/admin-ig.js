@@ -35,15 +35,48 @@ function readJsonBody(req, limit = 256 * 1024) {
   });
 }
 
+/**
+ * Qué le falta al publicador para poder publicar, mirando **la cuenta del
+ * panel** y no las variables sueltas del entorno.
+ *
+ * Es un sitio y no dos porque el diagnóstico se da en dos momentos —al pintar
+ * la pantalla y al encender el interruptor— y ya se vio lo que pasa cuando se
+ * separan: el interruptor avisaba «falta una cuenta de Instagram» con la cuenta
+ * agregada y activa, porque llamaba a `faltantes()` sin pasarle nada y caía al
+ * entorno, donde no hay `IG_USER_ID`.
+ *
+ * Y `cuentaPorDefecto()` solo devuelve las **activas**: con la única cuenta
+ * pausada da null, que no es lo mismo que no tener cuenta. Decir «falta una
+ * cuenta» ahí manda a agregar una segunda que ya existe; lo que falta es
+ * activar la que está.
+ */
+async function diagnostico() {
+  const porDefecto = await cola.cuentaPorDefecto();
+  const cuentas = await cola.listarCuentas();
+  const cuentaPausada = !porDefecto && cuentas.length > 0;
+  const falta = publish.faltantes(porDefecto);
+  if (cuentaPausada) {
+    const nombres = cuentas.map((c) => c.usuario || c.ig_user_id).join(', ');
+    const dilo = cuentas.length === 1
+      ? `activar ${nombres}, que está pausada`
+      : `activar alguna de las cuentas (${nombres}): están todas pausadas`;
+    const i = falta.findIndex((f) => f.startsWith('una cuenta de Instagram'));
+    if (i >= 0) falta[i] = dilo; else falta.unshift(dilo);
+  }
+  return { porDefecto, cuentas, falta, cuentaPausada, configurado: !falta.length };
+}
+
 async function estado(req, res) {
   const ajustes = await cola.ajustes();
   const filas = await cola.listar({ limite: 500 });
   const cuenta = (s) => filas.filter((f) => f.status === s).length;
   const proxima = filas.find((f) => f.status === 'queued');
-  const porDefecto = await cola.cuentaPorDefecto();
+  const { porDefecto, cuentas, falta, cuentaPausada, configurado } = await diagnostico();
+
   return send(res, 200, {
-    configurado: publish.configurado(porDefecto),
-    falta: publish.faltantes(porDefecto),
+    configurado,
+    falta,
+    cuentaPausada,
     ajustes: { activo: ajustes.activo, porDia: ajustes.por_dia, horas: ajustes.horas },
     cupo: await publish.cupoRestante(porDefecto),
     resumen: {
@@ -55,7 +88,7 @@ async function estado(req, res) {
     // Lo que queda en el repo sin encolar **para la cuenta por defecto**, que es
     // la que propone el botón. Con otra cuenta el número cambia.
     sinCargar: galeria.disponibles({ saltar: await cola.origenesUsados(porDefecto ? porDefecto.id : null) }).length,
-    cuentas: (await cola.listarCuentas()).map((c) => ({
+    cuentas: cuentas.map((c) => ({
       ...c,
       // Nunca el token: solo si la variable que nombra existe en el servidor.
       tokenPuesto: !!publish.tokenDe(c),
@@ -168,8 +201,9 @@ async function guardarAjustes(req, res) {
   const avisos = [];
   // Encender sin tener las llaves puestas no publica nada: mejor decirlo acá que
   // dejar al usuario mirando una cola que no avanza.
-  if (a.activo && !publish.configurado()) {
-    avisos.push(`Encendido, pero no va a publicar: falta ${publish.faltantes().join(', ')} en el servidor.`);
+  const diag = await diagnostico();
+  if (a.activo && !diag.configurado) {
+    avisos.push(`Encendido, pero no va a publicar: falta ${diag.falta.join(', ')}.`);
   }
   // `agenda.parseHoras` **recorta** la lista al número elegido: pedir 8 al día
   // con cinco horas en la lista sigue dando cinco. Sin este aviso el selector
