@@ -10,6 +10,7 @@
 
 const cola = require('../../db/ig-queue-store');
 const publish = require('./publish');
+const formato = require('./formato');
 const db = require('../../db');
 
 const CADA_MS = 60 * 1000;
@@ -57,6 +58,31 @@ async function vuelta() {
   }
 }
 
+/**
+ * Corrige el tipo de las piezas que ya están en cola.
+ *
+ * Las que se encolaron antes de que existiera `formato.js` entraron todas como
+ * post del feed, incluidas las nueve 9:16 — y en el feed Meta recorta todo lo
+ * más alto que 4:5. Sin esto, arreglar el encolado no sirve de nada para lo que
+ * ya está agendado, que es justamente lo que estaba por salir recortado.
+ *
+ * Corre una vez al arrancar y solo mira las que todavía no se publicaron. Lo ya
+ * publicado no se toca: es historia, y de Instagram no se borra por API.
+ */
+async function repararFormatos() {
+  const filas = await cola.cabecerasPendientes();
+  const cambiadas = [];
+  for (const f of filas) {
+    if (formato.kindDeImagen(f.cabecera) !== 'story') continue;
+    await cola.cambiarKind(f.id, 'story');
+    cambiadas.push(f.origen || f.id);
+  }
+  if (cambiadas.length) {
+    console.log(`[ig] ${cambiadas.length} pieza(s) 9:16 pasan de post a historia: ${cambiadas.join(', ')}`);
+  }
+  return cambiadas;
+}
+
 function start() {
   if (timer) return;
   if (!db.enabled) { console.log('[ig] sin BD — publicador desactivado'); return; }
@@ -69,6 +95,8 @@ function start() {
       if (falta.length) console.log(`[ig] publicador en espera: falta ${falta.join(', ')}`);
     })
     .catch(() => { /* sin base todavía: el vigía lo vuelve a mirar en cada vuelta */ });
+
+  repararFormatos().catch((e) => console.error('[ig] no pude revisar los formatos de la cola:', e.message));
   timer = setInterval(() => { vuelta().catch(() => {}); }, CADA_MS);
   timer.unref?.();
   console.log('[ig] publicador iniciado (revisa la cola cada minuto)');
@@ -76,4 +104,4 @@ function start() {
 
 function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
-module.exports = { start, stop, vuelta };
+module.exports = { start, stop, vuelta, repararFormatos };

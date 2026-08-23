@@ -121,6 +121,29 @@ async function actualizar(id, { caption, scheduledAt, status }) {
   return obtener(id);
 }
 
+/**
+ * Las piezas todavía sin publicar marcadas como post del feed, con **solo la
+ * cabecera** del binario.
+ *
+ * 64 kB alcanzan para el marcador SOF de un JPEG y evitan traerse los blobs
+ * enteros: son 24 piezas de medio mega cada una y esto corre al arrancar.
+ */
+async function cabecerasPendientes(bytes = 65536) {
+  const { rows } = await db.query(
+    `SELECT id, origen, substring(media from 1 for $1) AS cabecera
+       FROM ig_queue
+      WHERE kind = 'image' AND status IN ('queued','paused')`,
+    [bytes],
+  );
+  return rows;
+}
+
+/** Cambia el tipo de una pieza. Solo lo usa la reparación de formatos. */
+async function cambiarKind(id, kind) {
+  const { rowCount } = await db.query(`UPDATE ig_queue SET kind = $1 WHERE id = $2`, [kind, id]);
+  return rowCount > 0;
+}
+
 async function borrar(id) {
   const { rowCount } = await db.query(`DELETE FROM ig_queue WHERE id = $1`, [id]);
   return rowCount > 0;
@@ -261,6 +284,7 @@ async function publicadasHoy() {
 
 module.exports = {
   encolar, listar, obtener, media, origenesUsados, tomarVencida,
+  cabecerasPendientes, cambiarKind,
   marcarPublicada, marcarFallida, actualizar, borrar, ultimaAgendada,
   ajustes, guardarAjustes, publicadasHoy, adelantar,
   listarCuentas, cuenta, cuentaPorDefecto, crearCuenta, actualizarCuenta, borrarCuenta,
