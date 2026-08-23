@@ -1,8 +1,11 @@
 // Cargar la galería a la cola: los creativos ya hechos, con su copy.
 //
 // Las piezas y su texto viven en el repo y llegan con el deploy:
-//   marketing/ig-ads/ads.json   + creativos/IG-xx.jpg   → posts 4:5
+//   marketing/ig-ads/ads.json   + creativos/IG-xx.jpg   → posts 4:5 e historias 9:16
 //   marketing/video/videos.json + creativos/VID-xx.mp4  → reels 9:16
+//
+// Post o historia lo decide el tamaño del JPEG, no el `placement` de
+// `ads.json`: ver `formato.js`.
 //
 // El caption NO se inventa acá: es el `primaryText` que ya se escribió para cada
 // anuncio más sus hashtags. Si mañana cambia el copy en el JSON, cambia el
@@ -11,6 +14,8 @@
 
 const fs = require('fs');
 const path = require('path');
+
+const formato = require('./formato');
 
 const RAIZ = path.resolve(__dirname, '../..');
 const ADS = path.join(RAIZ, 'marketing/ig-ads');
@@ -45,13 +50,16 @@ function porCodigo() {
   for (const a of (ads && ads.ads) || []) {
     const archivo = path.join(ADS, 'creativos', `${a.code}.jpg`);
     if (!fs.existsSync(archivo)) continue;
+    const media = fs.readFileSync(archivo);
     mapa.set(a.code, {
       origen: a.code,
-      kind: 'image',
+      // Medido sobre el archivo: nueve de los creativos son 9:16 y en el feed
+      // los recorta Meta. Van a historias.
+      kind: formato.kindDeImagen(media),
       mime: 'image/jpeg',
       titulo: a.title || a.code,
       caption: caption(a),
-      media: fs.readFileSync(archivo),
+      media,
     });
   }
 
@@ -78,8 +86,17 @@ function porCodigo() {
  */
 function disponibles({ saltar = new Set() } = {}) {
   const salida = [...porCodigo().values()].filter((p) => !saltar.has(p.origen));
+
   // Los reels primero: rinden más que un post fijo y son los que menos hay.
-  salida.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'reel' ? -1 : 1));
+  // Después los posts, y al final las historias, que duran 24 h y no compiten
+  // por el mismo sitio del perfil.
+  //
+  // Con rangos y no con un ternario: el `a.kind === 'reel' ? -1 : 1` de antes
+  // decía «después» para los dos órdenes al comparar una historia con un post,
+  // y un comparador así no es un orden — con dos tipos daba igual y con tres
+  // deja la lista a merced de cómo entren los elementos.
+  const RANGO = { reel: 0, image: 1, story: 2 };
+  salida.sort((a, b) => (RANGO[a.kind] ?? 9) - (RANGO[b.kind] ?? 9));
   return salida;
 }
 

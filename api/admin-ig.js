@@ -164,6 +164,7 @@ async function resincronizar(req, res) {
   const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
   const cambiadas = [];
   const textos = [];
+  const tipos = [];
   const huerfanas = [];
 
   for (const fila of filas) {
@@ -175,22 +176,28 @@ async function resincronizar(req, res) {
 
     const distintoArchivo = sha(fila.media) !== sha(pieza.media);
     const distintoTexto = !fila.caption_editado && fila.caption !== pieza.caption;
-    if (!distintoArchivo && !distintoTexto) continue;
+    // El tipo va con el archivo: un creativo rehecho de 4:5 a 9:16 deja de ser
+    // post y pasa a historia, y publicarlo en el feed lo recorta Meta.
+    const distintoTipo = fila.kind !== pieza.kind;
+    if (!distintoArchivo && !distintoTexto && !distintoTipo) continue;
 
     const ok = await cola.reemplazarMedia(fila.id, {
       media: pieza.media,
       mime: pieza.mime,
+      kind: distintoTipo ? pieza.kind : undefined,
       caption: distintoTexto ? pieza.caption : undefined,
     });
     if (!ok) continue;                       // el vigía se la llevó a publicar
     if (distintoArchivo) cambiadas.push(fila.origen);
     if (distintoTexto) textos.push(fila.origen);
+    if (distintoTipo) tipos.push(`${fila.origen} → ${pieza.kind}`);
   }
 
   return send(res, 200, {
     revisadas: filas.length,
     archivos: cambiadas.length,
     captions: textos.length,
+    tipos,
     codigos: [...new Set([...cambiadas, ...textos])].sort(),
     huerfanas: [...new Set(huerfanas)].sort(),
   });

@@ -120,8 +120,8 @@ async function esperarContenedor(creationId, token, { maxMs = 5 * 60 * 1000 } = 
 }
 
 /**
- * Publica una pieza ya encolada en `cuenta`. `kind` es 'image' o 'reel'.
- * Devuelve { igMediaId, permalink }.
+ * Publica una pieza ya encolada en `cuenta`. `kind` es 'image', 'story' o
+ * 'reel'. Devuelve { igMediaId, permalink }.
  */
 async function publicar({ id, kind, caption }, cuenta) {
   const c = cuenta || cuentaDelEntorno();
@@ -131,9 +131,14 @@ async function publicar({ id, kind, caption }, cuenta) {
   const uid = c.ig_user_id;
 
   const url = urlDeMedia(id);
+  // Una historia es la misma imagen con `media_type: STORIES`, y **sin
+  // caption**: las historias no lo llevan, y mandarlo hace que el Graph
+  // rechace el contenedor en vez de ignorarlo.
   const contenedor = kind === 'reel'
     ? { media_type: 'REELS', video_url: url, caption }
-    : { image_url: url, caption };
+    : kind === 'story'
+      ? { media_type: 'STORIES', image_url: url }
+      : { image_url: url, caption };
 
   const { id: creationId } = await graph(`${uid}/media`, contenedor, token);
   if (!creationId) throw new Error('Meta no devolvió creation_id.');

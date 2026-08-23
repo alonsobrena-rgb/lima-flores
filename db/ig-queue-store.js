@@ -132,7 +132,7 @@ async function actualizar(id, { caption, scheduledAt, status }) {
  */
 async function pendientesDelRepo() {
   const { rows } = await db.query(
-    `SELECT id, origen, caption, caption_editado, mime, media
+    `SELECT id, origen, kind, caption, caption_editado, mime, media
        FROM ig_queue
       WHERE origen IS NOT NULL AND origen <> 'manual'
         AND status IN ('queued', 'paused', 'failed')
@@ -142,7 +142,29 @@ async function pendientesDelRepo() {
 }
 
 /**
- * Reemplaza el archivo (y opcionalmente el texto) de una pieza en cola.
+ * Las piezas todavía sin publicar marcadas como post del feed, con **solo la
+ * cabecera** del binario.
+ *
+ * 64 kB alcanzan para el marcador SOF de un JPEG y evitan traerse los blobs
+ * enteros: son 24 piezas de medio mega cada una y esto corre al arrancar.
+ */
+async function cabecerasPendientes(bytes = 65536) {
+  const { rows } = await db.query(
+    `SELECT id, origen, substring(media from 1 for $1) AS cabecera
+       FROM ig_queue
+      WHERE kind = 'image' AND status IN ('queued','paused')`,
+    [bytes],
+  );
+  return rows;
+}
+
+/**
+ * Reemplaza el archivo (y opcionalmente el tipo y el texto) de una pieza en cola.
+ *
+ * El `kind` viaja con el archivo porque depende de él: si un creativo se rehizo
+ * de 4:5 a 9:16, deja de ser un post y pasa a ser historia. Reemplazar el JPEG
+ * sin mover el tipo lo mandaría al feed para que Meta lo recorte, que es
+ * justamente lo que arregló `formato.js`.
  *
  * El `status IN (...)` del WHERE es el mismo candado que `tomarVencida`: si el
  * vigía se llevó la fila entre el SELECT y este UPDATE, acá se lleva cero filas
@@ -150,15 +172,22 @@ async function pendientesDelRepo() {
  * algo que Meta está descargando en ese instante es la forma de que el reel
  * quede a medias.
  */
-async function reemplazarMedia(id, { media, mime, caption }) {
+async function reemplazarMedia(id, { media, mime, kind, caption }) {
   const sets = ['media = $1', 'mime = $2', 'bytes = $3'];
   const vals = [media, mime, media.length];
+  if (kind !== undefined) { vals.push(kind); sets.push(`kind = $${vals.length}`); }
   if (caption !== undefined) { vals.push(caption); sets.push(`caption = $${vals.length}`); }
   vals.push(id);
   const { rowCount } = await db.query(
     `UPDATE ig_queue SET ${sets.join(', ')}
       WHERE id = $${vals.length} AND status IN ('queued', 'paused', 'failed')`, vals,
   );
+  return rowCount > 0;
+}
+
+/** Cambia el tipo de una pieza. Solo lo usa la reparación de formatos. */
+async function cambiarKind(id, kind) {
+  const { rowCount } = await db.query(`UPDATE ig_queue SET kind = $1 WHERE id = $2`, [kind, id]);
   return rowCount > 0;
 }
 
@@ -303,6 +332,7 @@ async function publicadasHoy() {
 module.exports = {
   pendientesDelRepo, reemplazarMedia,
   encolar, listar, obtener, media, origenesUsados, tomarVencida,
+  cabecerasPendientes, cambiarKind,
   marcarPublicada, marcarFallida, actualizar, borrar, ultimaAgendada,
   ajustes, guardarAjustes, publicadasHoy, adelantar,
   listarCuentas, cuenta, cuentaPorDefecto, crearCuenta, actualizarCuenta, borrarCuenta,

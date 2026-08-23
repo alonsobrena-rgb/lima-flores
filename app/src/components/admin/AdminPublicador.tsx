@@ -18,7 +18,7 @@ import { adminGet, adminSend, apiUrl, AuthError } from '@/lib/admin-api';
  *   mirarse antes, como cualquier pieza.
  */
 type Item = {
-  id: string; kind: 'image' | 'reel'; origen: string | null; caption: string;
+  id: string; kind: 'image' | 'story' | 'reel'; origen: string | null; caption: string;
   mime: string; bytes: number; scheduled_at: string; status: string;
   permalink: string | null; error: string | null; attempts: number;
   cuenta_id: string | null;
@@ -416,11 +416,13 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
           <button
             onClick={() => accion(async () => {
               const r = await adminSend('/api/admin/ig/resincronizar', 'POST') as {
-                revisadas: number; archivos: number; captions: number; codigos: string[]; huerfanas: string[];
+                revisadas: number; archivos: number; captions: number; tipos: string[];
+                codigos: string[]; huerfanas: string[];
               };
               const partes: string[] = [];
               if (r.archivos) partes.push(`${r.archivos} archivo(s)`);
               if (r.captions) partes.push(`${r.captions} caption(s)`);
+              if (r.tipos.length) partes.push(`tipo de ${r.tipos.join(', ')}`);
               const huerf = r.huerfanas.length ? ` Sin pareja en el repo: ${r.huerfanas.join(', ')}.` : '';
               setAviso(partes.length
                 ? `Actualizadas ${partes.join(' y ')} — ${r.codigos.join(', ')}.${huerf}`
@@ -526,7 +528,7 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <Insignia status={it.status} />
                   <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/55">
-                    {it.kind === 'reel' ? 'Reel' : 'Post'} · {it.origen || 'manual'} · {Math.round(it.bytes / 1024)} kB
+                    {it.kind === 'reel' ? 'Reel' : it.kind === 'story' ? 'Historia' : 'Post'} · {it.origen || 'manual'} · {Math.round(it.bytes / 1024)} kB
                     {' · '}
                     {(() => {
                       const c = estado.cuentas.find((x) => x.id === it.cuenta_id);
@@ -555,6 +557,16 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                     <button className={boton} onClick={() => accion(() => adminSend(`/api/admin/ig/cola/${it.id}/publicar-ya`, 'POST'))}>Publicar ya</button>
                     <button className={boton} onClick={() => { if (confirm('¿Sacar esta pieza de la cola?')) accion(() => adminSend(`/api/admin/ig/cola/${it.id}`, 'DELETE')); }}>Quitar</button>
                   </div>
+                )}
+
+                {/* Una historia no lleva caption: el texto va dentro de la
+                    pieza. Se sigue mostrando el copy del anuncio porque es de
+                    donde sale, pero avisando que no se publica. */}
+                {it.kind === 'story' && (
+                  <p className="mt-3 text-[12px] text-foreground/50">
+                    Va a <strong className="text-ink-900">historias</strong> (9:16, dura 24 h). Las
+                    historias no llevan caption: el texto de abajo no se publica.
+                  </p>
                 )}
 
                 <div className="mt-3">

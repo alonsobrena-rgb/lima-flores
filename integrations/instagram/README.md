@@ -137,6 +137,7 @@ Errores que se ven seguido:
 | | |
 |---|---|
 | `publish.js` | Las llamadas al Graph: contenedor → espera (video) → publicar |
+| `formato.js` | Mide el JPEG y decide si es post del feed o historia |
 | `publisher.js` | El vigía: una vuelta por minuto |
 | `agenda.js` | Las horas de Lima, cinco al día (por cuenta) |
 | `galeria.js` | Lee `marketing/ig-ads/` y `marketing/video/` con su copy |
@@ -144,6 +145,37 @@ Errores que se ven seguido:
 | `../../db/ig-queue-store.js` | La cola |
 | `../../api/admin-ig.js` | Lo que usa el panel |
 | `../../api/ig-media.js` | El archivo que descarga Meta |
+
+## Post, historia o reel
+
+Lo decide **el tamaño del archivo**, no una etiqueta. Nueve de los 33 creativos
+son 9:16, y el feed de Instagram solo admite de 4:5 a 1.91:1: todo lo más alto
+que 4:5 **lo recorta Meta**, que es donde estaban el titular y el logotipo. Esas
+nueve van a historias, que es el sitio para el que se diseñaron.
+
+| El archivo mide | Va a | Contenedor del Graph |
+|---|---|---|
+| Hasta 4:5 de alto (1080×1350, 1080×1080) | Feed | `image_url` |
+| Más alto que 4:5 (1080×1920) | Historias | `media_type: STORIES` |
+| MP4 | Reels | `media_type: REELS` |
+
+`ads.json` trae un `placement` que dice lo mismo, y aun así no se usa: es texto
+que escribe quien redacta el anuncio, y si alguien cambia la plantilla y olvida
+la línea, la pieza vuelve al feed y sale recortada sin que nada avise. El JPEG no
+puede mentir sobre cuánto mide. La medición está en `formato.js` y sale del
+marcador SOF, así que le basta la cabecera.
+
+Dos cosas de las historias:
+
+- **No llevan caption.** El texto va dentro de la pieza. El panel sigue
+  mostrando el copy del anuncio —de ahí sale— pero avisa que no se publica.
+- **Duran 24 h.** Por eso se encolan al final: no compiten con los posts por el
+  sitio del perfil.
+
+Las que ya estaban en la cola marcadas como post se corrigen solas: el vigía
+pasa `repararFormatos()` al arrancar, mira la cabecera de cada pieza sin
+publicar y cambia las 9:16. Lo ya publicado no se toca — de Instagram no se
+borra por API.
 
 ## El caption no se inventa acá
 
