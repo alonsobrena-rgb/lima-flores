@@ -39,6 +39,33 @@ const C = {
   body: TOKENS['--text-body'], muted: TOKENS['--text-muted'], rosa: TOKENS['--accent'],
 };
 
+/* ── velos ────────────────────────────────────────────────────────────────
+   La misma smoothstep que `marketing/ig-ads/build.mjs`, y por la misma razón:
+   un tramo lineal tiene la derivada rota en sus dos puntas, y el ojo lee esa
+   esquina como el borde de un recuadro aunque no haya recuadro. En el video se
+   nota todavía más, porque la toma de abajo se mueve y la línea se queda quieta.
+
+   Se paga dos veces en la misma banda: donde el blanco sólido empieza a caer y
+   donde la caída se corta. Esta última tiene que llegar a alfa 0 exacta — un
+   velo que termina en .2 deja una raya recta cruzando el anuncio. */
+const PASOS = [[0, 1], [12, .972], [24, .896], [36, .776], [48, .62], [60, .448],
+  [72, .28], [82, .152], [91, .06], [100, 0]];
+
+// Ojo con la subida: `1 - a` ya da la curva al revés, así que las paradas salen
+// en orden ascendente y NO hay que darles la vuelta. Volteándolas, las
+// posiciones quedan decrecientes, CSS las aplasta todas contra la última y el
+// velo aparece de golpe — 237 niveles en un píxel, justo lo que se venía a
+// arreglar. Lo cazó la medición del alfa, no el ojo.
+/** Subida de 0 a `alfa` en `largo` px desde el borde de arriba de la caja. */
+const sube = (largo, alfa) => PASOS
+  .map(([p, a]) => `rgba(255,255,255,${((1 - a) * alfa).toFixed(3)}) ${(p * largo / 100).toFixed(1)}px`)
+  .join(',');
+
+/** Bajada de `alfa` a 0 en los últimos `largo` px de la caja. */
+const baja = (largo, alfa) => PASOS
+  .map(([p, a]) => `rgba(255,255,255,${(a * alfa).toFixed(3)}) calc(100% - ${(largo - p * largo / 100).toFixed(1)}px)`)
+  .join(',');
+
 const MARCA = Object.fromEntries(['logo', 'logo-claro'].map((n) => [
   n, `data:image/png;base64,${fs.readFileSync(path.join(ADS, 'marca', `${n}.png`)).toString('base64')}`,
 ]));
@@ -106,13 +133,18 @@ const rotulo = (v) => pagina(`
      quedaban las flores. Atado al bloque de texto tapa lo que tiene que tapar
      —las dos líneas— y suelta lo de abajo: la base de la caja y el banco vuelven
      a verse. Va dentro del contenedor del texto para que crezca con la copia y
-     no haya que recalcular píxeles si el titular pasa a dos líneas. -->
+     no haya que recalcular píxeles si el titular pasa a dos líneas.
+
+     Las dos puntas van por smoothstep y la de abajo muere en alfa 0. Con tramos
+     lineales se veían dos rayas rectas cruzando el anuncio: una donde el blanco
+     dejaba de ser sólido y otra donde el velo se cortaba, que terminaba en .2 y
+     de ahí saltaba a nada. La zona sólida no se mueve — sigue empezando y
+     terminando donde estaba, lo único que cambia es la forma de las caídas. -->
 <div style="position:absolute;left:0;right:0;bottom:${SEGURO}px">
   <div style="position:absolute;left:0;right:0;top:-150px;bottom:-170px;
-       background:linear-gradient(to bottom,
-         rgba(255,255,255,0) 0, rgba(255,255,255,.93) 150px,
-         rgba(255,255,255,.93) calc(100% - 170px),
-         rgba(255,255,255,.3) calc(100% - 45px), rgba(255,255,255,.2) 100%)"></div>
+       background:linear-gradient(to bottom,${sube(150, .93)},
+         rgba(255,255,255,.93) 150px,
+         rgba(255,255,255,.93) calc(100% - 170px),${baja(170, .93)})"></div>
   <div style="position:relative;padding:0 76px">
     <h1 class="d" style="font-size:${v.hlSize || 92}px">${v.headline}</h1>
     ${v.sub ? `<p style="font-size:30px;font-weight:300;line-height:1.4;color:${C.body};margin-top:22px">${v.sub}</p>` : ''}

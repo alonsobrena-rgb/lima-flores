@@ -127,6 +127,19 @@ aclarar, y a cambio lavaba el globo morado de IG-30 y el respaldo del sofá de
 IG-16. Se veía como una nube blanca encima del producto, que es exactamente como
 lo describió el cliente.
 
+**Y cuando el velo sí hace falta, tiene que morir en alfa 0 y llegar por
+smoothstep.** Un tramo lineal tiene la derivada rota en sus dos puntas y el ojo
+lee esa esquina como el borde de un recuadro aunque no haya recuadro; un velo
+que termina en alfa .2 y de ahí salta a nada deja una raya recta cruzando la
+pieza. Las dos cosas pasaron a la vez en la banda de VID-01: 51 niveles de
+salto en un píxel. En video se nota más todavía, porque la toma se mueve y la
+línea se queda quieta. Las curvas están en `PASOS` (`marketing/ig-ads/build.mjs`
+y `marketing/video/build.mjs`); no se escribe un `linear-gradient` a mano.
+
+Y se comprueba midiendo el alfa del PNG, no mirando: al arreglarlo se me fue una
+rampa al revés que hacía aparecer el velo de golpe —237 niveles en un píxel, peor
+que el problema original— y a ojo, sobre una foto, no se veía.
+
 **El orden correcto es al revés del instinto.** Primero se busca dónde la foto ya
 está vacía, y ahí se pone el texto; el velo es el último recurso, para cuando no
 hay vacío en ninguna parte. Y ese vacío **se mide, no se mira**: se simula el

@@ -4,6 +4,11 @@ La misma fábrica que `marketing/ig-ads/`, para Reels e historias: los datos y e
 copy viven en `videos.json`, y `build.mjs` los monta sobre la toma. Se cambia el
 JSON, se vuelve a correr, y no se toca un video a mano.
 
+Hace falta **ffmpeg en el PATH**. Si no está en el sistema, sirve el que trae
+`pip install imageio-ffmpeg` — es el caso que ya contempla `dur()`, que saca el
+largo del clip de lo que ffmpeg escribe en stderr en vez de pedir ffprobe,
+justamente porque esa instalación trae el codificador y no la sonda.
+
 ```sh
 node marketing/video/build.mjs            # todos
 node marketing/video/build.mjs VID-01     # solo ese
@@ -51,6 +56,17 @@ la base de la caja y el banco se ven.
 
 Como la banda vive dentro del contenedor del texto, crece con la copia: si el
 titular pasa a dos líneas no hay que recalcular un solo píxel.
+
+**Las dos puntas van por smoothstep, y la de abajo muere en alfa 0.** Con tramos
+lineales la banda dejaba dos rayas rectas cruzando el anuncio: una donde el
+blanco dejaba de ser sólido —un tramo recto tiene la derivada rota en sus dos
+puntas y el ojo lee esa esquina como el borde de un recuadro— y otra, la peor,
+donde el velo se cortaba: terminaba en alfa .2 y de ahí saltaba a nada, 51
+niveles en un píxel. En video se nota todavía más que en una foto, porque la
+toma de abajo se mueve y la línea se queda quieta. Es la misma smoothstep de
+`marketing/ig-ads/build.mjs`, y la regla de la que salió está en el README de
+allá: *los velos no llevan canto*. Medido después del arreglo, el salto más
+grande en toda la caída es de 2 niveles por píxel.
 
 **Área segura: 372 px arriba y abajo.** Es lo que tapan la UI de Instagram, el
 avatar y la caja de respuesta. Un titular que entra ahí no existe.
