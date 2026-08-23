@@ -87,6 +87,13 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
   const [borrador, setBorrador] = useState('');
   const [nueva, setNueva] = useState({ igUserId: '', usuario: '', etiqueta: '', tokenEnv: 'IG_ACCESS_TOKEN' });
   const [destino, setDestino] = useState<string>('');
+  // El ritmo se edita en dos campos y se guarda de una: `null` hasta que llega
+  // el estado, y de ahí en más manda lo que hay escrito. Por eso el refresco
+  // automático de cada 15 s no lo pisa — escribir «12» y que se vuelva «5» a
+  // media edición es de las cosas más molestas que puede hacer una pantalla.
+  const [ritmo, setRitmo] = useState<{ porDia: string; horas: string } | null>(null);
+  const [cuantas, setCuantas] = useState('5');
+  const [destinoAhora, setDestinoAhora] = useState<string>('');
 
   const fail = useCallback((e: unknown) => {
     if (e instanceof AuthError) { onAuthError(); return; }
@@ -96,7 +103,9 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
   const refrescar = useCallback(async () => {
     try {
       const [e, c] = await Promise.all([adminGet('/api/admin/ig/estado'), adminGet('/api/admin/ig/cola')]);
-      setEstado(e as Estado);
+      const est = e as Estado;
+      setEstado(est);
+      setRitmo((r) => r ?? { porDia: String(est.ajustes.porDia), horas: est.ajustes.horas });
       setCola((c as { cola: Item[] }).cola);
       setErr('');
     } catch (e) { fail(e); }
@@ -120,6 +129,18 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
   if (!estado) return <p className="text-sm text-red-700">{err || 'No se pudo leer el estado.'}</p>;
 
   const { ajustes, resumen } = estado;
+  const forma = ritmo ?? { porDia: String(ajustes.porDia), horas: ajustes.horas };
+  // Las horas que de verdad valen. `agenda.parseHoras` en el servidor **recorta**
+  // la lista al número elegido, así que pedir 8 al día con cinco horas puestas
+  // sigue dando cinco: acá se dice antes de guardar, no después.
+  const horasValidas = forma.horas.split(',').map((h) => Number(h.trim()))
+    .filter((h) => Number.isInteger(h) && h >= 0 && h <= 23);
+  const horasUnicas = [...new Set(horasValidas)].length;
+  const horasRotas = forma.horas.split(',').some((h) => h.trim() === '') || horasValidas.length !== forma.horas.split(',').length;
+  const porDiaNum = Number(forma.porDia);
+  const ritmoTocado = forma.porDia !== String(ajustes.porDia) || forma.horas !== ajustes.horas;
+  const cuantasNum = Number(cuantas);
+  const cuantasOk = Number.isInteger(cuantasNum) && cuantasNum >= 1 && cuantasNum <= 25;
 
   return (
     <div className="space-y-8">
@@ -154,6 +175,62 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
             <code className="mx-1 break-all bg-black/5 px-1">instagram_content_publish</code>.
           </p>
         )}
+
+        {/* ── El ritmo: cuántas al día y a qué horas ──
+            Ya existía en la BD (`ig_settings.por_dia` / `horas`) y en el
+            endpoint; lo que faltaba era poder tocarlo sin un POST a mano. */}
+        <div className="mt-5 border-t border-border pt-5">
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label className={label} htmlFor="ig-por-dia">Publicaciones al día</label>
+              <select
+                id="ig-por-dia"
+                value={forma.porDia}
+                onChange={(e) => setRitmo({ ...forma, porDia: e.target.value })}
+                className={`${field} mt-1.5 w-auto`}
+              >
+                {/* Hasta 24: más de una por hora no cabe en la lista de horas,
+                    que es de horas enteras. */}
+                {Array.from({ length: 24 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={String(n)}>{n}</option>
+                ))}
+              </select>
+            </div>
+            <div className="min-w-[200px] flex-1">
+              <label className={label} htmlFor="ig-horas">¿A qué horas? (hora de Lima)</label>
+              <input
+                id="ig-horas"
+                value={forma.horas}
+                onChange={(e) => setRitmo({ ...forma, horas: e.target.value })}
+                placeholder="9,12,15,18,21"
+                className={`${field} mt-1.5 font-mono text-[12px]`}
+              />
+            </div>
+            <button
+              disabled={!ritmoTocado || horasRotas || !horasUnicas}
+              onClick={() => accion(async () => {
+                const r = await adminSend('/api/admin/ig/ajustes', 'POST', {
+                  porDia: porDiaNum, horas: forma.horas,
+                }) as { ajustes: { porDia: number; horas: string }; aviso?: string };
+                setRitmo({ porDia: String(r.ajustes.porDia), horas: r.ajustes.horas });
+                setAviso(r.aviso || `Guardado: ${r.ajustes.porDia} al día.`);
+              })}
+              className={boton}
+            >
+              Guardar el ritmo
+            </button>
+          </div>
+          <p className="mt-2 text-[12px] text-foreground/50">
+            {horasRotas
+              ? <span className="text-amber-800">Las horas son números de 0 a 23 separados por comas, p. ej. <code className="bg-black/5 px-1">9,12,15,18,21</code>.</span>
+              : horasUnicas < porDiaNum
+                ? <span className="text-amber-800">
+                    Con {horasUnicas} hora(s) en la lista solo van a salir {horasUnicas} al día, no {porDiaNum}.
+                    Agrega horas para llegar a {porDiaNum}.
+                  </span>
+                : <>Se usan las primeras {porDiaNum} horas de la lista. Cambia lo que se agenda de acá en adelante; lo que ya está en la cola conserva su hora.</>}
+          </p>
+        </div>
 
         <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
@@ -299,6 +376,67 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
       {/* ── La cola ── */}
       <section>
         <h3 className="mb-3 font-display text-xl italic text-ink-900">La cola ({cola.length})</h3>
+
+        {/* Adelantar una tanda. Es el `Publicar ya` de cada pieza, pero de a
+            varias: mueve la hora y las toma el vigía. Va con confirmación
+            porque es hacia afuera y no se deshace. */}
+        <div className="mb-4 flex flex-wrap items-end gap-3 border border-border p-4">
+          <div>
+            <label className={label} htmlFor="ig-cuantas">Publicar ahora las siguientes</label>
+            <input
+              id="ig-cuantas"
+              type="number"
+              min={1}
+              max={25}
+              value={cuantas}
+              onChange={(e) => setCuantas(e.target.value)}
+              className={`${field} mt-1.5 w-24`}
+            />
+          </div>
+          {/* Con una sola cuenta no hay nada que elegir; el selector aparece
+              cuando hay más de una, que es cuando «las siguientes» es ambiguo. */}
+          {estado.cuentas.length > 1 && (
+            <div>
+              <label className={label} htmlFor="ig-cuenta-ahora">¿De qué cuenta?</label>
+              <select
+                id="ig-cuenta-ahora"
+                value={destinoAhora}
+                onChange={(e) => setDestinoAhora(e.target.value)}
+                className={`${field} mt-1.5 w-auto`}
+              >
+                <option value="">Todas</option>
+                {estado.cuentas.map((c) => (
+                  <option key={c.id} value={c.id}>{c.usuario || c.ig_user_id}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button
+            disabled={!cuantasOk || !resumen.enCola}
+            onClick={() => {
+              if (!confirm(`¿Publicar ahora las ${cuantasNum} siguientes de la cola? Salen una por minuto y no se puede deshacer.`)) return;
+              accion(async () => {
+                const cuerpo = destinoAhora ? { cuantas: cuantasNum, cuentaId: destinoAhora } : { cuantas: cuantasNum };
+                const r = await adminSend('/api/admin/ig/publicar-ahora', 'POST', cuerpo) as
+                  { adelantadas: number; minutos: number; aviso?: string };
+                setAviso(r.aviso || (r.adelantadas
+                  ? `Adelantadas ${r.adelantadas}: salen una por minuto, unos ${r.minutos} min en total.`
+                  : 'No había nada en cola para adelantar.'));
+              });
+            }}
+            className={boton}
+          >
+            Publicar ahora
+          </button>
+          <span className="text-[12px] text-foreground/50">
+            {!resumen.enCola
+              ? 'No hay nada en cola.'
+              : !ajustes.activo
+                ? <span className="text-amber-800">El publicador está apagado: adelantarlas no las saca hasta que lo enciendas.</span>
+                : `Toma las primeras de la cola${destinoAhora ? ' de esa cuenta' : ''} y las manda a publicar de a una por minuto.`}
+          </span>
+        </div>
+
         {!cola.length && <p className="text-sm text-foreground/50">Vacía. Carga la galería para llenarla.</p>}
 
         <div className="space-y-3">

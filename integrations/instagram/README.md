@@ -56,9 +56,29 @@ Y después, **el interruptor del panel**. Arranca apagado y no lo enciende un
 deploy: publicar es hacia afuera y esa decisión es de una persona. Mientras está
 apagado la cola se llena y no sale nada.
 
+## El ritmo, y sacar una tanda ya
+
+Las dos cosas se manejan desde el panel, en la cabecera del publicador:
+
+- **Publicaciones al día** y **a qué horas** (`ig_settings.por_dia` / `horas`).
+  Cambia lo que se agende de ahí en adelante; lo que ya está en la cola conserva
+  su hora, que para eso cada pieza lleva la suya.
+- **Publicar ahora las N siguientes** — el `Publicar ya` de una pieza, pero de a
+  varias.
+
+Un detalle que se ve raro si no se sabe: `agenda.parseHoras` **recorta** la lista
+de horas al número elegido. Pedir 8 al día con cinco horas puestas sigue dando
+cinco, así que el panel avisa en vez de dejar el número mintiendo.
+
+Adelantar **no publica**: mueve la hora a ahora y las toma el vigía, una por
+vuelta —o sea una por minuto—. Ese camino es a propósito: sigue respetando el
+interruptor y el tope propio, y no es una puerta de atrás para publicar con el
+publicador apagado. Si algo de eso va a frenar la tanda, la respuesta lo dice.
+
 ## Los topes
 
-- **Cinco al día**, configurable, a las 9, 12, 15, 18 y 21 de Lima.
+- **Cinco al día** por defecto, configurable de 1 a 25 desde el panel, a las 9,
+  12, 15, 18 y 21 de Lima.
 - Meta permite **50 publicaciones cada 24 h** por cuenta; el panel muestra el
   consumo real (`content_publishing_limit`).
 - El vigía tiene además un tope propio del doble de lo configurado, para que un
