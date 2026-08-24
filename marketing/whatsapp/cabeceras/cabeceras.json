@@ -9,7 +9,8 @@
     "lienzo": [
       1200,
       628
-    ]
+    ],
+    "modo": "foto"
   },
   "boxsito_crespito": {
     "fondo": "#D5DADD",
@@ -21,7 +22,8 @@
     "lienzo": [
       1200,
       628
-    ]
+    ],
+    "modo": "foto"
   },
   "florero_forti": {
     "fondo": "#E5E8EB",
@@ -33,6 +35,33 @@
     "lienzo": [
       1200,
       628
-    ]
+    ],
+    "modo": "foto"
+  },
+  "orquideas_en_maceta": {
+    "fondo": "#DADFE2",
+    "foto": "orquidea-sunrise-de-dos-varas.jpg",
+    "foto_en_lienzo": [
+      625,
+      628
+    ],
+    "lienzo": [
+      1200,
+      628
+    ],
+    "modo": "foto"
+  },
+  "suscripcion_estacion": {
+    "fondo": "#FFFFFF",
+    "foto": "calados/ramo-estacion.webp",
+    "foto_en_lienzo": [
+      613,
+      554
+    ],
+    "lienzo": [
+      1200,
+      628
+    ],
+    "modo": "calado"
   }
 }

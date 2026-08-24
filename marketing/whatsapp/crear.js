@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 // Manda a revisión de Meta las plantillas de `plantillas.json`.
 //
-//   node marketing/whatsapp/crear.js            # las tres
+//   node marketing/whatsapp/crear.js            # todas
 //   node marketing/whatsapp/crear.js florero_forti
 //   node marketing/whatsapp/crear.js --revisar  # solo valida, no llama a Meta
 //   node marketing/whatsapp/crear.js --estado   # qué dice Meta de las que ya están
 //   node marketing/whatsapp/crear.js --waba=123 --app=456   # ids a mano
+//
+// El botón de cada plantilla lleva a un producto (`producto` en plantillas.json)
+// o a una ruta suelta del sitio (`ruta`): el catálogo filtrado por categoría, la
+// suscripción. Los dos destinos se comprueban contra su fuente antes de mandar
+// nada — el catálogo, las categorías y las rutas de App.tsx.
 //
 // Reusa `integrations/whatsapp/client.js`, que es el mismo cliente que usa el
 // panel. De dónde salen los ids, en este orden:
@@ -45,8 +50,51 @@ const CATALOGO = new Set(
   JSON.parse(fs.readFileSync(path.join(ROOT, 'db/products.seed.json'), 'utf8')).map((p) => p.id),
 );
 
+// Las categorías, por lo mismo: un `?cat=` con un slug que no existe no da 404,
+// deja el catálogo mostrando todo — se ve bien y no lleva a donde dice. El
+// catálogo en vivo sale de la base; este snapshot es el respaldo que la app trae
+// dentro, así que un slug que no esté acá ya es sospechoso.
+const CATEGORIAS = new Set(
+  JSON.parse(fs.readFileSync(path.join(ROOT, 'app/src/data/categories.json'), 'utf8')).map((c) => c.slug),
+);
+
+// Las rutas de la app, leídas de App.tsx en vez de copiadas: una plantilla vive
+// meses y las rutas se mueven. Las que llevan `:param` quedan fuera a propósito —
+// /producto/:id se valida contra el catálogo, que es más estricto.
+const RUTAS = new Set(
+  [...fs.readFileSync(path.join(ROOT, 'app/src/App.tsx'), 'utf8').matchAll(/path="([^"]+)"/g)]
+    .map((m) => m[1])
+    .filter((r) => r.startsWith('/') && !r.includes(':') && !r.includes('*')),
+);
+
+/**
+ * A dónde lleva el botón. Una plantilla apunta a un producto (`producto`) o a
+ * una ruta suelta del sitio (`ruta`): el catálogo filtrado, la suscripción.
+ */
 function urlDe(t) {
-  return datos.base + t.producto;
+  return t.producto ? datos.base + t.producto : datos.sitio + t.ruta;
+}
+
+/** Los problemas del destino del botón. Un enlace muerto se ve perfecto. */
+function revisarDestino(t) {
+  if (t.producto && t.ruta) return ['tiene `producto` y `ruta`: el botón lleva a un sitio solo'];
+  if (t.producto) {
+    return CATALOGO.has(t.producto)
+      ? []
+      : [`«${t.producto}» no existe en db/products.seed.json, el botón caería en un 404`];
+  }
+  if (!t.ruta) return ['sin `producto` ni `ruta`: el botón no lleva a ninguna parte'];
+  if (!datos.sitio) return ['la plantilla trae `ruta` y plantillas.json no tiene `sitio`'];
+  const malo = [];
+  if (!t.ruta.startsWith('/')) malo.push('la `ruta` tiene que empezar por «/»');
+  const [camino, query] = t.ruta.split('?');
+  if (!RUTAS.has(camino)) malo.push(`«${camino}» no es una ruta de app/src/App.tsx`);
+  const cat = new URLSearchParams(query || '').get('cat');
+  if (cat) {
+    const sueltos = cat.split(',').filter((c) => c && !CATEGORIAS.has(c));
+    if (sueltos.length) malo.push(`el filtro pide categorías que no existen: ${sueltos.join(', ')} (app/src/data/categories.json)`);
+  }
+  return malo;
 }
 
 /** Todo lo que se puede saber sin preguntarle a Meta. Devuelve los problemas. */
@@ -63,7 +111,7 @@ function revisar(t) {
   if (t.footer && t.footer.length > LIMITES.footer) malo.push(`el pie tiene ${t.footer.length} caracteres y el tope es ${LIMITES.footer}`);
   if (t.boton && t.boton.length > LIMITES.boton) malo.push(`el texto del botón tiene ${t.boton.length} y el tope es ${LIMITES.boton}`);
   if (url.length > LIMITES.url) malo.push('la URL pasa del tope');
-  if (!CATALOGO.has(t.producto)) malo.push(`«${t.producto}» no existe en db/products.seed.json, el botón caería en un 404`);
+  malo.push(...revisarDestino(t));
   const cab = path.join(HERE, 'cabeceras', `${t.name}.jpg`);
   if (!fs.existsSync(cab)) malo.push('falta la cabecera: corre `python3 marketing/whatsapp/cabeceras.py`');
   if (!Array.isArray(t.fuentes) || !t.fuentes.length) malo.push('sin tabla de fuentes: el copy tiene que poder citarse');
@@ -126,7 +174,7 @@ async function main() {
       console.error(`  ✗ ${t.name}`);
       for (const m of malo) console.error(`      ${m}`);
     } else {
-      console.log(`  ✓ ${t.name.padEnd(18)} cuerpo ${String(t.body.length).padStart(4)}/${LIMITES.body}`
+      console.log(`  ✓ ${t.name.padEnd(22)} cuerpo ${String(t.body.length).padStart(4)}/${LIMITES.body}`
         + `  pie ${String((t.footer || '').length).padStart(2)}/${LIMITES.footer}`
         + `  botón → ${urlDe(t)}`);
     }
@@ -149,7 +197,7 @@ async function main() {
     const enMeta = await wa.listTemplates(conexion);
     for (const t of lista) {
       const m = enMeta.find((x) => x.name === t.name);
-      console.log(`  ${t.name.padEnd(18)} ${m ? `${m.status}${m.rejected_reason && m.rejected_reason !== 'NONE' ? ` (${m.rejected_reason})` : ''}` : '— no está en Meta'}`);
+      console.log(`  ${t.name.padEnd(22)} ${m ? `${m.status}${m.rejected_reason && m.rejected_reason !== 'NONE' ? ` (${m.rejected_reason})` : ''}` : '— no está en Meta'}`);
     }
     return;
   }
@@ -180,7 +228,7 @@ async function main() {
       footerText: t.footer,
       buttons: [{ type: 'URL', text: t.boton, url: urlDe(t) }],
     });
-    console.log(`  → ${t.name.padEnd(18)} ${res.status}  id ${res.id}`);
+    console.log(`  → ${t.name.padEnd(22)} ${res.status}  id ${res.id}`);
   }
   console.log('\nMandadas a revisión. `node marketing/whatsapp/crear.js --estado` para ver en qué van.');
 }

@@ -22,8 +22,20 @@ unión no existe, porque el relleno arranca con los mismos píxeles que el borde
 
 Para que esa franja sea fondo y no producto, el recorte se hace al recuadro del
 producto **más un margen** que se toma del fondo que la toma ya traía alrededor
-(las tres tienen entre 5% y 20% por lado). Así el producto queda lo más grande
+(las cuatro tienen entre 5% y 20% por lado). Así el producto queda lo más grande
 que da el alto y los bordes siguen siendo ciclorama.
+
+**Y hay un segundo caso: el calado.** La suscripción no es un producto del
+catálogo y su foto es una entrega real sobre una banqueta —fondo de ambiente, no
+ciclorama—, así que ni el color de las esquinas ni el recuadro del producto
+significan nada ahí: estirar ese borde embarraría el piso de madera a lo ancho de
+la cabecera. Lo que sí existe es el calado que ya abre `/suscripcion`, el ramo
+recortado sobre transparencia. Cuando la foto trae canal alfa se compone sobre un
+lienzo liso (`fondo`, blanco por defecto, que es `--bg-page` del sistema): el
+producto entra entero y no hay filo de foto, así que tampoco hay recuadro.
+
+`photo` sin barra sale de `app/public/products`; con barra, de `app/public` — que
+es donde viven los calados.
 
     python3 marketing/whatsapp/cabeceras.py
 """
@@ -44,7 +56,43 @@ LIENZO = (1200, 628)
 TOLERANCIA = 26     # cuánto se puede alejar un píxel del fondo y seguir siéndolo
 AIRE = 0.04         # margen de fondo que se deja alrededor del producto
 FRANJA = 10         # ancho de la franja de borde que se estira para rellenar
+AIRE_CALADO = 0.06  # aire alrededor del calado, en fracción del alto del lienzo
+FONDO_CALADO = (255, 255, 255)   # --bg-page de design/direcciones/florencia.css
 MAX_BYTES = 5 * 1024 * 1024   # tope de Meta para el archivo de muestra
+
+
+def origen(photo):
+    """Dónde está la foto. Sin barra es una toma de catálogo; con barra, una ruta
+    dentro de `app/public` — así una cabecera puede salir de `calados/` o de
+    `suscripcion/` sin mover archivos ni duplicarlos."""
+    if '/' in photo:
+        return os.path.join(ROOT, 'app/public', photo)
+    return os.path.join(ORIG, photo)
+
+
+def tiene_alfa(im):
+    """¿Es un calado? Un PNG/WebP puede traer canal alfa y estar opaco entero."""
+    if im.mode not in ('RGBA', 'LA') and 'transparency' not in im.info:
+        return False
+    alfa = im.convert('RGBA').getchannel('A')
+    return alfa.getextrema()[0] < 250
+
+
+def compone_calado(im, lienzo_size, fondo):
+    """El calado, entero y centrado sobre un lienzo liso. No hay borde de foto que
+    empalmar —ese es todo el punto del calado—, así que acá no se estira nada."""
+    lw, lh = lienzo_size
+    im = im.convert('RGBA')
+    caja = im.getchannel('A').getbbox()      # el ramo, sin el aire transparente
+    if caja:
+        im = im.crop(caja)
+    margen = int(lh * AIRE_CALADO)
+    escala = min((lh - 2 * margen) / im.size[1], (lw - 2 * margen) / im.size[0])
+    foto = im.resize((max(1, round(im.size[0] * escala)),
+                      max(1, round(im.size[1] * escala))), Image.LANCZOS)
+    lienzo = Image.new('RGB', lienzo_size, fondo)
+    lienzo.paste(foto, ((lw - foto.size[0]) // 2, (lh - foto.size[1]) // 2), foto)
+    return lienzo, foto
 
 
 def color_fondo(im):
@@ -116,26 +164,33 @@ def main():
     lw, lh = LIENZO
 
     for t in datos['plantillas']:
-        im = Image.open(os.path.join(ORIG, t['photo'])).convert('RGB')
-        fondo = color_fondo(im)
-        caja = recuadro_producto(im, fondo)
-        if caja:
-            im = im.crop(recorte_con_aire(im, caja))
+        im = Image.open(origen(t['photo']))
+        modo = 'calado' if tiene_alfa(im) else 'foto'
 
-        # Se escala al alto del lienzo: así el producto queda lo más grande
-        # posible y arriba y abajo no hay relleno, o sea no hay unión que tapar.
-        escala = lh / im.size[1]
-        if im.size[0] * escala > lw:          # una toma apaisada: manda el ancho
-            escala = lw / im.size[0]
-        foto = im.resize((max(1, round(im.size[0] * escala)),
-                          max(1, round(im.size[1] * escala))), Image.LANCZOS)
-
-        if foto.size[1] < lh:                  # solo pasa con tomas apaisadas
-            marco = Image.new('RGB', LIENZO, fondo)
-            marco.paste(foto, ((lw - foto.size[0]) // 2, (lh - foto.size[1]) // 2))
-            lienzo = marco
+        if modo == 'calado':
+            fondo = FONDO_CALADO
+            lienzo, foto = compone_calado(im, LIENZO, fondo)
         else:
-            lienzo = rellena_lados(foto, LIENZO)
+            im = im.convert('RGB')
+            fondo = color_fondo(im)
+            caja = recuadro_producto(im, fondo)
+            if caja:
+                im = im.crop(recorte_con_aire(im, caja))
+
+            # Se escala al alto del lienzo: así el producto queda lo más grande
+            # posible y arriba y abajo no hay relleno, o sea no hay unión que tapar.
+            escala = lh / im.size[1]
+            if im.size[0] * escala > lw:          # una toma apaisada: manda el ancho
+                escala = lw / im.size[0]
+            foto = im.resize((max(1, round(im.size[0] * escala)),
+                              max(1, round(im.size[1] * escala))), Image.LANCZOS)
+
+            if foto.size[1] < lh:                  # solo pasa con tomas apaisadas
+                marco = Image.new('RGB', LIENZO, fondo)
+                marco.paste(foto, ((lw - foto.size[0]) // 2, (lh - foto.size[1]) // 2))
+                lienzo = marco
+            else:
+                lienzo = rellena_lados(foto, LIENZO)
 
         dst = os.path.join(OUT, f"{t['name']}.jpg")
         lienzo.save(dst, 'JPEG', quality=88, optimize=True)
@@ -147,11 +202,12 @@ def main():
 
         manifiesto[t['name']] = {
             'foto': t['photo'],
+            'modo': modo,
             'fondo': '#%02X%02X%02X' % fondo,
             'lienzo': list(LIENZO),
             'foto_en_lienzo': list(foto.size),
         }
-        print(f"  ✓ {t['name']:<18} {t['photo']:<22} fondo #%02X%02X%02X" % fondo
+        print(f"  ✓ {t['name']:<22} {t['photo']:<38} {modo:<6} fondo #%02X%02X%02X" % fondo
               + f"  foto {foto.size[0]}×{foto.size[1]} ({round(100 * foto.size[0] / lw)}% del ancho)"
               + f"  {peso // 1024} KB")
 
