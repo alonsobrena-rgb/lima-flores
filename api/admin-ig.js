@@ -13,6 +13,7 @@
 //   POST   /api/admin/ig/publicar-ahora         → { cuantas, cuentaId } adelanta las N siguientes
 //   PATCH  /api/admin/ig/cola/:id               → { caption, scheduledAt, status }
 //   POST   /api/admin/ig/cola/:id/publicar-ya   → la adelanta a ahora mismo
+//   POST   /api/admin/ig/cola/:id/reencolar     → otra copia, con el archivo de hoy
 //   DELETE /api/admin/ig/cola/:id               → la saca de la cola
 'use strict';
 
@@ -151,6 +152,48 @@ async function cargarGaleria(req, res) {
  */
 async function resincronizar(req, res) {
   return send(res, 200, await sincro.sincronizar());
+}
+
+/**
+ * Vuelve a encolar una pieza con el archivo que hay AHORA en el repo.
+ *
+ * Existe para el caso que el sincronizado no cubre y no debe cubrir: una pieza
+ * **ya publicada**. Su binario es el registro de lo que salió a Instagram y
+ * reescribirlo sería falsear el historial, así que `sincronizar.js` la salta.
+ * Pero si el creativo se arregló después de publicarlo —la banda de VID-01
+ * terminaba en una raya— hay que poder mandarlo otra vez.
+ *
+ * Se crea una fila NUEVA y la publicada se queda donde está, con su enlace a
+ * Instagram: es lo que pasó, y borrarlo no borra el post de allá. De Instagram
+ * el post viejo se quita a mano desde la app; por API no se puede.
+ */
+async function reencolar(req, res, id) {
+  const fila = await cola.obtener(id);
+  if (!fila) return send(res, 404, { error: 'no encontrada' });
+  if (!fila.origen || fila.origen === 'manual') {
+    return send(res, 400, { error: 'Esa pieza se subió a mano: no está en el repo, así que no hay de dónde volver a leerla.' });
+  }
+  const pieza = galeria.porCodigo().get(fila.origen);
+  if (!pieza) return send(res, 404, { error: `${fila.origen} ya no está en el repo.` });
+
+  // A continuación de lo que ya hay en esa cuenta, con su mismo ritmo.
+  const ajustes = await cola.ajustes();
+  const ultima = await cola.ultimaAgendada(fila.cuenta_id);
+  const desde = ultima && ultima > new Date() ? ultima : new Date();
+  const [hora] = agenda.proximasHoras(1, { desde, porDia: ajustes.por_dia, horas: ajustes.horas });
+
+  const nuevoId = await cola.encolar({
+    ...pieza, scheduledAt: hora, cuentaId: fila.cuenta_id,
+  });
+  return send(res, 201, {
+    id: nuevoId,
+    origen: fila.origen,
+    kind: pieza.kind,
+    bytes: pieza.media.length,
+    scheduledAt: hora,
+    yaPublicada: fila.status === 'published',
+    permalink: fila.permalink || null,
+  });
 }
 
 // ── Cuentas ──
@@ -315,10 +358,11 @@ module.exports = async (req, res, urlObj) => {
   if (p === '/api/admin/ig/ajustes' && req.method === 'POST') return guardarAjustes(req, res);
   if (p === '/api/admin/ig/publicar-ahora' && req.method === 'POST') return publicarAhora(req, res);
 
-  const m = p.match(/^\/api\/admin\/ig\/cola\/([a-f0-9]{6,32})(?:\/(publicar-ya))?$/);
+  const m = p.match(/^\/api\/admin\/ig\/cola\/([a-f0-9]{6,32})(?:\/(publicar-ya|reencolar))?$/);
   if (m) {
     const id = m[1];
     const accion = m[2];
+    if (accion === 'reencolar' && req.method === 'POST') return reencolar(req, res, id);
     if (accion === 'publicar-ya' && req.method === 'POST') {
       const fila = await cola.actualizar(id, { scheduledAt: new Date(), status: 'queued' });
       if (!fila) return send(res, 404, { error: 'no encontrada' });

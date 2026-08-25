@@ -53,6 +53,24 @@ Las reglas:
 - **Una pieza que ya no está en el repo se deja quieta** y se informa: puede ser
   un anuncio retirado que todavía se quiere publicar.
 
+### ¿Y si el creativo se arregló DESPUÉS de publicarlo?
+
+Para eso está **«Volver a encolar con el archivo de hoy»**, el botón que sale en
+las tarjetas ya publicadas (`POST /api/admin/ig/cola/:id/reencolar`).
+
+El sincronizado no toca una pieza publicada, y no debe: su binario es el
+registro de lo que salió. Pero VID-01 se publicó con la banda que terminaba en
+una raya, se arregló después, y hacía falta poder mandarlo otra vez. El botón
+crea una **fila nueva** con el archivo actual, agendada a continuación de la
+cola; la tarjeta publicada se queda donde está, con su enlace.
+
+Dos cosas que conviene tener claras:
+
+- **El post viejo no se borra de Instagram.** Por API no se puede: eso se hace a
+  mano desde la app. El botón solo prepara el nuevo.
+- **No sirve para una pieza subida a mano** (`origen = 'manual'`): no está en
+  ningún repo, así que no hay de dónde volver a leerla. El endpoint lo dice.
+
 Las dos vistas salen del mismo sitio: `integrations/instagram/galeria.js`
 (`porCodigo()`) y `marketing/ig-ads/galeria.py` leen los mismos archivos, y
 `galeria.py` revienta si alguna pieza de `ads.json` no cae en ningún producto —

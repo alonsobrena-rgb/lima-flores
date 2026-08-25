@@ -561,6 +561,34 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                   </div>
                 )}
 
+                {/* Una pieza ya publicada no se resincroniza nunca: su archivo
+                    es el registro de lo que salió. Pero si el creativo se
+                    arregló DESPUÉS de publicarlo, hay que poder mandarlo otra
+                    vez — eso es una copia nueva, no reescribir la vieja. */}
+                {it.status === 'published' && it.origen && it.origen !== 'manual' && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <button
+                      className={boton}
+                      onClick={() => {
+                        if (!confirm(`¿Encolar otra vez ${it.origen} con el archivo que hay ahora en el repo?\n\nEsta tarjeta se queda como historial. El post que ya salió NO se borra de Instagram: eso se hace a mano desde la app.`)) return;
+                        accion(async () => {
+                          const r = await adminSend(`/api/admin/ig/cola/${it.id}/reencolar`, 'POST') as {
+                            origen: string; kind: string; bytes: number; scheduledAt: string;
+                          };
+                          setAviso(`${r.origen} vuelve a la cola con el archivo de hoy (${Math.round(r.bytes / 1024)} kB), `
+                            + `para el ${enLima(r.scheduledAt)}. El post viejo sigue en Instagram: bórralo desde la app.`);
+                        });
+                      }}
+                    >
+                      Volver a encolar con el archivo de hoy
+                    </button>
+                    <p className="mt-2 max-w-xl text-[12px] leading-snug text-foreground/50">
+                      Para cuando el creativo se arregló después de publicarlo. Crea una copia nueva
+                      con el archivo actual del repo; esta tarjeta se queda como historial.
+                    </p>
+                  </div>
+                )}
+
                 {/* Una historia no lleva caption: el texto va dentro de la
                     pieza. Se sigue mostrando el copy del anuncio porque es de
                     donde sale, pero avisando que no se publica. */}
