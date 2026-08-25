@@ -16,12 +16,11 @@
 //   DELETE /api/admin/ig/cola/:id               → la saca de la cola
 'use strict';
 
-const crypto = require('crypto');
-
 const cola = require('../db/ig-queue-store');
 const publish = require('../integrations/instagram/publish');
 const agenda = require('../integrations/instagram/agenda');
 const galeria = require('../integrations/instagram/galeria');
+const sincro = require('../integrations/instagram/sincronizar');
 
 function send(res, code, payload) {
   res.statusCode = code;
@@ -144,63 +143,14 @@ async function cargarGaleria(req, res) {
 }
 
 /**
- * Vuelve a leer del repo las piezas que ya están en cola.
+ * El botón del panel. La lógica vive en `integrations/instagram/sincronizar.js`
+ * porque **la misma pasada corre sola en cada arranque**: dos copias del mismo
+ * criterio acabarían diciendo cosas distintas.
  *
- * La cola guarda una COPIA del binario, no una referencia: cuando se encoló
- * IG-25 se copió el JPEG de ese momento. Eso es lo correcto para publicar —una
- * pieza programada para el jueves tiene que sobrevivir a los deploys del
- * miércoles, y una subida a mano no está en ningún repo— pero significa que
- * rehacer un creativo NO alcanza: la galería pública cambia con el deploy y la
- * cola se queda con la foto vieja. Fue exactamente eso: el panel seguía
- * mostrando el VID-01 con la raya que ya se había arreglado.
- *
- * Acá se cierra el círculo. Se comparan por SHA-256, no por tamaño: un JPEG
- * reencodeado puede pesar lo mismo y ser otro.
+ * El botón sigue teniendo sentido para hacerlo ya, sin esperar a un deploy.
  */
 async function resincronizar(req, res) {
-  const repo = galeria.porCodigo();
-  const filas = await cola.pendientesDelRepo();
-
-  const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
-  const cambiadas = [];
-  const textos = [];
-  const tipos = [];
-  const huerfanas = [];
-
-  for (const fila of filas) {
-    const pieza = repo.get(fila.origen);
-    // Una pieza que ya no está en el repo se deja como está: puede ser un
-    // anuncio retirado que todavía se quiere publicar. Se informa y se decide
-    // desde el panel, que para eso está el botón de quitar.
-    if (!pieza) { huerfanas.push(fila.origen); continue; }
-
-    const distintoArchivo = sha(fila.media) !== sha(pieza.media);
-    const distintoTexto = !fila.caption_editado && fila.caption !== pieza.caption;
-    // El tipo va con el archivo: un creativo rehecho de 4:5 a 9:16 deja de ser
-    // post y pasa a historia, y publicarlo en el feed lo recorta Meta.
-    const distintoTipo = fila.kind !== pieza.kind;
-    if (!distintoArchivo && !distintoTexto && !distintoTipo) continue;
-
-    const ok = await cola.reemplazarMedia(fila.id, {
-      media: pieza.media,
-      mime: pieza.mime,
-      kind: distintoTipo ? pieza.kind : undefined,
-      caption: distintoTexto ? pieza.caption : undefined,
-    });
-    if (!ok) continue;                       // el vigía se la llevó a publicar
-    if (distintoArchivo) cambiadas.push(fila.origen);
-    if (distintoTexto) textos.push(fila.origen);
-    if (distintoTipo) tipos.push(`${fila.origen} → ${pieza.kind}`);
-  }
-
-  return send(res, 200, {
-    revisadas: filas.length,
-    archivos: cambiadas.length,
-    captions: textos.length,
-    tipos,
-    codigos: [...new Set([...cambiadas, ...textos])].sort(),
-    huerfanas: [...new Set(huerfanas)].sort(),
-  });
+  return send(res, 200, await sincro.sincronizar());
 }
 
 // ── Cuentas ──

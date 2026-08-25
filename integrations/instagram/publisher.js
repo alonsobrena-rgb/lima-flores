@@ -11,6 +11,7 @@
 const cola = require('../../db/ig-queue-store');
 const publish = require('./publish');
 const formato = require('./formato');
+const sincro = require('./sincronizar');
 const db = require('../../db');
 
 const CADA_MS = 60 * 1000;
@@ -96,7 +97,11 @@ function start() {
     })
     .catch(() => { /* sin base todavía: el vigía lo vuelve a mirar en cada vuelta */ });
 
-  repararFormatos().catch((e) => console.error('[ig] no pude revisar los formatos de la cola:', e.message));
+  // Primero poner la cola al día con el repo —el disco acaba de cambiar con el
+  // deploy— y después repasar formatos, que también cubre las subidas a mano.
+  sincro.alArrancar()
+    .then(() => repararFormatos())
+    .catch((e) => console.error('[ig] no pude revisar los formatos de la cola:', e.message));
   timer = setInterval(() => { vuelta().catch(() => {}); }, CADA_MS);
   timer.unref?.();
   console.log('[ig] publicador iniciado (revisa la cola cada minuto)');

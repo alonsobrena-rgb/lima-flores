@@ -326,6 +326,11 @@ CREATE INDEX IF NOT EXISTS ig_queue_agenda_idx ON ig_queue (status, scheduled_at
 -- siempre, pero el texto solo si nadie lo tocó a mano. Sin esta columna, apretar
 -- «volver a leer del repo» borraba en silencio un caption editado.
 ALTER TABLE ig_queue ADD COLUMN IF NOT EXISTS caption_editado BOOLEAN NOT NULL DEFAULT FALSE;
+-- El SHA-256 del binario. Existe para que el sincronizado con el repo, que corre
+-- en cada arranque, sepa qué cambió SIN traerse los blobs: son treinta y pico de
+-- piezas de medio mega y un MP4 de siete, por cuenta. Las filas anteriores lo
+-- tienen en NULL; se calcula la primera vez y queda guardado.
+ALTER TABLE ig_queue ADD COLUMN IF NOT EXISTS media_sha TEXT;
 
 -- Las cuentas de Instagram donde se publica. Se agregan desde el panel; el
 -- TOKEN NO SE GUARDA ACÁ: en la fila solo va el NOMBRE de la variable de entorno

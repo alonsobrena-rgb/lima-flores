@@ -411,7 +411,8 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
             pieza programada para el jueves sobrevive a los deploys del
             miércoles. El precio es que rehacer un creativo no basta: la galería
             pública cambia con el deploy y la cola se queda con la foto vieja.
-            Esto vuelve a leerlas. */}
+            Esto ya corre solo en cada arranque (`sincronizar.js`); el botón está
+            para no esperar al siguiente deploy. */}
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
           <button
             onClick={() => accion(async () => {
@@ -434,8 +435,9 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
           </button>
           <span className="max-w-xl text-[12.5px] leading-snug text-foreground/50">
             Reemplaza el archivo de lo que ya está en cola por el que hay ahora en el repo, para que
-            el panel y la galería pública muestren exactamente lo mismo. No toca lo ya publicado, ni
-            los captions que se hayan editado a mano acá.
+            el panel y la galería pública muestren exactamente lo mismo. <strong className="text-ink-900">Esto
+            ya pasa solo en cada despliegue</strong>; el botón es para hacerlo ahora. No toca lo ya
+            publicado, ni los captions que se hayan editado a mano acá.
           </span>
         </div>
       </section>
