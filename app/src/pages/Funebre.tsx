@@ -66,10 +66,10 @@ export default function Funebre() {
         >
           <div className="grid gap-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:items-start lg:gap-12">
             <p className="text-[17px] leading-relaxed text-ink-700">
-              Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir
-              a quien partió. Cada pieza se arma con flores frescas de la semana, incluye
-              tarjeta de dedicatoria y la entregamos en Lima. Estamos contigo en este
-              momento. Las imágenes son referenciales.
+              Coronas, lágrimas y boxes fúnebres hechos a mano para honrar y despedir
+              a quien partió. Cada pieza se arma con flores frescas, con el cuidado que
+              este momento exige. Incluye tarjeta con mensaje de despedida. Entregas en
+              Lima. Imágenes referenciales.
             </p>
             <a
               href="https://wa.me/51999479855"
