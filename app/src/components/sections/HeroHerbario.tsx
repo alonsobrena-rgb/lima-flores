@@ -90,8 +90,8 @@ export const HeroHerbario = () => (
           transition={{ duration: 0.9, ease }}
           className="display mb-[9vh] mt-[2vh] flex flex-col justify-between text-[clamp(3.3rem,12.6vw,145px)] leading-[0.88] text-ink-900 lg:mb-[10vh] lg:mt-auto lg:block lg:text-[clamp(2.9rem,9vw,150px)] lg:leading-[0.94]"
         >
-          <span className="block text-left">Llega mañana.</span>
-          <em className="mt-[27vh] block text-right lg:mt-0">Se queda <br className="lg:hidden" />meses.</em>
+          <span className="block text-left">Las flores más lindas</span>
+          <em className="mt-[27vh] block text-right lg:mt-0">están <br className="lg:hidden" />aquí.</em>
         </motion.h1>
       </div>
 
