@@ -61,7 +61,7 @@ export default function Funebre() {
           }
           foto="/calados/corona-eternidad.webp"
           alt="Corona Eternidad: corona fúnebre de liliums, gerberas, rosas y hortensias blancas sobre trípode"
-          medida="w-[58vw] max-w-[280px] lg:h-[58vh] lg:max-h-[600px] lg:w-auto"
+          medida="w-[58vw] max-w-[280px] lg:h-[40vh] lg:max-h-[320px] lg:w-auto"
           hueco="pb-[40vh]"
         >
           <div className="grid gap-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:items-start lg:gap-12">
