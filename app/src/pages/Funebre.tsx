@@ -61,15 +61,15 @@ export default function Funebre() {
           }
           foto="/calados/corona-eternidad.webp"
           alt="Corona Eternidad: corona fúnebre de liliums, gerberas, rosas y hortensias blancas sobre trípode"
-          medida="w-[58vw] max-w-[280px] lg:h-[58vh] lg:max-h-[600px] lg:w-auto"
+          medida="w-[58vw] max-w-[280px] lg:h-[40vh] lg:max-h-[320px] lg:w-auto"
           hueco="pb-[40vh]"
         >
           <div className="grid gap-8 lg:grid-cols-[minmax(0,52ch)_auto] lg:items-start lg:gap-12">
             <p className="text-[17px] leading-relaxed text-ink-700">
-              Coronas, lágrimas y arreglos fúnebres hechos a mano para honrar y despedir
-              a quien partió. Cada pieza se arma con flores frescas de la semana, incluye
-              tarjeta de dedicatoria y la entregamos en Lima. Estamos contigo en este
-              momento. Las imágenes son referenciales.
+              Coronas, lágrimas y boxes fúnebres hechos a mano para honrar y despedir
+              a quien partió. Cada pieza se arma con flores frescas, con el cuidado que
+              este momento exige. Incluye tarjeta con mensaje de despedida. Entregas en
+              Lima. Imágenes referenciales.
             </p>
             <a
               href="https://wa.me/51999479855"
