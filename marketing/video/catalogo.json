@@ -1,0 +1,115 @@
+{
+  "campaign": {
+    "brand": "Lima Flores",
+    "handle": "@lima_flores",
+    "note": "Un solo Reel-catálogo: recorre la especialidad (orquídeas) y el resto de la carta —arreglos con rosas, box de rosas, tulipanes en florero, ramo y la suscripción— cada uno con su nombre y su precio, tal como están en db/products.seed.json y app/src/data/plans.ts. Nada de video de estudio para esto: son fotos reales del catálogo animadas con un Ken Burns suave, igual que produce marketing/video/build-catalogo.mjs."
+  },
+  "intro": {
+    "headline": "Llega mañana. <em>Se queda meses.</em>",
+    "sub": "Entrega en Lima Metropolitana",
+    "duration": 1.6
+  },
+  "items": [
+    {
+      "code": "orquideas",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Orquídea Sunrise de dos varas",
+      "price": "S/ 215",
+      "image": "app/public/products/orquidea-sunrise-de-dos-varas.jpg",
+      "crop": [
+        528,
+        150,
+        1351,
+        2190
+      ],
+      "fondo": "#EBEFF3",
+      "fit": "contain",
+      "hlSize": 66,
+      "duration": 2.4
+    },
+    {
+      "code": "arreglos",
+      "tag": "ARREGLOS CON ROSAS",
+      "name": "Arreglo Andrea",
+      "price": "S/ 165",
+      "image": "app/public/products/arreglo-andrea.jpg",
+      "crop": [
+        236,
+        674,
+        1576,
+        1519
+      ],
+      "fondo": "#EAECEE",
+      "fit": "contain",
+      "hlSize": 92,
+      "duration": 2.4
+    },
+    {
+      "code": "boxes",
+      "tag": "BOX DE ROSAS",
+      "name": "Box Rogelia",
+      "price": "S/ 210",
+      "image": "app/public/products/box-rogelia.jpg",
+      "crop": [
+        200,
+        412,
+        1468,
+        1756
+      ],
+      "fondo": "#DDE1E5",
+      "fit": "contain",
+      "hlSize": 96,
+      "duration": 2.4
+    },
+    {
+      "code": "tulipanes",
+      "tag": "TULIPANES EN FLORERO",
+      "name": "Florero de 10 tulipanes",
+      "price": "S/ 195",
+      "image": "app/public/products/florero-de-10-tulipanes-2-3.jpg",
+      "crop": [
+        68,
+        232,
+        2437,
+        1930
+      ],
+      "fondo": "#F5F3F5",
+      "fit": "contain",
+      "hlSize": 74,
+      "duration": 2.4
+    },
+    {
+      "code": "ramo",
+      "tag": "RAMO",
+      "name": "Ramo de rosas con papel de estrellas",
+      "price": "S/ 190",
+      "image": "app/public/products/ramo-de-24-rosas-con-papel-de-estrellas.jpg",
+      "crop": [
+        630,
+        28,
+        1287,
+        1621
+      ],
+      "fondo": "#FFFFFF",
+      "fit": "contain",
+      "hlSize": 56,
+      "duration": 2.4
+    },
+    {
+      "code": "suscripcion",
+      "tag": "SUSCRIPCIÓN · CADA 15 DÍAS",
+      "name": "Flores nuevas en tu casa",
+      "price": "S/ 130 al mes",
+      "image": "app/public/suscripcion/estacion-1.webp",
+      "fit": "cover",
+      "hlSize": 72,
+      "duration": 2.6
+    }
+  ],
+  "cierre": {
+    "headline": "Escríbenos <em>y arma tu ramo.</em>",
+    "sub": "Lima Metropolitana · entrega al día siguiente",
+    "footer": "@lima_flores",
+    "duration": 2.6
+  }
+}

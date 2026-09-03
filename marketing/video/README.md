@@ -101,3 +101,50 @@ fotograma del medio y la placa final, no solo el primero.
 | Código | Producto | Embudo | Titular |
 |---|---|---|---|
 | `VID-01` | Boxsito Crespito · S/180 | Frío | Osito, globo y mini rosas |
+
+## El catálogo (`build-catalogo.mjs`)
+
+`VID-01` es una toma real por producto. Para vender la carta entera —no un solo
+arreglo— no hay toma de video de cada línea (orquídeas, arreglos con rosas, box
+de rosas, tulipanes en florero, ramo, suscripción), así que `build-catalogo.mjs`
+arma un Reel aparte a partir de `catalogo.json`, con estas diferencias:
+
+- **La toma es la foto de catálogo, no un clip.** Nunca una foto generada: la
+  regla de `piezas-graficas/SKILL.md` sigue siendo "el catálogo es fotografía
+  real". El movimiento sale de un Ken Burns propio (zoom lento y parejo al
+  centro, `zoompan` de ffmpeg) sobre esa foto.
+- **Cada foto de producto se recorta a mano al bulto real** (campo `crop` en
+  `catalogo.json`, en píxeles del archivo original) antes de entrar a la caja
+  del video. La toma de estudio trae mucho fondo de sobra alrededor de un
+  objeto angosto y alto —una maceta de orquídea, un ramo envuelto—, y sin
+  achicar ese sobrante el producto sale chico aunque la caja de destino sea
+  grande. El recorte se mira uno por uno, igual que cualquier pieza: un bbox
+  calculado solo (se probó y se descartó) corta producto por error, que es
+  justo lo que prohíbe la regla 1.
+- **El color de relleno se mide en el borde de la foto YA recortada**, no en
+  la esquina de la foto original ni en `fotos/encuadres.json` de los
+  creativos fijos: esos números vienen de un recorte distinto y, si se
+  reusan tal cual, dejan un rectángulo visible —el fondo de estudio tiene
+  viñeta, así que el color en una esquina lejana no es el color en el borde
+  real que toca el relleno—. Se mide con `ffmpeg ... crop=…,scale=1:1` sobre
+  el archivo ya recortado, en una tira ancha lejos de las esquinas.
+- **Un solo tramo es foto de ambiente, no de estudio**: la suscripción usa
+  `app/public/suscripcion/estacion-1.webp`, una toma de la flor ya en una
+  casa. Ahí el recorte a sangre (`cover`) es el punto —la excepción que ya
+  contempla la regla 1—, y por eso es el único tramo con velo detrás del
+  texto: el resto se apoya en el propio color de fondo medido, sin velo,
+  porque ahí abajo no hay foto, hay el color plano de la página.
+- **El rótulo tiene que entrar en bucle** (`-loop 1 -t <segundos>`) igual que
+  en `build.mjs`: una imagen suelta es un solo fotograma para ffmpeg, y el
+  fundido de entrada no tiene sobre qué animar —se queda congelado en el alfa
+  de ese único cuadro y el texto nunca aparece. Ya estaba anotado en
+  `build.mjs`; acá se repitió el mismo bug al escribirlo de nuevo.
+
+```sh
+node marketing/video/build-catalogo.mjs
+```
+
+Sale como `creativos/VID-CATALOGO.mp4`. Nombre, precio y el dato de la
+suscripción (S/130 al mes, cada 15 días) salen de `db/products.seed.json` y de
+`app/src/data/plans.ts`; el titular de la intro es el mismo del hero del sitio
+("Llega mañana. Se queda meses."), no uno nuevo.
