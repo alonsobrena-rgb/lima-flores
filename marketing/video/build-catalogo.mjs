@@ -39,7 +39,15 @@ const TOKENS = Object.fromEntries(
 const C = {
   fondo: TOKENS['--bg-page'], ink: TOKENS['--text-strong'],
   body: TOKENS['--text-body'], muted: TOKENS['--text-muted'], rosa: TOKENS['--accent'],
+  verde: TOKENS['--leaf'],   // el verde del propio ramo del logotipo, no uno inventado
 };
+
+/* ── el marco: mismas coordenadas que la caja de la foto (ver fotoContenida),
+   para que el borde quede pegado a la foto y no suelto en el aire ── */
+const CAJA_TOP = SEGURO + 84 + 36;   // debajo del logo
+const CAJA_ALTO = 780;               // deja margen antes del bloque de texto
+const CAJA_MARGEN = 50;              // izquierda/derecha
+const MARCO_PAD = 20;                // aire entre la foto y el filete
 
 /* ── velos: la misma smoothstep de build.mjs, para el único tramo (la
    suscripción) que va a foto de ambiente en vez de contenedor plano ── */
@@ -137,6 +145,9 @@ function rotulo(item, { veil = false } = {}) {
   <p class="d" style="font-size:60px;font-weight:400;margin-top:22px">${item.price}</p>
 </div>`;
   return pagina(`
+${veil ? '' : `<div style="position:absolute;top:${CAJA_TOP - MARCO_PAD}px;left:${CAJA_MARGEN - MARCO_PAD}px;
+     right:${CAJA_MARGEN - MARCO_PAD}px;height:${CAJA_ALTO + MARCO_PAD * 2}px;
+     border:3px solid ${C.verde}"></div>`}
 <div style="position:absolute;top:${SEGURO}px;left:76px">
   <img src="${MARCA.logo}" style="height:84px;display:block">
 </div>
@@ -174,10 +185,8 @@ function recorte(item) {
     gris inventado. */
 function fotoContenida(item) {
   const src = `data:image/jpeg;base64,${fs.readFileSync(recorte(item)).toString('base64')}`;
-  const cajaTop = SEGURO + 84 + 36;   // debajo del logo
-  const cajaAlto = 780;               // deja margen antes del bloque de texto
   return pagina(`
-<div style="position:absolute;top:${cajaTop}px;left:50px;right:50px;height:${cajaAlto}px;
+<div style="position:absolute;top:${CAJA_TOP}px;left:${CAJA_MARGEN}px;right:${CAJA_MARGEN}px;height:${CAJA_ALTO}px;
      display:flex;align-items:center;justify-content:center">
   <img src="${src}" style="max-width:100%;max-height:100%;display:block">
 </div>`, item.fondo);
