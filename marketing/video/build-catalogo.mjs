@@ -143,7 +143,7 @@ function musica(segundos) {
 function rotulo(item, { veil = false } = {}) {
   const bloque = `
 <div style="position:relative;padding:0 76px">
-  <p class="mono" style="font-size:24px;color:${C.rosa}">${item.tag}</p>
+  <p class="mono" style="font-size:30px;color:${C.rosa}">${item.tag}</p>
   <h1 class="d" style="font-size:${item.hlSize}px;margin-top:14px">${item.name}</h1>
   <p class="d" style="font-size:60px;font-weight:400;margin-top:22px">${item.price}</p>
 </div>`;
@@ -198,14 +198,15 @@ function fotoContenida(item) {
 
 /** Placa estática: logo, titular y bajada. Usada en la intro y en el cierre —
     las dos pantallas del video que no son una foto de producto. */
-function placa({ headline, sub, footer }) {
+function placa({ headline, sub, contacto, footer }) {
   return pagina(`
-<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px">
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px">
   <img src="${MARCA.logo}" style="height:150px;display:block">
   <div style="text-align:center;padding:0 90px">
     <h1 class="d" style="font-size:72px">${headline}</h1>
     ${sub ? `<p style="font-size:30px;font-weight:300;color:${C.body};margin-top:24px">${sub}</p>` : ''}
   </div>
+  ${contacto ? `<p class="d" style="font-size:38px">${contacto}</p>` : ''}
   ${footer ? `<span class="mono" style="font-size:17px;color:${C.muted}">${footer}</span>` : ''}
 </div>`, C.fondo);
 }
