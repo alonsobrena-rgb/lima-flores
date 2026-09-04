@@ -128,23 +128,46 @@ arma un Reel aparte a partir de `catalogo.json`, con estas diferencias:
   viñeta, así que el color en una esquina lejana no es el color en el borde
   real que toca el relleno—. Se mide con `ffmpeg ... crop=…,scale=1:1` sobre
   el archivo ya recortado, en una tira ancha lejos de las esquinas.
-- **Un solo tramo es foto de ambiente, no de estudio**: la suscripción usa
-  `app/public/suscripcion/estacion-1.webp`, una toma de la flor ya en una
-  casa. Ahí el recorte a sangre (`cover`) es el punto —la excepción que ya
-  contempla la regla 1—, y por eso es el único tramo con velo detrás del
-  texto: el resto se apoya en el propio color de fondo medido, sin velo,
-  porque ahí abajo no hay foto, hay el color plano de la página.
+- **Tres tipos de toma por `item.fit`**: `"contain"` (foto de estudio, fondo
+  plano, sin velo —el caso de arriba), `"cover"` (foto de ambiente a sangre,
+  con velo detrás del texto: la suscripción y varias fotos de orquídeas que
+  mandó el cliente, tomadas en su casa, no en estudio) y `"video"` (un clip
+  real del cliente, escalado y recortado a sangre igual que `cover` pero sin
+  Ken Burns encima —ya se mueve solo, y sumarle zoom es mover lo que ya se
+  mueve—). `cover` y `video` son la excepción que ya contempla la regla 1:
+  el recorte a sangre vale cuando la foto ES de ambiente, no de un objeto
+  sobre ciclorama.
 - **El rótulo tiene que entrar en bucle** (`-loop 1 -t <segundos>`) igual que
   en `build.mjs`: una imagen suelta es un solo fotograma para ffmpeg, y el
   fundido de entrada no tiene sobre qué animar —se queda congelado en el alfa
   de ese único cuadro y el texto nunca aparece. Ya estaba anotado en
   `build.mjs`; acá se repitió el mismo bug al escribirlo de nuevo.
+- **El velo lleva smoothstep en las dos puntas, no solo en la de abajo.** La
+  primera versión metía la subida como un corte duro (`transparent,
+  transparent 190px, rgba(...)`) en vez de la curva `sube()` de `build.mjs`,
+  y el rótulo que cae cerca de esa unión —la etiqueta de categoría, arriba
+  del titular— salía sobre una franja que todavía no había terminado de
+  aclarar. Con `sube(150,.94)` en la punta de arriba y `baja(170,.94)` en la
+  de abajo, igual que el rótulo de una sola toma, el texto entero cae sobre
+  blanco ya resuelto.
+- **El marco fino (`MARCO_PAD`, 3px en `--leaf`, el verde del propio ramo del
+  logotipo) va pegado a la caja de la foto** en los tramos `contain`, y se
+  omite en `cover`/`video`: puesto sobre una foto a sangre no tiene fondo
+  plano donde apoyarse y termina cruzando el producto, que es la misma banda
+  inventada que prohíbe la regla del logotipo.
+- **Las fotos y videos que manda el cliente por WhatsApp** —no son parte del
+  catálogo del sitio, así que no viven en `app/public/products/`— se guardan
+  en `marketing/video/fotos-cliente/`, con nombre descriptivo en vez del
+  nombre de WhatsApp. Antes de sumar una a `catalogo.json` hay que tener
+  nombre y precio confirmados por el cliente: una foto sin esos dos datos no
+  entra al video, por más que ya esté en el repo.
 
 ```sh
 node marketing/video/build-catalogo.mjs
 ```
 
 Sale como `creativos/VID-CATALOGO.mp4`. Nombre, precio y el dato de la
-suscripción (S/130 al mes, cada 15 días) salen de `db/products.seed.json` y de
-`app/src/data/plans.ts`; el titular de la intro es el mismo del hero del sitio
-("Llega mañana. Se queda meses."), no uno nuevo.
+suscripción (S/130 al mes, cada 15 días) salen de `db/products.seed.json`, de
+`app/src/data/plans.ts` o directamente del cliente cuando el producto es nuevo
+y todavía no está publicado en la tienda; el titular de la intro es el mismo
+del hero del sitio ("Llega mañana. Se queda meses."), no uno nuevo.

@@ -28,6 +28,82 @@
       "duration": 2.4
     },
     {
+      "code": "orq-amarillas-lineas",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Orquídeas amarillas con líneas fucsias",
+      "price": "S/ 190",
+      "image": "app/public/products/orquideas-amarillas-con-lineas-fucsias.jpg",
+      "crop": [40, 60, 2380, 2320],
+      "fondo": "#E7E6E6",
+      "fit": "contain",
+      "hlSize": 48,
+      "duration": 2.1
+    },
+    {
+      "code": "orq-amarilla-centro",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Orquídea amarilla centro fucsia",
+      "price": "S/ 200",
+      "image": "app/public/products/orquidea-amarilla-centro-fucsia.jpg",
+      "crop": [150, 60, 1550, 2450],
+      "fondo": "#F3F2EC",
+      "fit": "contain",
+      "hlSize": 54,
+      "duration": 2.1
+    },
+    {
+      "code": "orq-fucsia-dos-varas",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Orquídea Phalaenopsis fucsia de dos varas",
+      "price": "S/ 200",
+      "image": "marketing/video/fotos-cliente/orquidea-fucsia-de-dos-varas.jpeg",
+      "fit": "cover",
+      "hlSize": 42,
+      "duration": 2.1
+    },
+    {
+      "code": "orq-blanca-puntos",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Orquídea Blanca con puntos fucsia",
+      "price": "S/ 190",
+      "video": "marketing/video/fotos-cliente/orquidea-blanca-puntos-fucsia.mp4",
+      "videoStart": 0.3,
+      "fit": "video",
+      "hlSize": 50,
+      "duration": 2.1
+    },
+    {
+      "code": "orq-rosada-blanco",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Phalaenopsis rosada con blanco de dos varas",
+      "price": "S/ 200",
+      "image": "marketing/video/fotos-cliente/orquidea-blanca-dos-varas.jpeg",
+      "fit": "cover",
+      "hlSize": 38,
+      "duration": 2.1
+    },
+    {
+      "code": "orq-blanca-lisa",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Phalaenopsis Blanca de una vara",
+      "price": "S/ 190",
+      "image": "marketing/video/fotos-cliente/orquidea-blanca-lisa.jpeg",
+      "fit": "cover",
+      "hlSize": 50,
+      "duration": 2.1
+    },
+    {
+      "code": "orq-durazno",
+      "tag": "ORQUÍDEAS · NUESTRA ESPECIALIDAD",
+      "name": "Phalaenopsis de una vara color salmón",
+      "price": "S/ 190",
+      "video": "marketing/video/fotos-cliente/orquidea-durazno.mp4",
+      "videoStart": 0.3,
+      "fit": "video",
+      "hlSize": 44,
+      "duration": 2.1
+    },
+    {
       "code": "arreglos",
       "tag": "ARREGLOS CON ROSAS",
       "name": "Arreglo Andrea",

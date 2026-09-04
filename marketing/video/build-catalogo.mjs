@@ -56,6 +56,9 @@ const PASOS = [[0, 1], [12, .972], [24, .896], [36, .776], [48, .62], [60, .448]
 const baja = (largo, alfa) => PASOS
   .map(([p, a]) => `rgba(255,255,255,${(a * alfa).toFixed(3)}) calc(100% - ${(largo - p * largo / 100).toFixed(1)}px)`)
   .join(',');
+const sube = (largo, alfa) => PASOS
+  .map(([p, a]) => `rgba(255,255,255,${((1 - a) * alfa).toFixed(3)}) ${(p * largo / 100).toFixed(1)}px`)
+  .join(',');
 
 const MARCA = Object.fromEntries(['logo', 'logo-claro'].map((n) => [
   n, `data:image/png;base64,${fs.readFileSync(path.join(ADS, 'marca', `${n}.png`)).toString('base64')}`,
@@ -152,8 +155,9 @@ ${veil ? '' : `<div style="position:absolute;top:${CAJA_TOP - MARCO_PAD}px;left:
   <img src="${MARCA.logo}" style="height:84px;display:block">
 </div>
 <div style="position:absolute;left:0;right:0;bottom:${SEGURO}px">
-  ${veil ? `<div style="position:absolute;left:0;right:0;top:-190px;bottom:-170px;
-       background:linear-gradient(to bottom,transparent,transparent 190px,
+  ${veil ? `<div style="position:absolute;left:0;right:0;top:-150px;bottom:-170px;
+       background:linear-gradient(to bottom,${sube(150, .94)},
+         rgba(255,255,255,.94) 150px,
          rgba(255,255,255,.94) calc(100% - 170px),${baja(170, .94)})"></div>` : ''}
   ${bloque}
 </div>`, 'transparent');
@@ -273,7 +277,18 @@ function main() {
     const rot = path.join(TMP, `item-${i}-rotulo.png`);
     const final = path.join(TMP, `item-${i}-final.mp4`);
 
-    if (item.fit === 'cover') {
+    if (item.fit === 'video') {
+      // Video real del cliente: ya se mueve solo, así que nada de Ken Burns
+      // encima —sería mover lo que ya se mueve—. Mismo encuadre a sangre y
+      // mismo velo que una foto de ambiente, porque es exactamente eso.
+      execFileSync('ffmpeg', [
+        '-y', '-v', 'error', '-ss', String(item.videoStart || 0), '-i', path.join(ROOT, item.video),
+        '-t', String(item.duration),
+        '-vf', `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},fps=${FPS},setsar=1`,
+        '-an', toma,
+      ], { stdio: 'pipe' });
+      png(rotulo(item, { veil: true }), rot);
+    } else if (item.fit === 'cover') {
       // La única foto de ambiente: el recorte es el punto (rule 1, excepción
       // explícita), así que va a sangre y con velo detrás del texto.
       const original = path.join(ROOT, item.image);
