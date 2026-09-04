@@ -34,8 +34,9 @@ const C = {
   verde: TOKENS['--leaf'],
 };
 
-const CAJA_TOP = SEGURO + 84 + 36;
-const CAJA_ALTO = 780;
+const LOGO_H = 150;                        // más grande que en los tramos de producto: acá es portada
+const CAJA_TOP = SEGURO + LOGO_H + 32;
+const CAJA_ALTO = 700;
 const CAJA_MARGEN = 50;
 const MARCO_PAD = 20;
 
@@ -126,11 +127,12 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
      right:${CAJA_MARGEN - MARCO_PAD}px;height:${CAJA_ALTO + MARCO_PAD * 2}px;
      border:3px solid ${C.verde}"></div>
 <div style="position:absolute;top:${SEGURO}px;left:76px">
-  <img src="${MARCA}" style="height:84px;display:block">
+  <img src="${MARCA}" style="height:${LOGO_H}px;display:block">
 </div>
 <div style="position:absolute;left:0;right:0;bottom:${SEGURO}px;padding:0 76px">
   <p class="mono" style="font-size:22px;color:${C.rosa}">COLECCIÓN LIMA FLORES</p>
   <h1 class="d" style="font-size:88px;margin-top:14px">Primavera 2026</h1>
+  <p class="mono" style="font-size:24px;color:${C.muted};margin-top:26px">999 479 855 · DELIVERY</p>
 </div>
 </div></body></html>`;
 
