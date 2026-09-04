@@ -132,7 +132,7 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
 <div style="position:absolute;left:0;right:0;bottom:${SEGURO}px;padding:0 76px">
   <p class="mono" style="font-size:22px;color:${C.rosa}">COLECCIÓN LIMA FLORES</p>
   <h1 class="d" style="font-size:88px;margin-top:14px">Primavera 2026</h1>
-  <p class="mono" style="font-size:24px;color:${C.muted};margin-top:26px">999 479 855 · DELIVERY</p>
+  <p class="d" style="font-size:44px;margin-top:26px">999 479 855 <span class="mono" style="font-size:22px;color:${C.muted};letter-spacing:.2em">· DELIVERY</span></p>
 </div>
 </div></body></html>`;
 
