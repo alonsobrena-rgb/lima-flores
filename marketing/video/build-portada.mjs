@@ -126,6 +126,16 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
 <div style="position:absolute;top:${CAJA_TOP - MARCO_PAD}px;left:${CAJA_MARGEN - MARCO_PAD}px;
      right:${CAJA_MARGEN - MARCO_PAD}px;height:${CAJA_ALTO + MARCO_PAD * 2}px;
      border:3px solid ${C.verde}"></div>
+<!-- El sello: se apoya en la esquina del marco, como un timbre sobre un
+     sobre —no flota suelto en medio de la foto—, y es rosa acento, el único
+     color nuevo que la regla del sistema permite: el que ya manda en el
+     titular. -->
+<div style="position:absolute;top:${CAJA_TOP - MARCO_PAD - 92}px;right:20px;
+     width:184px;height:184px;border-radius:50%;background:${C.rosa};
+     transform:rotate(-10deg);display:flex;align-items:center;justify-content:center;
+     box-shadow:0 8px 24px rgba(0,0,0,.18)">
+  <p class="mono" style="font-size:26px;line-height:1.35;color:#fff;text-align:center">ORDENA<br>AHORA</p>
+</div>
 <div style="position:absolute;top:${SEGURO}px;left:76px">
   <img src="${MARCA}" style="height:${LOGO_H}px;display:block">
 </div>
