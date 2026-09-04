@@ -4,6 +4,10 @@
     "handle": "@lima_flores",
     "note": "Un solo Reel-catálogo: recorre la especialidad (orquídeas) y el resto de la carta —arreglos con rosas, box de rosas, tulipanes en florero, ramo y la suscripción— cada uno con su nombre y su precio, tal como están en db/products.seed.json y app/src/data/plans.ts. Nada de video de estudio para esto: son fotos reales del catálogo animadas con un Ken Burns suave, igual que produce marketing/video/build-catalogo.mjs."
   },
+  "portada": {
+    "image": "marketing/video/creativos/VID-CATALOGO-portada.jpg",
+    "duration": 2.2
+  },
   "intro": {
     "headline": "Llega mañana. <em>Se queda meses.</em>",
     "sub": "Entrega en Lima Metropolitana",
@@ -70,7 +74,7 @@
       "videoStart": 0.3,
       "fit": "video",
       "hlSize": 50,
-      "duration": 2.1
+      "duration": 4.1
     },
     {
       "code": "orq-rosada-blanco",
@@ -80,7 +84,7 @@
       "image": "marketing/video/fotos-cliente/orquidea-blanca-dos-varas.jpeg",
       "fit": "cover",
       "hlSize": 38,
-      "duration": 2.1
+      "duration": 4.1
     },
     {
       "code": "orq-blanca-lisa",

@@ -263,6 +263,16 @@ function main() {
   const data = JSON.parse(fs.readFileSync(path.join(HERE, 'catalogo.json'), 'utf8'));
   const clips = [];
 
+  // 0) Portada: la misma carátula que se sube como miniatura del Reel
+  // (build-portada.mjs), puesta también como primer fotograma del video —
+  // así el que lo ve dentro de Instagram, sin miniatura de por medio, la ve
+  // igual.
+  if (data.portada) {
+    const portadaMp4 = path.join(TMP, 'portada.mp4');
+    estatico(path.join(ROOT, data.portada.image), portadaMp4, data.portada.duration);
+    clips.push(portadaMp4);
+  }
+
   // 1) Intro: la misma promesa del hero del sitio, no una frase nueva.
   const introPng = path.join(TMP, 'intro.png');
   const introMp4 = path.join(TMP, 'intro.mp4');
@@ -314,7 +324,8 @@ function main() {
   clips.push(cierreMp4);
 
   // 4) Concat + música. Un solo paso de ffmpeg para las N tomas ya montadas.
-  const total = Math.round((data.intro.duration
+  const total = Math.round(((data.portada ? data.portada.duration : 0)
+    + data.intro.duration
     + data.items.reduce((s, it) => s + it.duration, 0)
     + data.cierre.duration) * 10) / 10;
   const wav = musica(total);
