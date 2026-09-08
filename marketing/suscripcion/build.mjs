@@ -144,7 +144,6 @@ function pagina(w, h, fotoAlto, glint) {
   const R = 128;
   const cx = w - 76 - R;
   const cy = fotoAlto;
-  const esc = h === 1920 ? 1.2 : 1; // la historia tiene más aire debajo de la foto
   const brillo = glint == null ? '' : (() => {
     // Barrido diagonal: -1.3R a 3.3R a lo largo del eje del gradiente, para
     // que entre y salga completo del círculo (que lo recorta con overflow:hidden).
@@ -182,20 +181,20 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
     ${brillo}
   </div>
   <div style="position:absolute;left:0;right:0;top:${fotoAlto}px;bottom:0;
-              padding:${R * 0.4 + (h === 1920 ? 40 : 0)}px 76px 0">
-    <span class="mono" style="display:block;font-size:${13 * esc}px;color:${C.rosa}">${V.eyebrow}</span>
-    <h1 class="d" style="font-size:${64 * esc}px;margin-top:${6 * esc}px;line-height:.98">${V.headline}</h1>
-    <p style="font-family:'Jost',sans-serif;font-weight:700;font-size:${22 * esc}px;color:${C.rosa};margin-top:${10 * esc}px">${V.priceLine}</p>
-    <p class="d" style="font-size:${22 * esc}px;font-weight:500;color:${C.body};margin-top:${12 * esc}px;max-width:36ch;line-height:1.28">${V.sub}</p>
-    <div style="height:1px;background:${C.linea};margin:${16 * esc}px 0 0"></div>
-    <p style="font-size:${17 * esc}px;color:${C.ink};margin-top:${14 * esc}px;line-height:1.45">${V.info1}</p>
-    <p style="font-size:${15 * esc}px;color:${C.muted};margin-top:${5 * esc}px;line-height:1.45">${V.info2}</p>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:${16 * esc}px">
+              display:flex;flex-direction:column;justify-content:center;padding:0 76px">
+    <span class="mono" style="display:block;font-size:18px;color:${C.rosa}">${V.eyebrow}</span>
+    <h1 class="d" style="font-size:84px;margin-top:10px;line-height:.98">${V.headline}</h1>
+    <p style="font-family:'Jost',sans-serif;font-weight:700;font-size:30px;color:${C.rosa};margin-top:16px">${V.priceLine}</p>
+    <p class="d" style="font-size:28px;font-weight:500;color:${C.body};margin-top:20px;max-width:30ch;line-height:1.32">${V.sub}</p>
+    <div style="height:1px;background:${C.linea};margin:28px 0 0"></div>
+    <p style="font-size:24px;color:${C.ink};margin-top:24px;line-height:1.5">${V.info1}</p>
+    <p style="font-size:21px;color:${C.muted};margin-top:8px;line-height:1.5">${V.info2}</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px">
       <div>
-        <p class="mono" style="font-size:${13 * esc}px;color:${C.rosa};margin:0">${V.urgency}</p>
-        <p style="font-size:${18 * esc}px;color:${C.ink};font-weight:600;margin-top:${5 * esc}px">${V.cta}</p>
+        <p class="mono" style="font-size:17px;color:${C.rosa};margin:0">${V.urgency}</p>
+        <p style="font-size:25px;color:${C.ink};font-weight:600;margin-top:8px">${V.cta}</p>
       </div>
-      <img src="data:image/png;base64,${LOGO}" style="height:${48 * esc}px;display:block">
+      <img src="data:image/png;base64,${LOGO}" style="height:60px;display:block">
     </div>
   </div>
 </div></body></html>`;
@@ -238,7 +237,7 @@ function capturar(html, w, h, destino) {
 }
 
 const FORMATOS = [
-  { nombre: '4x5', w: 1080, h: 1350, fotoAlto: 700 },
+  { nombre: '4x5', w: 1080, h: 1350, fotoAlto: 600 },
   { nombre: '9x16', w: 1080, h: 1920, fotoAlto: 980 },
 ];
 
