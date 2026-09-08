@@ -56,7 +56,18 @@ const FUENTES = fs.readdirSync(path.join(ROOT, 'app/public/fonts'))
   }).join('\n');
 
 const LOGO = fs.readFileSync(path.join(ROOT, 'marketing/ig-ads/marca/logo.png')).toString('base64');
-const FOTO = fs.readFileSync(path.join(HERE, 'fotos/jueves-de-flores.jpg')).toString('base64');
+
+// Cuatro ramos reales, no uno solo: la suscripción manda uno distinto cada
+// vez —el punto es la variedad, no un producto fijo— así que la pieza lo
+// muestra en vez de prometer un ramo puntual que después no coincide con el
+// que llega. Cada `pos` está elegida a mano para que el recorte a cuadrado no
+// se lleve la flor principal de esa foto.
+const RAMOS = [
+  { archivo: 'ramo-1.jpg', pos: '50% 40%' },
+  { archivo: 'ramo-2.jpg', pos: '50% 45%' },
+  { archivo: 'ramo-3.jpg', pos: '50% 45%' },
+  { archivo: 'ramo-4.jpg', pos: '50% 38%' },
+].map((r) => ({ ...r, b64: fs.readFileSync(path.join(HERE, 'fotos', r.archivo)).toString('base64') }));
 
 function chromium() {
   if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
@@ -156,8 +167,11 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
 .d em{font-style:italic;color:${C.rosa}}
 .mono{font-weight:600;letter-spacing:.16em;text-transform:uppercase}
 </style></head><body><div id="lienzo">
-  <div style="position:absolute;top:0;left:0;width:${w}px;height:${fotoAlto}px;overflow:hidden">
-    <img src="data:image/jpeg;base64,${FOTO}" style="width:100%;height:100%;object-fit:cover;object-position:50% 42%;display:block">
+  <div style="position:absolute;top:0;left:0;width:${w}px;height:${fotoAlto}px;overflow:hidden;
+              display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;background:${C.fondo}">
+    ${RAMOS.map((r) => `<div style="overflow:hidden">
+      <img src="data:image/jpeg;base64,${r.b64}" style="width:100%;height:100%;object-fit:cover;object-position:${r.pos};display:block">
+    </div>`).join('')}
   </div>
   <div style="position:absolute;left:${cx}px;top:${cy - R}px;width:${R * 2}px;height:${R * 2}px;
               border-radius:50%;background:${C.rosa};color:#fff;
