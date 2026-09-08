@@ -16,6 +16,11 @@
 //
 //   node marketing/suscripcion/build.mjs            # estática, 4:5 y 9:16
 //   node marketing/suscripcion/build.mjs --video     # + el sello animado (mp4)
+//
+// El mp4 es para WhatsApp: necesita H.264, y si el ffmpeg del sistema no lo
+// trae (pasa en contenedores mínimos), `pip install imageio-ffmpeg` deja uno
+// completo. Sin H.264 a mano, el video sale en .webm — no se ve bien en un
+// chat, así que el build lo avisa por consola en vez de fallar en silencio.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -70,13 +75,34 @@ function chromium() {
   throw new Error('No encontré Chromium. Exporta CHROME_PATH=/ruta/al/chrome');
 }
 
+// El video es para WhatsApp, no para Reels: tiene que ser un .mp4 con H.264,
+// que es lo único que reproduce sin rarezas en un chat. El ffmpeg que trae
+// Playwright para grabar video solo sabe codificar VP8/webm (ver más abajo);
+// si hay uno completo (con libx264) se prefiere siempre. `pip install
+// imageio-ffmpeg` deja uno en dist-packages y es la forma más simple de
+// conseguirlo en un contenedor que no tiene ffmpeg del sistema.
 function ffmpegBin() {
   if (process.env.FFMPEG_PATH && fs.existsSync(process.env.FFMPEG_PATH)) return process.env.FFMPEG_PATH;
-  const p = '/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux';
-  if (fs.existsSync(p)) return p;
-  try { return execFileSync('which', ['ffmpeg'], { encoding: 'utf8' }).trim(); } catch {
-    throw new Error('No encontré ffmpeg. Exporta FFMPEG_PATH=/ruta/a/ffmpeg');
-  }
+  try {
+    const py = execFileSync('python3', ['-c', 'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'], { encoding: 'utf8' }).trim();
+    if (py && fs.existsSync(py)) return py;
+  } catch { /* no está instalado, seguimos */ }
+  try {
+    const p = execFileSync('which', ['ffmpeg'], { encoding: 'utf8' }).trim();
+    if (p) return p;
+  } catch { /* no hay uno del sistema, seguimos */ }
+  const pw = '/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux';
+  if (fs.existsSync(pw)) return pw;
+  throw new Error('No encontré ffmpeg. Exporta FFMPEG_PATH=/ruta/a/ffmpeg');
+}
+
+let _h264;
+/** Si el ffmpeg resuelto sabe codificar H.264 (libx264). Se cachea porque
+ * `-encoders` lista cientos de líneas y no cambia entre llamadas. */
+function tieneH264() {
+  if (_h264 !== undefined) return _h264;
+  const salida = execFileSync(ffmpegBin(), ['-encoders'], { encoding: 'utf8' });
+  return (_h264 = /\blibx264\b/.test(salida));
 }
 
 /* ── copy de la pieza (ver nota de cabecera sobre qué está verificado) ── */
@@ -214,9 +240,11 @@ function estatica() {
  * del círculo, sostenido después 18 fotogramas más — no un loop que se
  * reinicia de golpe, sino un tintineo que pasa una vez y se queda quieto.
  *
- * Sale en .webm (VP8): el ffmpeg de este entorno no trae encoder de H.264,
- * solo el que usa Playwright para grabar video (libvpx). Para Reels/Historias
- * hay que pasarlo a mp4 con un ffmpeg completo antes de subirlo. */
+ * Es para mandar por WhatsApp, así que tiene que ser .mp4/H.264 — un .webm
+ * no se reproduce bien ahí. Si el ffmpeg resuelto trae libx264 (lo normal en
+ * cualquier máquina con ffmpeg del sistema, o con `pip install
+ * imageio-ffmpeg`) sale en mp4; si solo está el que trae Playwright para
+ * grabar video —sin encoder de H.264, solo VP8— cae a .webm y avisa. */
 function video(f) {
   const N = 18;
   for (let i = 0; i < N; i++) {
@@ -229,20 +257,21 @@ function video(f) {
   for (let i = N; i < N * 2; i++) {
     fs.copyFileSync(ultimo, path.join(TMP, `sello-${f.nombre}-${String(i).padStart(3, '0')}.jpg`));
   }
-  const destino = path.join(HERE, `jueves-de-flores-sello-${f.nombre}.webm`);
-  // El demuxer de este ffmpeg (el que trae Playwright para grabar video) es
-  // `image2pipe`, no `image2`: no lee un patrón `%03d` de archivos en disco,
-  // solo un flujo de imágenes por stdin. Y con `--disable-autodetect` en el
-  // build, hay que decirle el códec de entrada a mano (`mjpeg`) y el nombre
-  // real del encoder registrado (`libvpx`, no `libvpx_vp8`).
+  const h264 = tieneH264();
+  const destino = path.join(HERE, `jueves-de-flores-sello-${f.nombre}.${h264 ? 'mp4' : 'webm'}`);
+  // Se manda por stdin (`image2pipe`) y no como patrón `%03d` porque el
+  // ffmpeg de Playwright solo trae ese demuxer habilitado, no `image2`; con
+  // un ffmpeg completo funciona igual, así que se deja un solo camino.
   const entrada = Array.from({ length: N * 2 }, (_, i) => path.join(TMP, `sello-${f.nombre}-${String(i).padStart(3, '0')}.jpg`))
     .map((p) => fs.readFileSync(p));
-  const proc = execFileSync(ffmpegBin(), [
+  const args = h264
+    ? ['-c:v', 'libx264', '-profile:v', 'high', '-crf', '19', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart']
+    : ['-c:v', 'libvpx', '-pix_fmt', 'yuv420p', '-b:v', '3M']; // nombre real del encoder en el build de Playwright: `libvpx`, no `libvpx_vp8`
+  execFileSync(ffmpegBin(), [
     '-y', '-v', 'error', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-framerate', '12', '-i', 'pipe:0',
-    '-c:v', 'libvpx', '-pix_fmt', 'yuv420p', '-b:v', '3M',
-    destino,
+    ...args, destino,
   ], { input: Buffer.concat(entrada), stdio: ['pipe', 'pipe', 'pipe'] });
-  console.log(`  ✓ jueves-de-flores-sello-${f.nombre}.webm   ${f.w}×${f.h}`);
+  console.log(`  ✓ ${path.basename(destino)}   ${f.w}×${f.h}${h264 ? '' : '  (sin H.264 a mano — avisa antes de mandarlo por WhatsApp)'}`);
 }
 
 estatica();
