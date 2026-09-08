@@ -141,8 +141,8 @@ const V = {
    `glint` (0..1 o null) ubica el barrido de brillo para el video; en la
    pieza estática no existe. */
 function pagina(w, h, fotoAlto, glint) {
-  const R = 128;
-  const cx = w - 76 - R;
+  const R = 150;
+  const cx = w - 76 - R * 2; // el borde derecho del círculo queda a 76px del filo
   const cy = fotoAlto;
   const brillo = glint == null ? '' : (() => {
     // Barrido diagonal: -1.3R a 3.3R a lo largo del eje del gradiente, para
@@ -176,8 +176,8 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
               border-radius:50%;background:${C.rosa};color:#fff;
               display:flex;flex-direction:column;align-items:center;justify-content:center;
               box-shadow:0 0 0 6px ${C.fondo};overflow:hidden">
-    <span class="mono" style="font-size:15px;opacity:.85">${V.seal}</span>
-    <span class="d" style="font-size:56px;font-weight:400;margin-top:4px;font-style:normal;color:#fff">${V.price}</span>
+    <span class="mono" style="font-size:19px;opacity:.9">${V.seal}</span>
+    <span style="font-family:'Jost',sans-serif;font-weight:800;font-size:76px;line-height:1;margin-top:8px;color:#fff">${V.price}</span>
     ${brillo}
   </div>
   <div style="position:absolute;left:0;right:0;top:${fotoAlto}px;bottom:0;
