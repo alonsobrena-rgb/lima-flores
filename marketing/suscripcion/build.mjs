@@ -182,17 +182,17 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
   </div>
   <div style="position:absolute;left:0;right:0;top:${fotoAlto}px;bottom:0;
               display:flex;flex-direction:column;justify-content:center;padding:0 76px">
-    <span class="mono" style="display:block;font-size:18px;color:${C.rosa}">${V.eyebrow}</span>
-    <h1 class="d" style="font-size:84px;margin-top:10px;line-height:.98">${V.headline}</h1>
-    <p style="font-family:'Jost',sans-serif;font-weight:700;font-size:30px;color:${C.rosa};margin-top:16px">${V.priceLine}</p>
-    <p class="d" style="font-size:28px;font-weight:500;color:${C.body};margin-top:20px;max-width:30ch;line-height:1.32">${V.sub}</p>
-    <div style="height:1px;background:${C.linea};margin:28px 0 0"></div>
-    <p style="font-size:24px;color:${C.ink};margin-top:24px;line-height:1.5">${V.info1}</p>
-    <p style="font-size:21px;color:${C.muted};margin-top:8px;line-height:1.5">${V.info2}</p>
-    <p class="mono" style="font-size:17px;color:${C.rosa};margin-top:28px">${V.urgency}</p>
-    <p style="font-size:25px;color:${C.ink};font-weight:600;margin-top:8px">${V.cta}</p>
-    <div style="height:1px;background:${C.linea};margin:32px 0 0"></div>
-    <img src="data:image/png;base64,${LOGO}" style="height:96px;display:block;margin:24px auto 0">
+    <span class="mono" style="display:block;font-size:22px;color:${C.rosa}">${V.eyebrow}</span>
+    <h1 class="d" style="font-size:104px;margin-top:12px;line-height:.96">${V.headline}</h1>
+    <p style="font-family:'Jost',sans-serif;font-weight:700;font-size:36px;color:${C.rosa};margin-top:18px">${V.priceLine}</p>
+    <p class="d" style="font-size:34px;font-weight:500;color:${C.body};margin-top:22px;max-width:26ch;line-height:1.3">${V.sub}</p>
+    <div style="height:1px;background:${C.linea};margin:30px 0 0"></div>
+    <p style="font-size:29px;color:${C.ink};margin-top:26px;line-height:1.5">${V.info1}</p>
+    <p style="font-size:25px;color:${C.muted};margin-top:9px;line-height:1.5">${V.info2}</p>
+    <p class="mono" style="font-size:20px;color:${C.rosa};margin-top:30px">${V.urgency}</p>
+    <p style="font-size:31px;color:${C.ink};font-weight:600;margin-top:9px">${V.cta}</p>
+    <div style="height:1px;background:${C.linea};margin:34px 0 0"></div>
+    <img src="data:image/png;base64,${LOGO}" style="height:104px;display:block;margin:26px auto 0">
   </div>
 </div></body></html>`;
 }
@@ -234,7 +234,7 @@ function capturar(html, w, h, destino) {
 }
 
 const FORMATOS = [
-  { nombre: '4x5', w: 1080, h: 1350, fotoAlto: 500 },
+  { nombre: '4x5', w: 1080, h: 1350, fotoAlto: 420 },
   { nombre: '9x16', w: 1080, h: 1920, fotoAlto: 980 },
 ];
 
