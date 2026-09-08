@@ -143,7 +143,7 @@ const V = {
 function pagina(w, h, fotoAlto, glint) {
   const R = 150;
   const cx = w - 76 - R * 2; // el borde derecho del círculo queda a 76px del filo
-  const cy = fotoAlto;
+  const cy = fotoAlto + R + 28; // entero debajo de la foto, no montado encima
   const brillo = glint == null ? '' : (() => {
     // Barrido diagonal: -1.3R a 3.3R a lo largo del eje del gradiente, para
     // que entre y salga completo del círculo (que lo recorta con overflow:hidden).
@@ -180,7 +180,7 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
     <span style="font-family:'Jost',sans-serif;font-weight:800;font-size:76px;line-height:1;margin-top:8px;color:#fff">${V.price}</span>
     ${brillo}
   </div>
-  <div style="position:absolute;left:0;right:0;top:${fotoAlto}px;bottom:0;
+  <div style="position:absolute;left:0;right:0;top:${cy + R + 24}px;bottom:0;
               display:flex;flex-direction:column;justify-content:center;padding:0 76px">
     <span class="mono" style="display:block;font-size:28px;color:${C.rosa}">${V.eyebrow}</span>
     <h1 class="d" style="font-size:136px;margin-top:14px;line-height:.94">${V.headline}</h1>
@@ -237,8 +237,8 @@ const FORMATOS = [
   // miniatura de un chat de WhatsApp, no en pantalla completa) el panel de
   // texto necesita más alto del que da un 1080×1350 sin dejar la foto en
   // astillas. Se mantiene el nombre del archivo por continuidad.
-  { nombre: '4x5', w: 1080, h: 1500, fotoAlto: 450 },
-  { nombre: '9x16', w: 1080, h: 1920, fotoAlto: 980 },
+  { nombre: '4x5', w: 1080, h: 2000, fotoAlto: 380 },
+  { nombre: '9x16', w: 1080, h: 2100, fotoAlto: 500 },
 ];
 
 function estatica() {
