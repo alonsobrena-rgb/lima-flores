@@ -164,7 +164,7 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
               display:flex;flex-direction:column;align-items:center;justify-content:center;
               box-shadow:0 0 0 6px ${C.fondo};overflow:hidden">
     <span class="mono" style="font-size:15px;opacity:.85">${V.seal}</span>
-    <span class="d" style="font-size:56px;font-weight:400;margin-top:4px;font-style:normal">${V.price}</span>
+    <span class="d" style="font-size:56px;font-weight:400;margin-top:4px;font-style:normal;color:#fff">${V.price}</span>
     ${brillo}
   </div>
   <div style="position:absolute;left:0;right:0;top:${fotoAlto}px;bottom:0;
