@@ -172,6 +172,10 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
       <img src="data:image/jpeg;base64,${r.b64}" style="width:100%;height:100%;object-fit:cover;object-position:${r.pos};display:block">
     </div>`).join('')}
   </div>
+  <!-- El logo va directo sobre la foto, nunca metido en el panel de texto
+       como un dato más del pie — regla de la casa. La esquina superior
+       izquierda de ramo-1 es fondo claro liso, así que entra sin velo. -->
+  <img src="data:image/png;base64,${LOGO}" style="position:absolute;top:20px;left:20px;height:52px;display:block">
   <div style="position:absolute;left:${cx}px;top:${cy - R}px;width:${R * 2}px;height:${R * 2}px;
               border-radius:50%;background:${C.rosa};color:#fff;
               display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -189,13 +193,8 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
     <div style="height:1px;background:${C.linea};margin:28px 0 0"></div>
     <p style="font-size:24px;color:${C.ink};margin-top:24px;line-height:1.5">${V.info1}</p>
     <p style="font-size:21px;color:${C.muted};margin-top:8px;line-height:1.5">${V.info2}</p>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px">
-      <div>
-        <p class="mono" style="font-size:17px;color:${C.rosa};margin:0">${V.urgency}</p>
-        <p style="font-size:25px;color:${C.ink};font-weight:600;margin-top:8px">${V.cta}</p>
-      </div>
-      <img src="data:image/png;base64,${LOGO}" style="height:60px;display:block">
-    </div>
+    <p class="mono" style="font-size:17px;color:${C.rosa};margin-top:28px">${V.urgency}</p>
+    <p style="font-size:25px;color:${C.ink};font-weight:600;margin-top:8px">${V.cta}</p>
   </div>
 </div></body></html>`;
 }
