@@ -182,17 +182,16 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
   </div>
   <div style="position:absolute;left:0;right:0;top:${fotoAlto}px;bottom:0;
               display:flex;flex-direction:column;justify-content:center;padding:0 76px">
-    <span class="mono" style="display:block;font-size:22px;color:${C.rosa}">${V.eyebrow}</span>
-    <h1 class="d" style="font-size:104px;margin-top:12px;line-height:.96">${V.headline}</h1>
-    <p style="font-family:'Jost',sans-serif;font-weight:700;font-size:36px;color:${C.rosa};margin-top:18px">${V.priceLine}</p>
-    <p class="d" style="font-size:34px;font-weight:500;color:${C.body};margin-top:22px;max-width:26ch;line-height:1.3">${V.sub}</p>
-    <div style="height:1px;background:${C.linea};margin:30px 0 0"></div>
-    <p style="font-size:29px;color:${C.ink};margin-top:26px;line-height:1.5">${V.info1}</p>
-    <p style="font-size:25px;color:${C.muted};margin-top:9px;line-height:1.5">${V.info2}</p>
-    <p class="mono" style="font-size:20px;color:${C.rosa};margin-top:30px">${V.urgency}</p>
-    <p style="font-size:31px;color:${C.ink};font-weight:600;margin-top:9px">${V.cta}</p>
-    <div style="height:1px;background:${C.linea};margin:34px 0 0"></div>
-    <img src="data:image/png;base64,${LOGO}" style="height:104px;display:block;margin:26px auto 0">
+    <span class="mono" style="display:block;font-size:28px;color:${C.rosa}">${V.eyebrow}</span>
+    <h1 class="d" style="font-size:136px;margin-top:14px;line-height:.94">${V.headline}</h1>
+    <p style="font-family:'Jost',sans-serif;font-weight:700;font-size:48px;color:${C.rosa};margin-top:20px">${V.priceLine}</p>
+    <div style="height:1px;background:${C.linea};margin:28px 0 0"></div>
+    <p style="font-size:38px;color:${C.ink};margin-top:26px;line-height:1.42">${V.info1}</p>
+    <p style="font-size:33px;color:${C.muted};margin-top:10px;line-height:1.42">${V.info2}</p>
+    <p class="mono" style="font-size:26px;color:${C.rosa};margin-top:28px">${V.urgency}</p>
+    <p style="font-size:41px;color:${C.ink};font-weight:600;margin-top:10px">${V.cta}</p>
+    <div style="height:1px;background:${C.linea};margin:32px 0 0"></div>
+    <img src="data:image/png;base64,${LOGO}" style="height:116px;display:block;margin:24px auto 0">
   </div>
 </div></body></html>`;
 }
@@ -234,7 +233,11 @@ function capturar(html, w, h, destino) {
 }
 
 const FORMATOS = [
-  { nombre: '4x5', w: 1080, h: 1350, fotoAlto: 420 },
+  // Ya no es 4:5 exacto: con letra de este tamaño (pensada para leerse en la
+  // miniatura de un chat de WhatsApp, no en pantalla completa) el panel de
+  // texto necesita más alto del que da un 1080×1350 sin dejar la foto en
+  // astillas. Se mantiene el nombre del archivo por continuidad.
+  { nombre: '4x5', w: 1080, h: 1500, fotoAlto: 450 },
   { nombre: '9x16', w: 1080, h: 1920, fotoAlto: 980 },
 ];
 
