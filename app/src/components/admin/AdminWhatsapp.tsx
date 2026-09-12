@@ -4,7 +4,7 @@ import { useProducts, type Product } from '@/lib/cart';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type Contact = { id: string; name: string | null; phone: string; opted_out: boolean; created_at: string };
+type Contact = { id: string; name: string | null; phone: string; direccion: string | null; observaciones: string | null; opted_out: boolean; created_at: string };
 type Counts = { total: number; active: number };
 type Template = {
   id: string; meta_id: string | null; name: string; language: string; category: string;
@@ -228,20 +228,111 @@ function Conexion({ fail, onSaved }: { fail: (e: unknown) => boolean; onSaved: (
 }
 
 // ─── Contactos ────────────────────────────────────────────────────────────────
-function parseContactsText(text: string): { name: string; phone: string }[] {
-  const out: { name: string; phone: string }[] = [];
-  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  for (let i = 0; i < lines.length; i++) {
-    const cols = lines[i].split(/[,;\t]/).map((c) => c.trim());
-    // Salta una posible fila de cabecera.
-    if (i === 0 && /nombre|name|tel|phone|celular|whats/i.test(lines[i]) && !/\d{6,}/.test(lines[i])) continue;
-    if (cols.length === 1) { out.push({ name: '', phone: cols[0] }); continue; }
-    // Detecta cuál columna es el teléfono (la más "numérica").
-    const digits = (s: string) => (s.match(/\d/g) || []).length;
-    if (digits(cols[0]) > digits(cols[1])) out.push({ name: cols[1] || '', phone: cols[0] });
-    else out.push({ name: cols[0] || '', phone: cols[1] });
+// La libreta del taller es una planilla de cuatro columnas (nombre, teléfono,
+// dirección, observaciones) y las observaciones son frases: traen comas
+// —«consultó por 02 arreglos para Surco y Barranco, pero no compró»— y alguna
+// trae un salto de línea dentro de la celda. Partir por coma a secas rompía esas
+// filas en contactos inventados, así que esto lee CSV de verdad: comillas,
+// comillas dobles escapadas y saltos de línea dentro de una celda.
+type ContactoImport = { name: string; phone: string; direccion: string; observaciones: string };
+
+/** Separador del archivo: el que más aparece fuera de comillas en la primera fila. */
+function detectarSeparador(text: string): string {
+  const linea = text.split(/\r?\n/).find((l) => l.trim()) || '';
+  const fuera = linea.replace(/"[^"]*"/g, '');
+  const cuenta = (ch: string) => fuera.split(ch).length - 1;
+  return [['\t', cuenta('\t')], [';', cuenta(';')], [',', cuenta(',')]]
+    .sort((a, b) => (b[1] as number) - (a[1] as number))[0][0] as string;
+}
+
+/** El CSV entero a filas de celdas. Una sola pasada, respetando comillas. */
+function parseCsv(text: string, sep: string): string[][] {
+  const filas: string[][] = [];
+  let fila: string[] = [];
+  let celda = '';
+  let comillas = false;
+  const cerrarFila = () => {
+    fila.push(celda); celda = '';
+    if (fila.some((c) => c.trim())) filas.push(fila.map((c) => c.trim()));
+    fila = [];
+  };
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (comillas) {
+      if (ch !== '"') { celda += ch; continue; }
+      if (text[i + 1] === '"') { celda += '"'; i++; continue; }   // "" es una comilla
+      comillas = false;
+    } else if (ch === '"') comillas = true;
+    else if (ch === sep) { fila.push(celda); celda = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      cerrarFila();
+    } else celda += ch;
   }
-  return out.filter((c) => c.phone);
+  cerrarFila();
+  return filas;
+}
+
+// Cabeceras que se reconocen. `N°` no cae en ninguna a propósito: es el número
+// de fila de la planilla y no se guarda.
+const CABECERAS: [keyof ContactoImport, RegExp][] = [
+  ['phone', /tel[ée]fono|tel|phone|celular|whats|m[oó]vil/i],
+  ['name', /nombre|name|cliente/i],
+  ['direccion', /direcc|domicilio|address/i],
+  ['observaciones', /observ|nota|coment|detalle/i],
+];
+
+/** Una fila sin cabecera que la guíe. El teléfono es la celda más numérica. */
+function filaSuelta(cols: string[]): ContactoImport | null {
+  const digitos = (s: string) => (s.match(/\d/g) || []).length;
+  let tel = -1;
+  for (let i = 0; i < cols.length; i++) {
+    if (digitos(cols[i]) >= 6 && (tel < 0 || digitos(cols[i]) > digitos(cols[tel]))) tel = i;
+  }
+  if (tel < 0) return null;
+  // El «N°» de la planilla: primera celda, un número corto, y el teléfono está
+  // en otra. Se descarta antes de repartir posiciones, si no correría todo uno.
+  const desde = tel > 0 && /^\d{1,4}$/.test(cols[0]) ? 1 : 0;
+  const resto = cols.slice(desde).filter((_, i) => i + desde !== tel);
+  return {
+    phone: cols[tel],
+    name: resto[0] || '',
+    direccion: resto[1] || '',
+    // Lo que sobre se junta en observaciones: mejor que tirarlo.
+    observaciones: resto.slice(2).filter(Boolean).join(' · '),
+  };
+}
+
+function parseContactsText(text: string): ContactoImport[] {
+  const filas = parseCsv(text, detectarSeparador(text));
+  if (!filas.length) return [];
+
+  // ¿La primera fila es cabecera? Lo es si nombra columnas y no trae un número
+  // largo (una fila de datos con «Teléfono» adentro no existe).
+  const cab = filas[0];
+  const mapa: Partial<Record<keyof ContactoImport, number>> = {};
+  if (!cab.some((c) => /\d{6,}/.test(c.replace(/[\s\-().]/g, '')))) {
+    for (const [campo, re] of CABECERAS) {
+      const i = cab.findIndex((c, j) => re.test(c) && !Object.values(mapa).includes(j));
+      if (i >= 0) mapa[campo] = i;
+    }
+  }
+
+  const conCabecera = mapa.phone !== undefined;
+  const cuerpo = conCabecera || mapa.name !== undefined ? filas.slice(1) : filas;
+  const out: ContactoImport[] = [];
+  for (const cols of cuerpo) {
+    const c = conCabecera
+      ? {
+          phone: cols[mapa.phone as number] || '',
+          name: mapa.name !== undefined ? cols[mapa.name] || '' : '',
+          direccion: mapa.direccion !== undefined ? cols[mapa.direccion] || '' : '',
+          observaciones: mapa.observaciones !== undefined ? cols[mapa.observaciones] || '' : '',
+        }
+      : filaSuelta(cols);
+    if (c && c.phone) out.push(c);
+  }
+  return out;
 }
 
 function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
@@ -251,17 +342,21 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const [templateId, setTemplateId] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [direccion, setDireccion] = useState('');
+  const [observaciones, setObservaciones] = useState('');
   const [paste, setPaste] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
+  // Con la libreta del taller adentro son casi 200 filas: sin buscador, editar
+  // una es bajar hasta encontrarla. Busca en los cuatro campos.
+  const [filtro, setFiltro] = useState('');
   // Envío suelto: cuál se está enviando y cómo salió cada uno.
   const [enviando, setEnviando] = useState<string | null>(null);
   const [resultado, setResultado] = useState<Record<string, { ok: boolean; msg: string }>>({});
   // Edición en la propia fila.
   const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editPhone, setEditPhone] = useState('');
+  const [edit, setEdit] = useState({ name: '', phone: '', direccion: '', observaciones: '' });
 
   const load = useCallback(async () => {
     try {
@@ -278,7 +373,13 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
   const add = async () => {
     if (!phone.trim()) { setErr('Ingresa un teléfono.'); return; }
     setErr(''); setBusy(true);
-    try { await adminSend('/api/admin/wa/contacts', 'POST', { name: name.trim(), phone: phone.trim() }); setName(''); setPhone(''); await load(); }
+    try {
+      await adminSend('/api/admin/wa/contacts', 'POST', {
+        name: name.trim(), phone: phone.trim(),
+        direccion: direccion.trim(), observaciones: observaciones.trim(),
+      });
+      setName(''); setPhone(''); setDireccion(''); setObservaciones(''); await load();
+    }
     catch (e) { if (!fail(e)) setErr((e as Error).message); }
     finally { setBusy(false); }
   };
@@ -304,14 +405,29 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
     catch (e) { if (!fail(e)) setErr((e as Error).message); }
   };
 
-  const abrirEdicion = (c: Contact) => { setEditId(c.id); setEditName(c.name || ''); setEditPhone(c.phone); };
+  const abrirEdicion = (c: Contact) => {
+    setEditId(c.id);
+    setEdit({ name: c.name || '', phone: c.phone, direccion: c.direccion || '', observaciones: c.observaciones || '' });
+  };
   const guardarEdicion = async (id: string) => {
     setErr('');
     try {
-      await adminSend('/api/admin/wa/contacts/' + id, 'PATCH', { name: editName.trim(), phone: editPhone.trim() });
+      // Los cuatro campos van siempre, también vacíos: borrar una dirección a
+      // mano tiene que guardarse. (La importación sí conserva lo que ya había.)
+      await adminSend('/api/admin/wa/contacts/' + id, 'PATCH', {
+        name: edit.name.trim(), phone: edit.phone.trim(),
+        direccion: edit.direccion.trim(), observaciones: edit.observaciones.trim(),
+      });
       setEditId(null); await load();
     } catch (e) { if (!fail(e)) setErr((e as Error).message); }
   };
+
+  // Búsqueda sobre los cuatro campos, sin tildes ni mayúsculas de por medio.
+  const plano = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const q = plano(filtro.trim());
+  const visibles = q
+    ? contacts.filter((c) => plano([c.name, c.phone, c.direccion, c.observaciones].filter(Boolean).join(' ')).includes(q))
+    : contacts;
 
   const tpl = templates.find((t) => t.id === templateId);
   // Enviar es hacia afuera y no se deshace: se confirma con nombre y número a la vista.
@@ -344,6 +460,11 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
                 placeholder="987654321" />
               <p className="mt-1 text-[11px] text-foreground/45">Queda como <span className="font-mono">+51…</span>. Si escribes el número con <span className="font-mono">+</span> adelante, manda lo que escribiste.</p>
             </div>
+            <div><label className={label}>Dirección</label><input value={direccion} onChange={(e) => setDireccion(e.target.value)} className={field} placeholder="Av. José Pardo 261 — Miraflores" /></div>
+            <div>
+              <label className={label}>Observaciones</label>
+              <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} rows={2} className={field} placeholder="Compró orquídea y pasó a recoger al taller" />
+            </div>
             <button onClick={add} disabled={busy} className="w-full bg-ink-900 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500 disabled:opacity-50">Agregar</button>
           </div>
         </div>
@@ -351,13 +472,17 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-foreground/50">Importar en lote</p>
           <p className="mt-1 text-[12px] leading-relaxed text-foreground/55">
-            Sube un CSV o pega filas <span className="font-mono">nombre, teléfono</span> (una por línea).
-            Los que no traigan <span className="font-mono">+</span> entran como <span className="font-mono">+51</span>.
+            Sube un CSV o pega filas <span className="font-mono">nombre, teléfono, dirección, observaciones</span> (una
+            por línea). Si la primera fila trae los nombres de las columnas, se usan esos y el orden da igual.
+            Los teléfonos que no traigan <span className="font-mono">+</span> entran como <span className="font-mono">+51</span>.
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-foreground/45">
+            Reimportar no borra nada: un contacto que ya existe se queda con lo que tenía en las celdas que vengan vacías.
           </p>
           <label className="mt-2 inline-block cursor-pointer border border-border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900">
             Elegir CSV…<input type="file" accept=".csv,text/csv,text/plain" onChange={onFile} className="hidden" />
           </label>
-          <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} className={field + ' mt-2 font-mono text-[12px]'} placeholder={'Ana Pérez, 987654321\nLuis Díaz, 999888777'} />
+          <textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={6} className={field + ' mt-2 font-mono text-[12px]'} placeholder={'nombre, telefono, direccion, observaciones\nAna Pérez, 987654321, Av. Pardo 261 Miraflores, Compró orquídea\nLuis Díaz, 999888777'} />
           {parsed.length > 0 && <p className="mt-1.5 text-[12px] text-foreground/60">{parsed.length} contacto(s) detectado(s).</p>}
           <button onClick={importPasted} disabled={busy || !parsed.length} className="mt-2 w-full border border-rosa-500 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-rosa-600 hover:bg-rosa-500 hover:text-ivory-50 disabled:opacity-50">Importar {parsed.length || ''}</button>
           {note && <p className="mt-2 bg-green-100 px-3 py-2 text-sm text-green-800">{note}</p>}
@@ -368,7 +493,13 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
       {/* Tabla + envío suelto */}
       <div className="min-w-0">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-          <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{counts.total} contacto(s) · {counts.active} activos</p>
+          <div className="min-w-0">
+            <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">
+              {counts.total} contacto(s) · {counts.active} activos{q ? ` · ${visibles.length} en la búsqueda` : ''}
+            </p>
+            <input value={filtro} onChange={(e) => setFiltro(e.target.value)} placeholder="Buscar por nombre, teléfono, dirección u observación…"
+              className="mt-1.5 w-full min-w-[240px] border border-border bg-background px-3 py-2 text-sm outline-none focus:border-rosa-500 sm:w-[340px]" />
+          </div>
           <div className="w-full sm:w-auto sm:min-w-[240px]">
             <label className={label}>Plantilla para enviar</label>
             {templates.length
@@ -395,29 +526,54 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
           {/* Ancho mínimo para que, al desplazarse dentro de su caja, las columnas
               no se aplasten: sin esto el nombre se partía en cuatro líneas mientras
               los botones quedaban cortados. */}
-          <table className="w-full min-w-[420px] text-sm">
+          <table className="w-full min-w-[720px] text-sm">
             <thead className="sticky top-0 bg-surface text-left text-[11px] uppercase tracking-[0.08em] text-foreground/50">
-              <tr><th className="px-3 py-2 font-medium">Nombre</th><th className="px-3 py-2 font-medium">Teléfono</th><th className="px-3 py-2"></th></tr>
+              <tr>
+                <th className="px-3 py-2 font-medium">Nombre</th>
+                <th className="px-3 py-2 font-medium">Teléfono</th>
+                <th className="px-3 py-2 font-medium">Dirección</th>
+                <th className="px-3 py-2 font-medium">Observaciones</th>
+                <th className="px-3 py-2"></th>
+              </tr>
             </thead>
             <tbody>
-              {contacts.map((c) => {
+              {visibles.map((c) => {
                 const r = resultado[c.id];
                 return editId === c.id ? (
+                  /* Editar abre la fila entera: cuatro campos no entran en celdas
+                     de tabla sin dejar la dirección en una ranura de 80 px. */
                   <tr key={c.id} className="border-t border-border bg-ivory-100">
-                    <td className="px-3 py-2"><input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full border border-border bg-background px-2 py-1 text-sm outline-none focus:border-rosa-500" /></td>
-                    <td className="px-3 py-2"><input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full border border-border bg-background px-2 py-1 font-mono text-[13px] outline-none focus:border-rosa-500" /></td>
-                    <td className="whitespace-nowrap px-3 py-2 text-right">
-                      <button onClick={() => guardarEdicion(c.id)} className="font-mono text-[10px] uppercase tracking-[0.08em] text-rosa-600 hover:text-rosa-500">Guardar</button>
-                      <button onClick={() => setEditId(null)} className="ml-3 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-ink-900">Cancelar</button>
+                    <td colSpan={5} className="px-3 py-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div><label className={label}>Nombre</label><input value={edit.name} onChange={(e) => setEdit((v) => ({ ...v, name: e.target.value }))} className={field} /></div>
+                        <div><label className={label}>Teléfono</label><input value={edit.phone} onChange={(e) => setEdit((v) => ({ ...v, phone: e.target.value }))} className={field + ' font-mono text-[13px]'} /></div>
+                        <div className="sm:col-span-2"><label className={label}>Dirección</label><input value={edit.direccion} onChange={(e) => setEdit((v) => ({ ...v, direccion: e.target.value }))} className={field} /></div>
+                        <div className="sm:col-span-2">
+                          <label className={label}>Observaciones</label>
+                          <textarea value={edit.observaciones} onChange={(e) => setEdit((v) => ({ ...v, observaciones: e.target.value }))} rows={3} className={field} />
+                        </div>
+                      </div>
+                      <div className="mt-3 text-right">
+                        <button onClick={() => guardarEdicion(c.id)} className="font-mono text-[10px] uppercase tracking-[0.08em] text-rosa-600 hover:text-rosa-500">Guardar</button>
+                        <button onClick={() => setEditId(null)} className="ml-4 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/40 hover:text-ink-900">Cancelar</button>
+                      </div>
                     </td>
                   </tr>
                 ) : (
-                  <tr key={c.id} className="border-t border-border">
+                  <tr key={c.id} className="border-t border-border align-top">
                     <td className="min-w-[130px] px-3 py-2 text-ink-800">
                       {c.name || <span className="text-foreground/40">—</span>}
                       {r && <span className={`ml-2 font-mono text-[10px] uppercase tracking-[0.08em] ${r.ok ? 'text-green-700' : 'text-red-700'}`}>{r.ok ? '✓ enviado' : '✕ ' + r.msg}</span>}
                     </td>
-                    <td className="px-3 py-2 font-mono text-[13px] text-ink-800">{c.phone}</td>
+                    <td className="whitespace-nowrap px-3 py-2 font-mono text-[13px] text-ink-800">{c.phone}</td>
+                    {/* Dos líneas y el resto en el title: la libreta trae
+                        observaciones de tres renglones y estirarían la fila. */}
+                    <td className="max-w-[180px] px-3 py-2 text-[13px] text-foreground/70" title={c.direccion || ''}>
+                      {c.direccion ? <span className="line-clamp-2">{c.direccion}</span> : <span className="text-foreground/30">—</span>}
+                    </td>
+                    <td className="max-w-[260px] px-3 py-2 text-[13px] text-foreground/70" title={c.observaciones || ''}>
+                      {c.observaciones ? <span className="line-clamp-2">{c.observaciones}</span> : <span className="text-foreground/30">—</span>}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-2 text-right">
                       <button onClick={() => enviar(c)} disabled={!templateId || enviando === c.id}
                         className="border border-rosa-500 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-rosa-600 hover:bg-rosa-500 hover:text-ivory-50 disabled:cursor-not-allowed disabled:opacity-35">
@@ -429,7 +585,11 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
                   </tr>
                 );
               })}
-              {!contacts.length && <tr><td colSpan={3} className="px-3 py-10 text-center italic text-foreground/40">Aún no hay contactos.</td></tr>}
+              {!visibles.length && (
+                <tr><td colSpan={5} className="px-3 py-10 text-center italic text-foreground/40">
+                  {contacts.length ? 'Ningún contacto coincide con la búsqueda.' : 'Aún no hay contactos.'}
+                </td></tr>
+              )}
             </tbody>
           </table>
         </div>

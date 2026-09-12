@@ -65,6 +65,42 @@ Mientras falte algo, la sección WhatsApp del admin funciona en modo
 lectura/edición de contactos, avisa arriba qué falta, y crear plantillas o enviar
 responde un error claro (503) en vez de fallar.
 
+## La ficha de un contacto
+
+Cuatro campos, los mismos que traía la libreta del taller: **nombre**,
+**teléfono**, **dirección** y **observaciones**. Los cuatro se editan en la misma
+pestaña —*Editar* abre la fila entera— y hay un buscador arriba que mira en los
+cuatro, que con doscientas filas es la diferencia entre encontrar a alguien y
+bajar scrolleando.
+
+Solo el teléfono es obligatorio y solo él se normaliza; los otros tres son texto
+libre a propósito:
+
+- **Dirección** es la que alguien anotó para acordarse («Jesús María alt ovalo de
+  la brasil»), no una dirección de reparto. La de reparto vive en `orders`, con
+  distrito, lat/lng y referencia, y la valida el checkout. Mezclarlas haría creer
+  que desde acá se puede despachar.
+- **Observaciones** es lo que se sabe del cliente: qué compró, qué preguntó, por
+  qué no volvió.
+
+### Importar la libreta
+
+*Importar en lote* acepta un CSV o filas pegadas con
+`nombre, teléfono, dirección, observaciones`. Dos cosas que se ganaron a pulso:
+
+- **Si la primera fila nombra las columnas, mandan los nombres** y el orden da
+  igual; la columna `N°` de la planilla se descarta. Sin cabecera, el teléfono es
+  la celda con más dígitos y el resto se reparte por posición.
+- **Se lee CSV de verdad**, con comillas y saltos de línea dentro de una celda.
+  Las observaciones son frases y traen comas («consultó por 02 arreglos para
+  Surco y Barranco, pero no compró»): partir por coma a secas convertía una fila
+  en dos contactos rotos, y eso no se ve hasta que alguien abre la lista.
+
+**Reimportar no borra nada.** Un contacto que ya existe (mismo teléfono) se queda
+con lo que tenía en las celdas que vengan vacías, así que una planilla vieja de
+dos columnas no le vacía la dirección a nadie. Borrar sí se puede, pero a mano:
+vaciar el campo en *Editar* y guardar.
+
 ## Los números
 
 Una sola regla, sin desplegable de países: **si el número empieza con `+`, se

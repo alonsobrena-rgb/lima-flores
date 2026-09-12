@@ -7,9 +7,9 @@
 //   POST   /api/admin/wa/conexion/probar     → le pregunta a Meta si ese token abre ese número
 // Contactos:
 //   GET    /api/admin/wa/contacts            → lista + conteo
-//   POST   /api/admin/wa/contacts            → alta individual { name, phone }
-//   PATCH  /api/admin/wa/contacts/:id        → { name, phone, optedOut }
-//   POST   /api/admin/wa/contacts/import     → bulk { contacts: [{name, phone}] }
+//   POST   /api/admin/wa/contacts            → alta { name, phone, direccion, observaciones }
+//   PATCH  /api/admin/wa/contacts/:id        → { name, phone, direccion, observaciones, optedOut }
+//   POST   /api/admin/wa/contacts/import     → bulk { contacts: [{name, phone, direccion, observaciones}] }
 //   POST   /api/admin/wa/contacts/:id/enviar → una plantilla a ese contacto, ahora
 //   DELETE /api/admin/wa/contacts/:id
 // Plantillas:
@@ -142,7 +142,12 @@ async function listContacts(req, res) {
 async function addContact(req, res) {
   let body; try { body = await readJsonBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
   if (!body.phone) return send(res, 400, { error: 'Falta el teléfono.' });
-  try { return send(res, 201, await waStore.addContact({ name: body.name, phone: body.phone })); }
+  try {
+    return send(res, 201, await waStore.addContact({
+      name: body.name, phone: body.phone,
+      direccion: body.direccion, observaciones: body.observaciones,
+    }));
+  }
   catch (e) { return send(res, 400, { error: e.message }); }
 }
 
@@ -151,6 +156,7 @@ async function patchContact(req, res, id) {
   try {
     const c = await waStore.updateContact(id, {
       name: body.name, phone: body.phone, optedOut: body.optedOut,
+      direccion: body.direccion, observaciones: body.observaciones,
     });
     return c ? send(res, 200, c) : send(res, 404, { error: 'No existe ese contacto.' });
   } catch (e) {
