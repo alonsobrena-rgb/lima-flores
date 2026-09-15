@@ -15,12 +15,14 @@ const CAMPOS = `id, kind, origen, caption, mime, bytes, scheduled_at, status,
                 ig_media_id, permalink, error, attempts, published_at, created_at,
                 cuenta_id, caption_editado`;
 
+const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
+
 async function encolar({ kind, origen, caption, media, mime, scheduledAt, cuentaId = null }) {
   const id = crypto.randomBytes(8).toString('hex');
   await db.query(
-    `INSERT INTO ig_queue (id, kind, origen, caption, media, mime, bytes, scheduled_at, cuenta_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-    [id, kind, origen || 'manual', caption || '', media, mime, media.length, scheduledAt, cuentaId],
+    `INSERT INTO ig_queue (id, kind, origen, caption, media, mime, bytes, media_sha, scheduled_at, cuenta_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+    [id, kind, origen || 'manual', caption || '', media, mime, media.length, sha256(media), scheduledAt, cuentaId],
   );
   return id;
 }
@@ -126,13 +128,17 @@ async function actualizar(id, { caption, scheduledAt, status }) {
 /**
  * Las piezas de la cola que salieron del repo y todavía se pueden tocar.
  *
- * Con el binario incluido, porque el resincronizado compara: fuera quedan las ya
- * publicadas —su archivo es historia y su post en Meta ya salió— y las que están
- * publicándose en este momento, que es la fila que el vigía tiene tomada.
+ * **Sin el binario**: se compara por `media_sha`, que para eso está. Esto corre
+ * en cada arranque y traerse treinta y pico de blobs —uno de ellos un MP4 de
+ * siete megas— solo para descubrir que casi todos siguen igual es tirar el
+ * arranque a la basura.
+ *
+ * Fuera quedan las ya publicadas —su archivo es historia y su post en Meta ya
+ * salió— y las que están publicándose, que es la fila que el vigía tiene tomada.
  */
 async function pendientesDelRepo() {
   const { rows } = await db.query(
-    `SELECT id, origen, kind, caption, caption_editado, mime, media
+    `SELECT id, origen, kind, caption, caption_editado, mime, bytes, media_sha
        FROM ig_queue
       WHERE origen IS NOT NULL AND origen <> 'manual'
         AND status IN ('queued', 'paused', 'failed')
@@ -173,8 +179,8 @@ async function cabecerasPendientes(bytes = 65536) {
  * quede a medias.
  */
 async function reemplazarMedia(id, { media, mime, kind, caption }) {
-  const sets = ['media = $1', 'mime = $2', 'bytes = $3'];
-  const vals = [media, mime, media.length];
+  const sets = ['media = $1', 'mime = $2', 'bytes = $3', 'media_sha = $4'];
+  const vals = [media, mime, media.length, sha256(media)];
   if (kind !== undefined) { vals.push(kind); sets.push(`kind = $${vals.length}`); }
   if (caption !== undefined) { vals.push(caption); sets.push(`caption = $${vals.length}`); }
   vals.push(id);
@@ -183,6 +189,17 @@ async function reemplazarMedia(id, { media, mime, kind, caption }) {
       WHERE id = $${vals.length} AND status IN ('queued', 'paused', 'failed')`, vals,
   );
   return rowCount > 0;
+}
+
+/**
+ * Rellena el SHA de una fila vieja, sin tocar nada más.
+ *
+ * Las filas encoladas antes de que existiera la columna lo tienen en NULL. La
+ * primera vez hay que leerles el blob para calcularlo; guardándolo, el arranque
+ * siguiente ya no necesita leer nada.
+ */
+async function guardarSha(id, sha) {
+  await db.query(`UPDATE ig_queue SET media_sha = $1 WHERE id = $2 AND media_sha IS NULL`, [sha, id]);
 }
 
 /** Cambia el tipo de una pieza. Solo lo usa la reparación de formatos. */
@@ -330,7 +347,7 @@ async function publicadasHoy() {
 }
 
 module.exports = {
-  pendientesDelRepo, reemplazarMedia,
+  pendientesDelRepo, reemplazarMedia, guardarSha, sha256,
   encolar, listar, obtener, media, origenesUsados, tomarVencida,
   cabecerasPendientes, cambiarKind,
   marcarPublicada, marcarFallida, actualizar, borrar, ultimaAgendada,

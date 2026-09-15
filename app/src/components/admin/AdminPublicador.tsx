@@ -411,7 +411,8 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
             pieza programada para el jueves sobrevive a los deploys del
             miércoles. El precio es que rehacer un creativo no basta: la galería
             pública cambia con el deploy y la cola se queda con la foto vieja.
-            Esto vuelve a leerlas. */}
+            Esto ya corre solo en cada arranque (`sincronizar.js`); el botón está
+            para no esperar al siguiente deploy. */}
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
           <button
             onClick={() => accion(async () => {
@@ -434,8 +435,9 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
           </button>
           <span className="max-w-xl text-[12.5px] leading-snug text-foreground/50">
             Reemplaza el archivo de lo que ya está en cola por el que hay ahora en el repo, para que
-            el panel y la galería pública muestren exactamente lo mismo. No toca lo ya publicado, ni
-            los captions que se hayan editado a mano acá.
+            el panel y la galería pública muestren exactamente lo mismo. <strong className="text-ink-900">Esto
+            ya pasa solo en cada despliegue</strong>; el botón es para hacerlo ahora. No toca lo ya
+            publicado, ni los captions que se hayan editado a mano acá.
           </span>
         </div>
       </section>
@@ -556,6 +558,34 @@ export function AdminPublicador({ onAuthError }: { onAuthError: () => void }) {
                     </button>
                     <button className={boton} onClick={() => accion(() => adminSend(`/api/admin/ig/cola/${it.id}/publicar-ya`, 'POST'))}>Publicar ya</button>
                     <button className={boton} onClick={() => { if (confirm('¿Sacar esta pieza de la cola?')) accion(() => adminSend(`/api/admin/ig/cola/${it.id}`, 'DELETE')); }}>Quitar</button>
+                  </div>
+                )}
+
+                {/* Una pieza ya publicada no se resincroniza nunca: su archivo
+                    es el registro de lo que salió. Pero si el creativo se
+                    arregló DESPUÉS de publicarlo, hay que poder mandarlo otra
+                    vez — eso es una copia nueva, no reescribir la vieja. */}
+                {it.status === 'published' && it.origen && it.origen !== 'manual' && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <button
+                      className={boton}
+                      onClick={() => {
+                        if (!confirm(`¿Encolar otra vez ${it.origen} con el archivo que hay ahora en el repo?\n\nEsta tarjeta se queda como historial. El post que ya salió NO se borra de Instagram: eso se hace a mano desde la app.`)) return;
+                        accion(async () => {
+                          const r = await adminSend(`/api/admin/ig/cola/${it.id}/reencolar`, 'POST') as {
+                            origen: string; kind: string; bytes: number; scheduledAt: string;
+                          };
+                          setAviso(`${r.origen} vuelve a la cola con el archivo de hoy (${Math.round(r.bytes / 1024)} kB), `
+                            + `para el ${enLima(r.scheduledAt)}. El post viejo sigue en Instagram: bórralo desde la app.`);
+                        });
+                      }}
+                    >
+                      Volver a encolar con el archivo de hoy
+                    </button>
+                    <p className="mt-2 max-w-xl text-[12px] leading-snug text-foreground/50">
+                      Para cuando el creativo se arregló después de publicarlo. Crea una copia nueva
+                      con el archivo actual del repo; esta tarjeta se queda como historial.
+                    </p>
                   </div>
                 )}
 

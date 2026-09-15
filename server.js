@@ -77,7 +77,11 @@ function applyCors(req, res) {
   }
 }
 
-const server = http.createServer(async (req, res) => {
+// El manejador va aparte y el servidor lo envuelve: con
+// `createServer(async …)`, un rechazo que nadie recoge se vuelve
+// unhandledRejection y Node **tumba el proceso**. Un fallo de un endpoint del
+// panel no puede llevarse por delante la tienda entera.
+async function manejar(req, res) {
   let parsed;
   try { parsed = new URL(req.url, `http://${req.headers.host || 'localhost'}`); }
   catch { return send(res, 400, 'bad url'); }
@@ -271,6 +275,16 @@ const server = http.createServer(async (req, res) => {
   }
 
   return send(res, 404, `not found: ${pathname}`);
+}
+
+const server = http.createServer((req, res) => {
+  manejar(req, res).catch((e) => {
+    console.error(`[http] ${req.method} ${req.url} reventó:`, e && e.stack ? e.stack : e);
+    // Puede que el handler ya hubiera empezado a responder; ahí no queda más
+    // que cortar, pero al menos el proceso sigue vivo.
+    if (res.headersSent) return res.destroy();
+    try { send(res, 500, 'error interno'); } catch { res.destroy(); }
+  });
 });
 
 // Sirve un archivo estático con cache y soporte de HTTP Range (seek de video).

@@ -19,19 +19,28 @@ pide. La hora es nuestra (`agenda.js`, en hora de Lima).
 
 ## La cola guarda una copia, no una referencia
 
-Y por eso hay un botón de **«Volver a leer del repo»** en el panel
-(`POST /api/admin/ig/resincronizar`).
-
 Al encolar IG-25 se copia el JPEG **de ese momento**. Es lo correcto para
 publicar —el punto 1 de arriba— y además una pieza subida a mano no está en
 ningún repo. El precio es que rehacer un creativo no alcanza: la galería pública
-cambia con el deploy y la cola se queda con la foto vieja. Pasó exactamente eso;
-el panel seguía enseñando el VID-01 con la raya que ya se había arreglado.
+cambia con el deploy porque lee los archivos, y la cola se queda con la copia
+vieja. Pasó exactamente eso: se arregló la raya de la banda de VID-01, se
+desplegó, la galería mostró el video bueno y el panel siguió enseñando el viejo.
 
-El resincronizado vuelve a leer del repo lo que ya está en cola. Las reglas:
+**Por eso el sincronizado corre solo en cada arranque**
+(`sincronizar.js` → `alArrancar()`, lo llama `publisher.start()`), que es justo
+cuando el disco acaba de cambiar. La primera versión de esto era solo un botón,
+y un botón que alguien tiene que acordarse de apretar no es «estar conectados»:
+es la misma trampa con un paso más. El botón sigue estando —**«Volver a leer del
+repo»**, `POST /api/admin/ig/resincronizar`— para hacerlo sin esperar un deploy,
+y usa exactamente el mismo código.
+
+Las reglas:
 
 - **Compara por SHA-256, no por tamaño.** Un JPEG reencodeado puede pesar igual
-  y ser otro.
+  y ser otro. El hash vive en `ig_queue.media_sha` justamente para que la pasada
+  del arranque **no tenga que bajarse los blobs**: son treinta y pico de piezas
+  de medio mega y un MP4 de siete, por cuenta. Las filas anteriores a la columna
+  lo tienen en NULL, se calcula una vez y queda guardado.
 - **No toca lo ya publicado ni lo que se está publicando.** El archivo de una
   pieza publicada es historia, y cambiarle el binario a algo que Meta está
   descargando en ese instante es la forma de que el reel quede a medias. El
@@ -43,6 +52,24 @@ El resincronizado vuelve a leer del repo lo que ya está en cola. Las reglas:
   texto escrito por una persona.
 - **Una pieza que ya no está en el repo se deja quieta** y se informa: puede ser
   un anuncio retirado que todavía se quiere publicar.
+
+### ¿Y si el creativo se arregló DESPUÉS de publicarlo?
+
+Para eso está **«Volver a encolar con el archivo de hoy»**, el botón que sale en
+las tarjetas ya publicadas (`POST /api/admin/ig/cola/:id/reencolar`).
+
+El sincronizado no toca una pieza publicada, y no debe: su binario es el
+registro de lo que salió. Pero VID-01 se publicó con la banda que terminaba en
+una raya, se arregló después, y hacía falta poder mandarlo otra vez. El botón
+crea una **fila nueva** con el archivo actual, agendada a continuación de la
+cola; la tarjeta publicada se queda donde está, con su enlace.
+
+Dos cosas que conviene tener claras:
+
+- **El post viejo no se borra de Instagram.** Por API no se puede: eso se hace a
+  mano desde la app. El botón solo prepara el nuevo.
+- **No sirve para una pieza subida a mano** (`origen = 'manual'`): no está en
+  ningún repo, así que no hay de dónde volver a leerla. El endpoint lo dice.
 
 Las dos vistas salen del mismo sitio: `integrations/instagram/galeria.js`
 (`porCodigo()`) y `marketing/ig-ads/galeria.py` leen los mismos archivos, y
