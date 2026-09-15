@@ -71,9 +71,21 @@ async function guardarConexion({ phoneNumberId, wabaId, appId, tokenEnv, numero,
 }
 
 // ─── Contactos ──────────────────────────────────────────────────────────────
+// Las columnas que ve el panel, en un solo sitio: cuando se agregó dirección y
+// observaciones había cuatro consultas que listaban campos a mano y era fácil
+// dejar una vieja — el contacto se guardaba y volvía sin el campo nuevo.
+const COLS_CONTACTO = 'id, name, phone, direccion, observaciones, opted_out, created_at';
+
+// Texto libre que puede venir vacío. Se guarda NULL, no cadena vacía: así
+// COALESCE en la importación no pisa lo que ya estaba con una celda en blanco.
+const texto = (v) => {
+  const s = String(v == null ? '' : v).trim();
+  return s || null;
+};
+
 async function listContacts() {
   const { rows } = await db.query(
-    `SELECT id, name, phone, opted_out, created_at FROM wa_contacts ORDER BY created_at DESC`
+    `SELECT ${COLS_CONTACTO} FROM wa_contacts ORDER BY created_at DESC`
   );
   return rows;
 }
@@ -87,16 +99,19 @@ async function countContacts() {
   return rows[0] || { total: 0, active: 0 };
 }
 
-async function addContact({ name, phone }) {
+async function addContact({ name, phone, direccion, observaciones }) {
   const norm = normalizePhone(phone);
   if (!norm || norm.replace(/\D/g, '').length < 8) throw new Error('Teléfono inválido.');
   const id = newId();
   const { rows } = await db.query(
-    `INSERT INTO wa_contacts (id, name, phone, phone_raw)
-     VALUES ($1,$2,$3,$4)
-     ON CONFLICT (phone) DO UPDATE SET name = COALESCE(EXCLUDED.name, wa_contacts.name)
-     RETURNING id, name, phone, opted_out, created_at`,
-    [id, name || null, norm, String(phone || '')]
+    `INSERT INTO wa_contacts (id, name, phone, phone_raw, direccion, observaciones)
+     VALUES ($1,$2,$3,$4,$5,$6)
+     ON CONFLICT (phone) DO UPDATE SET
+       name          = COALESCE(EXCLUDED.name,          wa_contacts.name),
+       direccion     = COALESCE(EXCLUDED.direccion,     wa_contacts.direccion),
+       observaciones = COALESCE(EXCLUDED.observaciones, wa_contacts.observaciones)
+     RETURNING ${COLS_CONTACTO}`,
+    [id, texto(name), norm, String(phone || ''), texto(direccion), texto(observaciones)]
   );
   return rows[0];
 }
@@ -104,6 +119,10 @@ async function addContact({ name, phone }) {
 // Bulk import. Devuelve { added, skipped }. Dedupe por teléfono (ON CONFLICT).
 // El código de país es el mismo para todo el lote: cada fila puede saltárselo
 // escribiendo el suyo con +.
+//
+// Reimportar la misma libreta no borra nada: cada campo se queda con lo que
+// trae la fila nueva y, si viene vacío, con lo que ya había (COALESCE). Una
+// planilla que solo tiene nombre y teléfono no le vacía la dirección a nadie.
 async function importContacts(list) {
   let added = 0, skipped = 0;
   for (const row of Array.isArray(list) ? list : []) {
@@ -111,10 +130,13 @@ async function importContacts(list) {
     if (!norm || norm.replace(/\D/g, '').length < 8) { skipped++; continue; }
     try {
       await db.query(
-        `INSERT INTO wa_contacts (id, name, phone, phone_raw)
-         VALUES ($1,$2,$3,$4)
-         ON CONFLICT (phone) DO UPDATE SET name = COALESCE(EXCLUDED.name, wa_contacts.name)`,
-        [newId(), (row.name || '').trim() || null, norm, String(row.phone || '')]
+        `INSERT INTO wa_contacts (id, name, phone, phone_raw, direccion, observaciones)
+         VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT (phone) DO UPDATE SET
+           name          = COALESCE(EXCLUDED.name,          wa_contacts.name),
+           direccion     = COALESCE(EXCLUDED.direccion,     wa_contacts.direccion),
+           observaciones = COALESCE(EXCLUDED.observaciones, wa_contacts.observaciones)`,
+        [newId(), texto(row.name), norm, String(row.phone || ''), texto(row.direccion), texto(row.observaciones)]
       );
       added++;
     } catch { skipped++; }
@@ -124,17 +146,22 @@ async function importContacts(list) {
 
 async function getContact(id) {
   const { rows } = await db.query(
-    `SELECT id, name, phone, opted_out FROM wa_contacts WHERE id = $1`, [id]
+    `SELECT ${COLS_CONTACTO} FROM wa_contacts WHERE id = $1`, [id]
   );
   return rows[0] || null;
 }
 
 // Renombrar / cambiar el teléfono de un contacto ya guardado.
-async function updateContact(id, { name, phone, optedOut }) {
+async function updateContact(id, { name, phone, direccion, observaciones, optedOut }) {
   const sets = [];
   const vals = [];
   const set = (col, val) => { vals.push(val); sets.push(`${col} = $${vals.length}`); };
-  if (name !== undefined) set('name', String(name || '').trim() || null);
+  if (name !== undefined) set('name', texto(name));
+  // Acá no hay COALESCE: si el panel manda el campo vacío es porque alguien lo
+  // borró a mano, y eso sí tiene que guardarse. La importación es la que
+  // conserva (una celda en blanco de una planilla no es una decisión).
+  if (direccion !== undefined) set('direccion', texto(direccion));
+  if (observaciones !== undefined) set('observaciones', texto(observaciones));
   if (phone !== undefined) {
     const norm = normalizePhone(phone);
     if (!norm || norm.replace(/\D/g, '').length < 8) throw new Error('Teléfono inválido.');
@@ -146,7 +173,7 @@ async function updateContact(id, { name, phone, optedOut }) {
   vals.push(id);
   const { rows } = await db.query(
     `UPDATE wa_contacts SET ${sets.join(', ')} WHERE id = $${vals.length}
-     RETURNING id, name, phone, opted_out, created_at`, vals
+     RETURNING ${COLS_CONTACTO}`, vals
   );
   return rows[0] || null;
 }

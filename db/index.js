@@ -164,13 +164,21 @@ CREATE INDEX IF NOT EXISTS marketing_assets_product_idx ON marketing_assets (pro
 -- ─── Promociones por WhatsApp (Meta Cloud API) ──────────────────────────────
 -- Base de clientes para campañas de marketing por plantillas aprobadas por Meta.
 CREATE TABLE IF NOT EXISTS wa_contacts (
-  id          TEXT PRIMARY KEY,
-  name        TEXT,
-  phone       TEXT NOT NULL UNIQUE,   -- E.164 normalizado (+51...)
-  phone_raw   TEXT,
-  opted_out   BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id            TEXT PRIMARY KEY,
+  name          TEXT,
+  phone         TEXT NOT NULL UNIQUE,   -- E.164 normalizado (+51...)
+  phone_raw     TEXT,
+  direccion     TEXT,                   -- la de la libreta del taller, en crudo
+  observaciones TEXT,                   -- qué se sabe del cliente: qué compró, qué preguntó
+  opted_out     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- La libreta del taller traía cuatro campos y la tabla tenía dos. Dirección y
+-- observaciones son texto libre a propósito: «Jesús María alt ovalo de la
+-- brasil» no es una dirección de reparto (esa vive en la tabla orders, con
+-- distrito, lat/lng y referencia), es lo que alguien anotó para acordarse.
+ALTER TABLE wa_contacts ADD COLUMN IF NOT EXISTS direccion     TEXT;
+ALTER TABLE wa_contacts ADD COLUMN IF NOT EXISTS observaciones TEXT;
 
 -- Plantillas de mensaje creadas/sincronizadas con Meta. El binario del header
 -- (foto) vive en la BD para re-subirlo al enviar (Railway borra el disco).

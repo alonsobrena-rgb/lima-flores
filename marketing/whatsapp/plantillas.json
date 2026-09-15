@@ -1,8 +1,9 @@
 {
-  "_": "Plantillas de mensaje de WhatsApp para mandar a revisión de Meta. Cada afirmación del cuerpo sale de `fuentes`, igual que la galería de anuncios: si un dato no está ahí, no se escribe. La cabecera se prepara con cabeceras.py y se envía con crear.mjs. Límites de Meta: cuerpo 1024, pie 60, texto de botón 25, nombre en minúsculas con guiones bajos.",
+  "_": "Plantillas de mensaje de WhatsApp para mandar a revisión de Meta. Cada afirmación del cuerpo sale de `fuentes`, igual que la galería de anuncios: si un dato no está ahí, no se escribe. La cabecera se prepara con cabeceras.py y se envía con crear.mjs. Límites de Meta: cuerpo 1024, pie 60, texto de botón 25, nombre en minúsculas con guiones bajos. El botón lleva a `base + producto` o, si la plantilla trae `ruta`, a `sitio + ruta` — para lo que no es un producto (el catálogo filtrado, la suscripción). `photo` sin barra sale de app/public/products; con barra, de app/public.",
   "idioma": "es",
   "ejemplo_nombre": "Ana",
   "base": "https://limaflores.pe/producto/",
+  "sitio": "https://limaflores.pe",
   "plantillas": [
     {
       "name": "florero_forti",
@@ -60,6 +61,46 @@
         ["Desde el día siguiente", "app/src/pages/Checkout.tsx:192 → minDate = hoy + 1"]
       ],
       "nota": "El id del catálogo es `boxsito-ramon` aunque el producto se llame Crespito. El enlace usa el id, que es lo que resuelve /producto/:id."
+    },
+    {
+      "name": "orquideas_en_maceta",
+      "category": "MARKETING",
+      "ruta": "/catalogo?cat=orquideas",
+      "nombreProducto": "Orquídeas",
+      "precio": 200,
+      "photo": "orquidea-sunrise-de-dos-varas.jpg",
+      "body": "Hola {{1}}, tenemos orquídeas Phalaenopsis en maceta, en anaranjado, amarillo con líneas fucsias y rosado vintage, cada una con su tarjeta de dedicatoria sin costo.\n\nDesde S/ 200 · Entrega a domicilio en Lima Metropolitana, desde el día siguiente.",
+      "footer": "Lima Flores · Atelier en Miraflores",
+      "boton": "Ver las orquídeas",
+      "fuentes": [
+        ["Orquídeas Phalaenopsis en maceta", "db/products.seed.json → las 6 de category «orquideas», todas Phalaenopsis y todas en maceta"],
+        ["Anaranjadas, amarillas con líneas fucsias, rosado vintage", "db/products.seed.json → orquidea-sunrise-de-dos-varas, orquideas-amarillas-con-lineas-fucsias, orquidea-rosado-vintage (description)"],
+        ["Tarjeta de dedicatoria sin costo", "app/src/lib/tienda.ts → PROMESAS; 5 de las 6 fichas lo repiten"],
+        ["Desde S/ 200", "db/products.seed.json → el más barato de «orquideas»: orquidea-rosado-vintage y orquideas-grandes-en-maceta, price 200"],
+        ["Entrega a domicilio en Lima Metropolitana", "app/src/lib/tienda.ts → PROMESAS"],
+        ["Desde el día siguiente", "app/src/pages/Checkout.tsx:192 → minDate = hoy + 1"]
+      ],
+      "nota": "La única de categoría: el botón lleva al catálogo filtrado (`?cat=orquideas`, slug de app/src/data/categories.json), no a un producto. La cabecera es la Sunrise porque el catálogo no tiene una toma de las seis juntas; por eso el cuerpo nombra los tres colores en vez de describir un arreglo. «Instrucciones de mantenimiento» se omite: solo 3 de las 6 fichas lo dicen, y «de dos varas» tampoco vale para las seis."
+    },
+    {
+      "name": "suscripcion_estacion",
+      "category": "MARKETING",
+      "ruta": "/suscripcion",
+      "nombreProducto": "Suscripción de flores",
+      "precio": 130,
+      "photo": "calados/ramo-estacion.webp",
+      "body": "Hola {{1}}, con la suscripción de Lima Flores recibes dos entregas al mes de flores de estación, elegidas y armadas a mano: ninguna es igual a la anterior.\n\nS/ 130 al mes · sin permanencia, pausas o cancelas cuando quieras.\n\nEntrega a domicilio en Lima Metropolitana.",
+      "footer": "Lima Flores · Atelier en Miraflores",
+      "boton": "Ver los planes",
+      "fuentes": [
+        ["Dos entregas al mes", "app/src/data/plans.ts → plan Mensual: deliveries 2, period «1 mes · 2 entregas»"],
+        ["Flores de estación, elegidas y armadas a mano", "app/src/pages/Suscripcion.tsx → «cada semana elegimos las flores que están en su mejor momento» + «arman cada ramo a mano»"],
+        ["Ninguna entrega es igual a la anterior", "app/src/pages/Suscripcion.tsx, literal"],
+        ["S/ 130 al mes", "app/src/data/plans.ts → MONTHLY_PRICE"],
+        ["Sin permanencia · pausas o cancelas cuando quieras", "app/src/data/plans.ts → plan Mensual (note + features)"],
+        ["Entrega a domicilio en Lima Metropolitana", "app/src/lib/tienda.ts → PROMESAS"]
+      ],
+      "nota": "El encargo pedía «los envíos semanales», pero lo que vende el sitio son DOS entregas al mes (app/src/data/plans.ts) y el cuerpo dice eso. Semanal solo aparece en la frase de la landing sobre elegir las flores cada semana, que es el abastecimiento, no la entrega. Si el plan pasa a semanal se cambia en plans.ts y acá, a la vez. La cabecera no sale de products/: es el calado de una entrega real (app/public/calados/ramo-estacion.webp), el mismo que abre /suscripcion."
     }
   ],
   "sin_franja": "Ninguna plantilla escribe la franja horaria. PROMESAS promete «una franja de 30 minutos con 24 horas de anticipación» y el checkout da tres franjas de cuatro horas (app/src/lib/delivery.ts). Hasta que se decida cuál es la verdad, «desde el día siguiente» es lo único seguro. Pendiente 4 de TRASPASO.md."
