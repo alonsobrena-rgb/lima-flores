@@ -132,7 +132,9 @@ ese hueco no se arregla al enviar: un parámetro vacío lo rechaza, y la coma y 
 espacio son del cuerpo, no del dato. Con una sola plantilla, a quien no tiene
 nombre le llega «Hola  ,».
 
-Por eso cada pieza tiene **dos plantillas aprobadas** y el envío elige:
+Por eso cada pieza tiene **dos plantillas aprobadas** y el envío elige. **Una
+plantilla nueva se crea siempre de a dos**; la regla, con el porqué entero, está
+en `.claude/skills/plantillas-whatsapp/SKILL.md`.
 
 | El contacto | La plantilla | Lo que recibe |
 | --- | --- | --- |

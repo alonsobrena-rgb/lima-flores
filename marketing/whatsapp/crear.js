@@ -125,6 +125,11 @@ function revisar(t) {
   // Meta exige un ejemplo por cada variable, y el cliente solo arma el de {{1}}.
   const vars = [...new Set((t.body || '').match(/\{\{\d+\}\}/g) || [])];
   if (vars.length > 1) malo.push(`usa ${vars.join(', ')} y el cliente solo manda ejemplo para {{1}}`);
+  // Meta no aprueba un cuerpo que empiece o termine con una variable. Se revisa
+  // acá porque el rechazo llega horas después y sin decir cuál era el problema.
+  const cuerpo = (t.body || '').trim();
+  if (/^\{\{\d+\}\}/.test(cuerpo)) malo.push('el cuerpo no puede empezar con una variable: Meta lo rechaza');
+  if (/\{\{\d+\}\}$/.test(cuerpo)) malo.push('el cuerpo no puede terminar con una variable: Meta lo rechaza');
   if (t.footer && t.footer.length > LIMITES.footer) malo.push(`el pie tiene ${t.footer.length} caracteres y el tope es ${LIMITES.footer}`);
   if (t.boton && t.boton.length > LIMITES.boton) malo.push(`el texto del botón tiene ${t.boton.length} y el tope es ${LIMITES.boton}`);
   if (url.length > LIMITES.url) malo.push('la URL pasa del tope');

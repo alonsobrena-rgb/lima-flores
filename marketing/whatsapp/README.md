@@ -19,7 +19,11 @@ llamar a Meta, cada uno contra su fuente.
 
 **Son cinco piezas y diez plantillas en Meta.** Cada una va también en versión
 `_sin_nombre` —el mismo mensaje sin el `{{1}}`— y esa es la que recibe un
-contacto sin nombre guardado, que en la libreta es más de un tercio:
+contacto sin nombre guardado, que en la libreta es más de un tercio.
+
+> **Regla: una plantilla que saluda con `{{1}}` no se crea sola, se crean las
+> dos.** Está en `.claude/skills/plantillas-whatsapp/SKILL.md` con el porqué;
+> `crear.js` y el panel ya las hacen de a dos, no hay que desactivarlo.
 
 | | Cuerpo |
 | --- | --- |
