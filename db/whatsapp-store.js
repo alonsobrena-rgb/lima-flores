@@ -242,6 +242,16 @@ async function getTemplateFull(id) {
   return rows[0] || null;
 }
 
+// La misma fila, buscada por nombre+idioma. Es como se resuelve la gemela «sin
+// nombre» al enviar: la pareja se empareja por el nombre (ver
+// integrations/whatsapp/client.js), no por una columna que haya que mantener.
+async function getTemplateFullPorNombre(name, language = 'es') {
+  const { rows } = await db.query(
+    `SELECT * FROM wa_templates WHERE name = $1 AND language = $2 LIMIT 1`, [name, language]
+  );
+  return rows[0] || null;
+}
+
 // El binario del header por id (para servir en el preview del admin).
 async function getTemplateHeader(id) {
   const { rows } = await db.query(
@@ -496,7 +506,7 @@ module.exports = {
   listContacts, countContacts, addContact, importContacts, getContact, updateContact,
   deleteContact, getContacts,
   // plantillas
-  createTemplate, getTemplateMeta, listTemplates, getTemplateFull, getTemplateHeader,
+  createTemplate, getTemplateMeta, listTemplates, getTemplateFull, getTemplateFullPorNombre, getTemplateHeader,
   updateTemplateStatus, upsertTemplateDesdeMeta, faltaHeader,
   // campañas
   createCampaign, queueMessages, markMessage, bumpCampaign, finishCampaign,

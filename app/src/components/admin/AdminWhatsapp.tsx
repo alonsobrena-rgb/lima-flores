@@ -11,6 +11,22 @@ type Template = {
   status: string; body_text: string | null; header_kind: string | null; has_header: boolean;
   rejected_reason: string | null; created_at: string;
 };
+// La pareja con nombre / sin nombre. Una plantilla de marketing saluda con
+// «Hola {{1}},» y más de un tercio de la libreta no tiene nombre guardado; como
+// Meta congela el cuerpo al aprobarlo, el «Hola ,» no se arregla al enviar. Por
+// eso cada pieza puede tener dos plantillas aprobadas y el envío elige.
+// El emparejado es por el nombre y la regla vive en integrations/whatsapp/client.js.
+const SUFIJO_SIN_NOMBRE = '_sin_nombre';
+const esSinNombre = (name: string) => name.endsWith(SUFIJO_SIN_NOMBRE);
+const nombreSinNombre = (name: string) => name + SUFIJO_SIN_NOMBRE;
+/** «Hola {{1}}, el Florero…» → «Hola, el Florero…» */
+const cuerpoSinNombre = (body: string) => body.replace(/[ \t]*\{\{1\}\}/g, '').trim();
+/** Las que se pueden elegir para enviar: la gemela va sola, no se elige. */
+const elegibles = (ts: Template[]) => ts.filter((t) => !esSinNombre(t.name));
+/** La gemela aprobada de una plantilla, si la hay. */
+const gemelaDe = (ts: Template[], t?: Template | null) =>
+  (t ? ts.find((x) => x.name === nombreSinNombre(t.name) && x.language === t.language) : undefined);
+
 type Campaign = {
   id: string; name: string | null; template_id: string; template_name?: string;
   status: string; total: number; sent: number; failed: number; created_at: string;
@@ -430,6 +446,10 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
     : contacts;
 
   const tpl = templates.find((t) => t.id === templateId);
+  // La gemela no se elige: se elige la plantilla y el envío usa la versión sin
+  // nombre cuando el contacto no tiene uno guardado.
+  const paraElegir = elegibles(templates);
+  const gemela = gemelaDe(templates, tpl);
   // Enviar es hacia afuera y no se deshace: se confirma con nombre y número a la vista.
   const enviar = async (c: Contact) => {
     if (!templateId) { setErr('Elige primero la plantilla que quieres enviar.'); return; }
@@ -502,10 +522,10 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
           </div>
           <div className="w-full sm:w-auto sm:min-w-[240px]">
             <label className={label}>Plantilla para enviar</label>
-            {templates.length
+            {paraElegir.length
               ? <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={field}>
                   <option value="">— elegir —</option>
-                  {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  {paraElegir.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               : <p className="mt-1.5 text-[12px] text-foreground/55">No hay plantillas aprobadas. Crea una en <strong>Plantillas</strong>.</p>}
           </div>
@@ -514,7 +534,16 @@ function Contacts({ fail }: { fail: (e: unknown) => boolean }) {
         {tpl && (
           <div className="mb-3 flex items-start gap-3 border border-border bg-surface/40 p-3">
             {tpl.has_header && <img src={apiUrl('/api/admin/wa/templates/' + tpl.id + '/header')} alt="" className="h-14 w-14 flex-shrink-0 rounded-sm object-cover" />}
-            <p className="line-clamp-3 text-[12px] leading-snug text-foreground/65">{tpl.body_text?.replace(/\{\{1\}\}/g, 'nombre del contacto')}</p>
+            <div className="min-w-0">
+              <p className="line-clamp-3 text-[12px] leading-snug text-foreground/65">{tpl.body_text?.replace(/\{\{1\}\}/g, 'nombre del contacto')}</p>
+              {/* Qué le llega a un contacto sin nombre: la gemela, o esta misma
+                  con el hueco del nombre en blanco. */}
+              <p className="mt-1.5 text-[11px] leading-snug text-foreground/45">
+                {gemela
+                  ? <>Sin nombre guardado recibe la versión <span className="font-mono">{gemela.name}</span>: «{gemela.body_text}»</>
+                  : <>Sin nombre guardado recibe esta misma, con el hueco del nombre en blanco. Para un saludo limpio, crea su versión sin nombre en <strong>Plantillas</strong>.</>}
+              </p>
+            </div>
           </div>
         )}
 
@@ -609,6 +638,7 @@ function Templates({ fail }: { fail: (e: unknown) => boolean }) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [err, setErr] = useState('');
+  const [aviso, setAviso] = useState('');
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -624,47 +654,85 @@ function Templates({ fail }: { fail: (e: unknown) => boolean }) {
     finally { setBusy(false); }
   };
 
+  // Una tarjeta por pieza, con su gemela dentro: son dos plantillas en Meta pero
+  // una sola decisión acá, y verlas sueltas hacía una lista con todo duplicado.
+  // Una gemela sin su pareja (la borraron, o la sincronización trajo solo una)
+  // se muestra igual, sola, para que no desaparezca de la vista.
+  const piezas = elegibles(templates);
+  const huerfanas = templates.filter((t) => esSinNombre(t.name) && !piezas.some((b) => nombreSinNombre(b.name) === t.name));
+  const conGemela = piezas.filter((t) => gemelaDe(templates, t)).length;
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">{templates.length} plantilla(s)</p>
+        <p className="font-mono text-xs uppercase tracking-[0.08em] text-foreground/50">
+          {piezas.length} plantilla(s){conGemela ? ` · ${conGemela} con versión sin nombre` : ''}
+        </p>
         <div className="flex gap-2">
           <button onClick={sync} disabled={busy} className="border border-border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/60 hover:border-ink-900 hover:text-ink-900 disabled:opacity-50">↻ Sincronizar estados</button>
           <button onClick={() => setShowForm((v) => !v)} className="bg-ink-900 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.1em] text-ivory-50 hover:bg-rosa-500">{showForm ? 'Cerrar' : '+ Nueva plantilla'}</button>
         </div>
       </div>
       {err && <p className="mb-4 bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
+      {aviso && <p className="mb-4 bg-amber-100 px-3 py-2.5 text-sm text-amber-900">{aviso}</p>}
 
-      {showForm && <TemplateForm fail={fail} onCreated={() => { setShowForm(false); load(); }} />}
+      {showForm && <TemplateForm fail={fail} onCreated={(a) => { setShowForm(false); setAviso(a || ''); load(); }} />}
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {templates.map((t) => (
-          <div key={t.id} className="flex min-w-0 gap-3 border border-border p-3">
-            {t.has_header
-              ? <img src={apiUrl('/api/admin/wa/templates/' + t.id + '/header')} alt="" className="h-20 w-20 flex-shrink-0 rounded-sm object-cover" />
-              : <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-sm bg-ivory-200 text-[10px] text-foreground/40">sin foto</div>}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <p className="min-w-0 truncate font-mono text-[12px] text-ink-900">{t.name}</p>
-                <StatusBadge status={t.status} />
+        {[...piezas, ...huerfanas].map((t) => {
+          const g = gemelaDe(templates, t);
+          const usaNombre = /\{\{1\}\}/.test(t.body_text || '');
+          return (
+            <div key={t.id} className="flex min-w-0 flex-col border border-border p-3">
+              <div className="flex min-w-0 gap-3">
+                {t.has_header
+                  ? <img src={apiUrl('/api/admin/wa/templates/' + t.id + '/header')} alt="" className="h-20 w-20 flex-shrink-0 rounded-sm object-cover" />
+                  : <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-sm bg-ivory-200 text-[10px] text-foreground/40">sin foto</div>}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate font-mono text-[12px] text-ink-900">{t.name}</p>
+                    <StatusBadge status={t.status} />
+                  </div>
+                  <p className="mt-1 line-clamp-3 text-[12px] leading-snug text-foreground/60">{t.body_text}</p>
+                  {t.rejected_reason && t.rejected_reason.toUpperCase() !== 'NONE'
+                    && <p className="mt-1 break-words text-[11px] text-red-700">{t.rejected_reason}</p>}
+                </div>
               </div>
-              <p className="mt-1 line-clamp-3 text-[12px] leading-snug text-foreground/60">{t.body_text}</p>
-              {t.rejected_reason && t.rejected_reason.toUpperCase() !== 'NONE'
-                && <p className="mt-1 break-words text-[11px] text-red-700">{t.rejected_reason}</p>}
+              {/* La pareja: qué recibe un contacto sin nombre guardado. */}
+              {g && (
+                <div className="mt-3 border-t border-border pt-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate font-mono text-[11px] text-foreground/55">sin nombre → {g.name}</p>
+                    <StatusBadge status={g.status} />
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-foreground/60">{g.body_text}</p>
+                  {g.rejected_reason && g.rejected_reason.toUpperCase() !== 'NONE'
+                    && <p className="mt-1 break-words text-[11px] text-red-700">{g.rejected_reason}</p>}
+                </div>
+              )}
+              {!g && usaNombre && (
+                <p className="mt-3 border-t border-border pt-2.5 text-[11px] leading-snug text-foreground/45">
+                  Sin versión sin nombre: a los contactos sin nombre guardado les llega esta misma, con el hueco en blanco.
+                </p>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
         {!templates.length && !showForm && <p className="col-span-full py-10 text-center italic text-foreground/40">Aún no hay plantillas. Crea una para empezar.</p>}
       </div>
     </div>
   );
 }
 
-function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCreated: () => void }) {
+function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCreated: (aviso?: string) => void }) {
   const [name, setName] = useState('');
   const [language, setLanguage] = useState('es');
   const [body, setBody] = useState('Hola {{1}}, en Lima Flores tenemos una promoción especial para ti 🌸');
   const [example, setExample] = useState('Ana');
+  // La gemela sin nombre. `null` = todavía nadie la tocó, así que sigue al
+  // cuerpo principal; en cuanto se edita, deja de moverse sola.
+  const [gemela, setGemela] = useState(true);
+  const [gemelaTxt, setGemelaTxt] = useState<string | null>(null);
   const [header, setHeader] = useState<HeaderSel>({ kind: 'none' });
   const [picker, setPicker] = useState<'upload' | 'asset'>('upload');
   const [err, setErr] = useState('');
@@ -688,6 +756,9 @@ function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCr
 
   const preview = body.replace(/\{\{1\}\}/g, example || 'Ana');
   const headerThumb = header.kind === 'upload' ? header.dataUrl : header.kind === 'asset' ? header.thumb : '';
+  const usaNombre = /\{\{1\}\}/.test(body);
+  const cuerpoGemela = gemelaTxt ?? cuerpoSinNombre(body);
+  const creaGemela = usaNombre && gemela && !!cuerpoGemela.trim();
 
   const submit = async () => {
     if (!name.trim()) { setErr('Ponle un nombre a la plantilla.'); return; }
@@ -697,10 +768,16 @@ function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCr
       header.kind === 'upload' ? { dataBase64: header.dataUrl }
       : header.kind === 'asset' ? { assetId: header.assetId }
       : undefined;
+    if (creaGemela && /\{\{\d+\}\}/.test(cuerpoGemela)) {
+      setErr('La versión sin nombre no puede llevar {{1}}: es justamente la que no saluda por el nombre.');
+      setBusy(false); return;
+    }
     try {
-      await adminSend('/api/admin/wa/templates', 'POST', {
+      const r = await adminSend('/api/admin/wa/templates', 'POST', {
         name: name.trim(), language, bodyText: body, bodyExample: example || 'Ana', header: headerPayload,
+        bodySinNombre: creaGemela ? cuerpoGemela.trim() : undefined,
       });
+      if (r && r.sinNombreError) { onCreated(r.sinNombreError); return; }
       onCreated();
     } catch (e) { if (!fail(e)) setErr((e as Error).message); }
     finally { setBusy(false); }
@@ -724,6 +801,33 @@ function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCr
           <input value={example} onChange={(e) => setExample(e.target.value)} className={field + ' max-w-[200px]'} placeholder="Ejemplo para {{1}}" />
         </div>
 
+        {/* La versión sin nombre. Solo tiene sentido si el cuerpo saluda por el
+            nombre: sin {{1}} la plantilla ya sirve para todos. */}
+        {usaNombre && (
+          <div className="border border-border bg-background p-3">
+            <label className="flex cursor-pointer items-start gap-2">
+              <input type="checkbox" checked={gemela} onChange={(e) => setGemela(e.target.checked)} className="mt-0.5" />
+              <span className="min-w-0">
+                <span className="block text-[13px] text-ink-900">Crear también la versión sin nombre</span>
+                <span className="mt-0.5 block text-[11px] leading-relaxed text-foreground/50">
+                  Es la que recibe un contacto que no tiene nombre guardado — más de un tercio de la libreta. Se crea
+                  como <span className="font-mono">{(name.trim() || 'nombre') + SUFIJO_SIN_NOMBRE}</span>, Meta la revisa
+                  igual que la otra, y el envío elige sola cuál mandarle a cada uno.
+                </span>
+              </span>
+            </label>
+            {gemela && (
+              <>
+                <textarea value={cuerpoGemela} onChange={(e) => setGemelaTxt(e.target.value)} rows={4} className={field} />
+                <p className="mt-1 text-[11px] text-foreground/45">
+                  Sin <span className="font-mono">{'{{1}}'}</span>: acá no va ningún nombre. Se propone el mismo
+                  mensaje sin el hueco; edítalo si quieres otro saludo.
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Header con foto */}
         <div>
           <label className={label}>Foto del encabezado (opcional)</label>
@@ -745,7 +849,7 @@ function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCr
           )}
         </div>
 
-        <button onClick={submit} disabled={busy} className="w-full bg-rosa-500 py-3 font-mono text-[12px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-50">{busy ? 'Creando…' : 'Crear plantilla en Meta'}</button>
+        <button onClick={submit} disabled={busy} className="w-full bg-rosa-500 py-3 font-mono text-[12px] uppercase tracking-[0.12em] text-ivory-50 hover:bg-rosa-600 disabled:opacity-50">{busy ? 'Creando…' : creaGemela ? 'Crear las dos en Meta' : 'Crear plantilla en Meta'}</button>
         {err && <p className="bg-red-100 px-3 py-2.5 text-sm text-red-800">{err}</p>}
         <p className="text-[11px] leading-relaxed text-foreground/45">Meta revisa cada plantilla de marketing (de minutos a horas). Quedará en <strong>PENDING</strong> hasta su aprobación; usa “Sincronizar estados”.</p>
       </div>
@@ -754,10 +858,20 @@ function TemplateForm({ fail, onCreated }: { fail: (e: unknown) => boolean; onCr
       <div>
         <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/50">Vista previa</p>
         <div className="rounded-lg p-4" style={{ background: '#ECE5DD' }}>
+          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.12em] text-ink-900/40">Con nombre</p>
           <div className="ml-auto max-w-[260px] overflow-hidden rounded-lg bg-white shadow-sm">
             {headerThumb && <img src={headerThumb} alt="" className="h-36 w-full object-cover" />}
             <p className="whitespace-pre-wrap px-3 py-2 text-[13px] leading-snug text-ink-900">{preview}</p>
           </div>
+          {creaGemela && (
+            <>
+              <p className="mb-1 mt-3 text-[10px] font-medium uppercase tracking-[0.12em] text-ink-900/40">Sin nombre</p>
+              <div className="ml-auto max-w-[260px] overflow-hidden rounded-lg bg-white shadow-sm">
+                {headerThumb && <img src={headerThumb} alt="" className="h-36 w-full object-cover" />}
+                <p className="whitespace-pre-wrap px-3 py-2 text-[13px] leading-snug text-ink-900">{cuerpoGemela}</p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -907,10 +1021,12 @@ function Programadas({ fail }: { fail: (e: unknown) => boolean }) {
             </div>
             <div>
               <label className={label}>Plantilla</label>
-              {templates.length
+              {/* La gemela «sin nombre» no se elige acá: la elige el envío,
+                  contacto por contacto. Ver elegibles() arriba. */}
+              {elegibles(templates).length
                 ? <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={field}>
                     <option value="">— elegir —</option>
-                    {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    {elegibles(templates).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
                 : <p className="mt-1.5 text-[12px] text-foreground/55">No hay plantillas aprobadas. Crea una en <strong>Plantillas</strong>.</p>}
             </div>
@@ -1012,8 +1128,14 @@ function Campaigns({ fail }: { fail: (e: unknown) => boolean }) {
   useEffect(() => { load(); }, [load]);
 
   const tpl = templates.find((t) => t.id === templateId);
+  const paraElegir = elegibles(templates);
+  const gemela = gemelaDe(templates, tpl);
   const activeContacts = contacts.filter((c) => !c.opted_out);
-  const audienceIds = audMode === 'all' ? activeContacts.map((c) => c.id) : [...picked];
+  const audiencia = audMode === 'all' ? activeContacts : activeContacts.filter((c) => picked.has(c.id));
+  const audienceIds = audiencia.map((c) => c.id);
+  // Cuántos de esta audiencia no tienen nombre: son los que reciben la gemela,
+  // y conviene verlo antes de mandar, no después.
+  const sinNombre = audiencia.filter((c) => !(c.name || '').trim()).length;
   const sampleName = (audMode === 'pick' ? activeContacts.find((c) => picked.has(c.id)) : activeContacts[0])?.name || 'Ana';
   const previewBody = tpl?.body_text?.replace(/\{\{1\}\}/g, sampleName) || '';
 
@@ -1052,10 +1174,10 @@ function Campaigns({ fail }: { fail: (e: unknown) => boolean }) {
 
         <div>
           <label className={label}>Plantilla aprobada</label>
-          {templates.length
+          {paraElegir.length
             ? <select value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={field}>
                 <option value="">— elegir —</option>
-                {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                {paraElegir.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
             : <p className="mt-1.5 text-[12px] text-foreground/55">No hay plantillas aprobadas todavía. Crea una en la pestaña <strong>Plantillas</strong> y espera la aprobación de Meta.</p>}
         </div>
@@ -1089,6 +1211,25 @@ function Campaigns({ fail }: { fail: (e: unknown) => boolean }) {
               {tpl.has_header && <img src={apiUrl('/api/admin/wa/templates/' + tpl.id + '/header')} alt="" className="h-32 w-full object-cover" />}
               <p className="whitespace-pre-wrap px-3 py-2 text-[13px] leading-snug text-ink-900">{previewBody}</p>
             </div>
+            {/* Lo que reciben los que no tienen nombre guardado. Con gemela es
+                otro mensaje, así que se muestra entero: son dos envíos
+                distintos y no se ven en ninguna otra parte. */}
+            {sinNombre > 0 && (
+              <div className="mt-3">
+                <p className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/50">
+                  {sinNombre} sin nombre guardado {gemela ? '· reciben la versión sin nombre' : ''}
+                </p>
+                {gemela
+                  ? <div className="overflow-hidden rounded-lg bg-white shadow-sm" style={{ maxWidth: 280 }}>
+                      {gemela.has_header && <img src={apiUrl('/api/admin/wa/templates/' + gemela.id + '/header')} alt="" className="h-32 w-full object-cover" />}
+                      <p className="whitespace-pre-wrap px-3 py-2 text-[13px] leading-snug text-ink-900">{gemela.body_text}</p>
+                    </div>
+                  : <p className="text-[12px] leading-relaxed text-foreground/55">
+                      Reciben esta misma plantilla con el hueco del nombre en blanco. Para que les llegue un saludo
+                      limpio, crea su <strong>versión sin nombre</strong> en la pestaña Plantillas.
+                    </p>}
+              </div>
+            )}
           </div>
         )}
 

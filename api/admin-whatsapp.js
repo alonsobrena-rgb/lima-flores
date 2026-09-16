@@ -10,6 +10,9 @@
 //   POST   /api/admin/wa/contacts            → alta { name, phone, direccion, observaciones }
 //   PATCH  /api/admin/wa/contacts/:id        → { name, phone, direccion, observaciones, optedOut }
 //   POST   /api/admin/wa/contacts/import     → bulk { contacts: [{name, phone, direccion, observaciones}] }
+//   (plantillas) POST /api/admin/wa/templates acepta `bodySinNombre`: crea además
+//   la gemela `<nombre>_sin_nombre`, el mismo mensaje sin {{1}}, que es la que
+//   recibe un contacto sin nombre guardado.
 //   POST   /api/admin/wa/contacts/:id/enviar → una plantilla a ese contacto, ahora
 //   DELETE /api/admin/wa/contacts/:id
 // Plantillas:
@@ -244,14 +247,46 @@ async function createTemplate(req, res) {
   } catch (e) { return send(res, 502, { error: 'Meta rechazó la plantilla: ' + e.message }); }
 
   // 3. Persistir localmente (guardamos el header para re-subirlo al enviar).
+  let saved;
   try {
-    const saved = await waStore.createTemplate({
+    saved = await waStore.createTemplate({
       metaId: meta.id, name, language, category: 'MARKETING', status: meta.status || 'PENDING',
       bodyText, headerKind: headerHandle ? 'image' : 'none', headerImage, headerMime,
       buttons: body.buttons || null,
     });
-    return send(res, 201, saved);
   } catch (e) { return send(res, 500, { error: e.message }); }
+
+  // 4. La gemela sin nombre, si se pidió: el mismo mensaje sin {{1}}, para los
+  //    contactos que no tienen nombre guardado. Se manda como una plantilla más
+  //    —Meta la revisa igual— y el envío elige sola cuál usar.
+  //
+  //    Si esta falla NO se devuelve error: la primera ya está creada en Meta y
+  //    no se puede deshacer desde acá. Se responde 201 con el motivo, que el
+  //    panel muestra como aviso; la gemela se puede volver a intentar después.
+  const cuerpoGemela = String(body.bodySinNombre || '').trim();
+  if (!cuerpoGemela) return send(res, 201, saved);
+  if (/\{\{\d+\}\}/.test(cuerpoGemela)) {
+    return send(res, 201, { ...saved, sinNombreError: 'La versión sin nombre no puede llevar variables; se creó solo la principal.' });
+  }
+  try {
+    let handleGemela = null;
+    if (headerImage) {
+      handleGemela = await wa.uploadResumable(cx, { buffer: headerImage, mime: headerMime, filename: wa.nombreSinNombre(name) });
+    }
+    const metaGemela = await wa.createTemplate(cx, {
+      name: wa.nombreSinNombre(name), language, category: 'MARKETING',
+      bodyText: cuerpoGemela, headerHandle: handleGemela, buttons: body.buttons,
+    });
+    const savedGemela = await waStore.createTemplate({
+      metaId: metaGemela.id, name: wa.nombreSinNombre(name), language, category: 'MARKETING',
+      status: metaGemela.status || 'PENDING', bodyText: cuerpoGemela,
+      headerKind: handleGemela ? 'image' : 'none', headerImage, headerMime,
+      buttons: body.buttons || null,
+    });
+    return send(res, 201, { ...saved, sinNombre: savedGemela });
+  } catch (e) {
+    return send(res, 201, { ...saved, sinNombreError: 'La principal se creó; la versión sin nombre no: ' + e.message });
+  }
 }
 
 async function listTemplates(req, res) {

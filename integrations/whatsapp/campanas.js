@@ -8,19 +8,15 @@ const wa = require('./client.js');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Con qué se rellena {{1}} cuando el contacto no tiene nombre guardado. Era
-// «cliente» y se leía mal —«Hola cliente,» suena a formulario—, así que va un
-// espacio: el mensaje arranca «Hola  ,», sin nombre inventado. Decisión del
-// cliente, tomada sabiendo cómo queda.
+// Con qué se rellena {{1}} cuando el contacto no tiene nombre y la plantilla
+// tampoco tiene gemela aprobada. Es el último recurso: lo bueno es mandarle la
+// gemela sin variable (abajo), porque acá el mensaje sale «Hola  ,» — la coma y
+// el espacio son del cuerpo aprobado y desde el envío no se pueden quitar.
 //
-// No puede ir vacío: Meta rechaza un parámetro sin contenido, y el cuerpo ya
-// está aprobado con «Hola {{1}},» —la coma y el espacio de antes son parte de
-// la plantilla, no del parámetro, así que desde acá no se pueden quitar. Para
-// que diga «Hola, el Box…» hay que editar el cuerpo y volver a revisión.
-//
-// El espacio suelto no está probado contra Meta todavía: si lo rechazara, esos
-// envíos fallan con el error a la vista en la fila del mensaje (el resto de la
-// campaña sigue, cada mensaje va por su cuenta).
+// Vacío no es opción: Meta rechaza un parámetro sin contenido. Un espacio suelto
+// puede que también lo rechace (hay proveedores que documentan un mínimo de dos
+// caracteres); si pasa, ese mensaje falla con el error a la vista en su fila y
+// el resto de la campaña sigue saliendo.
 const SIN_NOMBRE = ' ';
 
 async function ejecutarCampana(campaignId, templateId, cx) {
@@ -42,24 +38,55 @@ async function ejecutarCampana(campaignId, templateId, cx) {
     return;
   }
 
-  let headerMediaId = null;
-  if (template.header_kind === 'image' && template.header_image) {
-    try { headerMediaId = await wa.uploadMedia(cx, { buffer: template.header_image, mime: template.header_mime || 'image/jpeg', filename: template.name }); }
-    catch (e) {
-      for (const m of camp.messages) await waStore.markMessage(m.id, { status: 'failed', error: 'Header: ' + e.message });
-      await waStore.bumpCampaign(campaignId, { failed: camp.messages.length });
-      await waStore.finishCampaign(campaignId, 'failed');
-      return;
+  // La gemela sin variable, para los contactos sin nombre. Solo si está
+  // aprobada: Meta no deja enviar una plantilla que sigue en revisión, y si se
+  // intenta el mensaje falla — mejor caer al relleno, que al menos sale.
+  let gemela = null;
+  if (hasVar && !wa.esSinNombre(template.name)) {
+    const g = await waStore.getTemplateFullPorNombre(wa.nombreSinNombre(template.name), template.language);
+    // Y solo si su foto está guardada acá: mandarla sin la cabecera que Meta le
+    // aprobó es un error de componentes, y uno que no dice cuál es el problema.
+    const sinFoto = g && g.header_kind === 'image' && !g.header_image;
+    if (g && !sinFoto && String(g.status).toUpperCase() === 'APPROVED') gemela = g;
+  }
+
+  // La foto se sube una vez por plantilla y se reutiliza en todos los envíos.
+  // El media id es del número, no de la plantilla, así que la gemela podría
+  // compartirlo; se sube aparte igual porque puede tener otra foto.
+  const fotos = new Map();
+  const subirFoto = async (t) => {
+    if (t.header_kind !== 'image' || !t.header_image) return null;
+    if (!fotos.has(t.id)) {
+      fotos.set(t.id, wa.uploadMedia(cx, {
+        buffer: t.header_image, mime: t.header_mime || 'image/jpeg', filename: t.name,
+      }));
     }
+    return fotos.get(t.id);
+  };
+
+  // La de la plantilla principal se sube antes de empezar: si falla, falla toda
+  // la campaña y conviene decirlo de una vez y no mensaje por mensaje.
+  try { await subirFoto(template); }
+  catch (e) {
+    for (const m of camp.messages) await waStore.markMessage(m.id, { status: 'failed', error: 'Header: ' + e.message });
+    await waStore.bumpCampaign(campaignId, { failed: camp.messages.length });
+    await waStore.finishCampaign(campaignId, 'failed');
+    return;
   }
 
   for (const m of camp.messages) {
+    // Con nombre va la plantilla que saluda por su nombre; sin nombre, la
+    // gemela. Si no hay gemela aprobada, la de siempre con el relleno.
+    const nombre = (m.contact_name || '').trim();
+    const usa = !nombre && gemela ? gemela : template;
+    const conVar = /\{\{1\}\}/.test(usa.body_text || '');
     try {
       const r = await wa.sendTemplate(cx, {
-        to: m.phone, templateName: template.name, language: template.language,
-        // .trim(): un nombre que quedó en blanco de antes son espacios de más
-        // dentro del parámetro, y Meta corta a las cuatro seguidas.
-        headerMediaId, bodyParams: hasVar ? [(m.contact_name || '').trim() || SIN_NOMBRE] : [],
+        to: m.phone, templateName: usa.name, language: usa.language,
+        headerMediaId: await subirFoto(usa),
+        // .trim() arriba: un nombre que quedó en blanco de antes son espacios de
+        // más dentro del parámetro, y Meta corta a los cuatro seguidos.
+        bodyParams: conVar ? [nombre || SIN_NOMBRE] : [],
       });
       await waStore.markMessage(m.id, { status: 'sent', waId: r.id });
       await waStore.bumpCampaign(campaignId, { sent: 1 });

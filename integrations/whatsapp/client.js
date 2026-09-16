@@ -262,6 +262,38 @@ async function uploadMedia(conexion, { buffer, mime, filename = 'header' }) {
   return json.id;
 }
 
+// ─── La pareja con nombre / sin nombre ───────────────────────────────────────
+// Una plantilla de marketing saluda con «Hola {{1}},» y más de un tercio de la
+// libreta no tiene nombre guardado. Meta congela el cuerpo al aprobarlo, así que
+// el «Hola ,» que queda no se arregla desde el envío: la coma es del cuerpo, y
+// un parámetro vacío lo rechaza Meta.
+//
+// La solución es tener dos plantillas aprobadas por pieza y elegir al enviar.
+// Se emparejan por el nombre, no por una columna: así una plantilla creada en
+// WhatsApp Manager o con marketing/whatsapp/crear.js entra emparejada sola
+// cuando el panel sincroniza, sin que nadie tenga que relacionarlas a mano.
+//
+//   florero_forti              → «Hola {{1}}, el Florero Forti lleva…»
+//   florero_forti_sin_nombre   → «Hola, el Florero Forti lleva…»
+const SUFIJO_SIN_NOMBRE = '_sin_nombre';
+
+/** El nombre de la gemela de una plantilla. */
+const nombreSinNombre = (name) => `${name}${SUFIJO_SIN_NOMBRE}`;
+
+/** ¿Este nombre es el de una gemela? */
+const esSinNombre = (name) => String(name || '').endsWith(SUFIJO_SIN_NOMBRE);
+
+/** El nombre de la plantilla con nombre a partir del de su gemela. */
+const nombreBase = (name) => (esSinNombre(name) ? String(name).slice(0, -SUFIJO_SIN_NOMBRE.length) : String(name || ''));
+
+/**
+ * El cuerpo de la gemela a partir del original. Quitar «{{1}}» con el espacio
+ * que lo precede convierte «Hola {{1}}, el Florero…» en «Hola, el Florero…»,
+ * que es exactamente el saludo que se busca. Es una sugerencia: el panel deja
+ * editarla y `plantillas.json` puede traer la suya escrita a mano.
+ */
+const cuerpoSinNombre = (bodyText) => String(bodyText || '').replace(/[ \t]*\{\{1\}\}/g, '').trim();
+
 // ─── Enviar un mensaje de plantilla ───────────────────────────────────────────
 // headerMediaId: media id (opcional, solo si la plantilla tiene header de imagen).
 // bodyParams: array de strings que llenan {{1}}, {{2}}, ...
@@ -288,6 +320,7 @@ async function sendTemplate(conexion, { to, templateName, language = 'es', heade
 
 module.exports = {
   ENV_VALIDA, TOKEN_ENV_POR_DEFECTO,
+  SUFIJO_SIN_NOMBRE, nombreSinNombre, esSinNombre, nombreBase, cuerpoSinNombre,
   config, tokenDe, faltantes, isConfigured, canCreateTemplates, probar,
   uploadResumable, createTemplate, listTemplates, parseComponents, fetchHeaderSample, uploadMedia, sendTemplate,
 };

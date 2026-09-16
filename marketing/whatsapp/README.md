@@ -17,6 +17,22 @@ así que traen `ruta` y el botón sale de `sitio + ruta`: el catálogo filtrado 
 categoría y la página de la suscripción. Los dos destinos se comprueban antes de
 llamar a Meta, cada uno contra su fuente.
 
+**Son cinco piezas y diez plantillas en Meta.** Cada una va también en versión
+`_sin_nombre` —el mismo mensaje sin el `{{1}}`— y esa es la que recibe un
+contacto sin nombre guardado, que en la libreta es más de un tercio:
+
+| | Cuerpo |
+| --- | --- |
+| `florero_forti` | «Hola {{1}}, el Florero Forti lleva…» |
+| `florero_forti_sin_nombre` | «Hola, el Florero Forti lleva…» |
+
+El envío elige sola cuál mandarle a cada contacto (`integrations/whatsapp/campanas.js`).
+Existe porque Meta congela el cuerpo al aprobarlo y no acepta un parámetro
+vacío: con una sola plantilla, quien no tiene nombre recibe «Hola  ,». El cuerpo
+de la gemela sale del principal quitándole el hueco y el espacio de antes
+(«Hola {{1}}, el…» → «Hola, el…»); si alguna necesita otro saludo se escribe en
+`body_sin_nombre`, y `sin_nombre: false` la deja sin gemela.
+
 ```sh
 python3 marketing/whatsapp/cabeceras.py     # prepara las fotos del encabezado
 node marketing/whatsapp/crear.js --revisar  # valida sin llamar a Meta
@@ -25,7 +41,13 @@ node marketing/whatsapp/crear.js --estado   # en qué van
 ```
 
 El copy y los datos están en `plantillas.json`; los cinco cuerpos usan `{{1}}`
-para el nombre del contacto.
+para el nombre del contacto, y de cada uno sale además su gemela sin nombre.
+
+`crear.js` **se puede correr las veces que haga falta**: pregunta primero qué hay
+en Meta y se salta lo que ya existe. Correrlo dos veces es lo normal —se agrega
+una plantilla al archivo, o aparece la gemela de las que ya estaban— y antes la
+segunda corrida moría en la primera repetida, con un error de nombre duplicado,
+sin llegar a las que faltaban.
 
 ## De dónde saca los ids
 

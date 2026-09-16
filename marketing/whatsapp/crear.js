@@ -12,6 +12,13 @@
 // suscripción. Los dos destinos se comprueban contra su fuente antes de mandar
 // nada — el catálogo, las categorías y las rutas de App.tsx.
 //
+// Cada plantilla va DOS veces a Meta: la que saluda por el nombre («Hola {{1}},
+// el Florero Forti…») y su gemela `_sin_nombre` («Hola, el Florero Forti…»),
+// que es la que recibe un contacto sin nombre guardado. Meta congela el cuerpo
+// al aprobarlo y no acepta un parámetro vacío, así que es la única forma de que
+// ese saludo se lea bien. El cuerpo de la gemela sale del principal quitándole
+// el hueco; una plantilla puede traer el suyo escrito en `body_sin_nombre`.
+//
 // Reusa `integrations/whatsapp/client.js`, que es el mismo cliente que usa el
 // panel. De dónde salen los ids, en este orden:
 //
@@ -97,6 +104,16 @@ function revisarDestino(t) {
   return malo;
 }
 
+/** El cuerpo de la gemela: el escrito a mano, o el principal sin el hueco. */
+function cuerpoGemela(t) {
+  return (t.body_sin_nombre || wa.cuerpoSinNombre(t.body)).trim();
+}
+
+/** ¿Esta plantilla tiene gemela? Solo tiene sentido si el cuerpo usa {{1}}. */
+function tieneGemela(t) {
+  return /\{\{1\}\}/.test(t.body || '') && t.sin_nombre !== false;
+}
+
 /** Todo lo que se puede saber sin preguntarle a Meta. Devuelve los problemas. */
 function revisar(t) {
   const malo = [];
@@ -115,6 +132,14 @@ function revisar(t) {
   const cab = path.join(HERE, 'cabeceras', `${t.name}.jpg`);
   if (!fs.existsSync(cab)) malo.push('falta la cabecera: corre `python3 marketing/whatsapp/cabeceras.py`');
   if (!Array.isArray(t.fuentes) || !t.fuentes.length) malo.push('sin tabla de fuentes: el copy tiene que poder citarse');
+  // La gemela: mismo cuerpo sin el hueco del nombre, así que se revisa igual.
+  if (tieneGemela(t)) {
+    const g = cuerpoGemela(t);
+    if (!g) malo.push('la versión sin nombre queda vacía; escríbela en `body_sin_nombre`');
+    if (g.length > LIMITES.body) malo.push(`la versión sin nombre tiene ${g.length} caracteres y el tope es ${LIMITES.body}`);
+    if (/\{\{\d+\}\}/.test(g)) malo.push('la versión sin nombre no puede llevar variables');
+    if (wa.nombreSinNombre(t.name).length > LIMITES.nombre) malo.push('el nombre de la versión sin nombre pasa del tope');
+  }
   return malo;
 }
 
@@ -177,6 +202,10 @@ async function main() {
       console.log(`  ✓ ${t.name.padEnd(22)} cuerpo ${String(t.body.length).padStart(4)}/${LIMITES.body}`
         + `  pie ${String((t.footer || '').length).padStart(2)}/${LIMITES.footer}`
         + `  botón → ${urlDe(t)}`);
+      if (tieneGemela(t)) {
+        console.log(`    + ${wa.nombreSinNombre(t.name).padEnd(20)} cuerpo ${String(cuerpoGemela(t).length).padStart(4)}/${LIMITES.body}`
+          + `  «${cuerpoGemela(t).split('\n')[0].slice(0, 48)}…»`);
+      }
     }
   }
   if (problemas) throw new Error(`${problemas} problema(s): no se mandó nada a Meta.`);
@@ -195,9 +224,15 @@ async function main() {
   if (estado) {
     if (!cfg.wabaId) throw new Error('Falta el ID de la WABA (WA_WABA_ID o la conexión del panel).');
     const enMeta = await wa.listTemplates(conexion);
+    const estadoDe = (nombre) => {
+      const m = enMeta.find((x) => x.name === nombre);
+      if (!m) return '— no está en Meta';
+      const motivo = m.rejected_reason && m.rejected_reason !== 'NONE' ? ` (${m.rejected_reason})` : '';
+      return `${m.status}${motivo}`;
+    };
     for (const t of lista) {
-      const m = enMeta.find((x) => x.name === t.name);
-      console.log(`  ${t.name.padEnd(22)} ${m ? `${m.status}${m.rejected_reason && m.rejected_reason !== 'NONE' ? ` (${m.rejected_reason})` : ''}` : '— no está en Meta'}`);
+      console.log(`  ${t.name.padEnd(28)} ${estadoDe(t.name)}`);
+      if (tieneGemela(t)) console.log(`  ${wa.nombreSinNombre(t.name).padEnd(28)} ${estadoDe(wa.nombreSinNombre(t.name))}`);
     }
     return;
   }
@@ -215,20 +250,39 @@ async function main() {
 
   // 3. Subir la cabecera y crear. La foto va por resumable upload y devuelve un
   //    handle; el handle es lo que Meta guarda como ejemplo de la plantilla.
-  for (const t of lista) {
-    const buffer = fs.readFileSync(path.join(HERE, 'cabeceras', `${t.name}.jpg`));
-    const handle = await wa.uploadResumable(conexion, { buffer, mime: 'image/jpeg', filename: `${t.name}.jpg` });
+  // Lo que ya está en Meta se salta. Correr esto dos veces es lo normal —se
+  // agrega una plantilla al archivo, o aparece la gemela de las que ya
+  // existían— y sin esto la segunda corrida muere en la primera repetida con
+  // un error de nombre duplicado, sin llegar a las que faltaban.
+  const yaEstan = new Set((await wa.listTemplates(conexion)).map((x) => x.name));
+
+  // Una plantilla y su gemela son lo mismo con otro cuerpo: se crean igual.
+  const crear = async (nombre, bodyText, bodyExample, t, buffer) => {
+    if (yaEstan.has(nombre)) {
+      console.log(`  · ${nombre.padEnd(28)} ya está en Meta, se salta`);
+      return;
+    }
+    // La foto se sube por plantilla: un handle es de un solo uso en la
+    // práctica, y una subida de más sale más barata que una plantilla aprobada
+    // a la que Meta no le encuentra la cabecera.
+    const handle = await wa.uploadResumable(conexion, { buffer, mime: 'image/jpeg', filename: `${nombre}.jpg` });
     const res = await wa.createTemplate(conexion, {
-      name: t.name,
+      name: nombre,
       language: datos.idioma,
       category: t.category,
-      bodyText: t.body,
-      bodyExample: datos.ejemplo_nombre,
+      bodyText,
+      bodyExample,
       headerHandle: handle,
       footerText: t.footer,
       buttons: [{ type: 'URL', text: t.boton, url: urlDe(t) }],
     });
-    console.log(`  → ${t.name.padEnd(22)} ${res.status}  id ${res.id}`);
+    console.log(`  → ${nombre.padEnd(28)} ${res.status}  id ${res.id}`);
+  };
+
+  for (const t of lista) {
+    const buffer = fs.readFileSync(path.join(HERE, 'cabeceras', `${t.name}.jpg`));
+    await crear(t.name, t.body, datos.ejemplo_nombre, t, buffer);
+    if (tieneGemela(t)) await crear(wa.nombreSinNombre(t.name), cuerpoGemela(t), null, t, buffer);
   }
   console.log('\nMandadas a revisión. `node marketing/whatsapp/crear.js --estado` para ver en qué van.');
 }

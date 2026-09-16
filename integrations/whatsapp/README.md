@@ -124,26 +124,44 @@ Dos detalles de `normalizePhone()` (`db/whatsapp-store.js`) que no son evidentes
 
 Todo se guarda en E.164 (`+51987654321`), que es lo único que acepta Meta.
 
-## El contacto sin nombre
+## El contacto sin nombre: la plantilla gemela
 
-Una plantilla de marketing lleva `{{1}}` para el nombre, y de los contactos de la
-libreta **más de un tercio no tiene ninguno**. Ahí el envío rellena `{{1}}` con
-**un espacio**: el mensaje llega «Hola  , el Florero Forti…», sin nombre
-inventado. Antes decía «cliente» y se leía a formulario.
+Una plantilla de marketing saluda con «Hola {{1}},» y **más de un tercio de la
+libreta no tiene nombre guardado**. Meta congela el cuerpo al aprobarlo, así que
+ese hueco no se arregla al enviar: un parámetro vacío lo rechaza, y la coma y el
+espacio son del cuerpo, no del dato. Con una sola plantilla, a quien no tiene
+nombre le llega «Hola  ,».
 
-Dos cosas que no se pueden hacer desde el envío, porque las decide el cuerpo ya
-aprobado por Meta:
+Por eso cada pieza tiene **dos plantillas aprobadas** y el envío elige:
 
-- **Dejar el parámetro vacío.** Meta rechaza un parámetro sin contenido, así que
-  el mínimo es un espacio.
-- **Sacar la coma.** «Hola {{1}},» tiene el espacio y la coma dentro del cuerpo
-  aprobado, no en el parámetro. Para que diga «Hola, el Florero Forti…» hay que
-  editar el cuerpo de la plantilla y volver a revisión, o tener una plantilla
-  gemela sin variable para los contactos sin nombre.
+| El contacto | La plantilla | Lo que recibe |
+| --- | --- | --- |
+| Tiene nombre | `florero_forti` | «Hola Ana, el Florero Forti lleva…» |
+| No tiene | `florero_forti_sin_nombre` | «Hola, el Florero Forti lleva…» |
 
-El espacio suelto todavía no pasó por un envío real. Si Meta lo rechazara, esos
-mensajes fallan uno por uno con el error a la vista en la campaña —el resto sigue
-saliendo— y ahí toca la plantilla gemela.
+**Se emparejan por el nombre**, no por una columna: la gemela es el nombre de la
+plantilla más `_sin_nombre` (`integrations/whatsapp/client.js`). Así una
+plantilla creada desde WhatsApp Manager o con `marketing/whatsapp/crear.js` queda
+emparejada sola en cuanto el panel sincroniza, sin que nadie tenga que
+relacionarlas a mano.
+
+En el panel son **una sola tarjeta**: la gemela se ve dentro de la de su pareja,
+con su propio estado de revisión, y no aparece en los desplegables de envío —no
+se elige, la elige el envío. Al crear una plantilla con `{{1}}`, la casilla
+«Crear también la versión sin nombre» viene marcada y propone el mismo mensaje
+sin el hueco; se puede editar antes de mandar las dos a Meta.
+
+Tres detalles del envío (`campanas.js`), los tres aprendidos a golpes:
+
+- **La gemela solo se usa si está `APPROVED`.** Meta no deja enviar una plantilla
+  en revisión; si se intentara, ese mensaje fallaría.
+- **Y solo si su foto está guardada acá.** Enviar sin la cabecera que Meta le
+  aprobó da un error de componentes que no dice cuál es el problema.
+- **Si no hay gemela utilizable**, se manda la de siempre con un espacio en el
+  hueco. Es el peor caso, no el plan: sale «Hola  ,».
+
+Una gemela aprobada en Meta no sirve hasta que el panel la tenga: **Plantillas →
+Sincronizar estados** la importa con su foto.
 
 ## Mandar una plantilla a un contacto
 
