@@ -124,6 +124,27 @@ Dos detalles de `normalizePhone()` (`db/whatsapp-store.js`) que no son evidentes
 
 Todo se guarda en E.164 (`+51987654321`), que es lo único que acepta Meta.
 
+## El contacto sin nombre
+
+Una plantilla de marketing lleva `{{1}}` para el nombre, y de los contactos de la
+libreta **más de un tercio no tiene ninguno**. Ahí el envío rellena `{{1}}` con
+**un espacio**: el mensaje llega «Hola  , el Florero Forti…», sin nombre
+inventado. Antes decía «cliente» y se leía a formulario.
+
+Dos cosas que no se pueden hacer desde el envío, porque las decide el cuerpo ya
+aprobado por Meta:
+
+- **Dejar el parámetro vacío.** Meta rechaza un parámetro sin contenido, así que
+  el mínimo es un espacio.
+- **Sacar la coma.** «Hola {{1}},» tiene el espacio y la coma dentro del cuerpo
+  aprobado, no en el parámetro. Para que diga «Hola, el Florero Forti…» hay que
+  editar el cuerpo de la plantilla y volver a revisión, o tener una plantilla
+  gemela sin variable para los contactos sin nombre.
+
+El espacio suelto todavía no pasó por un envío real. Si Meta lo rechazara, esos
+mensajes fallan uno por uno con el error a la vista en la campaña —el resto sigue
+saliendo— y ahí toca la plantilla gemela.
+
 ## Mandar una plantilla a un contacto
 
 En **Contactos**: se elige arriba la plantilla aprobada, y cada fila tiene su

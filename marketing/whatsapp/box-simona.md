@@ -28,9 +28,11 @@ S/ 176 · Entrega a domicilio en Lima Metropolitana, al día siguiente.
 Hola {{1}}, el BOX SIMONA junta 12 rosas amarillas y 12 rosas lilas con follaje verde en un box blanco. Con tarjeta de dedicatoria, S/ 176, a domicilio en Lima Metropolitana desde el día siguiente.
 ```
 
-**Sin el nombre**, para una lista con contactos sin nombre guardado — el envío
-rellena `{{1}}` con «cliente» cuando el contacto no tiene nombre, y «Hola
-cliente,» se lee mal:
+**Sin el nombre**, para una lista con contactos sin nombre guardado. El envío
+rellena `{{1}}` con un espacio cuando el contacto no tiene nombre («Hola  ,»),
+que es lo que se decidió: sin nombre inventado. Si se quiere un saludo limpio
+—«Un box blanco con…» o «Hola, el BOX SIMONA…»— hace falta un cuerpo sin
+variable, como este, aprobado aparte:
 
 ```
 Un box blanco con 12 rosas amarillas y 12 rosas lilas, follaje verde y tarjeta de dedicatoria: así es el BOX SIMONA.

@@ -8,6 +8,21 @@ const wa = require('./client.js');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Con qué se rellena {{1}} cuando el contacto no tiene nombre guardado. Era
+// «cliente» y se leía mal —«Hola cliente,» suena a formulario—, así que va un
+// espacio: el mensaje arranca «Hola  ,», sin nombre inventado. Decisión del
+// cliente, tomada sabiendo cómo queda.
+//
+// No puede ir vacío: Meta rechaza un parámetro sin contenido, y el cuerpo ya
+// está aprobado con «Hola {{1}},» —la coma y el espacio de antes son parte de
+// la plantilla, no del parámetro, así que desde acá no se pueden quitar. Para
+// que diga «Hola, el Box…» hay que editar el cuerpo y volver a revisión.
+//
+// El espacio suelto no está probado contra Meta todavía: si lo rechazara, esos
+// envíos fallan con el error a la vista en la fila del mensaje (el resto de la
+// campaña sigue, cada mensaje va por su cuenta).
+const SIN_NOMBRE = ' ';
+
 async function ejecutarCampana(campaignId, templateId, cx) {
   const template = await waStore.getTemplateFull(templateId);
   const camp = await waStore.getCampaign(campaignId);
@@ -42,7 +57,9 @@ async function ejecutarCampana(campaignId, templateId, cx) {
     try {
       const r = await wa.sendTemplate(cx, {
         to: m.phone, templateName: template.name, language: template.language,
-        headerMediaId, bodyParams: hasVar ? [m.contact_name || 'cliente'] : [],
+        // .trim(): un nombre que quedó en blanco de antes son espacios de más
+        // dentro del parámetro, y Meta corta a las cuatro seguidas.
+        headerMediaId, bodyParams: hasVar ? [(m.contact_name || '').trim() || SIN_NOMBRE] : [],
       });
       await waStore.markMessage(m.id, { status: 'sent', waId: r.id });
       await waStore.bumpCampaign(campaignId, { sent: 1 });
