@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SiteHeader } from '@/components/SiteHeader';
 import { useCart, money } from '@/lib/cart';
-import { attachAutocomplete, geocodeText, mapsAvailable, onMapsAuthFailure, DISTRICT_CENTROIDS, type PlaceResult } from '@/lib/maps';
+import { attachAutocomplete, mapsAvailable, onMapsAuthFailure, type PlaceResult } from '@/lib/maps';
 import { districts, timeSlots } from '@/lib/delivery';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) || '';
@@ -139,9 +139,22 @@ export default function Checkout() {
     quoteByCoords(loc.lat, loc.lng);
   };
 
+  // Si la dirección se edita a mano después de haber elegido una sugerencia, el
+  // pin deja de corresponder a lo escrito. Se descarta, y hay que volver a
+  // elegir: si no, se podía elegir «Av. Pardo 261», cambiarle el número a mano y
+  // pagar con el pin viejo — y el repartidor va a donde está el pin, no a lo
+  // escrito. Al elegir sugerencia, applyPlace escribe exactamente `formatted`,
+  // así que la comparación no se dispara sola.
+  const onAddressInput = () => {
+    if (!place) return;
+    const txt = addressRef.current?.value.trim() || '';
+    if (txt !== place.formatted.trim()) {
+      setPlace(null);
+      setShipping({ fee: null, provider: null, label: 'Por calcular' });
+    }
+  };
+
   // Autocomplete de Google Places (con fixes móvil/tap portados del vanilla).
-  // El input SIEMPRE acepta texto libre: si el usuario no elige sugerencia,
-  // onSubmit geocodifica el texto (o usa el centroide del distrito).
   // Si Google rechaza la llave (referrer no autorizado, llave inválida), las
   // sugerencias no van a llegar nunca: la pista del campo deja de prometerlas.
   useEffect(() => onMapsAuthFailure(() => setSinSugerencias(true)), []);
@@ -155,6 +168,15 @@ export default function Checkout() {
       .then((widget) => { ac = widget; })
       .catch(() => { /* sin key/referrer → input de texto normal */ });
     return () => { cancelled = true; const w = window as any; if (ac && w.google) w.google.maps.event.clearInstanceListeners(ac); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Un cliente que vuelve trae su dirección guardada (CHECKOUT_KEY), pero el
+  // envío no se cotiza solo: quedaba en «por calcular» y el pedido salía con
+  // envío 0 —lo pagaba la florería—. Ahora eso además bloquea el pago, así que
+  // la cotización se pide al montar, con el pin que ya venía elegido.
+  useEffect(() => {
+    if (place && deliveryMode === 'envio') quoteByCoords(place.lat, place.lng);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -191,27 +213,46 @@ export default function Checkout() {
   // pasadas ni el mismo día.
   const minDate = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toLocaleDateString('en-CA'); })();
 
+  // Envío a domicilio: sin pin elegido en Google no se cobra, y sin monto
+  // calculado tampoco. Antes el texto libre se geocodificaba y, si eso fallaba,
+  // se usaba el centroide del distrito: se podía pagar con una dirección que
+  // nadie confirmó —el pedido salía al centro del distrito— y con el envío en
+  // «por calcular», que al armar el pago valía 0. Lo pagaba la florería.
+  // En recojo no aplica: el destino es el taller.
+  const faltaPin = deliveryMode === 'envio' && !place;
+  const faltaMonto = deliveryMode === 'envio' && shipping.fee === null;
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    const irADireccion = () => {
+      addressRef.current?.focus();
+      addressRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    };
+    if (faltaPin) {
+      // Sin sugerencias de Google no hay forma de elegir el pin, y bloquear sin
+      // salida deja al cliente sin poder comprar: se le da el camino que sí hay.
+      setError(mapsAvailable() && !sinSugerencias
+        ? 'Tienes que seleccionar una dirección de Google Maps: escríbela y elige una de las sugerencias para fijar el pin en el mapa.'
+        : 'Ahora mismo no podemos cargar las sugerencias de Google Maps, y sin el pin no podemos calcular el envío. Escríbenos por WhatsApp y cerramos el pedido contigo.');
+      irADireccion();
+      return;
+    }
+    if (faltaMonto) {
+      setError('Todavía no tenemos el costo del envío para esa dirección. Espera unos segundos o mueve el pin; si sigue sin calcularse, escríbenos por WhatsApp.');
+      irADireccion();
+      return;
+    }
     if (!payment) { setError('Elige un método de pago.'); return; }
     setSending(true);
-    // Coordenadas: lugar elegido → geocodificar el texto libre → centroide del
-    // distrito. El pedido SIEMPRE lleva lat/lng numéricos (la API los exige) y
-    // escribir a mano nunca bloquea el envío.
+    // El pedido SIEMPRE lleva lat/lng numéricos (la API los exige): en recojo
+    // los del taller, en envío los del pin, que a esta altura existe sí o sí.
     const recojo = deliveryMode === 'recojo';
-    let coords: { lat: number; lng: number } | null = place ? { lat: place.lat, lng: place.lng } : null;
     const addressText = addressRef.current?.value?.trim() || '';
-    if (recojo) {
-      // Recojo en el taller: el destino es nuestra dirección, no la del cliente.
-      coords = { lat: WORKSHOP.lat, lng: WORKSHOP.lng };
-    } else {
-      if (!coords && addressText) {
-        const geo = await geocodeText(`${addressText}, ${district && district !== 'Otro' ? district + ', ' : ''}Lima, Perú`);
-        if (geo) coords = { lat: geo.lat, lng: geo.lng };
-      }
-      if (!coords) coords = DISTRICT_CENTROIDS[district] || DISTRICT_CENTROIDS['Otro'];
-    }
+    let coords: { lat: number; lng: number };
+    if (recojo) coords = { lat: WORKSHOP.lat, lng: WORKSHOP.lng };
+    else if (place) coords = { lat: place.lat, lng: place.lng };
+    else { setSending(false); return; }   // ya lo cortó faltaPin; esto es para que se vea
     const payload = {
       buyer_name: buyer.name, buyer_email: buyer.email, buyer_phone: buyer.phone,
       recipient_name: recip.name, recipient_phone: recip.phone,
@@ -432,7 +473,19 @@ export default function Checkout() {
                         {sinSugerencias ? '· escríbela completa, con distrito' : '· elige una sugerencia o escríbela completa'}
                       </span>
                     )}</label>
-                    <input ref={addressRef} required onBlur={persistCheckout} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
+                    <input ref={addressRef} required onInput={onAddressInput} onBlur={persistCheckout} className={darkField} placeholder="Av. / Calle, número, distrito…" autoComplete="off" />
+                    {/* Mientras no haya pin no se puede pagar, así que se dice
+                        acá y no recién al confirmar. */}
+                    {faltaPin && (
+                      <p className="mt-2 flex items-start gap-2 text-[13px] leading-relaxed text-[#E7AFC2]">
+                        <span className="shrink-0 leading-none">📍</span>
+                        <span>
+                          {mapsAvailable() && !sinSugerencias
+                            ? <>Falta elegir la dirección en Google Maps: escríbela y <strong>toca una de las sugerencias</strong>. Con eso fijamos el pin y calculamos el envío.</>
+                            : <>No podemos cargar las sugerencias de Google Maps ahora mismo. Escríbenos por WhatsApp y cerramos el pedido contigo.</>}
+                        </span>
+                      </p>
+                    )}
                   </div>
                   {place && (
                     <div>
@@ -537,6 +590,14 @@ export default function Checkout() {
               </div>
             </fieldset>
 
+            {/* Por qué no se va a poder pagar todavía, antes de que lo intente. */}
+            {!error && (faltaPin || faltaMonto) && (
+              <p className="bg-amber-100 px-4 py-3 text-sm text-amber-900">
+                {faltaPin
+                  ? 'Para pagar necesitamos la dirección elegida en Google Maps: escríbela arriba y toca una de las sugerencias.'
+                  : 'Estamos calculando el costo del envío para esa dirección.'}
+              </p>
+            )}
             {error && <p className="bg-red-100 px-4 py-3 text-sm text-red-800">{error}</p>}
             <button disabled={sending} className="press w-full bg-rosa-500 py-4 text-sm font-medium uppercase tracking-[0.18em] text-ivory-50 transition-colors hover:bg-rosa-600 disabled:opacity-60">
               {sending ? 'Procesando…' : CULQI_PK && (payment === 'Tarjeta' || payment === 'Yape') && total !== null ? `Pagar con ${payment} · ${money(total)}` : total !== null ? `Confirmar pedido · ${money(total)}` : 'Confirmar pedido'}
