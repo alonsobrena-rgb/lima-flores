@@ -114,12 +114,12 @@ const ITEMS = [
     precio: 'S/60',
   },
   {
-    foto: 'astromelias.png', nombre: 'Paquete de Astromelias 🌼',
+    foto: 'astromelias.png', nombre: 'Paquete de Astromelias',
     detalle: '24 tallos · 50 cm', colores: 'Blanco, amarillo, anaranjado y fucsia · uno o dos colores',
     precio: 'S/30',
   },
   {
-    foto: 'eucalipto-corto.png', nombre: 'Eucalipto Silver Dólar 🌿',
+    foto: 'eucalipto-corto.png', nombre: 'Eucalipto Silver Dólar',
     detalle: 'Corto: +15 tallos · 40 cm aprox. · Largo: +5 tallos ramificados · 89 cm aprox.',
     colores: 'Follaje fresco, para complementar o dar volumen',
     precio: 'S/30 corto · S/42 largo',
@@ -135,6 +135,25 @@ const PASOS = [
 function filete(margin = '36px 0 0') {
   return `<div style="height:1px;background:${C.linea};margin:${margin}"></div>`;
 }
+
+// Íconos de línea propios, no emoji de colores: el emoji de sistema (📱🚚✨)
+// desentona contra el resto de la pieza, que no usa ningún color fuera de
+// la paleta de la marca. Trazo fino, sin relleno, en el color que toque.
+const icono = {
+  whatsapp: (color, tam = 32) => `<svg width="${tam}" height="${tam}" viewBox="0 0 24 24" fill="none"
+    style="vertical-align:-7px">
+    <path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z" stroke="${color}" stroke-width="1.5"/>
+    <path d="M8.3 8.6c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .5.4.2.4.6 1.4.6 1.5.1.1.1.3 0 .4-.1.2-.1.3-.3.4-.1.2-.3.3-.4.5-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.5 1.5.3.1.5.1.6-.1.2-.2.7-.8.9-1 .2-.3.3-.2.5-.1l1.6.8c.2.1.3.2.4.3.1.2.1.9-.2 1.4-.3.6-1.5 1.1-2.1 1.1-.5 0-1.2 0-3.8-1.6C8.6 15 7 12.7 6.9 12.5c-.1-.1-.9-1.2-.9-2.4 0-1.1.6-1.7.8-1.9Z"
+      fill="${color}"/>
+  </svg>`,
+  delivery: (color, tam = 28) => `<svg width="${tam}" height="${tam}" viewBox="0 0 24 24" fill="none"
+    style="vertical-align:-6px">
+    <path d="M2.5 6.5h10a1 1 0 0 1 1 1v8.5h-11v-9.5Z" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M13.5 10.5h3.2a1 1 0 0 1 .8.4l2.3 3a1 1 0 0 1 .2.6v2.5h-2.6" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+    <circle cx="6.5" cy="17.5" r="1.6" stroke="${color}" stroke-width="1.5"/>
+    <circle cx="16.5" cy="17.5" r="1.6" stroke="${color}" stroke-width="1.5"/>
+  </svg>`,
+};
 
 function pagina(w, h) {
   const fila = (it) => `
@@ -171,7 +190,7 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased;padding:64
   <span class="mono" style="display:block;font-size:28px;color:${C.rosa}">Jueves de flores</span>
   <h1 class="d" style="font-size:132px;margin-top:14px;line-height:.94">A la <em>Carta</em></h1>
   <p style="font-size:34px;color:${C.body};margin-top:24px;line-height:1.38;max-width:26ch">
-    Arma tu combinación ideal: <strong style="color:${C.ink}">flores + follaje = tu ramo a tu manera</strong> ✨
+    Arma tu combinación ideal: <strong style="color:${C.ink}">flores + follaje = tu ramo a tu manera</strong>
   </p>
   ${filete('44px 0 0')}
 
@@ -185,9 +204,9 @@ body{font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased;padding:64
 
   ${filete('48px 0 0')}
   <p style="font-size:30px;color:${C.ink};margin-top:32px">
-    📱 Pedidos por WhatsApp: <strong>999 479 855</strong>
+    ${icono.whatsapp(C.rosa)} Pedidos por WhatsApp: <strong>999 479 855</strong>
   </p>
-  <p style="font-size:26px;color:${C.muted};margin-top:10px">🚚 Delivery disponible</p>
+  <p style="font-size:26px;color:${C.muted};margin-top:10px">${icono.delivery(C.muted)} Delivery disponible</p>
 
   ${filete('40px 0 0')}
   <img src="data:image/png;base64,${LOGO}" style="height:112px;display:block;margin:28px auto 0">
