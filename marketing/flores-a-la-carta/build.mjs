@@ -32,7 +32,7 @@ const TOKENS = Object.fromEntries(
 const C = {
   fondo: TOKENS['--bg-page'], ink: TOKENS['--text-strong'],
   body: TOKENS['--text-body'], muted: TOKENS['--text-muted'],
-  rosa: TOKENS['--accent'], linea: TOKENS['--border'],
+  rosa: TOKENS['--accent'], linea: TOKENS['--border'], bgAlt: TOKENS['--bg-alt'],
 };
 
 const FUENTES = fs.readdirSync(path.join(ROOT, 'app/public/fonts'))
@@ -139,12 +139,15 @@ function filete(margin = '36px 0 0') {
 function pagina(w, h) {
   const fila = (it) => `
   <div style="display:flex;gap:36px;align-items:flex-start;padding:40px 0">
-    <img src="${foto(it.foto)}" style="width:280px;height:280px;object-fit:cover;flex:none;display:block">
+    <div style="width:300px;height:300px;flex:none;background:${C.bgAlt};display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <img src="${foto(it.foto)}" style="width:264px;height:264px;object-fit:cover;display:block">
+    </div>
     <div style="min-width:0">
       <h2 class="d" style="font-size:44px;font-weight:500;font-style:normal;color:${C.ink};margin:0">${it.nombre}</h2>
       <p style="font-size:26px;color:${C.body};margin-top:10px;line-height:1.4">${it.detalle}</p>
       <p style="font-size:24px;color:${C.muted};margin-top:8px;line-height:1.4">${it.colores}</p>
-      <p style="font-family:'Jost',sans-serif;font-weight:800;font-size:40px;color:${C.rosa};margin-top:16px">${it.precio}</p>
+      <span style="display:inline-block;font-family:'Jost',sans-serif;font-weight:800;font-size:34px;color:#fff;
+                   background:${C.rosa};padding:10px 26px;border-radius:6px;margin-top:18px">${it.precio}</span>
     </div>
   </div>`;
 
