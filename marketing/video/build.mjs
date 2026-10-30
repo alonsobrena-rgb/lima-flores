@@ -163,13 +163,16 @@ const rotulo = (v) => pagina(`
 // verdad, así que el texto se apoya ahí sin velo. Una línea de titular con el
 // logotipo al lado y una de precio: con más, el bloque bajaba hasta los ramos.
 //
+// El logotipo puede pasar del tope de 84 px de la regla (`logo` en videos.json):
+// en VID-02 la dueña lo pidió más grande, y es su marca. Sigue sin plaquita.
+//
 // Todo pensado para el celular, que es donde se ve: 1080 px se muestran a unos
 // 390 puntos, al 36 %. El rótulo en versalitas de 18 px que llevaba al lado del
 // precio quedaba en 6,5 pt y no lo leía nadie; ningún texto baja de 34 px.
 const rotuloArriba = (v) => pagina(`
 <div style="position:absolute;top:${SEGURO}px;left:76px;right:76px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
   <h1 class="d" style="font-size:${v.hlSize || 112}px;white-space:nowrap">${v.headline}</h1>
-  <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:84px;display:block;margin-bottom:10px">
+  <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:${v.logo || 84}px;display:block;margin-bottom:6px">
 </div>
 <p style="position:absolute;top:${SEGURO + Math.round((v.hlSize || 112) * 1.03) + 10}px;left:76px;font-size:50px;font-weight:500;color:${C.rosa}">${v.price}</p>`, 'transparent');
 
@@ -277,14 +280,14 @@ const portada = (v) => {
   const p = v.portada;
   return pagina(`
 <div style="position:absolute;left:76px;right:170px;top:${SEGURO}px;bottom:${SEGURO}px;display:flex;flex-direction:column;justify-content:center">
-  <img src="${MARCA.logo}" style="height:84px;display:block;align-self:flex-start;margin-bottom:34px">
+  <img src="${MARCA.logo}" style="height:${p.logo || 84}px;display:block;align-self:flex-start;margin-bottom:22px">
   <span class="mono" style="font-size:30px;color:${C.rosa}">${p.rotulo}</span>
-  <h1 class="d" style="font-size:150px;margin-top:14px;white-space:nowrap">${v.headline}</h1>
+  <h1 class="d" style="font-size:140px;margin-top:10px;white-space:nowrap">${v.headline}</h1>
   <p style="font-size:56px;font-weight:500;color:${C.rosa};margin-top:12px">${p.precio}</p>
-  <div style="height:1px;background:#E6E5E3;margin:36px 0 30px"></div>
+  <div style="height:1px;background:#E6E5E3;margin:30px 0 26px"></div>
   ${p.datos.map((d) => `<p style="font-size:42px;font-weight:400;line-height:1.4;color:${C.ink}">${d}</p>`).join('')}
   <p style="font-size:36px;font-weight:300;line-height:1.4;color:${C.body};margin-top:10px">${p.zona}</p>
-  <div style="height:1px;background:#E6E5E3;margin:34px 0 30px"></div>
+  <div style="height:1px;background:#E6E5E3;margin:28px 0 26px"></div>
   <span class="mono" style="font-size:30px;color:${C.rosa}">${p.cupos}</span>
   <p style="font-size:46px;font-weight:500;line-height:1.25;color:${C.ink};margin-top:12px">${p.llamado}</p>
   <p style="font-size:34px;font-weight:400;color:${C.body};margin-top:22px">${p.canal}</p>

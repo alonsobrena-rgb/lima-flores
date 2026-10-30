@@ -61,7 +61,7 @@
       "price": "2 ramos al mes · S/ 130",
       "footer": "Jueves de Flores",
       "cierreSeg": 6,
-      "primaryText": "Jueves de Flores 🌷 — una suscripción mensual para tener siempre flores frescas en casa.\n\n🌿 2 ramos al mes · S/ 130 (un ramo de temporada cada 15 días)\n🚚 Delivery incluido\n📅 Entrega los jueves de 1 a 4 pm\n📍 Miraflores, Barranco, San Isidro, Magdalena del Mar y Chorrillos\n\nCupos limitados. Escríbenos por WhatsApp y separamos tus flores 🌸\n👉 wa.me/51999479855",
+      "primaryText": "Jueves de Flores 🌷 — una suscripción mensual para tener siempre flores frescas en casa.\n\n🌿 2 ramos al mes · S/ 130 (un ramo de temporada cada 15 días)\n🚚 Delivery incluido\n📅 Próxima entrega: jueves 5 de noviembre, de 1 a 4 pm\n📍 Miraflores, Barranco, San Isidro, Magdalena del Mar y Chorrillos\n\nCupos limitados. Escríbenos por WhatsApp y separamos tus flores 🌸\n👉 wa.me/51999479855",
       "cta": "Enviar mensaje (WhatsApp)",
       "hashtags": [
         "#limaflores",
@@ -101,6 +101,10 @@
         [
           "wa.me/51999479855",
           "app/src/pages/Suscripcion.tsx → const WHATSAPP"
+        ],
+        [
+          "Próxima entrega: jueves 5 de noviembre",
+          "la dueña, 30/10/2026. Vence ese día: después del 5 se cambia esta línea (portada.datos) y el primaryText y se vuelve a correr el build"
         ]
       ],
       "why": "Seis ramos reales de la suscripción, uno por compás: el argumento es que ninguno se repite, y eso solo lo cuenta la secuencia. El nombre y el precio están desde el primer segundo —en el celular se decide en uno— y van arriba, sobre la pared, porque los ramos llenan la foto hasta abajo. La placa final es la portada del servicio y dura 6 s, con el WhatsApp como lo más grande después del nombre: es lo que hay que recordar para comprar. En el anuncio pagado el botón «Enviar mensaje» abre el chat directo; en orgánico, el enlace wa.me del texto.",
@@ -110,17 +114,19 @@
         "precio": "2 ramos al mes · S/ 130",
         "datos": [
           "Un ramo de temporada cada 15 días",
-          "Delivery incluido",
-          "Jueves, de 1 a 4 pm"
+          "Delivery incluido · de 1 a 4 pm",
+          "Próxima entrega: <strong style=\"font-weight:500\">jueves 5 nov.</strong>"
         ],
         "zona": "Miraflores · Barranco · San Isidro<br>Magdalena del Mar · Chorrillos",
         "cupos": "Cupos limitados",
         "llamado": "Escríbeme y separamos tus flores",
         "canal": "WhatsApp",
-        "numero": "999 479 855"
+        "numero": "999 479 855",
+        "logo": 160
       },
       "musica": "jueves",
-      "rotuloEntra": 0.3
+      "rotuloEntra": 0.3,
+      "logo": 124
     }
   ]
 }
