@@ -394,7 +394,12 @@ function render(v) {
     // El rótulo entra en bucle y con duración: como imagen suelta, ffmpeg lo
     // congela en su único fotograma —el del arranque del fundido, con alfa 0— y
     // el rótulo no aparece nunca.
-    `[1:v]format=rgba,fade=in:st=${v.rotuloEntra ?? 1}:d=0.7:alpha=1,setpts=PTS-STARTPTS[rot]`,
+    // Con `rotuloEntra: 0` el rótulo está desde el primer cuadro, sin fundido:
+    // WhatsApp y el reproductor del navegador usan ese cuadro de miniatura, y en
+    // VID-02 se compartía un ramo sin nombre ni logotipo.
+    v.rotuloEntra === 0
+      ? '[1:v]format=rgba,setpts=PTS-STARTPTS[rot]'
+      : `[1:v]format=rgba,fade=in:st=${v.rotuloEntra ?? 1}:d=0.7:alpha=1,setpts=PTS-STARTPTS[rot]`,
     `[toma][rot]overlay=0:0[conRotulo]`,
     `[2:v]scale=${W}:${H},fps=30,setsar=1,format=yuv420p,fade=in:st=0:d=0.5[placa]`,
     `[conRotulo]format=yuv420p[a]`,
