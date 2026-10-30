@@ -203,18 +203,44 @@ function lamina(foto) {
   const tope = H - alto + (f.bajar || 0);
   const [c0, c1] = f.campo || [0, 1];
   const franja = 60;                    // px de la foto (a 1080 de ancho) que se estiran
-  const k = (tope + FUNDIDO + 80) / franja;
+  const fundido = f.fundido || FUNDIDO;
+  const k = (tope + fundido + 80) / franja;
   const ancho = (W + 120) / (c1 - c0);
-  const mascara = PASOS.map(([p, a]) => `rgba(0,0,0,${(1 - a).toFixed(3)}) ${(p * FUNDIDO / 100).toFixed(1)}px`).join(',');
+  const mascara = PASOS.map(([p, a]) => `rgba(0,0,0,${(1 - a).toFixed(3)}) ${(p * fundido / 100).toFixed(1)}px`).join(',');
   return pagina(`
-<div style="position:absolute;top:0;left:0;width:${W}px;height:${tope + FUNDIDO + 40}px;overflow:hidden">
+<div style="position:absolute;top:0;left:0;width:${W}px;height:${tope + fundido + 40}px;overflow:hidden">
   <div style="position:absolute;left:${Math.round(-60 - c0 * ancho)}px;top:-60px;width:${Math.round(ancho)}px;height:${Math.round(alto * k)}px;
        background:url(${src}) 0 0/100% 100% no-repeat;filter:blur(38px)"></div>
+  <!-- El campo se aclara hacia el blanco de la página. El logotipo es gris
+       claro (mediana 150) y sobre la pared desenfocada (≈212) no se leía; no
+       se puede oscurecer ni ponerle plaquita, así que lo que cambia es el
+       fondo. Esto no tapa producto: el campo es relleno, no foto. -->
+  <div style="position:absolute;inset:0;background:${C.fondo};opacity:${f.aclarar ?? 0.6}"></div>
 </div>
 <div style="position:absolute;left:0;top:${tope}px;width:${W}px;height:${alto}px;
      -webkit-mask-image:linear-gradient(to bottom,${mascara})">
   <img src="${src}" style="width:100%;height:100%;display:block">
 </div>`, C.fondo);
+}
+
+// La portada del Reel: la imagen fija que queda en la grilla del perfil. No es
+// un cuadro del video —ahí el logotipo, chico y gris, no se distinguía de la
+// pared— sino una composición propia: el logotipo grande y centrado sobre el
+// blanco de la página, el nombre y el precio debajo, y la primera foto entera.
+// Instagram muestra en la grilla el centro 3:4 (y 240–1680), así que todo el
+// texto vive ahí adentro.
+function portadaReel(v) {
+  const f = typeof v.fotos[0] === 'string' ? { archivo: v.fotos[0] } : v.fotos[0];
+  // Del blanco puro a la pared hay más salto que en el video, así que el fundido
+  // es el doble de largo: la foto bajó 150 px y el ramo sigue sin tocarse.
+  const base = lamina({ ...f, bajar: (f.bajar || 0) + 150, aclarar: 1, fundido: 240 });
+  const encima = `
+<div style="position:absolute;left:0;right:0;top:250px;display:flex;flex-direction:column;align-items:center;text-align:center">
+  <img src="${MARCA.logo}" style="height:190px;display:block">
+  <h1 class="d" style="font-size:118px;margin-top:6px;white-space:nowrap">${v.headline}</h1>
+  <p style="font-size:52px;font-weight:500;color:${C.rosa};margin-top:8px">${v.price}</p>
+</div>`;
+  return base.replace('</div></body></html>', `${encima}</div></body></html>`);
 }
 
 /** Las fotos de `v.fotos` en una toma: cada una `porFoto` s, con fundido entre ellas. */
@@ -388,6 +414,12 @@ function render(v) {
     '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-movflags', '+faststart',
     destino,
   ], { stdio: 'pipe' });
+
+  if (v.fotos) {
+    const pPortada = path.join(TMP, `${v.code}-portada.png`);
+    png(portadaReel(v), pPortada);
+    execFileSync('ffmpeg', ['-y', '-v', 'error', '-i', pPortada, '-q:v', '2', path.join(OUT, `${v.code}-portada.jpg`)], { stdio: 'pipe' });
+  }
 
   const kb = Math.round(fs.statSync(destino).size / 1024);
   console.log(`  ✓ ${v.code}  ${W}×${H}  ${total.toFixed(1)}s  ${kb} KB  — ${v.title}`);
