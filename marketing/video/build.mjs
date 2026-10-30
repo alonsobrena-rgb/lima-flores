@@ -27,7 +27,7 @@ const TMP = path.join(HERE, '.tmp');
 const W = 1080;
 const H = 1920;
 const SEGURO = 372;      // lo que tapa la UI de Instagram arriba y abajo — 9:16
-const CIERRE = 2.6;      // segundos de la placa final
+const CIERRE = 2.6;      // segundos de la placa final, si el video no pide otro
 
 /* ── el sistema, leído del CSS como en los creativos fijos ── */
 const TOKENS = Object.fromEntries(
@@ -155,6 +155,100 @@ const rotulo = (v) => pagina(`
   </div>
 </div>`, 'transparent');
 
+// Rótulo arriba, para los videos armados con fotos (`fotos` en videos.json).
+// Ahí la foto va a todo el ancho y el ramo ocupa casi todo su alto: no queda
+// ninguna franja abajo donde apoyar texto sin taparlo, y una banda blanca encima
+// del ramo es justo lo que la regla del producto prohíbe. Arriba, en cambio, la
+// lámina deja un campo de pared desenfocada (ver `lamina`) que es vacío de
+// verdad, así que el texto se apoya ahí sin velo. Una línea de titular con el
+// logotipo al lado y una de precio: con más, el bloque bajaba hasta los ramos.
+const rotuloArriba = (v) => pagina(`
+<div style="position:absolute;top:${SEGURO}px;left:76px;right:76px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+  <h1 class="d" style="font-size:${v.hlSize || 104}px;white-space:nowrap">${v.headline}</h1>
+  <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:84px;display:block;margin-bottom:10px">
+</div>
+<div style="position:absolute;top:${SEGURO + (v.hlSize || 104) + 12}px;left:76px;display:flex;align-items:baseline;gap:22px">
+  <span class="d" style="font-size:56px;font-weight:400">${v.price}</span>
+  <span class="mono" style="font-size:18px;color:${C.body}">${v.footer}</span>
+</div>`, 'transparent');
+
+// Una foto 3:4 dentro del 9:16, sin recortar el ramo. La foto entra a todo el
+// ancho y pegada abajo; los ${H - 1440} px de arriba se llenan con la franja
+// superior de la MISMA foto —la pared— estirada y desenfocada. Se probó antes
+// estirar el borde tal cual (fillborders=smear, el truco de las alas de los
+// fijos) y en un hueco de 480 px dejaba rayas verticales que se leían como
+// persianas; desenfocado, la franja se vuelve un campo liso del color de la
+// pared. La unión con la foto es una máscara por smoothstep (PASOS): con un
+// corte recto, o con ffmpeg y su geq, quedaba una raya horizontal oscura.
+const FUNDIDO = 110;     // px de la máscara; el ramo más alto empieza ~108 px dentro de la foto
+
+// Cada foto puede venir como nombre suelto o como objeto, para dos ajustes que
+// salieron de medir la luz debajo del texto, no de mirar:
+//   bajar  — px que la foto baja respecto de pegarla abajo. Solo sirve si el ramo
+//            deja aire debajo; si no, el filo de abajo se lo come la UI.
+//   campo  — [desde, hasta] en fracción del ancho: qué tramo de la franja superior
+//            se estira para el campo. En jueves-3 la mitad derecha de la franja
+//            es un mueble de madera y el logotipo caía sobre luminancia 44;
+//            tomando solo la pared de la izquierda, el campo sale claro entero.
+function lamina(foto) {
+  const f = typeof foto === 'string' ? { archivo: foto } : foto;
+  const archivo = path.join(HERE, 'fotos', f.archivo);
+  const ext = path.extname(archivo).slice(1).replace('jpg', 'jpeg');
+  const src = `data:image/${ext};base64,${fs.readFileSync(archivo).toString('base64')}`;
+  const alto = Math.round(W * 4 / 3);
+  const tope = H - alto + (f.bajar || 0);
+  const [c0, c1] = f.campo || [0, 1];
+  const franja = 60;                    // px de la foto (a 1080 de ancho) que se estiran
+  const k = (tope + FUNDIDO + 80) / franja;
+  const ancho = (W + 120) / (c1 - c0);
+  const mascara = PASOS.map(([p, a]) => `rgba(0,0,0,${(1 - a).toFixed(3)}) ${(p * FUNDIDO / 100).toFixed(1)}px`).join(',');
+  return pagina(`
+<div style="position:absolute;top:0;left:0;width:${W}px;height:${tope + FUNDIDO + 40}px;overflow:hidden">
+  <div style="position:absolute;left:${Math.round(-60 - c0 * ancho)}px;top:-60px;width:${Math.round(ancho)}px;height:${Math.round(alto * k)}px;
+       background:url(${src}) 0 0/100% 100% no-repeat;filter:blur(38px)"></div>
+</div>
+<div style="position:absolute;left:0;top:${tope}px;width:${W}px;height:${alto}px;
+     -webkit-mask-image:linear-gradient(to bottom,${mascara})">
+  <img src="${src}" style="width:100%;height:100%;display:block">
+</div>`, C.fondo);
+}
+
+/** Las fotos de `v.fotos` en una toma: cada una `porFoto` s, con fundido entre ellas. */
+function tomaDeFotos(v) {
+  const seg = v.porFoto || 2.4;
+  const cruce = 0.4;     // con 0,6 un tercio de cada lámina era doble exposición
+  const laminas = v.fotos.map((f, i) => {
+    const destino = path.join(TMP, `${v.code}-lamina-${i + 1}.png`);
+    png(lamina(f), destino);
+    return destino;
+  });
+  const entradas = laminas.flatMap((l) => ['-i', l]);
+  // Cada lámina se acerca un 3 % mientras está en pantalla: con las fotos quietas
+  // el video se leía como un carrusel. El acercamiento se ancla abajo y al centro
+  // —lo que se pierde es campo de pared arriba y 16 px por lado— porque anclado
+  // al medio se comía la base del ramo que llega hasta el filo (jueves-5). Se
+  // escala al doble antes del zoompan: a tamaño real redondea la posición a
+  // píxeles enteros y la imagen tiembla.
+  const cuadros = Math.round(seg * 30);
+  const cadena = laminas.map((_, i) => `[${i}:v]scale=${W * 2}:${H * 2},zoompan=z='1+0.03*on/${cuadros}'`
+    + `:x='iw/2-iw/zoom/2':y='ih-ih/zoom':d=${cuadros}:s=${W}x${H}:fps=30,setsar=1[l${i}]`);
+  let previo = '[l0]';
+  laminas.slice(1).forEach((_, i) => {
+    const sale = i === laminas.length - 2 ? '[v]' : `[x${i}]`;
+    const offset = ((i + 1) * (seg - cruce)).toFixed(2);
+    cadena.push(`${previo}[l${i + 1}]xfade=transition=fade:duration=${cruce}:offset=${offset}${sale}`);
+    previo = sale;
+  });
+  if (laminas.length === 1) cadena.push('[l0]null[v]');
+  const destino = path.join(TMP, `${v.code}-toma.mp4`);
+  execFileSync('ffmpeg', [
+    '-y', '-v', 'error', ...entradas,
+    '-filter_complex', cadena.join(';'),
+    '-map', '[v]', '-r', '30', '-c:v', 'libx264', '-crf', '14', '-pix_fmt', 'yuv420p', destino,
+  ], { stdio: 'pipe' });
+  return destino;
+}
+
 // Placa de cierre: blanco, logo y el dato. Es la única pantalla del anuncio que
 // no es la toma, y por eso no lleva nada más que lo que hace falta para comprar.
 const cierre = (v) => pagina(`
@@ -162,10 +256,34 @@ const cierre = (v) => pagina(`
   <img src="${MARCA.logo}" style="height:150px;display:block">
   <div style="text-align:center">
     <h1 class="d" style="font-size:78px">${v.cierre}</h1>
-    <p style="font-size:30px;font-weight:300;color:${C.body};margin-top:24px">${v.cierreSub}</p>
+    <p style="font-size:30px;font-weight:300;line-height:1.5;color:${C.body};margin-top:24px">${v.cierreSub}</p>
   </div>
-  <span class="mono" style="font-size:17px;color:${C.muted}">${v.footer} · ${v.price}</span>
+  <span class="mono" style="font-size:17px;color:${C.muted}">${v.cierreFooter || `${v.footer} · ${v.price}`}</span>
 </div>`, C.fondo);
+
+// La portada del servicio como placa final (`portada` en videos.json). Sigue el
+// orden del flyer que hizo la dueña para Jueves de Flores —rótulo, nombre, precio,
+// filete, entrega, cupos, llamado— para que quien vio el flyer reconozca el
+// anuncio y al revés. Lo que no se copia es el círculo rosa del precio: el
+// sistema no lleva plaquitas, y el precio ya manda en rosa debajo del nombre.
+// Va alineada a la izquierda, dentro del área segura de arriba y de abajo.
+const portada = (v) => {
+  const p = v.portada;
+  return pagina(`
+<div style="position:absolute;left:76px;right:76px;top:${SEGURO}px;bottom:${SEGURO}px;display:flex;flex-direction:column;justify-content:center">
+  <span class="mono" style="font-size:20px;color:${C.rosa}">${p.rotulo}</span>
+  <h1 class="d" style="font-size:150px;margin-top:22px;white-space:nowrap">${v.headline}</h1>
+  <p style="font-size:50px;font-weight:500;color:${C.rosa};margin-top:18px">${p.precio}</p>
+  <div style="height:1px;background:#E6E5E3;margin:44px 0 40px"></div>
+  ${p.datos.map((d) => `<p style="font-size:36px;font-weight:400;line-height:1.45;color:${C.ink}">${d}</p>`).join('')}
+  <p style="font-size:30px;font-weight:300;line-height:1.5;color:${C.body};margin-top:14px">${p.zona}</p>
+  <span class="mono" style="font-size:20px;color:${C.rosa};margin-top:44px">${p.cupos}</span>
+  <p style="font-size:40px;font-weight:500;color:${C.ink};margin-top:18px">${p.llamado}</p>
+  <p style="font-size:30px;font-weight:300;color:${C.body};margin-top:10px">${p.contacto}</p>
+  <div style="height:1px;background:#E6E5E3;margin:44px 0 36px"></div>
+  <img src="${MARCA.logo}" style="height:84px;display:block;align-self:center">
+</div>`, C.fondo);
+};
 
 // Se pide una ventana más alta de la cuenta —Chromium se queda unos 100 px por
 // debajo del `--window-size`— y después se recorta al lienzo exacto. Al final se
@@ -219,15 +337,16 @@ function dur(archivo) {
 }
 
 function render(v) {
-  const clip = path.join(HERE, 'clips', v.clip);
+  const clip = v.fotos ? tomaDeFotos(v) : path.join(HERE, 'clips', v.clip);
   if (!fs.existsSync(clip)) throw new Error(`falta el clip ${v.clip} en marketing/video/clips/`);
   const largo = dur(clip);
-  const total = Math.round((largo + CIERRE) * 10) / 10;
+  const fin = v.cierreSeg || CIERRE;
+  const total = Math.round((largo + fin) * 10) / 10;
 
   const pRotulo = path.join(TMP, `${v.code}-rotulo.png`);
   const pCierre = path.join(TMP, `${v.code}-cierre.png`);
-  png(rotulo(v), pRotulo);
-  png(cierre(v), pCierre);
+  png((v.plantilla === 'arriba' ? rotuloArriba : rotulo)(v), pRotulo);
+  png((v.portada ? portada : cierre)(v), pCierre);
   const wav = musica(total);
   const destino = path.join(OUT, `${v.code}.mp4`);
 
@@ -251,7 +370,7 @@ function render(v) {
     '-y', '-v', 'error',
     '-i', clip,
     '-loop', '1', '-t', String(largo), '-i', pRotulo,
-    '-loop', '1', '-t', String(CIERRE), '-i', pCierre,
+    '-loop', '1', '-t', String(fin), '-i', pCierre,
     '-i', wav,
     '-filter_complex', filtro,
     '-map', '[v]', '-map', '[a]',

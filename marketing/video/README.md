@@ -24,6 +24,8 @@ que no va embebido en la página: el MP4 se sirve por su propia URL
 | | |
 |---|---|
 | `clips/` | Las tomas de la florería, tal como llegan |
+| `fotos/` | Fotos de entregas reales, para los videos que se arman con fotos |
+| `fuentes/` | Los flyers de la dueña de los que sale lo que afirma un video |
 | `creativos/` | Lo que se sube a Instagram, 1080×1920 |
 | `musica/` | La cama de música. Se genera sola; no se versiona |
 | `.tmp/` | Los rótulos en PNG y su HTML, para depurar un render |
@@ -78,6 +80,24 @@ el velo cien píxeles antes del filo y una franja de video crudo debajo, con un
 corte recto. Pasó una vez. Por eso, además, `png()` comprueba que el archivo mida
 exactamente 1080×1920 y revienta el build si no.
 
+## Videos con fotos en vez de toma
+
+Cuando no hay clip, `fotos` en `videos.json` reemplaza a `clip`: cada foto es
+una lámina de 1080×1920 que se acerca un 3 % mientras está en pantalla, con
+fundidos de 0,4 s entre ellas. Lo que se aprendió armando `VID-02`:
+
+- **La foto 3:4 entra a todo el ancho y pegada abajo**, sin recortar el ramo. Los
+  480 px de arriba se llenan con la franja superior de la misma foto, estirada y
+  desenfocada, y la unión es una máscara por smoothstep. Estirar el borde sin
+  desenfocar (el truco de las alas de los fijos) dejaba rayas de persiana.
+- **El texto va arriba, sobre ese campo, sin velo** (`"plantilla": "arriba"`):
+  los ramos llenan la foto hasta abajo y ahí no hay hueco.
+- **La luz bajo el texto se mide por lámina.** En `jueves-3` el logotipo caía
+  sobre un mueble (luminancia 44); `campo` elige qué tramo de la franja se
+  estira y `bajar` baja la foto cuando el ramo deja aire debajo.
+- **`portada` reemplaza la placa de cierre** por la portada del servicio, en el
+  orden del flyer de la dueña.
+
 ## La música
 
 `musica.py` la sintetiza con numpy: un arpegio lento en fa mayor con cola larga y
@@ -101,3 +121,9 @@ fotograma del medio y la placa final, no solo el primero.
 | Código | Producto | Embudo | Titular |
 |---|---|---|---|
 | `VID-01` | Boxsito Crespito · S/180 | Frío | Osito, globo y mini rosas |
+| `VID-02` | Jueves de Flores · S/130 al mes | Frío | Jueves de Flores |
+
+`VID-02` afirma jueves de 1 a 4 pm y cinco distritos porque así lo dice el flyer
+de la dueña (`fuentes/jueves-de-flores-flyer.jpg`). **El sitio todavía dice otra
+cosa** —Lima Metropolitana y tres franjas de cuatro horas—; ver la `nota` del
+video en `videos.json`.
