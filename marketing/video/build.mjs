@@ -162,15 +162,16 @@ const rotulo = (v) => pagina(`
 // lámina deja un campo de pared desenfocada (ver `lamina`) que es vacío de
 // verdad, así que el texto se apoya ahí sin velo. Una línea de titular con el
 // logotipo al lado y una de precio: con más, el bloque bajaba hasta los ramos.
+//
+// Todo pensado para el celular, que es donde se ve: 1080 px se muestran a unos
+// 390 puntos, al 36 %. El rótulo en versalitas de 18 px que llevaba al lado del
+// precio quedaba en 6,5 pt y no lo leía nadie; ningún texto baja de 34 px.
 const rotuloArriba = (v) => pagina(`
 <div style="position:absolute;top:${SEGURO}px;left:76px;right:76px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
-  <h1 class="d" style="font-size:${v.hlSize || 104}px;white-space:nowrap">${v.headline}</h1>
+  <h1 class="d" style="font-size:${v.hlSize || 112}px;white-space:nowrap">${v.headline}</h1>
   <img src="${MARCA[v.tono === 'claro' ? 'logo-claro' : 'logo']}" style="height:84px;display:block;margin-bottom:10px">
 </div>
-<div style="position:absolute;top:${SEGURO + (v.hlSize || 104) + 12}px;left:76px;display:flex;align-items:baseline;gap:22px">
-  <span class="d" style="font-size:56px;font-weight:400">${v.price}</span>
-  <span class="mono" style="font-size:18px;color:${C.body}">${v.footer}</span>
-</div>`, 'transparent');
+<p style="position:absolute;top:${SEGURO + Math.round((v.hlSize || 112) * 1.03) + 10}px;left:76px;font-size:50px;font-weight:500;color:${C.rosa}">${v.price}</p>`, 'transparent');
 
 // Una foto 3:4 dentro del 9:16, sin recortar el ramo. La foto entra a todo el
 // ancho y pegada abajo; los ${H - 1440} px de arriba se llenan con la franja
@@ -267,21 +268,27 @@ const cierre = (v) => pagina(`
 // anuncio y al revés. Lo que no se copia es el círculo rosa del precio: el
 // sistema no lleva plaquitas, y el precio ya manda en rosa debajo del nombre.
 // Va alineada a la izquierda, dentro del área segura de arriba y de abajo.
+//
+// En el celular manda el llamado: el número de WhatsApp es lo más grande después
+// del nombre, porque es lo que alguien copia o recuerda para comprar. Nada baja
+// de 34 px (≈ 12 pt en pantalla), y la columna deja 170 px libres a la derecha,
+// que es donde Reels apila los botones de me gusta, comentar y compartir.
 const portada = (v) => {
   const p = v.portada;
   return pagina(`
-<div style="position:absolute;left:76px;right:76px;top:${SEGURO}px;bottom:${SEGURO}px;display:flex;flex-direction:column;justify-content:center">
-  <span class="mono" style="font-size:20px;color:${C.rosa}">${p.rotulo}</span>
-  <h1 class="d" style="font-size:150px;margin-top:22px;white-space:nowrap">${v.headline}</h1>
-  <p style="font-size:50px;font-weight:500;color:${C.rosa};margin-top:18px">${p.precio}</p>
-  <div style="height:1px;background:#E6E5E3;margin:44px 0 40px"></div>
-  ${p.datos.map((d) => `<p style="font-size:36px;font-weight:400;line-height:1.45;color:${C.ink}">${d}</p>`).join('')}
-  <p style="font-size:30px;font-weight:300;line-height:1.5;color:${C.body};margin-top:14px">${p.zona}</p>
-  <span class="mono" style="font-size:20px;color:${C.rosa};margin-top:44px">${p.cupos}</span>
-  <p style="font-size:40px;font-weight:500;color:${C.ink};margin-top:18px">${p.llamado}</p>
-  <p style="font-size:30px;font-weight:300;color:${C.body};margin-top:10px">${p.contacto}</p>
-  <div style="height:1px;background:#E6E5E3;margin:44px 0 36px"></div>
-  <img src="${MARCA.logo}" style="height:84px;display:block;align-self:center">
+<div style="position:absolute;left:76px;right:170px;top:${SEGURO}px;bottom:${SEGURO}px;display:flex;flex-direction:column;justify-content:center">
+  <img src="${MARCA.logo}" style="height:84px;display:block;align-self:flex-start;margin-bottom:34px">
+  <span class="mono" style="font-size:30px;color:${C.rosa}">${p.rotulo}</span>
+  <h1 class="d" style="font-size:150px;margin-top:14px;white-space:nowrap">${v.headline}</h1>
+  <p style="font-size:56px;font-weight:500;color:${C.rosa};margin-top:12px">${p.precio}</p>
+  <div style="height:1px;background:#E6E5E3;margin:36px 0 30px"></div>
+  ${p.datos.map((d) => `<p style="font-size:42px;font-weight:400;line-height:1.4;color:${C.ink}">${d}</p>`).join('')}
+  <p style="font-size:36px;font-weight:300;line-height:1.4;color:${C.body};margin-top:10px">${p.zona}</p>
+  <div style="height:1px;background:#E6E5E3;margin:34px 0 30px"></div>
+  <span class="mono" style="font-size:30px;color:${C.rosa}">${p.cupos}</span>
+  <p style="font-size:46px;font-weight:500;line-height:1.25;color:${C.ink};margin-top:12px">${p.llamado}</p>
+  <p style="font-size:34px;font-weight:400;color:${C.body};margin-top:22px">${p.canal}</p>
+  <p style="font-size:84px;font-weight:500;letter-spacing:.01em;line-height:1;color:${C.rosa};margin-top:6px">${p.numero}</p>
 </div>`, C.fondo);
 };
 
@@ -313,10 +320,10 @@ function medidaPng(archivo) {
   return [b.readUInt32BE(16), b.readUInt32BE(20)];
 }
 
-function musica(segundos) {
-  const wav = path.join(HERE, 'musica', `cama-${segundos}s.wav`);
+function musica(segundos, estilo) {
+  const wav = path.join(HERE, 'musica', `cama${estilo ? `-${estilo}` : ''}-${segundos}s.wav`);
   if (!fs.existsSync(wav)) {
-    execFileSync('python3', [path.join(HERE, 'musica.py'), String(segundos)], { stdio: 'pipe' });
+    execFileSync('python3', [path.join(HERE, 'musica.py'), String(segundos), ...(estilo ? ['--estilo', estilo] : [])], { stdio: 'pipe' });
   }
   return wav;
 }
@@ -347,7 +354,7 @@ function render(v) {
   const pCierre = path.join(TMP, `${v.code}-cierre.png`);
   png((v.plantilla === 'arriba' ? rotuloArriba : rotulo)(v), pRotulo);
   png((v.portada ? portada : cierre)(v), pCierre);
-  const wav = musica(total);
+  const wav = musica(total, v.musica);
   const destino = path.join(OUT, `${v.code}.mp4`);
 
   // Un solo paso de ffmpeg: escalar la toma, encimar el rótulo, pegar la placa
@@ -358,12 +365,12 @@ function render(v) {
     // El rótulo entra en bucle y con duración: como imagen suelta, ffmpeg lo
     // congela en su único fotograma —el del arranque del fundido, con alfa 0— y
     // el rótulo no aparece nunca.
-    `[1:v]format=rgba,fade=in:st=1:d=0.7:alpha=1,setpts=PTS-STARTPTS[rot]`,
+    `[1:v]format=rgba,fade=in:st=${v.rotuloEntra ?? 1}:d=0.7:alpha=1,setpts=PTS-STARTPTS[rot]`,
     `[toma][rot]overlay=0:0[conRotulo]`,
     `[2:v]scale=${W}:${H},fps=30,setsar=1,format=yuv420p,fade=in:st=0:d=0.5[placa]`,
     `[conRotulo]format=yuv420p[a]`,
     `[a][placa]concat=n=2:v=1:a=0[v]`,
-    `[3:a]atrim=0:${total},afade=t=in:st=0:d=1.2,afade=t=out:st=${(total - 2.2).toFixed(2)}:d=2.2[a]`,
+    `[3:a]atrim=0:${total},afade=t=in:st=0:d=${v.musica ? 0.2 : 1.2},afade=t=out:st=${(total - 2.2).toFixed(2)}:d=2.2[a]`,
   ].join(';');
 
   execFileSync('ffmpeg', [

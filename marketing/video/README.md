@@ -13,6 +13,7 @@ justamente porque esa instalación trae el codificador y no la sonda.
 node marketing/video/build.mjs            # todos
 node marketing/video/build.mjs VID-01     # solo ese
 python3 marketing/video/musica.py 14      # rehacer la cama de música, 14 s
+python3 marketing/video/musica.py 21.4 --estilo jueves
 ```
 
 El resultado sale también en la galería del cliente
@@ -96,7 +97,14 @@ fundidos de 0,4 s entre ellas. Lo que se aprendió armando `VID-02`:
   sobre un mueble (luminancia 44); `campo` elige qué tramo de la franja se
   estira y `bajar` baja la foto cuando el ramo deja aire debajo.
 - **`portada` reemplaza la placa de cierre** por la portada del servicio, en el
-  orden del flyer de la dueña.
+  orden del flyer de la dueña, con el WhatsApp como lo más grande después del
+  nombre: es lo que hay que recordar para comprar.
+- **Se ve en el celular, al 36 %.** Ningún texto baja de 34 px (≈ 12 pt en
+  pantalla), y la portada deja 170 px libres a la derecha, donde Reels apila
+  sus botones.
+- **`"musica": "jueves"`** usa el estilo con guitarra, bajo y campanitas de
+  `musica.py`, a 96 por minuto: cada lámina dura un compás (2,9 s − 0,4 de
+  fundido = 2,5 s) y el cambio de ramo cae en el uno.
 
 ## La música
 

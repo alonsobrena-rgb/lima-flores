@@ -38,7 +38,10 @@
       "funnel": "Frío",
       "placement": "Reels e historias · 9:16 (1080×1920)",
       "fotos": [
-        "jueves-1.jpg",
+        {
+          "archivo": "jueves-1.jpg",
+          "bajar": 70
+        },
         "jueves-2.jpg",
         {
           "archivo": "jueves-3.jpg",
@@ -52,14 +55,14 @@
         "jueves-5.jpg",
         "jueves-6.jpg"
       ],
-      "porFoto": 2.6,
+      "porFoto": 2.9,
       "plantilla": "arriba",
       "headline": "Jueves de <em>Flores</em>",
-      "price": "S/ 130",
-      "footer": "2 ramos al mes · delivery incluido",
-      "cierreSeg": 4.5,
-      "primaryText": "Jueves de Flores 🌷 — una suscripción mensual para tener siempre flores frescas en casa.\n\nCada 15 días recibes un ramo de temporada.\n\n🌿 2 ramos al mes · S/ 130\n🚚 Delivery incluido\n📍 Miraflores, Barranco, San Isidro, Magdalena del Mar y Chorrillos\n📅 Entrega los jueves de 1 a 4 pm\n\nCupos limitados. Escríbenos y separamos tus flores 🌸",
-      "cta": "Enviar mensaje",
+      "price": "2 ramos al mes · S/ 130",
+      "footer": "Jueves de Flores",
+      "cierreSeg": 6,
+      "primaryText": "Jueves de Flores 🌷 — una suscripción mensual para tener siempre flores frescas en casa.\n\n🌿 2 ramos al mes · S/ 130 (un ramo de temporada cada 15 días)\n🚚 Delivery incluido\n📅 Entrega los jueves de 1 a 4 pm\n📍 Miraflores, Barranco, San Isidro, Magdalena del Mar y Chorrillos\n\nCupos limitados. Escríbenos por WhatsApp y separamos tus flores 🌸\n👉 wa.me/51999479855",
+      "cta": "Enviar mensaje (WhatsApp)",
       "hashtags": [
         "#limaflores",
         "#juevesdeflores",
@@ -96,24 +99,28 @@
           "flyer + flyer de la carta de flores"
         ],
         [
-          "@lima_flores",
-          "campaign.handle en videos.json + flyer de la carta de flores"
+          "wa.me/51999479855",
+          "app/src/pages/Suscripcion.tsx → const WHATSAPP"
         ]
       ],
-      "why": "Seis ramos reales de la suscripción, uno tras otro: el argumento es que ninguno se repite, y eso solo lo cuenta la secuencia. El titular y el precio van arriba, sobre la pared, porque los ramos llenan la foto hasta abajo; los datos de la entrega quedan para la placa final, que repite la portada del servicio (el flyer de la dueña) para que el anuncio y el flyer se reconozcan entre sí.",
+      "why": "Seis ramos reales de la suscripción, uno por compás: el argumento es que ninguno se repite, y eso solo lo cuenta la secuencia. El nombre y el precio están desde el primer segundo —en el celular se decide en uno— y van arriba, sobre la pared, porque los ramos llenan la foto hasta abajo. La placa final es la portada del servicio y dura 6 s, con el WhatsApp como lo más grande después del nombre: es lo que hay que recordar para comprar. En el anuncio pagado el botón «Enviar mensaje» abre el chat directo; en orgánico, el enlace wa.me del texto.",
       "nota": "La franja y los distritos los dio la dueña para esta campaña y contradicen lo que hoy dice el sitio (Lima Metropolitana, franjas de cuatro horas). Si la suscripción de la web cambia a jueves 1–4 pm y esos cinco distritos, alinear plans.ts, delivery.ts y PROMESAS; si no, este video vende algo distinto de /suscripcion. Fotos: entregas reales enviadas por la dueña (marketing/video/fotos/); se dejaron fuera una captura de pantalla y un ramo de rosas rojas que no es de temporada.",
       "portada": {
         "rotulo": "Suscripción de flores",
         "precio": "2 ramos al mes · S/ 130",
         "datos": [
           "Un ramo de temporada cada 15 días",
-          "Delivery incluido · jueves, de 1 a 4 pm"
+          "Delivery incluido",
+          "Jueves, de 1 a 4 pm"
         ],
         "zona": "Miraflores · Barranco · San Isidro<br>Magdalena del Mar · Chorrillos",
         "cupos": "Cupos limitados",
         "llamado": "Escríbeme y separamos tus flores",
-        "contacto": "WhatsApp 999 479 855 · @lima_flores"
-      }
+        "canal": "WhatsApp",
+        "numero": "999 479 855"
+      },
+      "musica": "jueves",
+      "rotuloEntra": 0.3
     }
   ]
 }
