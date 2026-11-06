@@ -54,3 +54,19 @@ descarta. Aun así, **cada página se abre antes de entregarla**: la regla 4 de
 `.claude/skills/piezas-graficas/`.
 
 `DEPURAR=1 node marketing/catalogo/build.mjs <id>` imprime lo que midió la sonda.
+
+## Catálogo de Navidad
+
+El catálogo de Navidad del año pasado (Canva, 9:16) se **edita** en vez de
+rehacerse: el cliente quiere mantener el diseño navideño. Los cambios están en
+`navidad.py` (páginas que se quitan, fotos que se sacan dejando el recuadro y
+dónde entran las páginas nuevas), así que se puede volver a armar desde el
+original cada vez que el cliente pida otro ajuste:
+
+```sh
+FORMATO=historia node marketing/catalogo/build.mjs     # páginas nuevas en 9:16
+python3 -I marketing/catalogo/navidad.py <original.pdf>  # → navidad/catalogo-navidad.pdf
+```
+
+Pendiente: la foto nueva de Regalos corporativos y las fotos reales de Centros
+de mesa (sus recuadros quedan vacíos).

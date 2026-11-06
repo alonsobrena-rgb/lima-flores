@@ -18,10 +18,13 @@ import { createRequire } from 'node:module';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
 const PHOTOS = path.join(ROOT, 'app/public/products');
-const SALIDA = path.join(HERE, 'paginas');
+// FORMATO=historia arma las mismas páginas en 9:16 (1080 × 1920), el formato
+// del catálogo de Navidad, que se ve en el teléfono como una historia.
+const HISTORIA = process.env.FORMATO === 'historia';
+const SALIDA = path.join(HERE, HISTORIA ? 'paginas-historia' : 'paginas');
 const CACHE = path.join(HERE, '.fontcache');
 const W = 1080;
-const H = 1350;
+const H = HISTORIA ? 1920 : 1350;
 const MARGEN = 76; // área segura del feed: la misma página se publica
 const SANGRA = 2; // % de cada borde de la foto que se descarta (ver el script de la página)
 
@@ -316,7 +319,7 @@ async function main() {
   }
   // El PDF se arma solo con la corrida completa y sin fallas: un catálogo con
   // una página vieja o rota no se entrega.
-  if (!pedidas.length && !fallas.length) await armarPdf(browser, cat, fonts, logoUri);
+  if (!HISTORIA && !pedidas.length && !fallas.length) await armarPdf(browser, cat, fonts, logoUri);
   await browser.close();
   if (fallas.length) {
     console.error('\n✗ Páginas que no se entregan:\n  ' + fallas.join('\n  '));

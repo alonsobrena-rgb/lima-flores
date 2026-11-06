@@ -30,3 +30,5 @@ design/salida/
 
 # Fuentes bajadas por marketing/catalogo/build.mjs (se regeneran)
 marketing/catalogo/.fontcache/
+# PDF del catálogo de Navidad: pesa ~10 MB y se regenera con navidad.py desde el original del cliente
+marketing/catalogo/navidad/
