@@ -19,7 +19,7 @@
   },
   {
     "id": "box-rogelia",
-    "name": "Box  Rogelia",
+    "name": "Box Rogelia",
     "category": "arreglos",
     "categoryLabel": "Arreglos",
     "price": 210,
@@ -30,8 +30,8 @@
       "/products/box-rogelia-3.jpg"
     ],
     "palette": "#B6855E",
-    "shortDesc": "25 Rosas rojas decoradas con follaje verde. Disponibles en rojo, fucsia, amarillo o lila.",
-    "description": "25 Rosas rojas decoradas con follaje verde. Disponibles en rojo, fucsia, amarillo o lila.",
+    "shortDesc": "25 rosas rojas decoradas con follaje verde. Disponibles en rojo, fucsia, amarillo o lila.",
+    "description": "25 rosas rojas decoradas con follaje verde. Disponibles en rojo, fucsia, amarillo o lila.",
     "tags": [
       "mama"
     ]
@@ -82,8 +82,8 @@
       "/products/box-gaby-cafe-2.jpg"
     ],
     "palette": "#B6855E",
-    "shortDesc": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad 250 gr. y dos tacitas de expreso.",
-    "description": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad 250 gr. y dos tacitas de expreso.",
+    "shortDesc": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad 250 g y dos tacitas de expreso.",
+    "description": "Arreglo de mini rosas con toques azules y follaje, acompañado de café de especialidad 250 g y dos tacitas de expreso.",
     "tags": [
       "mama"
     ]
@@ -136,8 +136,8 @@
       "/products/box-yani-2.jpg"
     ],
     "palette": "#B6855E",
-    "shortDesc": "Box de madera con una combinación de flores como mini rosas, claveles, toques morados. Incluye copa falauta de vidrio y una botella de Riccadona de 200 ml. Prohibida la venta a menores de edad. Tomar…",
-    "description": "Box de madera con una combinación de flores como mini rosas, claveles, toques morados. Incluye copa falauta de vidrio y una botella de Riccadona de 200 ml. Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino",
+    "shortDesc": "Box de madera con una combinación de flores como mini rosas, claveles, toques morados. Incluye copa flauta de vidrio y una botella de Riccadonna de 200 ml. Prohibida la venta a menores de edad. Tomar…",
+    "description": "Box de madera con una combinación de flores como mini rosas, claveles, toques morados. Incluye copa flauta de vidrio y una botella de Riccadonna de 200 ml. Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino",
     "tags": [
       "amor",
       "mama"

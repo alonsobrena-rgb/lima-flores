@@ -4,25 +4,20 @@
     {
       "id": "box-yani",
       "foto": "fotos/box-yani-frontal.jpg",
-      "erratas": {
-        "falauta": "flauta",
-        "Riccadona": "Riccadonna"
-      }
+      "erratas": {}
     },
     {
       "id": "box-rogelia",
       "foto": "box-rogelia.jpg",
-      "erratas": {
-        "25 Rosas": "25 rosas"
-      }
+      "erratas": {}
     },
     {
       "id": "box-gaby-cafe",
-      "foto": "box-gaby-cafe-2.jpg",
+      "foto": "fotos/box-gaby-cafe-limpia.jpg",
       "erratas": {},
       "cambios": [
         {
-          "de": "café de especialidad 250 gr.",
+          "de": "café de especialidad 250 g",
           "a": "café Tres Orígenes (250 g)",
           "por": "Lo pidió el cliente el 6 de noviembre de 2026; es la marca que se ve en la foto y la que nombraba el catálogo anterior."
         }
