@@ -21,12 +21,31 @@ node marketing/catalogo/build.mjs box-yani     # una, para iterar
 ## De dónde sale cada dato
 
 Nombre, categoría, precio y descripción se leen de `db/products.seed.json`; no
-se escriben en `catalogo.json`. Lo único que va en `catalogo.json` es qué foto
-usar, cuánto subirla y las **erratas** que se corrigen al imprimir. Las erratas
-quedan a la vista ahí para que se arreglen también en la base.
+se escriben en `catalogo.json`. Ahí solo va qué foto usar y las **erratas** que
+se corrigen al imprimir, a la vista para que se arreglen también en la base.
+
+«Incluye tarjeta de dedicatoria sin costo» se agrega a todas las páginas y se lee
+de `PROMESAS` (`app/src/lib/tienda.ts`): si la promesa cambia en la tienda,
+cambia en el catálogo.
+
+## Fotos
+
+La foto puede ser una del catálogo de la tienda (`box-rogelia-3.jpg`) o una
+propia del impreso, en `fotos/` (`fotos/box-yani-frontal.jpg`), cuando la toma
+de la tienda no es la mejor para una página.
+
+**El encuadre es automático.** La plantilla mide el producto y lo centra en el
+hueco entre el logotipo y la ficha. Si a todo el ancho no entra, achica la foto,
+nunca la recorta. Lo que la foto no cubre se rellena estirando su propia fila o
+columna de borde, para que el ciclorama siga sin costura. Antes de eso se
+descarta un 2% de cada filo: el viñeteado del borde, estirado, dejaba una franja
+oscura cruzando la página (pasó con Box Gaby Café).
 
 ## Lo que el build no deja pasar
 
-Una sonda mide el producto dentro de la página y el build falla si el producto
-toca un borde o si el logotipo o el texto lo pisan. Aun así, **cada página se
-abre antes de entregarla**: la regla 4 de `.claude/skills/piezas-graficas/`.
+La página no se genera si el producto toca un borde, si el logotipo o el texto
+lo pisan, si es más alto que el hueco libre o si llega al filo de la foto que se
+descarta. Aun así, **cada página se abre antes de entregarla**: la regla 4 de
+`.claude/skills/piezas-graficas/`.
+
+`DEPURAR=1 node marketing/catalogo/build.mjs <id>` imprime lo que midió la sonda.
