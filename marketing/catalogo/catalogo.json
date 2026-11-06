@@ -1,0 +1,11 @@
+{
+  "_nota": "Una entrada por página. Nombre, categoría, precio y descripción NO van acá: se leen de db/products.seed.json. Acá solo va lo que el catálogo no sabe —qué foto, cuánto subirla— y las erratas del catálogo que se corrigen al imprimir, a la vista para que se arreglen también en la base.",
+  "paginas": [
+    {
+      "id": "box-yani",
+      "foto": "box-yani.jpg",
+      "subir": 50,
+      "erratas": { "falauta": "flauta", "Riccadona": "Riccadonna" }
+    }
+  ]
+}

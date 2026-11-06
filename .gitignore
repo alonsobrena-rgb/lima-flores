@@ -27,3 +27,6 @@ __pycache__/
 
 # Salida de design/build.py (se regenera)
 design/salida/
+
+# Fuentes bajadas por marketing/catalogo/build.mjs (se regeneran)
+marketing/catalogo/.fontcache/
