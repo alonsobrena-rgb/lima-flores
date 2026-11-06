@@ -1,5 +1,9 @@
 {
   "_nota": "Una entrada por página. Nombre, categoría, precio y descripción NO van acá: se leen de db/products.seed.json. Acá solo va qué foto usar, las erratas que se corrigen al imprimir y los cambios de texto que decidió el cliente (cada uno con su motivo), a la vista para que se lleven también a la base. La foto se encuadra sola.",
+  "portada": {
+    "rotulo": "Lima Flores · 2026",
+    "titulo": "Catálogo de Navidad"
+  },
   "paginas": [
     {
       "id": "box-yani",

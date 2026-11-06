@@ -237,6 +237,38 @@ window.listo = new Promise((ok) => {
 </script>`;
 }
 
+// Portada y páginas, en el orden de catalogo.json, en un PDF del mismo tamaño
+// que las páginas (1080 × 1350 px). Las páginas van como la imagen que ya se
+// revisó, no se vuelven a componer: lo que se abrió es lo que se imprime.
+async function armarPdf(browser, cat, fonts, logoUri) {
+  const p = cat.portada || {};
+  const portada = `<section class="hoja portada">
+    <img src="${logoUri}" class="logo-portada">
+    ${p.rotulo ? `<div class="rotulo-portada">${esc(p.rotulo)}</div>` : ''}
+    <h1>${esc(p.titulo || 'Catálogo')}</h1>
+  </section>`;
+  const hojas = cat.paginas.map((pg) =>
+    `<section class="hoja"><img class="pagina" src="${b64(path.join(SALIDA, pg.id + '.jpg'), 'image/jpeg')}"></section>`).join('');
+  const doc = `<!doctype html><meta charset="utf-8"><style>
+${fonts}
+@page{size:${W}px ${H}px;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+.hoja{width:${W}px;height:${H}px;overflow:hidden;page-break-after:always;break-after:page;position:relative;background:#fff}
+.hoja>img.pagina{display:block;width:${W}px;height:${H}px}
+.portada{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:${VERDE}}
+.logo-portada{height:84px;margin-bottom:56px}
+.rotulo-portada{font-family:'Jost',sans-serif;font-weight:500;font-size:19px;letter-spacing:.22em;text-transform:uppercase}
+.portada h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:120px;line-height:.96;letter-spacing:-.018em;margin-top:22px;max-width:860px}
+</style>${portada}${hojas}`;
+  const page = await browser.newPage();
+  await page.setContent(doc);
+  await page.evaluate(() => document.fonts.ready);
+  const out = path.join(SALIDA, 'catalogo.pdf');
+  await page.pdf({ path: out, width: `${W}px`, height: `${H}px`, printBackground: true });
+  await page.close();
+  console.log(`  PDF: portada + ${cat.paginas.length} páginas → ${path.relative(ROOT, out)}`);
+}
+
 async function main() {
   const require = createRequire(import.meta.url);
   const { chromium } = require('playwright');
@@ -282,6 +314,9 @@ async function main() {
     console.log(`  ${pag.id}  producto y ${p.top}–${p.bottom}  texto desde ${Math.round(s.ficha.top)}  → ${path.relative(ROOT, out)}`);
     await page.close();
   }
+  // El PDF se arma solo con la corrida completa y sin fallas: un catálogo con
+  // una página vieja o rota no se entrega.
+  if (!pedidas.length && !fallas.length) await armarPdf(browser, cat, fonts, logoUri);
   await browser.close();
   if (fallas.length) {
     console.error('\n✗ Páginas que no se entregan:\n  ' + fallas.join('\n  '));
