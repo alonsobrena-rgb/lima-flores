@@ -101,6 +101,15 @@ const precio = (n) => `S/ ${Number.isInteger(n) ? n : n.toFixed(2)}`;
 function html({ prod, pag, fonts, fotoUri, logoUri }) {
   let desc = prod.description;
   for (const [mal, bien] of Object.entries(pag.erratas || {})) desc = desc.replaceAll(mal, bien);
+  // Los cambios que decidió el cliente van aparte de las erratas y con su
+  // motivo: no salen del catálogo de la tienda, y sin el motivo escrito nadie
+  // sabría después de dónde vino el dato. Si el texto de la tienda cambia y
+  // ya no aparece, se avisa en vez de imprimir la versión vieja.
+  for (const c of pag.cambios || []) {
+    if (!c.por) throw new Error(`${pag.id}: un cambio sin motivo («${c.de}»)`);
+    if (!desc.includes(c.de)) throw new Error(`${pag.id}: «${c.de}» ya no está en la descripción de la tienda`);
+    desc = desc.replaceAll(c.de, c.a);
+  }
   let { cuerpo, legal } = partirTexto(desc);
   if (!/dedicatoria/i.test(cuerpo)) cuerpo += ` ${TARJETA}`;
   // El catálogo de la tienda trae nombres con dobles espacios («Box  Rogelia»).

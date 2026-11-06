@@ -1,20 +1,32 @@
 {
-  "_nota": "Una entrada por página. Nombre, categoría, precio y descripción NO van acá: se leen de db/products.seed.json. Acá solo va qué foto usar y las erratas del catálogo que se corrigen al imprimir, a la vista para que se arreglen también en la base. La foto se encuadra sola.",
+  "_nota": "Una entrada por página. Nombre, categoría, precio y descripción NO van acá: se leen de db/products.seed.json. Acá solo va qué foto usar, las erratas que se corrigen al imprimir y los cambios de texto que decidió el cliente (cada uno con su motivo), a la vista para que se lleven también a la base. La foto se encuadra sola.",
   "paginas": [
     {
       "id": "box-yani",
       "foto": "fotos/box-yani-frontal.jpg",
-      "erratas": { "falauta": "flauta", "Riccadona": "Riccadonna" }
+      "erratas": {
+        "falauta": "flauta",
+        "Riccadona": "Riccadonna"
+      }
     },
     {
       "id": "box-rogelia",
       "foto": "box-rogelia.jpg",
-      "erratas": { "25 Rosas": "25 rosas" }
+      "erratas": {
+        "25 Rosas": "25 rosas"
+      }
     },
     {
       "id": "box-gaby-cafe",
       "foto": "box-gaby-cafe-2.jpg",
-      "erratas": { "250 gr.": "250 g" }
+      "erratas": {},
+      "cambios": [
+        {
+          "de": "café de especialidad 250 gr.",
+          "a": "café Tres Orígenes (250 g)",
+          "por": "Lo pidió el cliente el 6 de noviembre de 2026; es la marca que se ve en la foto y la que nombraba el catálogo anterior."
+        }
+      ]
     }
   ]
 }
