@@ -15,8 +15,13 @@ node marketing/catalogo/build.mjs box-yani     # una, para iterar
 | Foto dentro de un marco verde | Foto a sangre | El marco es la «cajita» que prohíbe `DESIGN.md`: el producto manda |
 | Fondo marfil | Ciclorama de la propia foto | El marfil `#F6F3EC` es el fondo viejo del sistema |
 | Advertencia de alcohol girada sobre la foto | Al pie, horizontal | La ley pide que esté; girada sobre el ciclorama no se lee |
-| Nombre en monoespaciada gris, todo centrado | Cormorant itálica, colgado del margen izquierdo | Tipografía y alineación de Florencia |
-| `S/180.00` debajo del nombre | `S/ 180` a la derecha, más chico que el nombre | Ficha de producto del sistema |
+| Nombre en monoespaciada gris | Nombre en Cormorant itálica, el precio debajo y más chico | Tipografía de Florencia; el precio nunca más grande que el nombre |
+
+**Centrado y en verde, a pedido del cliente.** La ficha va centrada, como en el
+catálogo anterior, y todo el texto en `#41542B`, el verde del marco de ese
+catálogo (medido sobre su página de Box Yani). No es un token de Florencia: el
+verde del sistema (`#88A65C`) se probó y sobre el ciclorama da contraste 2,4,
+ilegible en la descripción; `#41542B` da 7,3. Está en `VERDE`, en `build.mjs`.
 
 ## De dónde sale cada dato
 

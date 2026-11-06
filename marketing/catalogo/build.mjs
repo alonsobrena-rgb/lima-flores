@@ -35,6 +35,12 @@ const tk = (n) => {
   if (!TOKENS[n]) throw new Error(`falta el token ${n} en florencia.css`);
   return TOKENS[n];
 };
+// El verde del texto lo pidió el cliente (6-nov-2026) y NO es un token de
+// Florencia: es el marco del catálogo anterior, medido sobre su página de
+// Box Yani. El verde del ramo (--leaf, #88A65C) se probó primero y sobre el
+// ciclorama da contraste 2,4 —ilegible en la descripción—; este da 7,3.
+const VERDE = '#41542B';
+
 const C = {
   ink: tk('--text-strong'),
   body: tk('--text-body'),
@@ -122,23 +128,27 @@ html,body{width:${W}px;height:${H}px;overflow:hidden;background:#fff}
    Chromium headless no mide lo que se le pide. */
 #lienzo{position:relative;width:${W}px;height:${H}px;overflow:hidden;font-family:'Jost',sans-serif;color:${C.ink}}
 canvas{position:absolute;inset:0}
-#logo{position:absolute;left:${MARGEN}px;top:${MARGEN - 16}px;height:64px}
-#ficha{position:absolute;left:${MARGEN}px;right:${MARGEN}px;bottom:${MARGEN}px}
-.fila{display:flex;justify-content:space-between;align-items:baseline;
-  border-top:1px solid ${C.filete};padding-top:22px}
-.rotulo{font-weight:500;font-size:19px;letter-spacing:.22em;text-transform:uppercase;color:${C.rosa}}
-/* El precio nunca más grande que el nombre (DESIGN.md, ficha de producto). */
-.precio{font-weight:500;font-size:30px;letter-spacing:.02em;color:${C.ink}}
+/* Centrada, como pidió el cliente: logotipo, ficha y producto sobre el mismo
+   eje. Todo el texto en el verde del catálogo anterior (ver VERDE). */
+#logo{position:absolute;left:50%;transform:translateX(-50%);top:${MARGEN - 16}px;height:64px}
+#ficha{position:absolute;left:${MARGEN}px;right:${MARGEN}px;bottom:${MARGEN}px;
+  text-align:center;color:${VERDE}}
+.filete{width:120px;height:0;border-top:1px solid ${VERDE};opacity:.45;margin:0 auto 22px}
+.rotulo{font-weight:500;font-size:19px;letter-spacing:.22em;text-transform:uppercase}
 h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;
-  font-size:92px;line-height:.96;letter-spacing:-.018em;margin-top:14px}
-.cuerpo{font-size:25px;line-height:1.48;color:${C.body};margin-top:18px;max-width:880px}
-.legal{font-size:16px;line-height:1.4;color:${C.muted};margin-top:20px;letter-spacing:.01em}
+  font-size:88px;line-height:.96;letter-spacing:-.018em;margin-top:12px}
+/* El precio nunca más grande que el nombre (DESIGN.md, ficha de producto). */
+.precio{font-weight:500;font-size:30px;letter-spacing:.02em;margin-top:12px}
+.cuerpo{font-size:24px;line-height:1.48;margin:16px auto 0;max-width:840px}
+.legal{font-size:16px;line-height:1.4;margin-top:16px;letter-spacing:.01em;opacity:.8}
 </style><div id="lienzo">
 <canvas id="c" width="${W}" height="${H}"></canvas>
 <img id="logo" src="${logoUri}">
 <div id="ficha">
-  <div class="fila"><span class="rotulo">${esc(prod.categoryLabel)}</span><span class="precio">${precio(prod.price)}</span></div>
+  <div class="filete"></div>
+  <div class="rotulo">${esc(prod.categoryLabel)}</div>
   <h1>${esc(nombre)}</h1>
+  <div class="precio">${precio(prod.price)}</div>
   <p class="cuerpo">${esc(cuerpo)}</p>
   ${legal ? `<p class="legal">${esc(legal)}</p>` : ''}
 </div></div>
