@@ -3,14 +3,17 @@ rehacerlo, porque el diseño navideño se mantiene.
 
     python3 -I marketing/catalogo/navidad.py <catalogo-del-año-pasado.pdf>
 
-Antes hay que generar las páginas verticales de los productos nuevos:
+Antes hay que generar las páginas verticales de los productos nuevos y los
+textos que se reescriben:
 
     FORMATO=historia node marketing/catalogo/build.mjs
+    node marketing/catalogo/textos-navidad.mjs
 
 Los cambios están escritos acá y no en el PDF a mano para que, si el cliente
 pide otro ajuste, se vuelva a correr desde el original y no se acumulen
 ediciones sobre ediciones.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -33,6 +36,21 @@ NUEVAS = ["box-yani", "box-rogelia", "box-gaby-cafe"]
 def main(origen: str) -> None:
     doc = pymupdf.open(origen)
     ancho, alto = doc[0].rect.width, doc[0].rect.height
+
+    # Textos reescritos (textos-navidad.mjs). Se borra solo el texto viejo: la
+    # redacción no toca imágenes ni dibujos y no pinta relleno, así que el
+    # fondo y el logotipo que asoma por arriba del título quedan como estaban.
+    manifiesto = AQUI / "navidad" / "textos" / "textos.json"
+    if not manifiesto.exists():
+        sys.exit("faltan los textos: corre antes node marketing/catalogo/textos-navidad.mjs")
+    for t in json.loads(manifiesto.read_text(encoding="utf-8")):
+        pag = doc[t["pagina"] - 1]
+        for r in t["borrar"]:
+            pag.add_redact_annot(pymupdf.Rect(r), fill=False)
+        pag.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_NONE,
+                             graphics=pymupdf.PDF_REDACT_LINE_ART_NONE)
+        with pymupdf.open(AQUI / "navidad" / "textos" / f"{t['id']}.pdf") as src:
+            pag.show_pdf_page(pymupdf.Rect(t["rect"]), src, 0)
 
     for n in SIN_FOTOS:
         pag = doc[n - 1]

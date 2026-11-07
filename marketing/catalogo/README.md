@@ -70,3 +70,14 @@ python3 -I marketing/catalogo/navidad.py <original.pdf>  # → navidad/catalogo-
 
 Pendiente: la foto nueva de Regalos corporativos y las fotos reales de Centros
 de mesa (sus recuadros quedan vacíos).
+
+Los textos que se reescriben (por ahora, los de la página 2) están en
+`textos-navidad.mjs`: salen como PDF vectorial en Cormorant y Jost, en el verde
+del catálogo de Navidad (`#105B34`), y `navidad.py` los coloca después de borrar
+solo el texto viejo. El orden completo:
+
+```sh
+FORMATO=historia node marketing/catalogo/build.mjs
+node marketing/catalogo/textos-navidad.mjs
+python3 -I marketing/catalogo/navidad.py <original.pdf>
+```
