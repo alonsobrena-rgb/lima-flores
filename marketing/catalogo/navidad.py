@@ -24,10 +24,11 @@ AQUI = Path(__file__).resolve().parent
 SALIDA = AQUI / "navidad" / "catalogo-navidad.pdf"
 
 # Numeración del PDF original, contando desde 1, como la dice el cliente.
-QUITAR = [6, 8, 11]  # árbol grande, árbol decorado, rosas con «Feliz Navidad»
-# Centros de mesa: las fotos no son arreglos de Lima Flores. Se quitan y se
-# dejan los recuadros vacíos para las fotos reales.
-SIN_FOTOS = [9]
+# Árbol grande, árbol decorado, centros de mesa y rosas con «Feliz Navidad».
+# Centros de mesa (9) se quita entera: sus fotos no eran arreglos de Lima
+# Flores y no hay reales; el cliente prefirió sacarla a dejar recuadros vacíos.
+QUITAR = [6, 8, 9, 11]
+SIN_FOTOS = []
 # Las páginas nuevas entran después de la de Ramo Melissa, Box de rosas,
 # Tulipanes y Arreglo Rossie: es la página de productos con flores.
 DESPUES_DE = 10

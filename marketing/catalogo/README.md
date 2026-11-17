@@ -80,7 +80,8 @@ esa versión igual (17 de noviembre de 2026). Por eso
 lleva «Imagen referencial». El precio (S/ 120) lo dio el cliente porque la
 corona aún no está en la tienda; la composición no se escribe. Cuando haya foto real de una corona del taller, se cambia `foto`.
 
-Pendiente: las fotos reales de Centros de mesa (sus recuadros quedan vacíos).
+La página de Centros de mesa se quitó (17 de noviembre de 2026): no había fotos
+reales.
 
 Los textos que se reescriben (por ahora, los de la página 2) están en
 `textos-navidad.mjs`: salen como PDF vectorial en Cormorant y Jost, en el verde
