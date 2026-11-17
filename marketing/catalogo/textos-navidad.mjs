@@ -91,6 +91,21 @@ export const PAGINAS = [
     precio: 120,
     nota: 'Imagen referencial',
   },
+  {
+    id: 'pinas',
+    // Tras Pinos, en el hueco que dejó Centros de mesa. Cuenta sobre el PDF
+    // con la corona de adviento ya metida (las páginas se insertan en orden).
+    despues_de: 7,
+    foto: 'fotos/pinas-referencial.jpg',
+    titulo: 'Piñas <em>naturales</em>',
+    // Cantidad y precio dictados por el cliente el 17 de noviembre de 2026; no
+    // están en la tienda. La foto no es del taller (bowl y escena de banco de
+    // imágenes): va como referencial y el bowl no se nombra, nadie dijo que
+    // venga incluido.
+    detalle: '24 piñas',
+    precio: 32,
+    nota: 'Imagen referencial',
+  },
 ];
 
 const FONDO_NAVIDAD = '#EDE9E3'; // el fondo de las páginas de Canva, medido
@@ -145,11 +160,12 @@ async function main() {
     const page = await browser.newPage();
     await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
       body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};text-align:center}
-      img{display:block;width:1080px;height:1440px;object-fit:cover}
-      h1{font-size:108px;margin-top:150px}
+      img{display:block;width:1080px;height:auto;max-height:1440px;object-fit:cover}
+      .detalle{font-family:'Jost',sans-serif;font-size:36px;margin-top:28px}
+      h1{font-size:108px;margin-top:120px}
       .precio{font-family:'Jost',sans-serif;font-size:44px;font-weight:500;margin-top:36px}
       .nota{font-family:'Jost',sans-serif;font-size:26px;letter-spacing:.18em;text-transform:uppercase;margin-top:56px;opacity:.8}
-      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.precio ? `<div class="precio">S/ ${p.precio}</div>` : ''}<div class="nota">${p.nota}</div>`);
+      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.detalle ? `<div class="detalle">${p.detalle}</div>` : ''}${p.precio ? `<div class="precio">S/ ${p.precio}</div>` : ''}<div class="nota">${p.nota}</div>`);
     await page.evaluate(() => document.fonts.ready);
     const out = path.join(SALIDA, `${p.id}.pdf`);
     await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
