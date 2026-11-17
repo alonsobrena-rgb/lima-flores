@@ -42,6 +42,17 @@ export const TEXTOS = [
     // «darán» y «ciprés» llevan tilde; en el original no la tenían.
     html: '<p>Coronas naturales que le darán a tu casa un delicioso olor a ciprés.</p>',
   },
+  {
+    id: 'p13-legal',
+    pagina: 13,
+    // Bajo la foto de la caja navideña, que trae una cidra: la ley pide la
+    // advertencia en toda publicidad de alcohol. El texto es el mismo de la
+    // tienda (db/products.seed.json); no se redacta uno propio.
+    rect: [20, 962, 333, 1010],
+    borrar: [],
+    max: 15,
+    html: '<p class="legal">Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.</p>',
+  },
 ];
 
 const ESTILO = `
@@ -51,6 +62,7 @@ html,body{background:transparent}
 h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;line-height:1;letter-spacing:-.018em}
 h1 em{font-style:italic}
 p{font-family:'Jost',sans-serif;font-weight:400;line-height:1.38}
+p.legal{line-height:1.25}
 `;
 
 async function main() {

@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 import pymupdf
+from PIL import Image
 
 AQUI = Path(__file__).resolve().parent
 SALIDA = AQUI / "navidad" / "catalogo-navidad.pdf"
@@ -31,6 +32,29 @@ SIN_FOTOS = [9]
 # Tulipanes y Arreglo Rossie: es la página de productos con flores.
 DESPUES_DE = 10
 NUEVAS = ["box-yani", "box-rogelia", "box-gaby-cafe"]
+# Regalos corporativos: la foto vieja era el Arreglo Rossie repetido. Va la caja
+# navideña, la toma de dentro de la caja porque muestra cómo llega el regalo.
+# El rect es la parte visible del recuadro de Canva: la imagen original se
+# salía por el borde izquierdo y Canva la recortaba con la página.
+CAMBIAR_FOTO = {13: ((0, 492.19, 333.4, 948.19), "fotos/caja-navidena-dentro.jpg")}
+
+
+def recorte(foto: Path, rect) -> bytes:
+    """Recorta la foto a la proporción del recuadro, centrada. insert_image solo
+    sabe encoger para que entre, y eso dejaría franjas vacías a los lados."""
+    im = Image.open(foto).convert("RGB")
+    w, h = im.size
+    prop = (rect[2] - rect[0]) / (rect[3] - rect[1])
+    if w / h > prop:
+        nw = round(h * prop)
+        im = im.crop(((w - nw) // 2, 0, (w - nw) // 2 + nw, h))
+    else:
+        nh = round(w / prop)
+        im = im.crop((0, (h - nh) // 2, w, (h - nh) // 2 + nh))
+    import io
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=90)
+    return buf.getvalue()
 
 
 def main(origen: str) -> None:
@@ -58,6 +82,14 @@ def main(origen: str) -> None:
         # y los marcos, que en Canva son trazos aparte, siguen en su lugar.
         for info in pag.get_images(full=True):
             pag.delete_image(info[0])
+
+    for n, (rect, foto) in CAMBIAR_FOTO.items():
+        pag = doc[n - 1]
+        for info in pag.get_images(full=True):
+            # Solo la foto del recuadro: el logotipo de arriba también es imagen.
+            if any(r.intersects(pymupdf.Rect(rect)) for r in pag.get_image_rects(info[0])):
+                pag.delete_image(info[0])
+        pag.insert_image(pymupdf.Rect(rect), stream=recorte(AQUI / foto, rect))
 
     # Las nuevas se insertan antes de borrar, mientras la numeración del
     # original todavía vale.
