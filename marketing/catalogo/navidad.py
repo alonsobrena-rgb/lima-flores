@@ -44,6 +44,43 @@ CAMBIAR_FOTO = {13: ((0, 492.19, 333.4, 948.19), "fotos/noelia-contenido.jpg")}
 AGREGAR_FOTO = {13: ((205, 1050, 605), "fotos/noelia-armada.jpg")}
 
 
+# Erratas del texto de Canva (página, línea tal cual está, línea corregida). Se
+# reescribe la línea entera con la misma Space Mono, tamaño, color y línea base:
+# es monoespaciada, así que una letra de más corre el resto un carácter y nada
+# más. «6O» llevaba una letra O en vez de un cero.
+ERRATAS = [
+    (10, "TOQUES VERDE LIMON.", "TOQUES VERDE LIMÓN."),
+    (10, "MEDIDAS: 60  CM DE", "MEDIDAS: 60 CM DE"),
+    (10, "DEDIFERENTE COLOR.", "DE DIFERENTE COLOR."),
+    (10, "55 CM DE DIAMETRO", "55 CM DE DIÁMETRO"),
+    (10, "RAMO DETULIPANES", "RAMO DE TULIPANES"),
+    (10, "MAS TE GUSTEN ", "MÁS TE GUSTEN"),
+    (10, "MEDIDAS: 6O CM DE ALTO ", "MEDIDAS: 60 CM DE ALTO"),
+]
+SPACE_MONO = AQUI / ".fontcache" / "SpaceMono-Regular.ttf"
+SPACE_MONO_URL = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/spacemono/SpaceMono-Regular.ttf"
+
+
+def corregir_erratas(doc) -> None:
+    if not SPACE_MONO.exists():
+        import urllib.request
+        SPACE_MONO.parent.mkdir(exist_ok=True)
+        urllib.request.urlretrieve(SPACE_MONO_URL, SPACE_MONO)
+    for n, viejo, nuevo in ERRATAS:
+        pag = doc[n - 1]
+        span = next((s for b in pag.get_text("dict")["blocks"] for l in b.get("lines", [])
+                     for s in l["spans"] if s["text"] == viejo), None)
+        if span is None:
+            sys.exit(f"errata no encontrada en la página {n}: {viejo!r}")
+        pag.add_redact_annot(pymupdf.Rect(span["bbox"]), fill=False)
+        pag.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_NONE,
+                             graphics=pymupdf.PDF_REDACT_LINE_ART_NONE)
+        c = span["color"]
+        pag.insert_text(span["origin"], nuevo, fontsize=span["size"], fontname="spacemono",
+                        fontfile=str(SPACE_MONO),
+                        color=((c >> 16 & 255) / 255, (c >> 8 & 255) / 255, (c & 255) / 255))
+
+
 def recorte(foto: Path, rect) -> bytes:
     """Recorta la foto a la proporción del recuadro, centrada. insert_image solo
     sabe encoger para que entre, y eso dejaría franjas vacías a los lados."""
@@ -80,6 +117,8 @@ def main(origen: str) -> None:
                              graphics=pymupdf.PDF_REDACT_LINE_ART_NONE)
         with pymupdf.open(AQUI / "navidad" / "textos" / f"{t['id']}.pdf") as src:
             pag.show_pdf_page(pymupdf.Rect(t["rect"]), src, 0)
+
+    corregir_erratas(doc)
 
     for n in SIN_FOTOS:
         pag = doc[n - 1]
