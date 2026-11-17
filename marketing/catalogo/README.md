@@ -77,8 +77,8 @@ foto **generada con IA**: la trajo el cliente y se editó con Higgsfield
 (Seedream): canela, pepas de eucalipto, naranjas deshidratadas y thuja en vez
 del pino azulado. La corona toca el borde derecho de la foto; el cliente eligió
 esa versión igual (17 de noviembre de 2026). Por eso
-lleva «Imagen referencial» y no tiene precio ni composición: no están en la
-tienda. Cuando haya foto real de una corona del taller, se cambia `foto`.
+lleva «Imagen referencial». El precio (S/ 120) lo dio el cliente porque la
+corona aún no está en la tienda; la composición no se escribe. Cuando haya foto real de una corona del taller, se cambia `foto`.
 
 Pendiente: las fotos reales de Centros de mesa (sus recuadros quedan vacíos).
 

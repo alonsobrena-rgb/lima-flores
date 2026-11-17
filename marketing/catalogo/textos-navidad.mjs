@@ -67,7 +67,10 @@ export const PAGINAS = [
     // La foto es generada con IA (Higgsfield, Seedream) sobre una imagen que
     // trajo el cliente; no es una corona hecha en el taller. Lo pidió el
     // cliente el 17 de noviembre de 2026, con la condición de que lo diga.
-    // Sin precio ni composición: no están en la tienda y no se inventan.
+    // El precio lo dio el cliente el 17 de noviembre de 2026; la corona todavía
+    // no está en la tienda. Cuando se cargue, que salga de ahí y no de acá.
+    // La composición no se escribe: nadie la confirmó.
+    precio: 120,
     nota: 'Imagen referencial',
   },
 ];
@@ -126,8 +129,9 @@ async function main() {
       body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};text-align:center}
       img{display:block;width:1080px;height:1440px;object-fit:cover}
       h1{font-size:108px;margin-top:150px}
+      .precio{font-family:'Jost',sans-serif;font-size:44px;font-weight:500;margin-top:36px}
       .nota{font-family:'Jost',sans-serif;font-size:26px;letter-spacing:.18em;text-transform:uppercase;margin-top:56px;opacity:.8}
-      </style><img src="${foto}"><h1>${p.titulo}</h1><div class="nota">${p.nota}</div>`);
+      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.precio ? `<div class="precio">S/ ${p.precio}</div>` : ''}<div class="nota">${p.nota}</div>`);
     await page.evaluate(() => document.fonts.ready);
     const out = path.join(SALIDA, `${p.id}.pdf`);
     await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
