@@ -65,9 +65,11 @@ async function uploadImage(filePath) {
   const ct = filePath.endsWith('.png') ? 'image/png' : 'image/jpeg';
   const u = await req('POST', '/files/generate-upload-url', { json: { content_type: ct } });
   if (u.status < 200 || u.status >= 300) throw new Error(`generate-upload-url HTTP ${u.status}: ${u.text.slice(0, 300)}`);
-  const { public_url, upload_url } = u.json;
+  const { public_url, upload_url, upload_headers } = u.json;
   const bytes = fs.readFileSync(filePath);
-  const put = await req('PUT', upload_url, { body: bytes, headers: { 'Content-Type': ct } });
+  // La URL firmada incluye x-amz-tagging: si el PUT no manda exactamente los
+  // encabezados que devuelve la API, S3 responde 403 SignatureDoesNotMatch.
+  const put = await req('PUT', upload_url, { body: bytes, headers: upload_headers || { 'Content-Type': ct } });
   if (put.status < 200 || put.status >= 300) throw new Error(`PUT upload HTTP ${put.status}: ${put.text.slice(0, 200)}`);
   return public_url;
 }
