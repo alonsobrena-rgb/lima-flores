@@ -92,10 +92,23 @@ export const PAGINAS = [
     nota: 'Imagen referencial',
   },
   {
-    id: 'pinas',
-    // Tras la corona de adviento (Pinos y Centros de mesa salieron). Cuenta
-    // sobre el PDF con la corona ya metida: las páginas se insertan en orden.
+    id: 'colgadores',
+    // Tras la corona de adviento, antes de las piñas: completan las coronas.
     despues_de: 6,
+    foto: 'fotos/colgadores.jpg',
+    titulo: 'Colgadores de <em>corona</em>',
+    // Foto del producto (fondo blanco) que mandó el cliente. «Desde S/ 30» y
+    // los colores (los dos de la foto) los dio el cliente el 17 de noviembre
+    // de 2026; no están en la tienda.
+    detalle: 'Dorado o negro',
+    precio: 30,
+    desde: true,
+  },
+  {
+    id: 'pinas',
+    // Tras los colgadores (Pinos y Centros de mesa salieron). Cuenta sobre el
+    // PDF con las páginas anteriores ya metidas: se insertan en orden.
+    despues_de: 7,
     foto: 'fotos/pinas-referencial.jpg',
     titulo: 'Piñas <em>naturales</em>',
     // Cantidad y precio dictados por el cliente el 17 de noviembre de 2026; no
@@ -165,7 +178,7 @@ async function main() {
       h1{font-size:108px;margin-top:120px}
       .precio{font-family:'Jost',sans-serif;font-size:44px;font-weight:500;margin-top:36px}
       .nota{font-family:'Jost',sans-serif;font-size:26px;letter-spacing:.18em;text-transform:uppercase;margin-top:56px;opacity:.8}
-      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.detalle ? `<div class="detalle">${p.detalle}</div>` : ''}${p.precio ? `<div class="precio">S/ ${p.precio}</div>` : ''}<div class="nota">${p.nota}</div>`);
+      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.detalle ? `<div class="detalle">${p.detalle}</div>` : ''}${p.precio ? `<div class="precio">${p.desde ? 'Desde ' : ''}S/ ${p.precio}</div>` : ''}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);
     await page.evaluate(() => document.fonts.ready);
     const out = path.join(SALIDA, `${p.id}.pdf`);
     await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
