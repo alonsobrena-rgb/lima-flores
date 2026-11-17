@@ -93,9 +93,9 @@ export const PAGINAS = [
   },
   {
     id: 'pinas',
-    // Tras Pinos, en el hueco que dejó Centros de mesa. Cuenta sobre el PDF
-    // con la corona de adviento ya metida (las páginas se insertan en orden).
-    despues_de: 7,
+    // Tras la corona de adviento (Pinos y Centros de mesa salieron). Cuenta
+    // sobre el PDF con la corona ya metida: las páginas se insertan en orden.
+    despues_de: 6,
     foto: 'fotos/pinas-referencial.jpg',
     titulo: 'Piñas <em>naturales</em>',
     // Cantidad y precio dictados por el cliente el 17 de noviembre de 2026; no

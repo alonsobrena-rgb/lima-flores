@@ -81,7 +81,7 @@ esa versión igual (17 de noviembre de 2026). Por eso
 lleva «Imagen referencial». El precio (S/ 120) lo dio el cliente porque la
 corona aún no está en la tienda; la composición no se escribe. Cuando haya foto real de una corona del taller, se cambia `foto`.
 
-**Piñas naturales** (24 piñas, S/ 32, dictado por el cliente) va tras Pinos, con
+**Piñas naturales** (24 piñas, S/ 32, dictado por el cliente) va tras la corona de adviento, con
 foto de banco de imágenes marcada como referencial; el bowl no se nombra.
 
 La página de Centros de mesa se quitó (17 de noviembre de 2026): no había fotos
