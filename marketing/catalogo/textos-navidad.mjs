@@ -55,6 +55,25 @@ export const TEXTOS = [
   },
 ];
 
+// Páginas enteras nuevas, con el estilo de la página 2 reescrita. Salen como
+// PDF vectorial de 810 × 1440 pt (el tamaño del original) y navidad.py las mete
+// después de la página indicada, contada sobre el PDF ya armado.
+export const PAGINAS = [
+  {
+    id: 'corona-adviento',
+    despues_de: 5, // tras «Escoge la que más te guste», cierra el bloque de coronas
+    foto: 'fotos/corona-adviento-referencial.jpg',
+    titulo: 'Coronas de <em>adviento</em>',
+    // La foto es generada con IA (Higgsfield, Seedream) sobre una imagen que
+    // trajo el cliente; no es una corona hecha en el taller. Lo pidió el
+    // cliente el 17 de noviembre de 2026, con la condición de que lo diga.
+    // Sin precio ni composición: no están en la tienda y no se inventan.
+    nota: 'Imagen referencial',
+  },
+];
+
+const FONDO_NAVIDAD = '#EDE9E3'; // el fondo de las páginas de Canva, medido
+
 const ESTILO = `
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:transparent}
@@ -100,6 +119,22 @@ async function main() {
     await page.close();
     console.log(`  ${t.id}  ${Math.round(tam)} px  → ${path.relative(path.resolve(HERE, '../..'), out)}`);
   }
+  for (const p of PAGINAS) {
+    const foto = `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, p.foto)).toString('base64')}`;
+    const page = await browser.newPage();
+    await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
+      body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};text-align:center}
+      img{display:block;width:1080px;height:1440px;object-fit:cover}
+      h1{font-size:108px;margin-top:150px}
+      .nota{font-family:'Jost',sans-serif;font-size:26px;letter-spacing:.18em;text-transform:uppercase;margin-top:56px;opacity:.8}
+      </style><img src="${foto}"><h1>${p.titulo}</h1><div class="nota">${p.nota}</div>`);
+    await page.evaluate(() => document.fonts.ready);
+    const out = path.join(SALIDA, `${p.id}.pdf`);
+    await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
+    await page.close();
+    console.log(`  página ${p.id}  → ${path.relative(path.resolve(HERE, '../..'), out)}`);
+  }
+  fs.writeFileSync(path.join(SALIDA, 'paginas.json'), JSON.stringify(PAGINAS.map(({ id, despues_de }) => ({ id, despues_de })), null, 2));
   fs.writeFileSync(path.join(SALIDA, 'textos.json'), JSON.stringify(TEXTOS.map(({ html, ...r }) => r), null, 2));
   await browser.close();
 }

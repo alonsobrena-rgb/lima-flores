@@ -105,6 +105,12 @@ def main(origen: str) -> None:
     corridas = [n - 1 + (len(NUEVAS) if n > DESPUES_DE else 0) for n in QUITAR]
     doc.delete_pages(corridas)
 
+    # Páginas enteras nuevas (textos-navidad.mjs). Van al final porque su
+    # posición se cuenta sobre el PDF ya armado, con las quitadas fuera.
+    for pg in json.loads((AQUI / "navidad" / "textos" / "paginas.json").read_text(encoding="utf-8")):
+        with pymupdf.open(AQUI / "navidad" / "textos" / f"{pg['id']}.pdf") as src:
+            doc.insert_pdf(src, start_at=pg["despues_de"])
+
     SALIDA.parent.mkdir(exist_ok=True)
     doc.save(SALIDA, garbage=4, deflate=True)
     print(f"{doc.page_count} páginas → {SALIDA.relative_to(AQUI.parent.parent)}")

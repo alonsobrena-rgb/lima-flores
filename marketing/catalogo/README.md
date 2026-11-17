@@ -72,6 +72,12 @@ Regalos corporativos lleva la caja navideña (`fotos/caja-navidena-dentro.jpg`,
 `CAMBIAR_FOTO` en `navidad.py`). Como la caja trae una cidra, debajo va la
 advertencia de alcohol de la tienda (`p13-legal` en `textos-navidad.mjs`).
 
+La página de **Coronas de adviento** (`PAGINAS` en `textos-navidad.mjs`) usa una
+foto **generada con IA**: la trajo el cliente y se editó con Higgsfield
+(Seedream) para cambiar el pino azulado por canela y pepas de eucalipto. Por eso
+lleva «Imagen referencial» y no tiene precio ni composición: no están en la
+tienda. Cuando haya foto real de una corona del taller, se cambia `foto`.
+
 Pendiente: las fotos reales de Centros de mesa (sus recuadros quedan vacíos).
 
 Los textos que se reescriben (por ahora, los de la página 2) están en
