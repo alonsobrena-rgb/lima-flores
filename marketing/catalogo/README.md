@@ -68,8 +68,9 @@ FORMATO=historia node marketing/catalogo/build.mjs     # páginas nuevas en 9:16
 python3 -I marketing/catalogo/navidad.py <original.pdf>  # → navidad/catalogo-navidad.pdf
 ```
 
-Regalos corporativos lleva la Cajita Noelia, S/ 250 (`fotos/caja-navidena-dentro.jpg`,
-`CAMBIAR_FOTO` en `navidad.py`). Como la caja trae una cidra, debajo va la
+Regalos corporativos lleva la Cajita Noelia, S/ 250: los productos sueltos en el
+recuadro (`fotos/noelia-contenido.jpg`) y la caja armada abajo
+(`fotos/noelia-armada.jpg`, con la dirección corregida a mano), en `navidad.py`. Como la caja trae una cidra, debajo va la
 advertencia de alcohol de la tienda (`p13-legal` en `textos-navidad.mjs`).
 
 La página de **Coronas de adviento** (`PAGINAS` en `textos-navidad.mjs`) usa una

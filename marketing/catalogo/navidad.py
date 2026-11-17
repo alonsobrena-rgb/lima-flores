@@ -33,11 +33,15 @@ SIN_FOTOS = []
 # Tulipanes y Arreglo Rossie: es la página de productos con flores.
 DESPUES_DE = 10
 NUEVAS = ["box-yani", "box-rogelia", "box-gaby-cafe"]
-# Regalos corporativos: la foto vieja era el Arreglo Rossie repetido. Va la caja
-# navideña, la toma de dentro de la caja porque muestra cómo llega el regalo.
-# El rect es la parte visible del recuadro de Canva: la imagen original se
-# salía por el borde izquierdo y Canva la recortaba con la página.
-CAMBIAR_FOTO = {13: ((0, 492.19, 333.4, 948.19), "fotos/caja-navidena-dentro.jpg")}
+# Regalos corporativos (Cajita Noelia): la foto vieja era el Arreglo Rossie
+# repetido. En el recuadro va la toma con los productos sueltos, al lado de la
+# lista de lo que trae. El rect es la parte visible del recuadro de Canva: la
+# imagen original se salía por el borde izquierdo y Canva la recortaba.
+CAMBIAR_FOTO = {13: ((0, 492.19, 333.4, 948.19), "fotos/noelia-contenido.jpg")}
+# Y abajo, la caja armada, entera (sin recorte: se calcula el alto con su
+# proporción). En esa foto retocada la dirección decía «limaflorea.pe»; la
+# «a» se cambió a mano por una «s» antes de guardarla en fotos/.
+AGREGAR_FOTO = {13: ((205, 1050, 605), "fotos/noelia-armada.jpg")}
 
 
 def recorte(foto: Path, rect) -> bytes:
@@ -91,6 +95,11 @@ def main(origen: str) -> None:
             if any(r.intersects(pymupdf.Rect(rect)) for r in pag.get_image_rects(info[0])):
                 pag.delete_image(info[0])
         pag.insert_image(pymupdf.Rect(rect), stream=recorte(AQUI / foto, rect))
+
+    for n, ((x0, y0, x1), foto) in AGREGAR_FOTO.items():
+        w, h = Image.open(AQUI / foto).size
+        rect = pymupdf.Rect(x0, y0, x1, y0 + (x1 - x0) * h / w)
+        doc[n - 1].insert_image(rect, filename=str(AQUI / foto))
 
     # Las nuevas se insertan antes de borrar, mientras la numeración del
     # original todavía vale.

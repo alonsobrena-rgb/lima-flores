@@ -64,11 +64,11 @@ export const TEXTOS = [
     // Bajo la foto de la caja navideña, que trae una cidra: la ley pide la
     // advertencia en toda publicidad de alcohol. El texto es el mismo de la
     // tienda (db/products.seed.json); no se redacta uno propio.
-    // A lo ancho y bajo el adorno dorado (termina en y 1034): el cliente la
-    // pidió bien visible, y bajo la foto a 15 px no se notaba.
-    rect: [40, 1060, 770, 1130],
+    // Bajo la foto, hasta donde empieza el adorno dorado (x 575). Abajo va la
+    // caja armada. El cliente la pidió bien visible: a 15 px no se notaba.
+    rect: [20, 958, 565, 1040],
     borrar: [],
-    max: 26,
+    max: 24,
     html: '<p class="legal">Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.</p>',
   },
 ];
