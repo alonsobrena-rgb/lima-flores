@@ -43,14 +43,32 @@ export const TEXTOS = [
     html: '<p>Coronas naturales que le darán a tu casa un delicioso olor a ciprés.</p>',
   },
   {
+    id: 'p13-noelia',
+    pagina: 13,
+    // Regalos corporativos: el párrafo viejo hablaba de flores y la foto es la
+    // Cajita Noelia. Nombre, precio y contenido los dictó el cliente el 17 de
+    // noviembre de 2026; la caja aún no está en la tienda. El hueco termina
+    // donde empieza el adorno dorado de la derecha (y 794).
+    rect: [351, 560, 780, 790],
+    borrar: [[351, 561, 776, 825]],
+    max: 60,
+    html: `<div style="text-align:left">
+      <h1 style="font-size:1.6em">Cajita <em>Noelia</em></h1>
+      <p style="font-weight:500;margin:.35em 0 .55em">S/ 250</p>
+      <p>Cidra en botella de vidrio de 750 ml · Miel pura de abeja Selva del Cusco, 120 ml, con mini servidor · Queso tilsit · Sal de Maras, frasco de 200 g, con servidor de madera · Tabla rectangular de madera</p>
+    </div>`,
+  },
+  {
     id: 'p13-legal',
     pagina: 13,
     // Bajo la foto de la caja navideña, que trae una cidra: la ley pide la
     // advertencia en toda publicidad de alcohol. El texto es el mismo de la
     // tienda (db/products.seed.json); no se redacta uno propio.
-    rect: [20, 962, 333, 1010],
+    // A lo ancho y bajo el adorno dorado (termina en y 1034): el cliente la
+    // pidió bien visible, y bajo la foto a 15 px no se notaba.
+    rect: [40, 1060, 770, 1130],
     borrar: [],
-    max: 15,
+    max: 26,
     html: '<p class="legal">Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.</p>',
   },
 ];
