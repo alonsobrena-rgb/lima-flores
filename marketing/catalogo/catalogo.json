@@ -7,8 +7,10 @@
   "paginas": [
     {
       "id": "box-yani",
-      "foto": "fotos/box-yani-frontal.jpg",
-      "erratas": {}
+      "foto": "fotos/box-yani-navidad.jpg",
+      "erratas": {},
+      "sello": "Edición limitada",
+      "_foto": "Versión de Navidad pedida por el cliente el 18 de noviembre de 2026: los claveles fucsia de box-yani-frontal.jpg pasados a rojo con un cambio de tono local (no IA). El box se arma así en Navidad; por eso el sello."
     },
     {
       "id": "box-rogelia",

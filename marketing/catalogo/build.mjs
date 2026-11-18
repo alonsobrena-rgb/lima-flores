@@ -144,9 +144,16 @@ h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;
 .precio{font-weight:500;font-size:30px;letter-spacing:.02em;margin-top:12px}
 .cuerpo{font-size:24px;line-height:1.48;margin:16px auto 0;max-width:840px}
 .legal{font-size:16px;line-height:1.4;margin-top:16px;letter-spacing:.01em;opacity:.8}
+/* Sello (p. ej. «Edición limitada»): arriba a la derecha, sobre el ciclorama
+   vacío, para que no tape el producto ni compita con el nombre. */
+#sello{position:absolute;right:${MARGEN}px;top:${MARGEN + 70}px;width:190px;height:190px;border-radius:50%;
+  background:${VERDE};color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:38px;line-height:1;
+  padding:24px;transform:rotate(-8deg);box-shadow:0 6px 18px rgba(0,0,0,.12)}
 </style><div id="lienzo">
 <canvas id="c" width="${W}" height="${H}"></canvas>
 <img id="logo" src="${logoUri}">
+${pag.sello ? `<div id="sello">${esc(pag.sello)}</div>` : ''}
 <div id="ficha">
   <div class="filete"></div>
   <div class="rotulo">${esc(prod.categoryLabel)}</div>
