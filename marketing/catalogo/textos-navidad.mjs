@@ -128,6 +128,9 @@ export const PAGINAS = [
     items: [
       { foto: 'fotos/centro-mesa-rojas.jpg', nombre: 'Con tres velas <em>rojas</em>' },
       { foto: 'fotos/centro-mesa-doradas.jpg', nombre: 'Con tres velas <em>doradas</em>' },
+      // Tercera opción: foto de internet que mandó el cliente, con la caja gris
+      // pasada a negra con Seedream (pedido del 18 de noviembre de 2026).
+      { foto: 'fotos/centro-mesa-caja-negra.jpg', nombre: 'En caja negra, con velas <em>doradas</em>' },
     ],
     nota: 'Imágenes referenciales',
   },
@@ -251,10 +254,10 @@ async function main() {
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:140px 60px 0;position:relative}
-        h1{font-size:96px;text-align:center;margin-bottom:80px}
-        .fila{display:flex;align-items:center;gap:48px;margin-bottom:60px}
+        h1{font-size:96px;text-align:center;margin-bottom:${p.items.length > 2 ? 50 : 80}px}
+        .fila{display:flex;align-items:center;gap:48px;margin-bottom:${p.items.length > 2 ? 34 : 60}px}
         .fila.inv{flex-direction:row-reverse;text-align:right}
-        .fila img{width:640px;height:640px;object-fit:cover;flex:none}
+        .fila img{width:${p.items.length > 2 ? 470 : 640}px;height:${p.items.length > 2 ? 470 : 640}px;object-fit:cover;flex:none}
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:62px;line-height:1.05}
         h2 em{font-style:italic}
         .nota{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-family:'Jost',sans-serif;font-size:24px;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
