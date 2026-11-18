@@ -220,6 +220,7 @@ const mono = (peso, archivo) => {
 const MONO = mono(400, 'SpaceMono-Regular.ttf') + mono(700, 'SpaceMono-Bold.ttf');
 
 const ESTILO = MONO + `
+.ref{font-size:15px !important;letter-spacing:.14em !important;opacity:.6 !important}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:transparent}
 .caja{display:flex;align-items:center;justify-content:center;text-align:center;color:${VERDE_NAVIDAD};overflow:hidden}
@@ -296,7 +297,7 @@ async function main() {
       // Dos fotos en zigzag, cada una con su nombre al costado.
       const filas = p.items.map((it, i) => {
         const img = fs.readFileSync(path.join(HERE, it.foto)).toString('base64');
-        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><div><h2>${it.nombre}</h2>${it.detalle ? `<div class="detalle-g">${it.detalle}</div>` : ''}${it.precio ? `<div class="precio-g">${it.desde ? 'Desde ' : ''}S/ ${it.precio}</div>` : ''}${it.nota ? `<div class="nota-g">${it.nota}</div>` : ''}</div></div>`;
+        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><div><h2>${it.nombre}</h2>${it.detalle ? `<div class="detalle-g">${it.detalle}</div>` : ''}${it.precio ? `<div class="precio-g">${it.desde ? 'Desde ' : ''}S/ ${it.precio}</div>` : ''}${it.nota ? `<div class="nota-g ref">${it.nota}</div>` : ''}</div></div>`;
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:140px 60px 0;position:relative}
@@ -310,7 +311,7 @@ async function main() {
         .nota-g{font-family:'Jost',sans-serif;font-size:20px;letter-spacing:.18em;text-transform:uppercase;margin-top:16px;opacity:.8}
         .precio-g{font-family:'Jost',sans-serif;font-weight:500;font-size:40px;margin-top:18px}
         .nota{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-family:'Jost',sans-serif;font-size:24px;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
-        </style><h1>${p.titulo}</h1>${filas}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);
+        </style><h1>${p.titulo}</h1>${filas}${p.nota ? `<div class="nota${/referencial/i.test(p.nota) ? ' ref' : ''}">${p.nota}</div>` : ''}`);
       await page.evaluate(() => document.fonts.ready);
       const out = path.join(SALIDA, `${p.id}.pdf`);
       await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
@@ -329,7 +330,7 @@ async function main() {
         if (desc.length < prod.description.trim().length) conAlcohol = true;
         const img = fs.readFileSync(p.fotos?.[id] ? path.join(HERE, p.fotos[id]) : path.join(RAIZ, 'app/public', prod.image));
         return `<div class="fila"><img src="data:image/jpeg;base64,${img.toString('base64')}">
-          <div class="ficha"><h2>${prod.name.replace(/\s+/g, ' ')}</h2><div class="precio">S/ ${prod.price}</div><p>${desc}</p>${p.notas?.[id] ? `<div class="nota-opc">${p.notas[id]}</div>` : ''}</div></div>`;
+          <div class="ficha"><h2>${prod.name.replace(/\s+/g, ' ')}</h2><div class="precio">S/ ${prod.price}</div><p>${desc}</p>${p.notas?.[id] ? `<div class="nota-opc ref">${p.notas[id]}</div>` : ''}</div></div>`;
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:150px 60px 0}
@@ -357,7 +358,7 @@ async function main() {
       h1{font-size:${p.tamTitulo || 108}px;margin-top:${p.tamTitulo ? 100 : 120}px}
       .precio{font-family:'Jost',sans-serif;font-size:44px;font-weight:500;margin-top:36px}
       .nota{font-family:'Jost',sans-serif;font-size:26px;letter-spacing:.18em;text-transform:uppercase;margin-top:56px;opacity:.8}
-      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.detalle ? `<div class="detalle">${p.detalle}</div>` : ''}${p.precio ? `<div class="precio">${p.desde ? 'Desde ' : ''}S/ ${p.precio}</div>` : ''}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);
+      </style><img src="${foto}"><h1>${p.titulo}</h1>${p.detalle ? `<div class="detalle">${p.detalle}</div>` : ''}${p.precio ? `<div class="precio">${p.desde ? 'Desde ' : ''}S/ ${p.precio}</div>` : ''}${p.nota ? `<div class="nota${/referencial/i.test(p.nota) ? ' ref' : ''}">${p.nota}</div>` : ''}`);
     await page.evaluate(() => document.fonts.ready);
     const out = path.join(SALIDA, `${p.id}.pdf`);
     await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
