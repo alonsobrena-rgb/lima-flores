@@ -200,6 +200,9 @@ export const PAGINAS = [
     // decoración es generada, por eso la nota.
     fotos: { 'box-de-madera-rafaela': 'fotos/box-rafaela-navidad.jpg', 'cajita-jimena': 'fotos/cajita-jimena.jpg' },
     notas: { 'box-de-madera-rafaela': 'Imagen referencial' },
+    // Texto dictado por el cliente (18 nov 2026) en vez del de la tienda
+    // («Dos macetas pequeñas de loza con suculentas en caja de madera»).
+    descripciones: { 'cajita-jimena': 'Dos mini macetas con suculentas.' },
   },
 ];
 
@@ -320,7 +323,7 @@ async function main() {
         const prod = tienda.find((x) => x.id === id);
         if (!prod) throw new Error(`${p.id}: «${id}» ya no está en la tienda`);
         // La advertencia legal va una sola vez al pie, no repetida en cada caja.
-        let desc = prod.description.replace(/\s*prohibida la venta.*$/is, '').trim().replace(/\s+,/g, ',');
+        let desc = (p.descripciones?.[id] || prod.description).replace(/\s*prohibida la venta.*$/is, '').trim().replace(/\s+,/g, ',');
         if (desc.length < prod.description.trim().length) conAlcohol = true;
         const img = fs.readFileSync(p.fotos?.[id] ? path.join(HERE, p.fotos[id]) : path.join(RAIZ, 'app/public', prod.image));
         return `<div class="fila"><img src="data:image/jpeg;base64,${img.toString('base64')}">
