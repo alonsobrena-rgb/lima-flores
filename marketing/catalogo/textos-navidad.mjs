@@ -149,13 +149,25 @@ export const PAGINAS = [
     nota: 'Imágenes referenciales',
   },
   {
+    id: 'centro-mesa-taller',
+    // Foto real de un centro de mesa del taller (18 de noviembre de 2026):
+    // se borró a una persona reflejada en el espejo y se difuminó el fondo;
+    // el arreglo no se tocó, por eso no lleva «Imagen referencial».
+    // Precio dictado por el cliente.
+    despues_de: 7,
+    foto: 'fotos/centro-mesa-taller.jpg',
+    titulo: 'Centro de mesa <em>navideño</em>',
+    detalle: 'Con tres velas doradas',
+    precio: 145,
+  },
+  {
     id: 'complementos',
     // Colgadores y piñas juntos en una página (pedido del cliente, 18 de
     // noviembre de 2026); antes tenían una cada uno. Precios y detalles
     // dictados por el cliente: no están en la tienda. La foto de las piñas
     // es de banco de imágenes (referencial); la de los colgadores es del
     // producto. El bowl de las piñas no se nombra: nadie dijo que venga.
-    despues_de: 7,
+    despues_de: 8,
     tipo: 'galeria',
     titulo: 'Complementos <em>navideños</em>',
     items: [
@@ -168,7 +180,7 @@ export const PAGINAS = [
     // Tras Regalos corporativos (Cajita Noelia): el cliente pidió más opciones
     // de precio el 18 de noviembre de 2026. Nombre, precio, descripción y foto
     // salen de la tienda (db/products.seed.json, app/public/products), no de acá.
-    despues_de: 13,
+    despues_de: 14,
     tipo: 'opciones',
     // «corporativos» en el título: es la continuación de Regalos corporativos.
     titulo: 'Más regalos <em>corporativos</em>',
