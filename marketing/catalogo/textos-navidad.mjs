@@ -114,6 +114,15 @@ export const TEXTOS = [
 // después de la página indicada, contada sobre el PDF ya armado.
 export const PAGINAS = [
   {
+    id: 'portada',
+    // Portada nueva con una corona real del taller (18 nov 2026); la de Canva
+    // era un árbol desenfocado con «CATALOGO» sin tilde. navidad.py la pone
+    // en lugar de la página 1 original.
+    despues_de: 0,
+    tipo: 'portada',
+    foto: 'fotos/portada-corona.jpg',
+  },
+  {
     id: 'corona-adviento',
     despues_de: 5, // tras «Escoge la que más te guste», cierra el bloque de coronas
     foto: 'fotos/corona-adviento-referencial.jpg',
@@ -150,19 +159,19 @@ export const PAGINAS = [
   },
   {
     id: 'centro-mesa-taller',
-    // Foto real de un centro de mesa del taller (18 de noviembre de 2026):
-    // se borró a una persona reflejada en el espejo y se difuminó el fondo;
-    // el arreglo no se tocó, por eso no lleva «Imagen referencial».
-    // Precio dictado por el cliente.
+    // Centro de mesa del taller, fotos reales (18 nov 2026): la de estudio con
+    // velas doradas y la de velas blancas. Nombre, precio y aviso de colores
+    // dictados por el cliente. Sin «referencial»: las fotos no se editaron.
     despues_de: 7,
-    foto: 'fotos/centro-mesa-taller.jpg',
-    // Nombre y aviso de colores dictados por el cliente (18 nov 2026).
-    titulo: 'Centro de mesa de <em>ciprés con estrellas</em>',
-    detalle: 'Con tres velas doradas',
-    precio: 145,
+    tipo: 'galeria',
+    titulo: 'Centro de mesa<br>de <em>ciprés con estrellas</em>',
+    tamTitulo: 78,
+    vertical: true,
+    items: [
+      { foto: 'fotos/centro-cipres-doradas.jpg', nombre: 'Con velas <em>doradas</em>', precio: 145 },
+      { foto: 'fotos/centro-cipres-blancas.jpg', nombre: 'Con velas <em>blancas</em>', precio: 145 },
+    ],
     nota: '¡Pregunta por nuestros colores de velas!',
-    // Nombre largo: a 108 px salta a dos líneas y saca el precio de la hoja.
-    tamTitulo: 74,
   },
   {
     id: 'complementos',
@@ -188,13 +197,15 @@ export const PAGINAS = [
     tipo: 'opciones',
     // «corporativos» en el título: es la continuación de Regalos corporativos.
     titulo: 'Más regalos <em>corporativos</em>',
-    productos: ['box-de-madera-rafaela', 'box-chococafe'],
+    // Cajita Jimena (S/ 70, de la tienda) entra el 18 nov 2026 a pedido del
+    // cliente, con su foto real; van de menor a mayor precio.
+    productos: ['cajita-jimena', 'box-de-madera-rafaela', 'box-chococafe'],
     // Rafaela con decoración navideña como la Cajita Noelia (pedido del
     // cliente, 18 de noviembre de 2026): la toma de 2000 px que mandó el
     // cliente (fotos/box-rafaela.jpg) editada con Seedream para agregar pino,
     // pepitas rojas, piñas y moño verde. Los productos son los reales; la
     // decoración es generada, por eso la nota.
-    fotos: { 'box-de-madera-rafaela': 'fotos/box-rafaela-navidad.jpg' },
+    fotos: { 'box-de-madera-rafaela': 'fotos/box-rafaela-navidad.jpg', 'cajita-jimena': 'fotos/cajita-jimena.jpg' },
     notas: { 'box-de-madera-rafaela': 'Imagen referencial' },
   },
 ];
@@ -263,6 +274,24 @@ async function main() {
   const LEGAL = 'Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.';
   for (const p of PAGINAS) {
     const page = await browser.newPage();
+    if (p.tipo === 'portada') {
+      const img = fs.readFileSync(path.join(HERE, p.foto)).toString('base64');
+      const logo = fs.readFileSync(path.join(RAIZ, 'marketing/ig-ads/marca/logo.png')).toString('base64');
+      await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
+        body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};text-align:center}
+        .foto{display:block;width:1080px;height:1440px;object-fit:cover}
+        .logo{height:92px;margin-top:70px}
+        h1{font-size:118px;margin-top:26px}
+        .anio{font-family:'Jost',sans-serif;font-weight:500;font-size:30px;letter-spacing:.32em;margin-top:22px}
+        </style><img class="foto" src="data:image/jpeg;base64,${img}"><img class="logo" src="data:image/png;base64,${logo}">
+        <h1>Catálogo de <em>Navidad</em></h1><div class="anio">2026</div>`);
+      await page.evaluate(() => document.fonts.ready);
+      const out = path.join(SALIDA, `${p.id}.pdf`);
+      await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
+      await page.close();
+      console.log(`  página ${p.id}  → ${path.relative(RAIZ, out)}`);
+      continue;
+    }
     if (p.tipo === 'galeria') {
       // Dos fotos en zigzag, cada una con su nombre al costado.
       const filas = p.items.map((it, i) => {
@@ -271,10 +300,10 @@ async function main() {
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:140px 60px 0;position:relative}
-        h1{font-size:96px;text-align:center;margin-bottom:${p.items.length > 2 ? 50 : 80}px}
+        h1{font-size:${p.tamTitulo || 96}px;text-align:center;margin-bottom:${p.items.length > 2 ? 50 : (p.vertical ? 50 : 80)}px}
         .fila{display:flex;align-items:center;gap:48px;margin-bottom:${p.items.length > 2 ? 34 : 60}px}
         .fila.inv{flex-direction:row-reverse;text-align:right}
-        .fila img{width:${p.items.length > 2 ? 470 : 640}px;height:${p.items.length > 2 ? 470 : 640}px;object-fit:cover;flex:none}
+        .fila img{width:${p.vertical ? 500 : (p.items.length > 2 ? 470 : 640)}px;height:${p.vertical ? 667 : (p.items.length > 2 ? 470 : 640)}px;object-fit:cover;flex:none}
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:62px;line-height:1.05}
         h2 em{font-style:italic}
         .detalle-g{font-family:'Jost',sans-serif;font-size:32px;margin-top:16px}
@@ -291,6 +320,7 @@ async function main() {
     }
     if (p.tipo === 'opciones') {
       let conAlcohol = false;
+      const n3 = p.productos.length > 2;
       const filas = p.productos.map((id) => {
         const prod = tienda.find((x) => x.id === id);
         if (!prod) throw new Error(`${p.id}: «${id}» ya no está en la tienda`);
@@ -303,14 +333,14 @@ async function main() {
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:150px 60px 0}
-        h1{font-size:92px;text-align:center;margin-bottom:90px}
-        .fila{display:flex;gap:48px;align-items:center;margin-bottom:80px}
-        .fila img{width:500px;height:500px;object-fit:cover;flex:none}
+        h1{font-size:92px;text-align:center;margin-bottom:${n3 ? 60 : 90}px}
+        .fila{display:flex;gap:48px;align-items:center;margin-bottom:${n3 ? 40 : 80}px}
+        .fila img{width:${n3 ? 380 : 500}px;height:${n3 ? 380 : 500}px;object-fit:cover;flex:none}
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:64px;line-height:1}
         .precio{font-family:'Jost',sans-serif;font-weight:500;font-size:38px;margin:16px 0 18px}
         .ficha p{font-size:27px;line-height:1.42}
         .nota-opc{font-family:'Jost',sans-serif;font-size:20px;letter-spacing:.18em;text-transform:uppercase;margin-top:18px;opacity:.8}
-        .legal{position:absolute;left:60px;right:60px;bottom:110px;text-align:center;font-family:'Jost',sans-serif;font-size:24px}
+        .legal{position:absolute;left:60px;right:60px;bottom:${n3 ? 36 : 110}px;text-align:center;font-family:'Jost',sans-serif;font-size:24px}
         </style><h1>${p.titulo}</h1>${filas}${conAlcohol ? `<div class="legal">${LEGAL}</div>` : ''}`);
       await page.evaluate(() => document.fonts.ready);
       const out = path.join(SALIDA, `${p.id}.pdf`);

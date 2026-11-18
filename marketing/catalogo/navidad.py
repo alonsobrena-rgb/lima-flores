@@ -29,7 +29,8 @@ SALIDA = AQUI / "navidad" / "catalogo-navidad.pdf"
 # anterior y no quedó escrito acá; el cliente lo recordó el 17 de noviembre.
 # Centros de mesa (9) se quita entera: sus fotos no eran arreglos de Lima
 # Flores y no hay reales; el cliente prefirió sacarla a dejar recuadros vacíos.
-QUITAR = [6, 7, 8, 9, 11]
+# La 1 (portada de Canva) sale: la reemplaza la portada de textos-navidad.mjs.
+QUITAR = [1, 6, 7, 8, 9, 11]
 SIN_FOTOS = []
 # Las páginas nuevas entran después de la de Ramo Melissa, Box de rosas,
 # Tulipanes y Arreglo Rossie: es la página de productos con flores.
@@ -59,6 +60,7 @@ ERRATAS = [
     (10, "RAMO DETULIPANES", "RAMO DE TULIPANES"),
     (10, "MAS TE GUSTEN ", "MÁS TE GUSTEN"),
     (10, "MEDIDAS: 6O CM DE ALTO ", "MEDIDAS: 60 CM DE ALTO"),
+    (12, "mantenimiento..", "mantenimiento."),
 ]
 SPACE_MONO = AQUI / ".fontcache" / "SpaceMono-Regular.ttf"
 SPACE_MONO_URL = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/spacemono/SpaceMono-Regular.ttf"
@@ -174,7 +176,8 @@ def main(origen: str) -> None:
         dest = doc[pg["despues_de"]]
         # En la galería las fotos bajan hasta y≈1245: los adornos van más
         # abajo y más chicos para no taparlas.
-        copos, colg = ((pymupdf.Rect(20, 1090, 380, 1305), pymupdf.Rect(575, 1075, 776, 1315))
+        # Con tres productos «Más regalos» también baja a la franja de abajo.
+        copos, colg = ((pymupdf.Rect(30, 1262, 245, 1390), pymupdf.Rect(650, 1255, 760, 1385))
                        if pg["id"] == "mas-regalos" else
                        (pymupdf.Rect(30, 1262, 265, 1402), pymupdf.Rect(640, 1255, 760, 1398)))
         with pymupdf.open(origen) as orig:
