@@ -258,15 +258,19 @@ def main(origen: str) -> None:
     # colgantes de regalos de la página 13. Abajo, donde la página está vacía.
     paginas = json.loads((AQUI / "navidad" / "textos" / "paginas.json").read_text(encoding="utf-8"))
     for pg in paginas:
-        if pg["id"] not in ("mas-regalos", "complementos"):
+        if pg["id"] not in ("mas-regalos", "complementos", "centro-mesa-taller"):
             continue
         dest = doc[pg["despues_de"]]
         # En la galería las fotos bajan hasta y≈1245: los adornos van más
         # abajo y más chicos para no taparlas.
         # Con tres productos «Más regalos» también baja a la franja de abajo.
-        copos, colg = ((pymupdf.Rect(30, 1262, 245, 1390), pymupdf.Rect(650, 1255, 760, 1385))
-                       if pg["id"] == "mas-regalos" else
-                       (pymupdf.Rect(30, 1262, 265, 1402), pymupdf.Rect(640, 1255, 760, 1398)))
+        # Centro de ciprés (el cliente la vio «calata»): en los huecos de la
+        # galería en zigzag, bajo el precio de la derecha y sobre el texto de
+        # la izquierda.
+        copos, colg = {
+            "mas-regalos": (pymupdf.Rect(30, 1262, 245, 1390), pymupdf.Rect(650, 1255, 760, 1385)),
+            "centro-mesa-taller": (pymupdf.Rect(495, 590, 755, 745), pymupdf.Rect(150, 815, 265, 952)),
+        }.get(pg["id"], (pymupdf.Rect(30, 1262, 265, 1402), pymupdf.Rect(640, 1255, 760, 1398)))
         with pymupdf.open(origen) as orig:
             dest.show_pdf_page(copos, orig, 3, clip=pymupdf.Rect(450, 0, 810, 215))
             colgantes = orig.extract_image(97)
