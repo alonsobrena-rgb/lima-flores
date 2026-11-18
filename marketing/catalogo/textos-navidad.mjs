@@ -154,9 +154,13 @@ export const PAGINAS = [
     // «corporativos» en el título: es la continuación de Regalos corporativos.
     titulo: 'Más regalos <em>corporativos</em>',
     productos: ['box-de-madera-rafaela', 'box-chococafe'],
-    // La foto de la tienda de Rafaela mide 500 px y se ve borrosa impresa; el
-    // cliente mandó la misma toma en 2000 px.
-    fotos: { 'box-de-madera-rafaela': 'fotos/box-rafaela.jpg' },
+    // Rafaela con decoración navideña como la Cajita Noelia (pedido del
+    // cliente, 18 de noviembre de 2026): la toma de 2000 px que mandó el
+    // cliente (fotos/box-rafaela.jpg) editada con Seedream para agregar pino,
+    // pepitas rojas, piñas y moño verde. Los productos son los reales; la
+    // decoración es generada, por eso la nota.
+    fotos: { 'box-de-madera-rafaela': 'fotos/box-rafaela-navidad.jpg' },
+    notas: { 'box-de-madera-rafaela': 'Imagen referencial' },
   },
 ];
 
@@ -234,7 +238,7 @@ async function main() {
         if (desc.length < prod.description.trim().length) conAlcohol = true;
         const img = fs.readFileSync(p.fotos?.[id] ? path.join(HERE, p.fotos[id]) : path.join(RAIZ, 'app/public', prod.image));
         return `<div class="fila"><img src="data:image/jpeg;base64,${img.toString('base64')}">
-          <div class="ficha"><h2>${prod.name.replace(/\s+/g, ' ')}</h2><div class="precio">S/ ${prod.price}</div><p>${desc}</p></div></div>`;
+          <div class="ficha"><h2>${prod.name.replace(/\s+/g, ' ')}</h2><div class="precio">S/ ${prod.price}</div><p>${desc}</p>${p.notas?.[id] ? `<div class="nota-opc">${p.notas[id]}</div>` : ''}</div></div>`;
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:150px 60px 0}
@@ -244,6 +248,7 @@ async function main() {
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:64px;line-height:1}
         .precio{font-family:'Jost',sans-serif;font-weight:500;font-size:38px;margin:16px 0 18px}
         .ficha p{font-size:27px;line-height:1.42}
+        .nota-opc{font-family:'Jost',sans-serif;font-size:20px;letter-spacing:.18em;text-transform:uppercase;margin-top:18px;opacity:.8}
         .legal{position:absolute;left:60px;right:60px;bottom:110px;text-align:center;font-family:'Jost',sans-serif;font-size:24px}
         </style><h1>${p.titulo}</h1>${filas}${conAlcohol ? `<div class="legal">${LEGAL}</div>` : ''}`);
       await page.evaluate(() => document.fonts.ready);
