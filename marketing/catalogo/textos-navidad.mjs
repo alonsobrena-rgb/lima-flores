@@ -143,7 +143,8 @@ export const PAGINAS = [
       // Tercera opción: foto de internet que mandó el cliente, con la caja gris
       // pasada a negra con Seedream y el moño dorado real del cliente pegado
       // encima (fotografiado aparte). Se probó fondo marfil: se veía falso.
-      { foto: 'fotos/centro-mesa-caja-negra.jpg', nombre: 'En caja negra, con velas <em>doradas</em>' },
+      // S/ 115 el de caja negra con dos velas: precio dictado por el cliente.
+      { foto: 'fotos/centro-mesa-caja-negra.jpg', nombre: 'En caja negra, con dos velas <em>doradas</em>', precio: 115 },
     ],
     nota: 'Imágenes referenciales',
   },
