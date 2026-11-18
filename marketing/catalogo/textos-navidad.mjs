@@ -137,8 +137,9 @@ export const PAGINAS = [
     tipo: 'galeria',
     titulo: 'Centros de mesa <em>navideños</em>',
     items: [
-      { foto: 'fotos/centro-mesa-rojas.jpg', nombre: 'Con tres velas <em>rojas</em>' },
-      { foto: 'fotos/centro-mesa-doradas.jpg', nombre: 'Con tres velas <em>doradas</em>' },
+      // S/ 160 el de tres velas: precio dictado por el cliente (18 nov 2026).
+      { foto: 'fotos/centro-mesa-rojas.jpg', nombre: 'Con tres velas <em>rojas</em>', precio: 160 },
+      { foto: 'fotos/centro-mesa-doradas.jpg', nombre: 'Con tres velas <em>doradas</em>', precio: 160 },
       // Tercera opción: foto de internet que mandó el cliente, con la caja gris
       // pasada a negra con Seedream y el moño dorado real del cliente pegado
       // encima (fotografiado aparte). Se probó fondo marfil: se veía falso.
@@ -262,7 +263,7 @@ async function main() {
       // Dos fotos en zigzag, cada una con su nombre al costado.
       const filas = p.items.map((it, i) => {
         const img = fs.readFileSync(path.join(HERE, it.foto)).toString('base64');
-        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><h2>${it.nombre}</h2></div>`;
+        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><div><h2>${it.nombre}</h2>${it.precio ? `<div class="precio-g">S/ ${it.precio}</div>` : ''}</div></div>`;
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:140px 60px 0;position:relative}
@@ -272,6 +273,7 @@ async function main() {
         .fila img{width:${p.items.length > 2 ? 470 : 640}px;height:${p.items.length > 2 ? 470 : 640}px;object-fit:cover;flex:none}
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:62px;line-height:1.05}
         h2 em{font-style:italic}
+        .precio-g{font-family:'Jost',sans-serif;font-weight:500;font-size:40px;margin-top:18px}
         .nota{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-family:'Jost',sans-serif;font-size:24px;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
         </style><h1>${p.titulo}</h1>${filas}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);
       await page.evaluate(() => document.fonts.ready);
