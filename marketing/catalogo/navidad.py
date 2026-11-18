@@ -29,8 +29,10 @@ SALIDA = AQUI / "navidad" / "catalogo-navidad.pdf"
 # anterior y no quedó escrito acá; el cliente lo recordó el 17 de noviembre.
 # Centros de mesa (9) se quita entera: sus fotos no eran arreglos de Lima
 # Flores y no hay reales; el cliente prefirió sacarla a dejar recuadros vacíos.
-# La 1 (portada de Canva) sale: la reemplaza la portada de textos-navidad.mjs.
-QUITAR = [1, 6, 7, 8, 9, 11]
+# La portada de Canva se queda: se probó una nueva con la corona del moño
+# rojo y el cliente prefirió la original (18 nov 2026).
+# Orquídeas (12) sale a pedido del cliente, 18 nov 2026.
+QUITAR = [6, 7, 8, 9, 11, 12]
 SIN_FOTOS = []
 # Las páginas nuevas entran después de la de Ramo Melissa, Box de rosas,
 # Tulipanes y Arreglo Rossie: es la página de productos con flores.

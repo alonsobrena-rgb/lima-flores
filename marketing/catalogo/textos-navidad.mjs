@@ -114,15 +114,6 @@ export const TEXTOS = [
 // después de la página indicada, contada sobre el PDF ya armado.
 export const PAGINAS = [
   {
-    id: 'portada',
-    // Portada nueva con una corona real del taller (18 nov 2026); la de Canva
-    // era un árbol desenfocado con «CATALOGO» sin tilde. navidad.py la pone
-    // en lugar de la página 1 original.
-    despues_de: 0,
-    tipo: 'portada',
-    foto: 'fotos/portada-corona.jpg',
-  },
-  {
     id: 'corona-adviento',
     despues_de: 5, // tras «Escoge la que más te guste», cierra el bloque de coronas
     foto: 'fotos/corona-adviento-referencial.jpg',
@@ -193,7 +184,7 @@ export const PAGINAS = [
     // Tras Regalos corporativos (Cajita Noelia): el cliente pidió más opciones
     // de precio el 18 de noviembre de 2026. Nombre, precio, descripción y foto
     // salen de la tienda (db/products.seed.json, app/public/products), no de acá.
-    despues_de: 14,
+    despues_de: 13,
     tipo: 'opciones',
     // «corporativos» en el título: es la continuación de Regalos corporativos.
     titulo: 'Más regalos <em>corporativos</em>',
