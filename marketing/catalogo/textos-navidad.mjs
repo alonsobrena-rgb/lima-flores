@@ -156,9 +156,13 @@ export const PAGINAS = [
     // Precio dictado por el cliente.
     despues_de: 7,
     foto: 'fotos/centro-mesa-taller.jpg',
-    titulo: 'Centro de mesa <em>navideño</em>',
+    // Nombre y aviso de colores dictados por el cliente (18 nov 2026).
+    titulo: 'Centro de mesa de <em>ciprés con estrellas</em>',
     detalle: 'Con tres velas doradas',
     precio: 145,
+    nota: '¡Pregunta por nuestros colores de velas!',
+    // Nombre largo: a 108 px salta a dos líneas y saca el precio de la hoja.
+    tamTitulo: 74,
   },
   {
     id: 'complementos',
@@ -320,7 +324,7 @@ async function main() {
       body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};text-align:center}
       img{display:block;width:1080px;height:auto;max-height:1440px;object-fit:cover}
       .detalle{font-family:'Jost',sans-serif;font-size:36px;margin-top:28px}
-      h1{font-size:108px;margin-top:120px}
+      h1{font-size:${p.tamTitulo || 108}px;margin-top:${p.tamTitulo ? 100 : 120}px}
       .precio{font-family:'Jost',sans-serif;font-size:44px;font-weight:500;margin-top:36px}
       .nota{font-family:'Jost',sans-serif;font-size:26px;letter-spacing:.18em;text-transform:uppercase;margin-top:56px;opacity:.8}
       </style><img src="${foto}"><h1>${p.titulo}</h1>${p.detalle ? `<div class="detalle">${p.detalle}</div>` : ''}${p.precio ? `<div class="precio">${p.desde ? 'Desde ' : ''}S/ ${p.precio}</div>` : ''}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);
