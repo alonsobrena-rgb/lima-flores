@@ -119,14 +119,17 @@ export const PAGINAS = [
   {
     id: 'centro-mesa',
     // Tras la corona de adviento. Foto de internet que mandó el cliente,
-    // editada con Seedream para que tenga tres velas, y después doradas en vez
-    // de rojas, como eligió (18 de noviembre de 2026): va como referencial.
-    // Sin precio hasta que lo dé.
+    // editada con Seedream para que tenga tres velas y, en una segunda
+    // versión, velas doradas. El cliente eligió mostrar las dos (18 de
+    // noviembre de 2026): van como referenciales. Sin precio hasta que lo dé.
     despues_de: 6,
-    foto: 'fotos/centro-mesa-referencial.jpg',
-    titulo: 'Centro de mesa <em>navideño</em>',
-    detalle: 'Con tres velas doradas',
-    nota: 'Imagen referencial',
+    tipo: 'galeria',
+    titulo: 'Centros de mesa <em>navideños</em>',
+    items: [
+      { foto: 'fotos/centro-mesa-rojas.jpg', nombre: 'Con tres velas <em>rojas</em>' },
+      { foto: 'fotos/centro-mesa-doradas.jpg', nombre: 'Con tres velas <em>doradas</em>' },
+    ],
+    nota: 'Imágenes referenciales',
   },
   {
     id: 'colgadores',
@@ -240,6 +243,29 @@ async function main() {
   const LEGAL = 'Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.';
   for (const p of PAGINAS) {
     const page = await browser.newPage();
+    if (p.tipo === 'galeria') {
+      // Dos fotos en zigzag, cada una con su nombre al costado.
+      const filas = p.items.map((it, i) => {
+        const img = fs.readFileSync(path.join(HERE, it.foto)).toString('base64');
+        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><h2>${it.nombre}</h2></div>`;
+      }).join('');
+      await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
+        body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:140px 60px 0;position:relative}
+        h1{font-size:96px;text-align:center;margin-bottom:80px}
+        .fila{display:flex;align-items:center;gap:48px;margin-bottom:60px}
+        .fila.inv{flex-direction:row-reverse;text-align:right}
+        .fila img{width:640px;height:640px;object-fit:cover;flex:none}
+        h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:62px;line-height:1.05}
+        h2 em{font-style:italic}
+        .nota{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-family:'Jost',sans-serif;font-size:24px;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
+        </style><h1>${p.titulo}</h1>${filas}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);
+      await page.evaluate(() => document.fonts.ready);
+      const out = path.join(SALIDA, `${p.id}.pdf`);
+      await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
+      await page.close();
+      console.log(`  página ${p.id}  → ${path.relative(RAIZ, out)}`);
+      continue;
+    }
     if (p.tipo === 'opciones') {
       let conAlcohol = false;
       const filas = p.productos.map((id) => {
