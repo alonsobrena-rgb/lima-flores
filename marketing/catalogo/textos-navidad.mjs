@@ -119,12 +119,13 @@ export const PAGINAS = [
   {
     id: 'centro-mesa',
     // Tras la corona de adviento. Foto de internet que mandó el cliente,
-    // editada con Seedream para que tenga tres velas como pidió (18 de
-    // noviembre de 2026): va como referencial. Sin precio hasta que lo dé.
+    // editada con Seedream para que tenga tres velas, y después doradas en vez
+    // de rojas, como eligió (18 de noviembre de 2026): va como referencial.
+    // Sin precio hasta que lo dé.
     despues_de: 6,
     foto: 'fotos/centro-mesa-referencial.jpg',
     titulo: 'Centro de mesa <em>navideño</em>',
-    detalle: 'Con tres velas',
+    detalle: 'Con tres velas doradas',
     nota: 'Imagen referencial',
   },
   {
