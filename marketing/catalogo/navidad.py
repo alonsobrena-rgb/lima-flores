@@ -269,7 +269,7 @@ def main(origen: str) -> None:
         # la izquierda.
         copos, colg = {
             "mas-regalos": (pymupdf.Rect(30, 1262, 245, 1390), pymupdf.Rect(650, 1255, 760, 1385)),
-            "centro-mesa-taller": (pymupdf.Rect(495, 590, 755, 745), pymupdf.Rect(150, 815, 265, 952)),
+            "centro-mesa-taller": (pymupdf.Rect(470, 600, 730, 755), pymupdf.Rect(150, 790, 265, 927)),
         }.get(pg["id"], (pymupdf.Rect(30, 1262, 265, 1402), pymupdf.Rect(640, 1255, 760, 1398)))
         with pymupdf.open(origen) as orig:
             dest.show_pdf_page(copos, orig, 3, clip=pymupdf.Rect(450, 0, 810, 215))

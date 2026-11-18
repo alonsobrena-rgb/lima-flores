@@ -156,6 +156,8 @@ export const PAGINAS = [
     despues_de: 7,
     tipo: 'galeria',
     titulo: 'Centro de mesa<br>de <em>ciprés con estrellas</em>',
+    // Composición dictada por el cliente (18 nov 2026).
+    subtitulo: 'Ciprés con estrellas, pinos y semillas de eucalipto',
     tamTitulo: 78,
     vertical: true,
     items: [
@@ -295,14 +297,15 @@ async function main() {
         h1{font-size:${p.tamTitulo || 96}px;text-align:center;margin-bottom:${p.items.length > 2 ? 50 : (p.vertical ? 50 : 80)}px}
         .fila{display:flex;align-items:center;gap:48px;margin-bottom:${p.items.length > 2 ? 34 : 60}px}
         .fila.inv{flex-direction:row-reverse;text-align:right}
-        .fila img{width:${p.vertical ? 500 : (p.items.length > 2 ? 470 : 640)}px;height:${p.vertical ? 667 : (p.items.length > 2 ? 470 : 640)}px;object-fit:cover;flex:none}
+        .fila img{width:${p.vertical ? 450 : (p.items.length > 2 ? 470 : 640)}px;height:${p.vertical ? 600 : (p.items.length > 2 ? 470 : 640)}px;object-fit:cover;flex:none}
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:62px;line-height:1.05}
         h2 em{font-style:italic}
         .detalle-g{font-family:'Jost',sans-serif;font-size:32px;margin-top:16px}
         .nota-g{font-family:'Jost',sans-serif;font-size:20px;letter-spacing:.18em;text-transform:uppercase;margin-top:16px;opacity:.8}
+        .subt{font-family:'Jost',sans-serif;font-size:30px;text-align:center;margin:-20px 0 30px}
         .precio-g{font-family:'Jost',sans-serif;font-weight:500;font-size:40px;margin-top:18px}
         .nota{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-family:'Jost',sans-serif;font-size:24px;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
-        </style><h1>${p.titulo}</h1>${filas}${p.nota ? `<div class="nota${/referencial/i.test(p.nota) ? ' ref' : ''}">${p.nota}</div>` : ''}`);
+        </style><h1>${p.titulo}</h1>${p.subtitulo ? `<div class="subt">${p.subtitulo}</div>` : ''}${filas}${p.nota ? `<div class="nota${/referencial/i.test(p.nota) ? ' ref' : ''}">${p.nota}</div>` : ''}`);
       await page.evaluate(() => document.fonts.ready);
       const out = path.join(SALIDA, `${p.id}.pdf`);
       await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
