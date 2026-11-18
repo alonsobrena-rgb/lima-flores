@@ -144,6 +144,16 @@ export const PAGINAS = [
     precio: 32,
     nota: 'Imagen referencial',
   },
+  {
+    id: 'mas-regalos',
+    // Tras Regalos corporativos (Cajita Noelia): el cliente pidió más opciones
+    // de precio el 18 de noviembre de 2026. Nombre, precio, descripción y foto
+    // salen de la tienda (db/products.seed.json, app/public/products), no de acá.
+    despues_de: 13,
+    tipo: 'opciones',
+    titulo: 'Más opciones <em>para regalar</em>',
+    productos: ['box-de-madera-rafaela', 'box-chococafe'],
+  },
 ];
 
 const FONDO_NAVIDAD = '#EDE9E3'; // el fondo de las páginas de Canva, medido
@@ -204,9 +214,42 @@ async function main() {
     await page.close();
     console.log(`  ${t.id}  ${Math.round(tam)} px  → ${path.relative(path.resolve(HERE, '../..'), out)}`);
   }
+  const RAIZ = path.resolve(HERE, '../..');
+  const seed = JSON.parse(fs.readFileSync(path.join(RAIZ, 'db/products.seed.json'), 'utf8'));
+  const tienda = Array.isArray(seed) ? seed : seed.products;
+  const LEGAL = 'Prohibida la venta a menores de edad. Tomar bebidas alcohólicas en exceso es dañino.';
   for (const p of PAGINAS) {
-    const foto = `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, p.foto)).toString('base64')}`;
     const page = await browser.newPage();
+    if (p.tipo === 'opciones') {
+      let conAlcohol = false;
+      const filas = p.productos.map((id) => {
+        const prod = tienda.find((x) => x.id === id);
+        if (!prod) throw new Error(`${p.id}: «${id}» ya no está en la tienda`);
+        // La advertencia legal va una sola vez al pie, no repetida en cada caja.
+        let desc = prod.description.replace(/\s*prohibida la venta.*$/is, '').trim().replace(/\s+,/g, ',');
+        if (desc.length < prod.description.trim().length) conAlcohol = true;
+        const img = fs.readFileSync(path.join(RAIZ, 'app/public', prod.image));
+        return `<div class="fila"><img src="data:image/jpeg;base64,${img.toString('base64')}">
+          <div class="ficha"><h2>${prod.name.replace(/\s+/g, ' ')}</h2><div class="precio">S/ ${prod.price}</div><p>${desc}</p></div></div>`;
+      }).join('');
+      await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
+        body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:150px 60px 0}
+        h1{font-size:92px;text-align:center;margin-bottom:90px}
+        .fila{display:flex;gap:48px;align-items:center;margin-bottom:80px}
+        .fila img{width:500px;height:500px;object-fit:cover;flex:none}
+        h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:64px;line-height:1}
+        .precio{font-family:'Jost',sans-serif;font-weight:500;font-size:38px;margin:16px 0 18px}
+        .ficha p{font-size:27px;line-height:1.42}
+        .legal{position:absolute;left:60px;right:60px;bottom:110px;text-align:center;font-family:'Jost',sans-serif;font-size:24px}
+        </style><h1>${p.titulo}</h1>${filas}${conAlcohol ? `<div class="legal">${LEGAL}</div>` : ''}`);
+      await page.evaluate(() => document.fonts.ready);
+      const out = path.join(SALIDA, `${p.id}.pdf`);
+      await page.pdf({ path: out, width: '1080px', height: '1920px', printBackground: true, pageRanges: '1' });
+      await page.close();
+      console.log(`  página ${p.id}  → ${path.relative(RAIZ, out)}`);
+      continue;
+    }
+    const foto = `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, p.foto)).toString('base64')}`;
     await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
       body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};text-align:center}
       img{display:block;width:1080px;height:auto;max-height:1440px;object-fit:cover}
