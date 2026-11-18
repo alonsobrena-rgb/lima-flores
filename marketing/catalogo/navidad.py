@@ -34,7 +34,8 @@ SIN_FOTOS = []
 # Las páginas nuevas entran después de la de Ramo Melissa, Box de rosas,
 # Tulipanes y Arreglo Rossie: es la página de productos con flores.
 DESPUES_DE = 10
-NUEVAS = ["box-yani", "box-rogelia", "box-gaby-cafe"]
+# Box Gaby Café salió el 18 de noviembre de 2026, a pedido del cliente.
+NUEVAS = ["box-yani", "box-rogelia"]
 # Regalos corporativos (Cajita Noelia): la foto vieja era el Arreglo Rossie
 # repetido. En el recuadro va la toma con los productos sueltos, al lado de la
 # lista de lo que trae. El rect es la parte visible del recuadro de Canva: la
