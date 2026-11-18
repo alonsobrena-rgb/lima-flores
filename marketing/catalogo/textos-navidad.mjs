@@ -117,9 +117,20 @@ export const PAGINAS = [
     nota: 'Imagen referencial',
   },
   {
-    id: 'colgadores',
-    // Tras la corona de adviento, antes de las piñas: completan las coronas.
+    id: 'centro-mesa',
+    // Tras la corona de adviento. Foto de internet que mandó el cliente,
+    // editada con Seedream para que tenga tres velas como pidió (18 de
+    // noviembre de 2026): va como referencial. Sin precio hasta que lo dé.
     despues_de: 6,
+    foto: 'fotos/centro-mesa-referencial.jpg',
+    titulo: 'Centro de mesa <em>navideño</em>',
+    detalle: 'Con tres velas',
+    nota: 'Imagen referencial',
+  },
+  {
+    id: 'colgadores',
+    // Tras el centro de mesa, antes de las piñas.
+    despues_de: 7,
     foto: 'fotos/colgadores.jpg',
     titulo: 'Colgadores para <em>puerta</em>',
     // Foto del producto (fondo blanco) que mandó el cliente. «Desde S/ 30» y
@@ -133,7 +144,7 @@ export const PAGINAS = [
     id: 'pinas',
     // Tras los colgadores (Pinos y Centros de mesa salieron). Cuenta sobre el
     // PDF con las páginas anteriores ya metidas: se insertan en orden.
-    despues_de: 7,
+    despues_de: 8,
     foto: 'fotos/pinas-referencial.jpg',
     titulo: 'Piñas <em>naturales</em>',
     // Cantidad y precio dictados por el cliente el 17 de noviembre de 2026; no
@@ -149,7 +160,7 @@ export const PAGINAS = [
     // Tras Regalos corporativos (Cajita Noelia): el cliente pidió más opciones
     // de precio el 18 de noviembre de 2026. Nombre, precio, descripción y foto
     // salen de la tienda (db/products.seed.json, app/public/products), no de acá.
-    despues_de: 13,
+    despues_de: 14,
     tipo: 'opciones',
     // «corporativos» en el título: es la continuación de Regalos corporativos.
     titulo: 'Más regalos <em>corporativos</em>',
