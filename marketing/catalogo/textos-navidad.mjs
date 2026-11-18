@@ -44,6 +44,17 @@ export const TEXTOS = [
     html: '<p>Ciprés natural que le dará a tu casa un delicioso olor navideño.</p>',
   },
   {
+    id: 'p2-precio',
+    pagina: 2,
+    // Precio dictado por el cliente el 18 de noviembre de 2026: las coronas
+    // navideñas no están en la tienda. «Desde» porque hay más tamaños; el
+    // tamaño base (30 cm) va al lado para que el precio no prometa de más.
+    rect: [60, 1225, 750, 1300],
+    borrar: [],
+    max: 46,
+    html: '<p style="font-weight:500">Desde S/ 115 <span style="font-weight:400">(30 cm)</span></p>',
+  },
+  {
     id: 'p3-texto',
     pagina: 3,
     // Misma Space Mono y mismo justificado de Canva, para que la página no
