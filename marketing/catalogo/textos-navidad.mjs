@@ -39,8 +39,33 @@ export const TEXTOS = [
     rect: [60, 1050, 750, 1210],
     borrar: [[27, 1027, 783, 1268]],
     max: 58,
-    // «darán» y «ciprés» llevan tilde; en el original no la tenían.
-    html: '<p>Coronas naturales que le darán a tu casa un delicioso olor a ciprés.</p>',
+    // Sin «coronas»: la palabra se repetía en casi todas las páginas (pedido del
+    // cliente, 18 de noviembre de 2026). El ciprés es lo que se ve en las fotos.
+    html: '<p>Ciprés natural que le dará a tu casa un delicioso olor navideño.</p>',
+  },
+  {
+    id: 'p3-texto',
+    pagina: 3,
+    // Misma Space Mono y mismo justificado de Canva, para que la página no
+    // cambie de cara. Se reescribe para no repetir «coronas» y para no decir
+    // «elige la que más te guste», que es el titular de la página 5. La corona
+    // de esa página es de flores secas lilas, no de ciprés: no nombrar material.
+    rect: [31, 794, 779, 1129],
+    borrar: [[25, 790, 785, 1135]],
+    max: 61,
+    html: `<div class="mono" style="text-align:left">
+      <h2>PARA TU PUERTA</h2>
+      <p class="just">CELEBRA ESTA NAVIDAD CON LO NATURAL Y RECÍBELO EN CASA</p>
+    </div>`,
+  },
+  {
+    id: 'p4-titulo',
+    pagina: 4,
+    // Lo que se ve en la foto de esa corona; antes decía «coronas navideñas».
+    rect: [60, 1316, 750, 1400],
+    borrar: [[120, 1310, 725, 1405]],
+    max: 75,
+    html: '<div class="mono"><h2>CANELA Y CIPRÉS</h2></div>',
   },
   {
     id: 'p13-noelia',
@@ -96,7 +121,7 @@ export const PAGINAS = [
     // Tras la corona de adviento, antes de las piñas: completan las coronas.
     despues_de: 6,
     foto: 'fotos/colgadores.jpg',
-    titulo: 'Colgadores de <em>corona</em>',
+    titulo: 'Colgadores para <em>puerta</em>',
     // Foto del producto (fondo blanco) que mandó el cliente. «Desde S/ 30» y
     // los colores (los dos de la foto) los dio el cliente el 17 de noviembre
     // de 2026; no están en la tienda.
@@ -123,13 +148,24 @@ export const PAGINAS = [
 
 const FONDO_NAVIDAD = '#EDE9E3'; // el fondo de las páginas de Canva, medido
 
-const ESTILO = `
+const mono = (peso, archivo) => {
+  const f = path.join(HERE, '.fontcache', archivo);
+  return fs.existsSync(f) ? `@font-face{font-family:'Space Mono';font-weight:${peso};src:url(data:font/ttf;base64,${fs.readFileSync(f).toString('base64')})}` : '';
+};
+// Las bajan navidad.py (Regular) y el README (Bold); si faltan, el texto sale en otra letra.
+const MONO = mono(400, 'SpaceMono-Regular.ttf') + mono(700, 'SpaceMono-Bold.ttf');
+
+const ESTILO = MONO + `
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:transparent}
 .caja{display:flex;align-items:center;justify-content:center;text-align:center;color:${VERDE_NAVIDAD};overflow:hidden}
 h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;line-height:1;letter-spacing:-.018em}
 h1 em{font-style:italic}
 p{font-family:'Jost',sans-serif;font-weight:400;line-height:1.38}
+.mono h2,.mono p{font-family:'Space Mono',monospace;color:inherit}
+.mono h2{font-weight:700;font-size:1.13em;line-height:1.4}
+.mono p{font-weight:400;font-size:1em;line-height:1.4}
+.mono .just{text-align:justify;text-align-last:left}
 p.legal{line-height:1.25}
 `;
 
