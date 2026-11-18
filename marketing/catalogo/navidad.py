@@ -137,6 +137,25 @@ def pagina_ramos(doc, raiz: Path) -> None:
         pag.show_pdf_page(pymupdf.Rect(40, 1150, 400, 1365), copia, 0, clip=pymupdf.Rect(450, 0, 810, 215))
 
 
+def pagina_web(doc) -> None:
+    """Última página (14 del original): la dirección de la web bajo el WhatsApp,
+    pedida por el cliente el 18 nov 2026. Va donde estaba el adorno colgante,
+    que baja y se achica para que entren los dos. Mismo verde y Space Mono
+    Bold del «ATENDEMOS PEDIDOS», un punto más chica para no competir."""
+    pag = doc[13]
+    adorno = pymupdf.Pixmap(pymupdf.Pixmap(doc, 105), pymupdf.Pixmap(doc, 304))
+    pag.add_redact_annot(pymupdf.Rect(360, 1345, 445, 1440), fill=False)
+    pag.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_REMOVE,
+                         graphics=pymupdf.PDF_REDACT_LINE_ART_NONE)
+    web = "www.limaflores.pe"
+    tam = 26
+    fuente = pymupdf.Font(fontfile=str(SPACE_MONO_BOLD))
+    ancho = fuente.text_length(web, fontsize=tam)
+    pag.insert_text(((810 - ancho) / 2, 1374), web, fontsize=tam, fontname="spacemonob",
+                    fontfile=str(SPACE_MONO_BOLD), color=(0x51 / 255, 0x5f / 255, 0x1e / 255))
+    pag.insert_image(pymupdf.Rect(381, 1386, 429, 1440), pixmap=adorno)
+
+
 def recorte_bytes(datos: bytes, mostrado, visible) -> bytes:
     """De una imagen mostrada en el rect «mostrado», devuelve solo la parte que
     cae dentro de «visible»."""
@@ -191,6 +210,7 @@ def main(origen: str) -> None:
 
     corregir_erratas(doc)
     pagina_ramos(doc, AQUI.parent.parent)
+    pagina_web(doc)
 
     for n in SIN_FOTOS:
         pag = doc[n - 1]
