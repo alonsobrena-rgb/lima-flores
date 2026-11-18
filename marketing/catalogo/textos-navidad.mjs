@@ -153,6 +153,9 @@ export const PAGINAS = [
     tipo: 'opciones',
     titulo: 'Más opciones <em>para regalar</em>',
     productos: ['box-de-madera-rafaela', 'box-chococafe'],
+    // La foto de la tienda de Rafaela mide 500 px y se ve borrosa impresa; el
+    // cliente mandó la misma toma en 2000 px.
+    fotos: { 'box-de-madera-rafaela': 'fotos/box-rafaela.jpg' },
   },
 ];
 
@@ -228,7 +231,7 @@ async function main() {
         // La advertencia legal va una sola vez al pie, no repetida en cada caja.
         let desc = prod.description.replace(/\s*prohibida la venta.*$/is, '').trim().replace(/\s+,/g, ',');
         if (desc.length < prod.description.trim().length) conAlcohol = true;
-        const img = fs.readFileSync(path.join(RAIZ, 'app/public', prod.image));
+        const img = fs.readFileSync(p.fotos?.[id] ? path.join(HERE, p.fotos[id]) : path.join(RAIZ, 'app/public', prod.image));
         return `<div class="fila"><img src="data:image/jpeg;base64,${img.toString('base64')}">
           <div class="ficha"><h2>${prod.name.replace(/\s+/g, ' ')}</h2><div class="precio">S/ ${prod.price}</div><p>${desc}</p></div></div>`;
       }).join('');

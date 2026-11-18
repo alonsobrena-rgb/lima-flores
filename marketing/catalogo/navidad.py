@@ -163,6 +163,23 @@ def main(origen: str) -> None:
         with pymupdf.open(AQUI / "navidad" / "textos" / f"{pg['id']}.pdf") as src:
             doc.insert_pdf(src, start_at=pg["despues_de"])
 
+    # «Más opciones para regalar» se veía apagada al lado de las páginas de
+    # Canva: se le ponen los mismos adornos dorados, tomados del original para
+    # no inventar otros. Copos (vectoriales) de la esquina de la página 4 y los
+    # colgantes de regalos de la página 13. Abajo, donde la página está vacía.
+    paginas = json.loads((AQUI / "navidad" / "textos" / "paginas.json").read_text(encoding="utf-8"))
+    for pg in paginas:
+        if pg["id"] != "mas-regalos":
+            continue
+        dest = doc[pg["despues_de"]]
+        with pymupdf.open(origen) as orig:
+            dest.show_pdf_page(pymupdf.Rect(20, 1090, 380, 1305), orig, 3,
+                               clip=pymupdf.Rect(450, 0, 810, 215))
+            colgantes = orig.extract_image(97)
+            mascara = orig.extract_image(294)
+            pix = pymupdf.Pixmap(pymupdf.Pixmap(colgantes["image"]), pymupdf.Pixmap(mascara["image"]))
+            dest.insert_image(pymupdf.Rect(575, 1075, 776, 1315), pixmap=pix)
+
     SALIDA.parent.mkdir(exist_ok=True)
     doc.save(SALIDA, garbage=4, deflate=True)
     print(f"{doc.page_count} páginas → {SALIDA.relative_to(AQUI.parent.parent)}")
