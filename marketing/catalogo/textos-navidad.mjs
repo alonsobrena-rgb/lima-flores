@@ -151,7 +151,8 @@ export const PAGINAS = [
     // salen de la tienda (db/products.seed.json, app/public/products), no de acá.
     despues_de: 13,
     tipo: 'opciones',
-    titulo: 'Más opciones <em>para regalar</em>',
+    // «corporativos» en el título: es la continuación de Regalos corporativos.
+    titulo: 'Más regalos <em>corporativos</em>',
     productos: ['box-de-madera-rafaela', 'box-chococafe'],
     // La foto de la tienda de Rafaela mide 500 px y se ve borrosa impresa; el
     // cliente mandó la misma toma en 2000 px.
