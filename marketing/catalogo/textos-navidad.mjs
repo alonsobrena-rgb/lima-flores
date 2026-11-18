@@ -129,7 +129,8 @@ export const PAGINAS = [
       { foto: 'fotos/centro-mesa-rojas.jpg', nombre: 'Con tres velas <em>rojas</em>' },
       { foto: 'fotos/centro-mesa-doradas.jpg', nombre: 'Con tres velas <em>doradas</em>' },
       // Tercera opción: foto de internet que mandó el cliente, con la caja gris
-      // pasada a negra con Seedream (pedido del 18 de noviembre de 2026).
+      // pasada a negra con Seedream y el moño dorado real del cliente pegado
+      // encima (fotografiado aparte). Se probó fondo marfil: se veía falso.
       { foto: 'fotos/centro-mesa-caja-negra.jpg', nombre: 'En caja negra, con velas <em>doradas</em>' },
     ],
     nota: 'Imágenes referenciales',
