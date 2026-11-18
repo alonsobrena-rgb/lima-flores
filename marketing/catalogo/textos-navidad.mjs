@@ -149,39 +149,26 @@ export const PAGINAS = [
     nota: 'Imágenes referenciales',
   },
   {
-    id: 'colgadores',
-    // Tras el centro de mesa, antes de las piñas.
+    id: 'complementos',
+    // Colgadores y piñas juntos en una página (pedido del cliente, 18 de
+    // noviembre de 2026); antes tenían una cada uno. Precios y detalles
+    // dictados por el cliente: no están en la tienda. La foto de las piñas
+    // es de banco de imágenes (referencial); la de los colgadores es del
+    // producto. El bowl de las piñas no se nombra: nadie dijo que venga.
     despues_de: 7,
-    foto: 'fotos/colgadores.jpg',
-    titulo: 'Colgadores para <em>puerta</em>',
-    // Foto del producto (fondo blanco) que mandó el cliente. «Desde S/ 30» y
-    // los colores (los dos de la foto) los dio el cliente el 17 de noviembre
-    // de 2026; no están en la tienda.
-    detalle: 'Dorado o negro',
-    precio: 30,
-    desde: true,
-  },
-  {
-    id: 'pinas',
-    // Tras los colgadores (Pinos y Centros de mesa salieron). Cuenta sobre el
-    // PDF con las páginas anteriores ya metidas: se insertan en orden.
-    despues_de: 8,
-    foto: 'fotos/pinas-referencial.jpg',
-    titulo: 'Piñas <em>naturales</em>',
-    // Cantidad y precio dictados por el cliente el 17 de noviembre de 2026; no
-    // están en la tienda. La foto no es del taller (bowl y escena de banco de
-    // imágenes): va como referencial y el bowl no se nombra, nadie dijo que
-    // venga incluido.
-    detalle: '24 piñas',
-    precio: 32,
-    nota: 'Imagen referencial',
+    tipo: 'galeria',
+    titulo: 'Complementos <em>navideños</em>',
+    items: [
+      { foto: 'fotos/colgadores.jpg', nombre: 'Colgadores para <em>puerta</em>', detalle: 'Dorado o negro', precio: 30, desde: true },
+      { foto: 'fotos/pinas-referencial.jpg', nombre: 'Piñas <em>naturales</em>', detalle: '24 piñas', precio: 32, nota: 'Imagen referencial' },
+    ],
   },
   {
     id: 'mas-regalos',
     // Tras Regalos corporativos (Cajita Noelia): el cliente pidió más opciones
     // de precio el 18 de noviembre de 2026. Nombre, precio, descripción y foto
     // salen de la tienda (db/products.seed.json, app/public/products), no de acá.
-    despues_de: 14,
+    despues_de: 13,
     tipo: 'opciones',
     // «corporativos» en el título: es la continuación de Regalos corporativos.
     titulo: 'Más regalos <em>corporativos</em>',
@@ -264,7 +251,7 @@ async function main() {
       // Dos fotos en zigzag, cada una con su nombre al costado.
       const filas = p.items.map((it, i) => {
         const img = fs.readFileSync(path.join(HERE, it.foto)).toString('base64');
-        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><div><h2>${it.nombre}</h2>${it.precio ? `<div class="precio-g">S/ ${it.precio}</div>` : ''}</div></div>`;
+        return `<div class="fila ${i % 2 ? 'inv' : ''}"><img src="data:image/jpeg;base64,${img}"><div><h2>${it.nombre}</h2>${it.detalle ? `<div class="detalle-g">${it.detalle}</div>` : ''}${it.precio ? `<div class="precio-g">${it.desde ? 'Desde ' : ''}S/ ${it.precio}</div>` : ''}${it.nota ? `<div class="nota-g">${it.nota}</div>` : ''}</div></div>`;
       }).join('');
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>${fonts}${ESTILO}
         body{width:1080px;height:1920px;background:${FONDO_NAVIDAD};color:${VERDE_NAVIDAD};padding:140px 60px 0;position:relative}
@@ -274,6 +261,8 @@ async function main() {
         .fila img{width:${p.items.length > 2 ? 470 : 640}px;height:${p.items.length > 2 ? 470 : 640}px;object-fit:cover;flex:none}
         h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:62px;line-height:1.05}
         h2 em{font-style:italic}
+        .detalle-g{font-family:'Jost',sans-serif;font-size:32px;margin-top:16px}
+        .nota-g{font-family:'Jost',sans-serif;font-size:20px;letter-spacing:.18em;text-transform:uppercase;margin-top:16px;opacity:.8}
         .precio-g{font-family:'Jost',sans-serif;font-weight:500;font-size:40px;margin-top:18px}
         .nota{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-family:'Jost',sans-serif;font-size:24px;letter-spacing:.18em;text-transform:uppercase;opacity:.8}
         </style><h1>${p.titulo}</h1>${filas}${p.nota ? `<div class="nota">${p.nota}</div>` : ''}`);

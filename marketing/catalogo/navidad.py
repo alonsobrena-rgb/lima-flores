@@ -163,22 +163,26 @@ def main(origen: str) -> None:
         with pymupdf.open(AQUI / "navidad" / "textos" / f"{pg['id']}.pdf") as src:
             doc.insert_pdf(src, start_at=pg["despues_de"])
 
-    # «Más opciones para regalar» se veía apagada al lado de las páginas de
+    # «Más regalos corporativos» y «Complementos» se veían apagadas junto a las de
     # Canva: se le ponen los mismos adornos dorados, tomados del original para
     # no inventar otros. Copos (vectoriales) de la esquina de la página 4 y los
     # colgantes de regalos de la página 13. Abajo, donde la página está vacía.
     paginas = json.loads((AQUI / "navidad" / "textos" / "paginas.json").read_text(encoding="utf-8"))
     for pg in paginas:
-        if pg["id"] != "mas-regalos":
+        if pg["id"] not in ("mas-regalos", "complementos"):
             continue
         dest = doc[pg["despues_de"]]
+        # En la galería las fotos bajan hasta y≈1245: los adornos van más
+        # abajo y más chicos para no taparlas.
+        copos, colg = ((pymupdf.Rect(20, 1090, 380, 1305), pymupdf.Rect(575, 1075, 776, 1315))
+                       if pg["id"] == "mas-regalos" else
+                       (pymupdf.Rect(30, 1262, 265, 1402), pymupdf.Rect(640, 1255, 760, 1398)))
         with pymupdf.open(origen) as orig:
-            dest.show_pdf_page(pymupdf.Rect(20, 1090, 380, 1305), orig, 3,
-                               clip=pymupdf.Rect(450, 0, 810, 215))
+            dest.show_pdf_page(copos, orig, 3, clip=pymupdf.Rect(450, 0, 810, 215))
             colgantes = orig.extract_image(97)
             mascara = orig.extract_image(294)
             pix = pymupdf.Pixmap(pymupdf.Pixmap(colgantes["image"]), pymupdf.Pixmap(mascara["image"]))
-            dest.insert_image(pymupdf.Rect(575, 1075, 776, 1315), pixmap=pix)
+            dest.insert_image(colg, pixmap=pix)
 
     SALIDA.parent.mkdir(exist_ok=True)
     doc.save(SALIDA, garbage=4, deflate=True)
