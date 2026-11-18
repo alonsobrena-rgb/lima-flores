@@ -88,6 +88,70 @@ def corregir_erratas(doc) -> None:
                         color=((c >> 16 & 255) / 255, (c >> 8 & 255) / 255, (c & 255) / 255))
 
 
+SPACE_MONO_BOLD = AQUI / ".fontcache" / "SpaceMono-Bold.ttf"
+SPACE_MONO_BOLD_URL = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/spacemono/SpaceMono-Bold.ttf"
+
+
+def pagina_ramos(doc, raiz: Path) -> None:
+    """Página 10 (ramos), pedidos del cliente del 18 de noviembre de 2026:
+    - Tulipanes sale (foto, marco y texto).
+    - Arreglo Rossie sube a ese hueco, para que no quede un agujero en medio.
+    - Box de rosas lleva la foto de la tienda (box-de-luxe.jpg): la de Canva
+      dejaba el box chico y perdido en el blanco.
+    La redacción quita solo lo que cubre entero (REMOVE_IF_COVERED): el fondo
+    de la página también es un dibujo y con «si lo toca» se borraba."""
+    if not SPACE_MONO_BOLD.exists():
+        import urllib.request
+        urllib.request.urlretrieve(SPACE_MONO_BOLD_URL, SPACE_MONO_BOLD)
+    pag = doc[9]
+    dy = 202  # Rossie: del marco en y 892 al y 690, justo bajo el box de rosas
+    spans = [s for b in pag.get_text("dict")["blocks"] for l in b.get("lines", [])
+             for s in l["spans"] if s["bbox"][1] >= 985 and s["bbox"][0] < 460]
+    rossie = pag.parent.extract_image(79)["image"]
+    marco = pymupdf.Rect(494.97, 892.2, 749.76, 1196.93)
+    for r in [pymupdf.Rect(20, 638, 375, 990), pymupdf.Rect(340, 700, 700, 870),
+              pymupdf.Rect(60, 985, 460, 1175), pymupdf.Rect(460, 885, 790, 1205),
+              pymupdf.Rect(450, 350, 735, 750)]:  # desde y 350: más arriba corta «MEDIDAS» del Ramo Melissa
+        pag.add_redact_annot(r, fill=False)
+    pag.apply_redactions(images=pymupdf.PDF_REDACT_IMAGE_REMOVE,
+                         graphics=pymupdf.PDF_REDACT_LINE_ART_REMOVE_IF_COVERED)
+    for s in spans:
+        bold = "Bold" in s["font"]
+        c = s["color"]
+        pag.insert_text((s["origin"][0], s["origin"][1] - dy), s["text"].rstrip(), fontsize=s["size"],
+                        fontname="spacemonob" if bold else "spacemono",
+                        fontfile=str(SPACE_MONO_BOLD if bold else SPACE_MONO),
+                        color=((c >> 16 & 255) / 255, (c >> 8 & 255) / 255, (c & 255) / 255))
+    # La foto de Rossie se mostraba más ancha que su marco (Canva recortaba con
+    # el marco): se recorta a lo visible antes de volver a ponerla.
+    nuevo = marco + (0, -dy, 0, -dy)
+    pag.insert_image(nuevo, stream=recorte_bytes(rossie, (470, 892, 774, 1197), marco))
+    pag.draw_rect(nuevo, color=(0, 0, 0), width=1.5)
+    luxe = pymupdf.Rect(455.25, 362.64, 729.0, 642.9)
+    pag.insert_image(luxe, stream=recorte(raiz / "app/public/products/box-de-luxe.jpg", tuple(luxe)))
+    pag.draw_rect(luxe, color=(0, 0, 0), width=1.5)
+    # Sin tulipanes queda libre el pie: los adornos dorados del propio original.
+    # (show_pdf_page no acepta el mismo documento: se copia la página 4 aparte.)
+    with pymupdf.open() as copia:
+        copia.insert_pdf(doc, from_page=3, to_page=3)
+        pag.show_pdf_page(pymupdf.Rect(40, 1150, 400, 1365), copia, 0, clip=pymupdf.Rect(450, 0, 810, 215))
+
+
+def recorte_bytes(datos: bytes, mostrado, visible) -> bytes:
+    """De una imagen mostrada en el rect «mostrado», devuelve solo la parte que
+    cae dentro de «visible»."""
+    import io
+    im = Image.open(io.BytesIO(datos)).convert("RGB")
+    w, h = im.size
+    x0, y0, x1, y1 = mostrado
+    fx = lambda x: round((x - x0) / (x1 - x0) * w)
+    fy = lambda y: round((y - y0) / (y1 - y0) * h)
+    im = im.crop((fx(max(visible.x0, x0)), fy(max(visible.y0, y0)), fx(min(visible.x1, x1)), fy(min(visible.y1, y1))))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=92)
+    return buf.getvalue()
+
+
 def recorte(foto: Path, rect) -> bytes:
     """Recorta la foto a la proporción del recuadro, centrada. insert_image solo
     sabe encoger para que entre, y eso dejaría franjas vacías a los lados."""
@@ -126,6 +190,7 @@ def main(origen: str) -> None:
             pag.show_pdf_page(pymupdf.Rect(t["rect"]), src, 0)
 
     corregir_erratas(doc)
+    pagina_ramos(doc, AQUI.parent.parent)
 
     for n in SIN_FOTOS:
         pag = doc[n - 1]
